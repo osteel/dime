@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  style:
+    name: Style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+
+      - name: Install composer dependencies
+        uses: "ramsey/composer-install@v2"
+
+      - name: Check coding style
+        run: vendor/bin/pint --test
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+
+      - name: Install composer dependencies
+        uses: "ramsey/composer-install@v2"
+
+      - name: Check test coverage
+        run: vendor/bin/pest --coverage --min=75
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - "8.1"
+        dependency-versions:
+          - "lowest"
+          - "highest"
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          coverage: none
+
+      - name: Install composer dependencies
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependency-versions }}
+
+      - name: Run test suite
+        run: vendor/bin/pest
