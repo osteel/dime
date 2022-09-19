@@ -1,18 +1,20 @@
 {
-    "name": "laravel-zero/laravel-zero",
-    "description": "The Laravel Zero Framework.",
-    "keywords": ["framework", "laravel", "laravel zero", "console", "cli"],
-    "homepage": "https://laravel-zero.com",
+    "name": "osteel/dime",
+    "description": "Extract tax-related data from crypto transactions",
+    "keywords": ["crypto", "taxes", "hmrc", "php", "console", "cli"],
+    "homepage": "https://github.com/osteel/dime",
     "type": "project",
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/laravel-zero/laravel-zero/issues",
-        "source": "https://github.com/laravel-zero/laravel-zero"
+        "issues": "https://github.com/osteel/dime/issues",
+        "source": "https://github.com/osteel/dime"
     },
     "authors": [
         {
-            "name": "Nuno Maduro",
-            "email": "enunomaduro@gmail.com"
+            "name": "Yannick Chenot",
+            "email": "yannick@yellowraincoat.co.uk",
+            "homepage": "https://github.com/osteel",
+            "role": "Maintainer"
         }
     ],
     "require": {
@@ -46,6 +48,10 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }
+    },
+    "scripts": {
+        "test": "pest",
+        "pint": "pint"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
