@@ -3,4 +3,5 @@
 /.vscode
 /.vagrant
 .phpunit.result.cache
-composer.lock
+composer.lock/database/database.sqlite
+.env
