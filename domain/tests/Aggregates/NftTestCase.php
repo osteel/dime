@@ -2,9 +2,12 @@
 
 namespace Domain\Tests\Aggregates;
 
-use App\Action;
+use Domain\Actions\AcquireNft;
+use Domain\Aggregates\Nft;
 use Domain\Aggregates\NftId;
 use EventSauce\EventSourcing\AggregateRootId;
+use EventSauce\EventSourcing\MessageDispatcher;
+use EventSauce\EventSourcing\SynchronousMessageDispatcher;
 use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 
 abstract class NftTestCase extends AggregateRootTestCase
@@ -19,8 +22,19 @@ abstract class NftTestCase extends AggregateRootTestCase
         return Nft::class;
     }
 
-    public function handle(Action $action)
+    public function handle(object $action)
     {
-        $action->handle($this->repository);
+        if ($action instanceof AcquireNft) {
+            $nft = Nft::acquire($action);
+        } else {
+            $nft = $this->repository->retrieve($action->nftId);
+        }
+
+        $this->repository->persist($nft);
+    }
+
+    protected function messageDispatcher(): MessageDispatcher
+    {
+        return new SynchronousMessageDispatcher();
     }
 }

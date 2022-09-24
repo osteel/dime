@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace Domain\Aggregates;
 
 use EventSauce\EventSourcing\AggregateRootId as AggregateRootIdInterface;
 use Illuminate\Support\Str;
