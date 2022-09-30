@@ -24,11 +24,11 @@ abstract class NftTestCase extends AggregateRootTestCase
 
     public function handle(object $action)
     {
-        if ($action instanceof AcquireNft) {
-            $nft = Nft::acquire($action);
-        } else {
-            $nft = $this->repository->retrieve($action->nftId);
-        }
+        $nft = $this->repository->retrieve($action->nftId);
+
+        match ($action::class) {
+            AcquireNft::class => $nft->acquire($action),
+        };
 
         $this->repository->persist($nft);
     }

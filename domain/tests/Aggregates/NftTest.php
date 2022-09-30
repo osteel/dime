@@ -1,6 +1,7 @@
 <?php
 
 use Domain\Actions\AcquireNft;
+use Domain\Aggregates\Exceptions\NftException;
 use Domain\Enums\Currency;
 use Domain\Events\NftAcquired;
 use Domain\Tests\Aggregates\NftTestCase;
@@ -19,26 +20,27 @@ it('can acquire an NFT', function () {
     $this->when($action)
         ->then($event);
 });
-/*
+
 it('cannot acquire the same NFT more than once', function () {
-    /** @var AggregateRootTestCase $this 
+    /** @var AggregateRootTestCase $this */
     $nftId = $this->aggregateRootId();
 
-    $event = new NftAcquired($nftId, new Fiat('100', Currency::GBP()));
-    $action = new AcquireNft($nftId, new Fiat('50', Currency::GBP()));
-    $exception = NftException::alreadyAcquired($action->id);
+    $event = new NftAcquired($nftId, new FiatAmount('100', Currency::GBP));
+    $action = new AcquireNft($nftId, new FiatAmount('100', Currency::GBP));
+    $exception = NftException::alreadyAcquired($action->nftId);
 
     $this->given($event)
         ->when($action)
         ->expectToFail($exception);
 });
 
+/*
 it('can average the cost basis of an NFT', function () {
-    /** @var AggregateRootTestCase $this 
+    /** @var AggregateRootTestCase $this
     $nftId = $this->aggregateRootId();
 
-    $event1 = new NftAcquired($nftId, new Fiat('100', Currency::GBP()));
-    $action = new AverageCostBasis($nftId, new Fiat('50', Currency::GBP()));
+    $event1 = new NftAcquired($nftId, new FiatAmount('100', Currency::GBP));
+    $action = new AverageCostBasis($nftId, new FiatAmount('50', Currency::GBP));
     $event2 = new CostBasisAveraged($nftId, $action->costBasis);
 
     $this->given($event1)

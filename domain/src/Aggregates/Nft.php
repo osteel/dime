@@ -3,6 +3,7 @@
 namespace Domain\Aggregates;
 
 use Domain\Actions\AcquireNft;
+use Domain\Aggregates\Exceptions\NftException;
 use Domain\Events\NftAcquired;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
@@ -11,15 +12,18 @@ class Nft implements AggregateRoot
 {
     use AggregateRootBehaviour;
 
-    public static function acquire(AcquireNft $action): Nft
-    {
-        $nft = new static($action->nftId);
-        $nft->recordThat(new NftAcquired($nft->aggregateRootId(), $action->costBasis));
+    private bool $isAcquired = false;
 
-        return $nft;
+    /** @throws NftException */
+    public function acquire(AcquireNft $action): void
+    {
+        throw_if($this->isAcquired, NftException::alreadyAcquired($this->aggregateRootId()));
+
+        $this->recordThat(new NftAcquired($this->aggregateRootId(), $action->costBasis));
     }
 
     public function applyNftAcquired(NftAcquired $event): void
     {
+        $this->isAcquired = true;
     }
 }

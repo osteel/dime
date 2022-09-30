@@ -8,7 +8,7 @@ enum Currency: string
 
     public function symbol(): string
     {
-        return match($this) {
+        return match ($this) {
             Currency::GBP => '£',
         };
     }
