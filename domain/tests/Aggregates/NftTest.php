@@ -1,11 +1,11 @@
 <?php
 
 use Domain\Actions\AcquireNft;
-use Domain\Actions\AverageNftCostBasis;
+use Domain\Actions\IncreaseNftCostBasis;
 use Domain\Aggregates\Exceptions\NftException;
 use Domain\Enums\Currency;
 use Domain\Events\NftAcquired;
-use Domain\Events\NftCostBasisAveraged;
+use Domain\Events\NftCostBasisIncreased;
 use Domain\Tests\Aggregates\NftTestCase;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
@@ -16,8 +16,8 @@ it('can acquire an NFT', function () {
     /** @var AggregateRootTestCase $this */
     $nftId = $this->aggregateRootId();
 
-    $acquireNft = new AcquireNft($nftId, new FiatAmount('100', Currency::GBP));
-    $nftAcquired = new NftAcquired($acquireNft->nftId, $acquireNft->costBasis);
+    $acquireNft = new AcquireNft(nftId: $nftId, costBasis: new FiatAmount('100', Currency::GBP));
+    $nftAcquired = new NftAcquired(nftId: $acquireNft->nftId, costBasis: $acquireNft->costBasis);
 
     $this->when($acquireNft)
         ->then($nftAcquired);
@@ -27,8 +27,8 @@ it('cannot acquire the same NFT more than once', function () {
     /** @var AggregateRootTestCase $this */
     $nftId = $this->aggregateRootId();
 
-    $nftAcquired = new NftAcquired($nftId, new FiatAmount('100', Currency::GBP));
-    $acquireSameNft = new AcquireNft($nftId, new FiatAmount('100', Currency::GBP));
+    $nftAcquired = new NftAcquired(nftId: $nftId, costBasis: new FiatAmount('100', Currency::GBP));
+    $acquireSameNft = new AcquireNft(nftId: $nftId, costBasis: new FiatAmount('100', Currency::GBP));
     $alreadyAcquired = NftException::alreadyAcquired($acquireSameNft->nftId);
 
     $this->given($nftAcquired)
@@ -36,26 +36,31 @@ it('cannot acquire the same NFT more than once', function () {
         ->expectToFail($alreadyAcquired);
 });
 
-it('can average the cost basis of an NFT', function () {
+it('can increase the cost basis of an NFT', function () {
     /** @var AggregateRootTestCase $this */
     $nftId = $this->aggregateRootId();
 
-    $nftAcquired = new NftAcquired($nftId, new FiatAmount('100', Currency::GBP));
-    $averageNftCostBasis = new AverageNftCostBasis($nftId, new FiatAmount('50', Currency::GBP));
-    $nftCostBasisAveraged = new NftCostBasisAveraged($nftId, $averageNftCostBasis->averagingCostBasis);
+    $nftAcquired = new NftAcquired(nftId: $nftId, costBasis: new FiatAmount('100', Currency::GBP));
+    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $nftId, extraCostBasis: new FiatAmount('50', Currency::GBP));
+    $nftCostBasisIncreased = new NftCostBasisIncreased(
+        nftId: $nftId,
+        previousCostBasis: $nftAcquired->costBasis,
+        extraCostBasis: $increaseNftCostBasis->extraCostBasis,
+        newCostBasis: new FiatAmount('150', Currency::GBP),
+    );
 
     $this->given($nftAcquired)
-        ->when($averageNftCostBasis)
-        ->then($nftCostBasisAveraged);
+        ->when($increaseNftCostBasis)
+        ->then($nftCostBasisIncreased);
 });
 
-it('cannot average the cost basis of an NFT that has not been acquired yet', function () {
+it('cannot increase the cost basis of an NFT that has not been acquired yet', function () {
     /** @var AggregateRootTestCase $this */
     $nftId = $this->aggregateRootId();
 
-    $averageNftCostBasis = new AverageNftCostBasis($nftId, new FiatAmount('100', Currency::GBP));
-    $cannotAverageCostBasis = NftException::cannotAverageCostBasisBeforeAcquisition($nftId);
+    $increaseNftCostBasis = new IncreaseNftCostBasis($nftId, new FiatAmount('100', Currency::GBP));
+    $cannotincreaseCostBasis = NftException::cannotincreaseCostBasisBeforeAcquisition($nftId);
 
-    $this->when($averageNftCostBasis)
-        ->expectToFail($cannotAverageCostBasis);
+    $this->when($increaseNftCostBasis)
+        ->expectToFail($cannotincreaseCostBasis);
 });

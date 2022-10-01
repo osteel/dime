@@ -1,15 +1,15 @@
 <?php
 
-namespace Domain\Events;
+namespace Domain\Actions;
 
 use Domain\Aggregates\NftId;
 use Domain\ValueObjects\FiatAmount;
 
-final class NftCostBasisAveraged
+final class IncreaseNftCostBasis
 {
     public function __construct(
         public readonly NftId $nftId,
-        public readonly FiatAmount $averagingCostBasis,
+        public readonly FiatAmount $extraCostBasis,
     ) {
     }
 }

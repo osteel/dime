@@ -3,7 +3,7 @@
 namespace Domain\Tests\Aggregates;
 
 use Domain\Actions\AcquireNft;
-use Domain\Actions\AverageNftCostBasis;
+use Domain\Actions\IncreaseNftCostBasis;
 use Domain\Aggregates\Nft;
 use Domain\Aggregates\NftId;
 use EventSauce\EventSourcing\AggregateRootId;
@@ -29,7 +29,7 @@ abstract class NftTestCase extends AggregateRootTestCase
 
         match ($action::class) {
             AcquireNft::class => $nft->acquire($action),
-            AverageNftCostBasis::class => $nft->averageCostBasis($action),
+            IncreaseNftCostBasis::class => $nft->increaseCostBasis($action),
         };
 
         $this->repository->persist($nft);
