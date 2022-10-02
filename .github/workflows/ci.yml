@@ -40,7 +40,7 @@ jobs:
         uses: "ramsey/composer-install@v2"
 
       - name: Check test coverage
-        run: vendor/bin/pest --coverage --min=75
+        run: vendor/bin/pest --ci --coverage --min=75
 
   tests:
     name: Tests
