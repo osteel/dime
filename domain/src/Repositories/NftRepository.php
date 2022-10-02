@@ -2,12 +2,16 @@
 
 namespace Domain\Repositories;
 
+use Domain\Aggregates\Nft;
 use EventSauce\EventSourcing\ClassNameInflector;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\MessageDecorator;
 use EventSauce\EventSourcing\MessageDispatcher;
 use EventSauce\EventSourcing\MessageRepository;
 
+/**
+ * @extends EventSourcedAggregateRootRepository<Nft>
+ */
 final class NftRepository extends EventSourcedAggregateRootRepository
 {
     public function __construct(

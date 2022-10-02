@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 abstract class AggregateRootId implements AggregateRootIdInterface
 {
-    private function __construct(public readonly string $id)
+    final private function __construct(public readonly string $id)
     {
     }
 

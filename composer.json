@@ -30,7 +30,8 @@
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.2",
         "mockery/mockery": "^1.4.4",
-        "pestphp/pest": "^1.21.3"
+        "pestphp/pest": "^1.21.3",
+        "phpstan/phpstan": "^1.8"
     },
     "autoload": {
         "psr-4": {
@@ -55,8 +56,9 @@
         }
     },
     "scripts": {
-        "test": "pest",
-        "pint": "pint"
+        "pint": "pint",
+        "stan": "phpstan",
+        "test": "pest"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

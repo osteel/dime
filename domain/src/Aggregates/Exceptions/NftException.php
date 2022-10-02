@@ -10,7 +10,7 @@ final class NftException extends RuntimeException
 {
     private function __construct(string $message)
     {
-        return parent::__construct($message);
+        parent::__construct($message);
     }
 
     public static function alreadyAcquired(NftId $nftId): self

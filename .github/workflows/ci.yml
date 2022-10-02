@@ -25,6 +25,23 @@ jobs:
       - name: Check coding style
         run: vendor/bin/pint --test
 
+  analysis:
+    name: Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+
+      - name: Install composer dependencies
+        uses: "ramsey/composer-install@v2"
+
+      - name: Analyse code
+        run: vendor/bin/phpstan
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
