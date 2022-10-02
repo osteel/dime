@@ -2,7 +2,7 @@
 
 namespace Domain\Services;
 
-class Math
+final class Math
 {
     private const SCALE = 32;
 

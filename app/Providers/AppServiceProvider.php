@@ -2,9 +2,7 @@
 
 namespace App\Providers;
 
-use Domain\Repositories\NftRepository;
 use Illuminate\Support\ServiceProvider;
-use LaravelZero\Framework\Application;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //$this->app->singleton(NftRepository::class, fn (Application $app) => new NftRepository(...));
+        //
     }
 }

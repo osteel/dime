@@ -14,7 +14,7 @@ use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 
-class Nft implements AggregateRoot
+final class Nft implements AggregateRoot
 {
     use AggregateRootBehaviour;
 
