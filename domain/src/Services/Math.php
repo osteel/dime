@@ -16,7 +16,7 @@ class Math
         return self::withoutTrailingZeros(array_reduce(
             array: $operands,
             callback: fn (string $total, string $operand) => bcadd($operand, $total, self::SCALE),
-            initial: '0'
+            initial: '0',
         ));
     }
 }

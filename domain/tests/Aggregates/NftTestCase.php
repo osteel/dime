@@ -3,6 +3,7 @@
 namespace Domain\Tests\Aggregates;
 
 use Domain\Actions\AcquireNft;
+use Domain\Actions\DisposeOfNft;
 use Domain\Actions\IncreaseNftCostBasis;
 use Domain\Aggregates\Nft;
 use Domain\Aggregates\NftId;
@@ -30,6 +31,7 @@ abstract class NftTestCase extends AggregateRootTestCase
         match ($action::class) {
             AcquireNft::class => $nft->acquire($action),
             IncreaseNftCostBasis::class => $nft->increaseCostBasis($action),
+            DisposeOfNft::class => $nft->disposeOf($action),
         };
 
         $this->repository->persist($nft);
