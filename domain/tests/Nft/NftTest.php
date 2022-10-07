@@ -1,14 +1,14 @@
 <?php
 
-use Domain\Actions\AcquireNft;
-use Domain\Actions\DisposeOfNft;
-use Domain\Actions\IncreaseNftCostBasis;
-use Domain\Aggregates\Exceptions\NftException;
 use Domain\Enums\Currency;
-use Domain\Events\NftAcquired;
-use Domain\Events\NftCostBasisIncreased;
-use Domain\Events\NftDisposedOf;
-use Domain\Tests\Aggregates\NftTestCase;
+use Domain\Nft\Actions\AcquireNft;
+use Domain\Nft\Actions\DisposeOfNft;
+use Domain\Nft\Actions\IncreaseNftCostBasis;
+use Domain\Nft\Events\NftAcquired;
+use Domain\Nft\Events\NftCostBasisIncreased;
+use Domain\Nft\Events\NftDisposedOf;
+use Domain\Nft\Exceptions\NftException;
+use Domain\Tests\Nft\NftTestCase;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 

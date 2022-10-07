@@ -1,15 +1,14 @@
 <?php
 
-namespace Domain\Events;
+namespace Domain\Nft\Actions;
 
-use Domain\Aggregates\NftId;
+use Domain\Nft\NftId;
 use Domain\ValueObjects\FiatAmount;
 
-final class NftDisposedOf
+final class DisposeOfNft
 {
     public function __construct(
         public readonly NftId $nftId,
-        public readonly FiatAmount $costBasis,
         public readonly FiatAmount $disposalProceeds,
     ) {
     }

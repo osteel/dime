@@ -1,8 +1,8 @@
 <?php
 
-namespace Domain\Aggregates\Exceptions;
+namespace Domain\Nft\Exceptions;
 
-use Domain\Aggregates\NftId;
+use Domain\Nft\NftId;
 use Domain\Enums\Currency;
 use RuntimeException;
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Domain\Tests\Aggregates;
+namespace Domain\Tests\Nft;
 
-use Domain\Actions\AcquireNft;
-use Domain\Actions\DisposeOfNft;
-use Domain\Actions\IncreaseNftCostBasis;
-use Domain\Aggregates\Nft;
-use Domain\Aggregates\NftId;
+use Domain\Nft\Actions\AcquireNft;
+use Domain\Nft\Actions\DisposeOfNft;
+use Domain\Nft\Actions\IncreaseNftCostBasis;
+use Domain\Nft\Nft;
+use Domain\Nft\NftId;
 use EventSauce\EventSourcing\AggregateRootId;
 use EventSauce\EventSourcing\MessageDispatcher;
 use EventSauce\EventSourcing\SynchronousMessageDispatcher;

@@ -1,8 +1,8 @@
 <?php
 
-namespace Domain\Actions;
+namespace Domain\Nft\Actions;
 
-use Domain\Aggregates\NftId;
+use Domain\Nft\NftId;
 use Domain\ValueObjects\FiatAmount;
 
 final class IncreaseNftCostBasis
