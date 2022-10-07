@@ -2,7 +2,7 @@
 
 namespace Domain\Repositories;
 
-use Domain\Aggregates\Nft;
+use Domain\Nft\Nft;
 use EventSauce\EventSourcing\ClassNameInflector;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\MessageDecorator;

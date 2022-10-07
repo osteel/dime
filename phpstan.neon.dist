@@ -8,4 +8,4 @@ parameters:
 	ignoreErrors:
 		-
 			message: "#^.+EventSauce\\\\EventSourcing\\\\AggregateRootId given\\.$#"
-			path: domain/src/Aggregates
+			path: domain/src

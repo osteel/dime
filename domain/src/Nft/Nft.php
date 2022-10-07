@@ -1,14 +1,14 @@
 <?php
 
-namespace Domain\Aggregates;
+namespace Domain\Nft;
 
-use Domain\Actions\AcquireNft;
-use Domain\Actions\DisposeOfNft;
-use Domain\Actions\IncreaseNftCostBasis;
-use Domain\Aggregates\Exceptions\NftException;
-use Domain\Events\NftAcquired;
-use Domain\Events\NftCostBasisIncreased;
-use Domain\Events\NftDisposedOf;
+use Domain\Nft\Actions\AcquireNft;
+use Domain\Nft\Actions\DisposeOfNft;
+use Domain\Nft\Actions\IncreaseNftCostBasis;
+use Domain\Nft\Events\NftAcquired;
+use Domain\Nft\Events\NftCostBasisIncreased;
+use Domain\Nft\Events\NftDisposedOf;
+use Domain\Nft\Exceptions\NftException;
 use Domain\Services\Math;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;

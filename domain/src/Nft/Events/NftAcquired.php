@@ -1,8 +1,8 @@
 <?php
 
-namespace Domain\Events;
+namespace Domain\Nft\Events;
 
-use Domain\Aggregates\NftId;
+use Domain\Nft\NftId;
 use Domain\ValueObjects\FiatAmount;
 
 final class NftAcquired
