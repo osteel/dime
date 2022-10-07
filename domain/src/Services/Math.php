@@ -19,4 +19,9 @@ final class Math
             initial: '0',
         ));
     }
+
+    public static function div(string $dividend, string $divisor): string
+    {
+        return self::withoutTrailingZeros(bcdiv($dividend, $divisor, self::SCALE));
+    }
 }
