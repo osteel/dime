@@ -40,11 +40,11 @@ it('cannot acquire the same NFT more than once', function () {
 
 it('can increase the cost basis of a NFT', function () {
     $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', Currency::GBP));
-    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, acquisitionCostBasis: new FiatAmount('50', Currency::GBP));
+    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, costBasisIncrease: new FiatAmount('50', Currency::GBP));
     $nftCostBasisIncreased = new NftCostBasisIncreased(
         nftId: $this->nftId,
         previousCostBasis: $nftAcquired->costBasis,
-        acquisitionCostBasis: $increaseNftCostBasis->acquisitionCostBasis,
+        costBasisIncrease: $increaseNftCostBasis->costBasisIncrease,
         newCostBasis: new FiatAmount('150', Currency::GBP),
     );
 
@@ -55,7 +55,7 @@ it('can increase the cost basis of a NFT', function () {
 });
 
 it('cannot increase the cost basis of a NFT that has not been acquired', function () {
-    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, acquisitionCostBasis: new FiatAmount('100', Currency::GBP));
+    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, costBasisIncrease: new FiatAmount('100', Currency::GBP));
     $cannotIncreaseCostBasis = NftException::cannotIncreaseCostBasisBeforeAcquisition($this->nftId);
 
     /** @var AggregateRootTestCase $this */
@@ -65,7 +65,7 @@ it('cannot increase the cost basis of a NFT that has not been acquired', functio
 
 it('cannot increase the cost basis of a NFT because the currency is different', function () {
     $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', Currency::GBP));
-    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, acquisitionCostBasis: new FiatAmount('100', Currency::EUR));
+    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, costBasisIncrease: new FiatAmount('100', Currency::EUR));
     $cannotIncreaseCostBasis = NftException::cannotIncreaseCostBasisFromDifferentCurrency(
         nftId: $this->nftId,
         from: Currency::GBP,

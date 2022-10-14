@@ -10,7 +10,7 @@ final class NftCostBasisIncreased
     public function __construct(
         public readonly NftId $nftId,
         public readonly FiatAmount $previousCostBasis,
-        public readonly FiatAmount $acquisitionCostBasis,
+        public readonly FiatAmount $costBasisIncrease,
         public readonly FiatAmount $newCostBasis,
     ) {
     }

@@ -14,6 +14,7 @@ final class Math
         return rtrim(rtrim($number, '0'), '.');
     }
 
+    /** @throws MathException */
     public static function add(string ...$operands): string
     {
         try {
@@ -27,6 +28,7 @@ final class Math
         }
     }
 
+    /** @throws MathException */
     public static function sub(string ...$operands): string
     {
         $initial = array_shift($operands);
@@ -42,6 +44,7 @@ final class Math
         }
     }
 
+    /** @throws MathException */
     public static function mul(string $multiplicand, string $multiplier): string
     {
         try {
@@ -51,6 +54,7 @@ final class Math
         }
     }
 
+    /** @throws MathException */
     public static function div(string $dividend, string $divisor): string
     {
         try {
@@ -58,5 +62,39 @@ final class Math
         } catch (Throwable $exception) {
             throw MathException::fromThrowable($exception);
         }
+    }
+
+    /** @throws MathException */
+    public static function gt(string $term1, string $term2, bool $orEqual = false): bool
+    {
+        try {
+            $result = bccomp($term1, $term2, self::SCALE);
+            return $orEqual ? $result >= 0 : $result === 1;
+        } catch (Throwable $exception) {
+            throw MathException::fromThrowable($exception);
+        }
+    }
+
+    /** @throws MathException */
+    public static function gte(string $term1, string $term2): bool
+    {
+        return self::gt($term1, $term2, orEqual: true);
+    }
+
+    /** @throws MathException */
+    public static function lt(string $term1, string $term2, bool $orEqual = false): bool
+    {
+        try {
+            $result = bccomp($term1, $term2, self::SCALE);
+            return $orEqual ? $result <= 0 : $result === -1;
+        } catch (Throwable $exception) {
+            throw MathException::fromThrowable($exception);
+        }
+    }
+
+    /** @throws MathException */
+    public static function lte(string $term1, string $term2): bool
+    {
+        return self::lt($term1, $term2, orEqual: true);
     }
 }

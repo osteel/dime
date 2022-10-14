@@ -42,23 +42,23 @@ final class Nft implements AggregateRoot
             throw NftException::cannotIncreaseCostBasisBeforeAcquisition($this->aggregateRootId);
         }
 
-        if ($this->costBasis->currency !== $action->acquisitionCostBasis->currency) {
+        if ($this->costBasis->currency !== $action->costBasisIncrease->currency) {
             throw NftException::cannotIncreaseCostBasisFromDifferentCurrency(
                 nftId: $this->aggregateRootId,
                 from: $this->costBasis->currency,
-                to: $action->acquisitionCostBasis->currency,
+                to: $action->costBasisIncrease->currency,
             );
         }
 
         $newCostBasis = new FiatAmount(
-            amount: Math::add($this->costBasis->amount, $action->acquisitionCostBasis->amount),
+            amount: Math::add($this->costBasis->amount, $action->costBasisIncrease->amount),
             currency: $this->costBasis->currency,
         );
 
         $this->recordThat(new NftCostBasisIncreased(
             nftId: $this->aggregateRootId,
             previousCostBasis: $this->costBasis,
-            acquisitionCostBasis: $action->acquisitionCostBasis,
+            costBasisIncrease: $action->costBasisIncrease,
             newCostBasis: $newCostBasis,
         ));
     }

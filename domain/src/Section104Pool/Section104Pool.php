@@ -6,6 +6,7 @@ use Domain\Section104Pool\Actions\AcquireSection104PoolTokens;
 use Domain\Section104Pool\Actions\DisposeOfSection104PoolTokens;
 use Domain\Section104Pool\Events\Section104PoolTokensAcquired;
 use Domain\Section104Pool\Events\Section104PoolTokensDisposedOf;
+use Domain\Section104Pool\Exceptions\Section104PoolException;
 use Domain\Services\Math\Math;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
@@ -21,6 +22,14 @@ final class Section104Pool implements AggregateRoot
 
     public function acquire(AcquireSection104PoolTokens $action): void
     {
+        if ($this->costBasis && $this->costBasis->currency !== $action->costBasis->currency) {
+            throw Section104PoolException::cannotAcquireDifferentCostBasisCurrency(
+                section104PoolId: $this->aggregateRootId,
+                from: $this->costBasis->currency,
+                to: $action->costBasis->currency,
+            );
+        }
+
         $newQuantity = Math::add($this->quantity, $action->quantity);
 
         $previousCostBasis = $this->costBasis ?? new FiatAmount('0', $action->costBasis->currency);
@@ -58,6 +67,14 @@ final class Section104Pool implements AggregateRoot
 
     public function disposeOf(DisposeOfSection104PoolTokens $action): void
     {
+        if (Math::gt($action->quantity, $this->quantity)) {
+            throw Section104PoolException::disposalQuantityIsTooHigh(
+                section104PoolId: $this->aggregateRootId,
+                disposalQuantity: $action->quantity,
+                availableQuantity: $this->quantity,
+            );
+        }
+
         $newQuantity = Math::sub($this->quantity, $action->quantity);
 
         $newCostBasis = new FiatAmount(
