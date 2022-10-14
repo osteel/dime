@@ -2,10 +2,10 @@
 
 namespace Domain\Section104Pool;
 
-use Domain\Section104Pool\Actions\AcquireSection104PoolTokens;
-use Domain\Section104Pool\Actions\DisposeOfSection104PoolTokens;
-use Domain\Section104Pool\Events\Section104PoolTokensAcquired;
-use Domain\Section104Pool\Events\Section104PoolTokensDisposedOf;
+use Domain\Section104Pool\Actions\AcquireSection104PoolToken;
+use Domain\Section104Pool\Actions\DisposeOfSection104PoolToken;
+use Domain\Section104Pool\Events\Section104PoolTokenAcquired;
+use Domain\Section104Pool\Events\Section104PoolTokenDisposedOf;
 use Domain\Section104Pool\Exceptions\Section104PoolException;
 use Domain\Services\Math\Math;
 use Domain\ValueObjects\FiatAmount;
@@ -20,7 +20,7 @@ final class Section104Pool implements AggregateRoot
     public ?FiatAmount $costBasis = null;
     public ?FiatAmount $averageCostBasisPerUnit = null;
 
-    public function acquire(AcquireSection104PoolTokens $action): void
+    public function acquire(AcquireSection104PoolToken $action): void
     {
         if ($this->costBasis && $this->costBasis->currency !== $action->costBasis->currency) {
             throw Section104PoolException::cannotAcquireDifferentCostBasisCurrency(
@@ -45,7 +45,7 @@ final class Section104Pool implements AggregateRoot
             currency: $previousAverageCostBasisPerUnit->currency,
         );
 
-        $this->recordThat(new Section104PoolTokensAcquired(
+        $this->recordThat(new Section104PoolTokenAcquired(
             section104PoolId: $this->aggregateRootId,
             previousQuantity: $this->quantity,
             acquiredQuantity: $action->quantity,
@@ -58,14 +58,14 @@ final class Section104Pool implements AggregateRoot
         ));
     }
 
-    public function applySection104PoolTokensAcquired(Section104PoolTokensAcquired $event): void
+    public function applySection104PoolTokenAcquired(Section104PoolTokenAcquired $event): void
     {
         $this->quantity = $event->newQuantity;
         $this->costBasis = $event->newCostBasis;
         $this->averageCostBasisPerUnit = $event->newAverageCostBasisPerUnit;
     }
 
-    public function disposeOf(DisposeOfSection104PoolTokens $action): void
+    public function disposeOf(DisposeOfSection104PoolToken $action): void
     {
         if (Math::gt($action->quantity, $this->quantity)) {
             throw Section104PoolException::disposalQuantityIsTooHigh(
@@ -85,7 +85,7 @@ final class Section104Pool implements AggregateRoot
             currency: $this->costBasis->currency,
         );
 
-        $this->recordThat(new Section104PoolTokensDisposedOf(
+        $this->recordThat(new Section104PoolTokenDisposedOf(
             section104PoolId: $this->aggregateRootId,
             previousQuantity: $this->quantity,
             disposedOfQuantity: $action->quantity,
@@ -97,7 +97,7 @@ final class Section104Pool implements AggregateRoot
         ));
     }
 
-    public function applySection104PoolTokensDisposedOf(Section104PoolTokensDisposedOf $event): void
+    public function applySection104PoolTokenDisposedOf(Section104PoolTokenDisposedOf $event): void
     {
         $this->quantity = $event->newQuantity;
         $this->costBasis = $event->newCostBasis;
