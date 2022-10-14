@@ -31,7 +31,9 @@ final class Math
     /** @throws MathException */
     public static function sub(string ...$operands): string
     {
-        $initial = array_shift($operands);
+        if (empty($initial = array_shift($operands))) {
+            return '0';
+        }
 
         try {
             return self::withoutTrailingZeros(array_reduce(

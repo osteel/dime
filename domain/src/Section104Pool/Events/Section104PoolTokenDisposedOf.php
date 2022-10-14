@@ -9,12 +9,7 @@ final class Section104PoolTokenDisposedOf
 {
     public function __construct(
         public readonly Section104PoolId $section104PoolId,
-        public readonly string $previousQuantity,
-        public readonly string $disposedOfQuantity,
-        public readonly string $newQuantity,
-        public readonly FiatAmount $previousCostBasis,
-        public readonly FiatAmount $averageCostBasisPerUnit,
-        public readonly FiatAmount $newCostBasis,
+        public readonly string $quantity,
         public readonly FiatAmount $disposalProceeds,
     ) {
     }

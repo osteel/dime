@@ -25,14 +25,8 @@ it('can acquire some section 104 pool tokens', function () {
 
     $section104PoolTokensAcquired = new Section104PoolTokenAcquired(
         section104PoolId: $acquireSection104PoolToken->section104PoolId,
-        previousQuantity: '0',
-        acquiredQuantity: '100',
-        newQuantity: '100',
-        previousCostBasis: new FiatAmount('0', Currency::GBP),
-        acquisitionCostBasis: $acquireSection104PoolToken->costBasis,
-        newCostBasis: new FiatAmount('100', Currency::GBP),
-        previousAverageCostBasisPerUnit: new FiatAmount('0', Currency::GBP),
-        newAverageCostBasisPerUnit: new FiatAmount('1', Currency::GBP),
+        quantity: '100',
+        costBasis: $acquireSection104PoolToken->costBasis,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -43,63 +37,33 @@ it('can acquire some section 104 pool tokens', function () {
 it('can acquire more of the same section 104 pool tokens', function () {
     $someSection104PoolTokenAcquired = new Section104PoolTokenAcquired(
         section104PoolId: $this->section104PoolId,
-        previousQuantity: '0',
-        acquiredQuantity: '100',
-        newQuantity: '100',
-        previousCostBasis: new FiatAmount('0', Currency::GBP),
-        acquisitionCostBasis: new FiatAmount('100', Currency::GBP),
-        newCostBasis: new FiatAmount('100', Currency::GBP),
-        previousAverageCostBasisPerUnit: new FiatAmount('0', Currency::GBP),
-        newAverageCostBasisPerUnit: new FiatAmount('1', Currency::GBP),
+        quantity: '100',
+        costBasis: new FiatAmount('100', Currency::GBP),
     );
 
-    $moreSection104PoolTokenAcquired = new Section104PoolTokenAcquired(
+    $acquireMoreSection104PoolToken = new AcquireSection104PoolToken(
         section104PoolId: $someSection104PoolTokenAcquired->section104PoolId,
-        previousQuantity: $someSection104PoolTokenAcquired->newQuantity,
-        acquiredQuantity: '300',
-        newQuantity: '400',
-        previousCostBasis: $someSection104PoolTokenAcquired->newCostBasis,
-        acquisitionCostBasis: new FiatAmount('400', Currency::GBP),
-        newCostBasis: new FiatAmount('500', Currency::GBP),
-        previousAverageCostBasisPerUnit: $someSection104PoolTokenAcquired->newAverageCostBasisPerUnit,
-        newAverageCostBasisPerUnit: new FiatAmount('1.25', Currency::GBP),
-    );
-
-    $acquireEvenMoreSection104PoolToken = new AcquireSection104PoolToken(
-        section104PoolId: $moreSection104PoolTokenAcquired->section104PoolId,
         quantity: '100',
         costBasis: new FiatAmount('300', Currency::GBP),
     );
 
     $evenMoreSection104PoolTokenAcquired = new Section104PoolTokenAcquired(
-        section104PoolId: $acquireEvenMoreSection104PoolToken->section104PoolId,
-        previousQuantity: $moreSection104PoolTokenAcquired->newQuantity,
-        acquiredQuantity: '100',
-        newQuantity: '500',
-        previousCostBasis: $moreSection104PoolTokenAcquired->newCostBasis,
-        acquisitionCostBasis: $acquireEvenMoreSection104PoolToken->costBasis,
-        newCostBasis: new FiatAmount('800', Currency::GBP),
-        previousAverageCostBasisPerUnit: $moreSection104PoolTokenAcquired->newAverageCostBasisPerUnit,
-        newAverageCostBasisPerUnit: new FiatAmount('1.6', Currency::GBP),
+        section104PoolId: $acquireMoreSection104PoolToken->section104PoolId,
+        quantity: '100',
+        costBasis: new FiatAmount('300', Currency::GBP),
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($someSection104PoolTokenAcquired, $moreSection104PoolTokenAcquired)
-        ->when($acquireEvenMoreSection104PoolToken)
+    $this->given($someSection104PoolTokenAcquired)
+        ->when($acquireMoreSection104PoolToken)
         ->then($evenMoreSection104PoolTokenAcquired);
 });
 
 it('cannot acquire more of the same section 104 pool tokens because the currency is different', function () {
     $someSection104PoolTokenAcquired = new Section104PoolTokenAcquired(
         section104PoolId: $this->section104PoolId,
-        previousQuantity: '0',
-        acquiredQuantity: '100',
-        newQuantity: '100',
-        previousCostBasis: new FiatAmount('0', Currency::GBP),
-        acquisitionCostBasis: new FiatAmount('100', Currency::GBP),
-        newCostBasis: new FiatAmount('100', Currency::GBP),
-        previousAverageCostBasisPerUnit: new FiatAmount('0', Currency::GBP),
-        newAverageCostBasisPerUnit: new FiatAmount('1', Currency::GBP),
+        quantity: '100',
+        costBasis: new FiatAmount('100', Currency::GBP),
     );
 
     $acquireMoreSection104PoolToken = new AcquireSection104PoolToken(
@@ -123,14 +87,8 @@ it('cannot acquire more of the same section 104 pool tokens because the currency
 it('can dispose of some section 104 pool tokens', function () {
     $section104PoolTokensAcquired = new Section104PoolTokenAcquired(
         section104PoolId: $this->section104PoolId,
-        previousQuantity: '0',
-        acquiredQuantity: '100',
-        newQuantity: '100',
-        previousCostBasis: new FiatAmount('0', Currency::GBP),
-        acquisitionCostBasis: new FiatAmount('200', Currency::GBP),
-        newCostBasis: new FiatAmount('200', Currency::GBP),
-        previousAverageCostBasisPerUnit: new FiatAmount('0', Currency::GBP),
-        newAverageCostBasisPerUnit: new FiatAmount('2', Currency::GBP),
+        quantity: '100',
+        costBasis: new FiatAmount('200', Currency::GBP),
     );
 
     $disposeOfSection104PoolToken = new DisposeOfSection104PoolToken(
@@ -141,12 +99,7 @@ it('can dispose of some section 104 pool tokens', function () {
 
     $section104PoolTokensDisposedOf = new Section104PoolTokenDisposedOf(
         section104PoolId: $disposeOfSection104PoolToken->section104PoolId,
-        previousQuantity: $section104PoolTokensAcquired->newQuantity,
-        disposedOfQuantity: '50',
-        newQuantity: '50',
-        previousCostBasis: $section104PoolTokensAcquired->newCostBasis,
-        averageCostBasisPerUnit: $section104PoolTokensAcquired->newAverageCostBasisPerUnit,
-        newCostBasis: new FiatAmount('100', Currency::GBP),
+        quantity: '50',
         disposalProceeds: new FiatAmount('100', Currency::GBP),
     );
 
@@ -159,14 +112,8 @@ it('can dispose of some section 104 pool tokens', function () {
 it('cannot dispose of some section 104 pool tokens because the quantity is too high', function () {
     $section104PoolTokensAcquired = new Section104PoolTokenAcquired(
         section104PoolId: $this->section104PoolId,
-        previousQuantity: '0',
-        acquiredQuantity: '100',
-        newQuantity: '100',
-        previousCostBasis: new FiatAmount('0', Currency::GBP),
-        acquisitionCostBasis: new FiatAmount('100', Currency::GBP),
-        newCostBasis: new FiatAmount('100', Currency::GBP),
-        previousAverageCostBasisPerUnit: new FiatAmount('0', Currency::GBP),
-        newAverageCostBasisPerUnit: new FiatAmount('1', Currency::GBP),
+        quantity: '100',
+        costBasis: new FiatAmount('100', Currency::GBP),
     );
 
     $disposeOfSection104PoolToken = new DisposeOfSection104PoolToken(

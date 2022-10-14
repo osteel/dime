@@ -24,19 +24,28 @@ final class Section104Pool implements AggregateRoot
     {
         if ($this->costBasis && $this->costBasis->currency !== $action->costBasis->currency) {
             throw Section104PoolException::cannotAcquireDifferentCostBasisCurrency(
-                section104PoolId: $this->aggregateRootId,
+                section104PoolId: $action->section104PoolId,
                 from: $this->costBasis->currency,
                 to: $action->costBasis->currency,
             );
         }
 
-        $newQuantity = Math::add($this->quantity, $action->quantity);
+        $this->recordThat(new Section104PoolTokenAcquired(
+            section104PoolId: $action->section104PoolId,
+            quantity: $action->quantity,
+            costBasis: $action->costBasis,
+        ));
+    }
 
-        $previousCostBasis = $this->costBasis ?? new FiatAmount('0', $action->costBasis->currency);
-        $previousAverageCostBasisPerUnit = $this->averageCostBasisPerUnit ??  new FiatAmount('0', $action->costBasis->currency);
+    public function applySection104PoolTokenAcquired(Section104PoolTokenAcquired $event): void
+    {
+        $newQuantity = Math::add($this->quantity, $event->quantity);
+
+        $previousCostBasis = $this->costBasis ?? new FiatAmount('0', $event->costBasis->currency);
+        $previousAverageCostBasisPerUnit = $this->averageCostBasisPerUnit ??  new FiatAmount('0', $event->costBasis->currency);
 
         $newCostBasis = new FiatAmount(
-            amount: Math::add($previousCostBasis->amount, $action->costBasis->amount),
+            amount: Math::add($previousCostBasis->amount, $event->costBasis->amount),
             currency: $previousCostBasis->currency,
         );
 
@@ -45,61 +54,44 @@ final class Section104Pool implements AggregateRoot
             currency: $previousAverageCostBasisPerUnit->currency,
         );
 
-        $this->recordThat(new Section104PoolTokenAcquired(
-            section104PoolId: $this->aggregateRootId,
-            previousQuantity: $this->quantity,
-            acquiredQuantity: $action->quantity,
-            newQuantity: $newQuantity,
-            previousCostBasis: $previousCostBasis,
-            acquisitionCostBasis: $action->costBasis,
-            newCostBasis: $newCostBasis,
-            previousAverageCostBasisPerUnit: $previousAverageCostBasisPerUnit,
-            newAverageCostBasisPerUnit: $newAverageCostBasisPerUnit,
-        ));
-    }
-
-    public function applySection104PoolTokenAcquired(Section104PoolTokenAcquired $event): void
-    {
-        $this->quantity = $event->newQuantity;
-        $this->costBasis = $event->newCostBasis;
-        $this->averageCostBasisPerUnit = $event->newAverageCostBasisPerUnit;
+        $this->quantity = $newQuantity;
+        $this->costBasis = $newCostBasis;
+        $this->averageCostBasisPerUnit = $newAverageCostBasisPerUnit;
     }
 
     public function disposeOf(DisposeOfSection104PoolToken $action): void
     {
         if (Math::gt($action->quantity, $this->quantity)) {
             throw Section104PoolException::disposalQuantityIsTooHigh(
-                section104PoolId: $this->aggregateRootId,
+                section104PoolId: $action->section104PoolId,
                 disposalQuantity: $action->quantity,
                 availableQuantity: $this->quantity,
             );
         }
 
-        $newQuantity = Math::sub($this->quantity, $action->quantity);
-
-        $newCostBasis = new FiatAmount(
-            amount: Math::sub(
-                $this->costBasis->amount,
-                Math::mul($action->quantity, $this->averageCostBasisPerUnit->amount),
-            ),
-            currency: $this->costBasis->currency,
-        );
-
         $this->recordThat(new Section104PoolTokenDisposedOf(
-            section104PoolId: $this->aggregateRootId,
-            previousQuantity: $this->quantity,
-            disposedOfQuantity: $action->quantity,
-            newQuantity: $newQuantity,
-            previousCostBasis: $this->costBasis,
-            averageCostBasisPerUnit: $this->averageCostBasisPerUnit,
-            newCostBasis: $newCostBasis,
+            section104PoolId: $action->section104PoolId,
+            quantity: $action->quantity,
             disposalProceeds: $action->disposalProceeds,
         ));
     }
 
     public function applySection104PoolTokenDisposedOf(Section104PoolTokenDisposedOf $event): void
     {
-        $this->quantity = $event->newQuantity;
-        $this->costBasis = $event->newCostBasis;
+        assert(! is_null($this->costBasis));
+        assert(! is_null($this->averageCostBasisPerUnit));
+
+        $newQuantity = Math::sub($this->quantity, $event->quantity);
+
+        $newCostBasis = new FiatAmount(
+            amount: Math::sub(
+                $this->costBasis->amount,
+                Math::mul($event->quantity, $this->averageCostBasisPerUnit->amount),
+            ),
+            currency: $this->costBasis->currency,
+        );
+
+        $this->quantity = $newQuantity;
+        $this->costBasis = $newCostBasis;
     }
 }
