@@ -29,8 +29,6 @@ final class Section104Pool implements AggregateRoot
 
         $newQuantity = Math::add($this->quantity, $action->quantity);
 
-        // @TODO this is wrong because we need to keep track of all previous
-        // quantities and their cost bases. Add test case testing this.
         $newAverageCostBasisPerUnit = new FiatAmount(
             amount: Math::div($newCostBasis->amount, $newQuantity),
             currency: $previousAverageCostBasisPerUnit->currency,
@@ -51,7 +49,8 @@ final class Section104Pool implements AggregateRoot
 
     public function applySection104PoolTokensAcquired(Section104PoolTokensAcquired $event): void
     {
-        $this->costBasis ??= $event->previousCostBasis;
-        $this->averageCostBasisPerUnit ??= $event->previousAverageCostBasisPerUnit;
+        $this->quantity = $event->newQuantity;
+        $this->costBasis = $event->newCostBasis;
+        $this->averageCostBasisPerUnit = $event->newAverageCostBasisPerUnit;
     }
 }
