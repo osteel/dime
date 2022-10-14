@@ -3,6 +3,7 @@
 namespace Domain\Tests\Section104Pool;
 
 use Domain\Section104Pool\Actions\AcquireSection104PoolTokens;
+use Domain\Section104Pool\Actions\DisposeOfSection104PoolTokens;
 use Domain\Section104Pool\Section104Pool;
 use Domain\Section104Pool\Section104PoolId;
 use Domain\Tests\AggregateRootTestCase;
@@ -26,6 +27,7 @@ abstract class Section104PoolTestCase extends AggregateRootTestCase
 
         match ($action::class) {
             AcquireSection104PoolTokens::class => $section104Pool->acquire($action),
+            DisposeOfSection104PoolTokens::class => $section104Pool->disposeOf($action),
         };
 
         $this->repository->persist($section104Pool);

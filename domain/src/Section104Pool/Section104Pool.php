@@ -3,8 +3,10 @@
 namespace Domain\Section104Pool;
 
 use Domain\Section104Pool\Actions\AcquireSection104PoolTokens;
+use Domain\Section104Pool\Actions\DisposeOfSection104PoolTokens;
 use Domain\Section104Pool\Events\Section104PoolTokensAcquired;
-use Domain\Services\Math;
+use Domain\Section104Pool\Events\Section104PoolTokensDisposedOf;
+use Domain\Services\Math\Math;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
@@ -19,6 +21,8 @@ final class Section104Pool implements AggregateRoot
 
     public function acquire(AcquireSection104PoolTokens $action): void
     {
+        $newQuantity = Math::add($this->quantity, $action->quantity);
+
         $previousCostBasis = $this->costBasis ?? new FiatAmount('0', $action->costBasis->currency);
         $previousAverageCostBasisPerUnit = $this->averageCostBasisPerUnit ??  new FiatAmount('0', $action->costBasis->currency);
 
@@ -26,8 +30,6 @@ final class Section104Pool implements AggregateRoot
             amount: Math::add($previousCostBasis->amount, $action->costBasis->amount),
             currency: $previousCostBasis->currency,
         );
-
-        $newQuantity = Math::add($this->quantity, $action->quantity);
 
         $newAverageCostBasisPerUnit = new FiatAmount(
             amount: Math::div($newCostBasis->amount, $newQuantity),
@@ -37,10 +39,10 @@ final class Section104Pool implements AggregateRoot
         $this->recordThat(new Section104PoolTokensAcquired(
             section104PoolId: $this->aggregateRootId,
             previousQuantity: $this->quantity,
-            extraQuantity: $action->quantity,
+            acquiredQuantity: $action->quantity,
             newQuantity: $newQuantity,
             previousCostBasis: $previousCostBasis,
-            extraCostBasis: $action->costBasis,
+            acquisitionCostBasis: $action->costBasis,
             newCostBasis: $newCostBasis,
             previousAverageCostBasisPerUnit: $previousAverageCostBasisPerUnit,
             newAverageCostBasisPerUnit: $newAverageCostBasisPerUnit,
@@ -52,5 +54,35 @@ final class Section104Pool implements AggregateRoot
         $this->quantity = $event->newQuantity;
         $this->costBasis = $event->newCostBasis;
         $this->averageCostBasisPerUnit = $event->newAverageCostBasisPerUnit;
+    }
+
+    public function disposeOf(DisposeOfSection104PoolTokens $action): void
+    {
+        $newQuantity = Math::sub($this->quantity, $action->quantity);
+
+        $newCostBasis = new FiatAmount(
+            amount: Math::sub(
+                $this->costBasis->amount,
+                Math::mul($action->quantity, $this->averageCostBasisPerUnit->amount),
+            ),
+            currency: $this->costBasis->currency,
+        );
+
+        $this->recordThat(new Section104PoolTokensDisposedOf(
+            section104PoolId: $this->aggregateRootId,
+            previousQuantity: $this->quantity,
+            disposedOfQuantity: $action->quantity,
+            newQuantity: $newQuantity,
+            previousCostBasis: $this->costBasis,
+            averageCostBasisPerUnit: $this->averageCostBasisPerUnit,
+            newCostBasis: $newCostBasis,
+            disposalProceeds: $action->disposalProceeds,
+        ));
+    }
+
+    public function applySection104PoolTokensDisposedOf(Section104PoolTokensDisposedOf $event): void
+    {
+        $this->quantity = $event->newQuantity;
+        $this->costBasis = $event->newCostBasis;
     }
 }
