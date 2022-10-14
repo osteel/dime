@@ -24,10 +24,10 @@ final class Nft implements AggregateRoot
     public function acquire(AcquireNft $action): void
     {
         if (! is_null($this->costBasis)) {
-            throw NftException::alreadyAcquired($this->aggregateRootId);
+            throw NftException::alreadyAcquired($action->nftId);
         }
 
-        $this->recordThat(new NftAcquired(nftId: $this->aggregateRootId, costBasis: $action->costBasis));
+        $this->recordThat(new NftAcquired(nftId: $action->nftId, costBasis: $action->costBasis));
     }
 
     public function applyNftAcquired(NftAcquired $event): void
@@ -39,44 +39,44 @@ final class Nft implements AggregateRoot
     public function increaseCostBasis(IncreaseNftCostBasis $action): void
     {
         if (is_null($this->costBasis)) {
-            throw NftException::cannotIncreaseCostBasisBeforeAcquisition($this->aggregateRootId);
+            throw NftException::cannotIncreaseCostBasisBeforeAcquisition($action->nftId);
         }
 
         if ($this->costBasis->currency !== $action->costBasisIncrease->currency) {
             throw NftException::cannotIncreaseCostBasisFromDifferentCurrency(
-                nftId: $this->aggregateRootId,
+                nftId: $action->nftId,
                 from: $this->costBasis->currency,
                 to: $action->costBasisIncrease->currency,
             );
         }
 
-        $newCostBasis = new FiatAmount(
-            amount: Math::add($this->costBasis->amount, $action->costBasisIncrease->amount),
-            currency: $this->costBasis->currency,
-        );
-
         $this->recordThat(new NftCostBasisIncreased(
-            nftId: $this->aggregateRootId,
-            previousCostBasis: $this->costBasis,
+            nftId: $action->nftId,
             costBasisIncrease: $action->costBasisIncrease,
-            newCostBasis: $newCostBasis,
         ));
     }
 
     public function applyNftCostBasisIncreased(NftCostBasisIncreased $event): void
     {
-        $this->costBasis = $event->newCostBasis;
+        assert(! is_null($this->costBasis));
+
+        $newCostBasis = new FiatAmount(
+            amount: Math::add($this->costBasis->amount, $event->costBasisIncrease->amount),
+            currency: $this->costBasis->currency,
+        );
+
+        $this->costBasis = $newCostBasis;
     }
 
     /** @throws NftException */
     public function disposeOf(DisposeOfNft $action): void
     {
         if (is_null($this->costBasis)) {
-            throw NftException::cannotDisposeOfBeforeAcquisition($this->aggregateRootId);
+            throw NftException::cannotDisposeOfBeforeAcquisition($action->nftId);
         }
 
         $this->recordThat(new NftDisposedOf(
-            nftId: $this->aggregateRootId,
+            nftId: $action->nftId,
             costBasis: $this->costBasis,
             disposalProceeds: $action->disposalProceeds
         ));
