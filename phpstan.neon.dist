@@ -4,8 +4,3 @@ parameters:
 	paths:
 		- app
 		- domain/src
-
-	ignoreErrors:
-		-
-			message: "#^.+EventSauce\\\\EventSourcing\\\\AggregateRootId given\\.$#"
-			path: domain/src
