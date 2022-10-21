@@ -4,8 +4,63 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cef5b9db8dd336a3cd6e719529f59bdd",
+    "content-hash": "d2a172eb2e6bc06714eea5d6fb8d6e0f",
     "packages": [
+        {
+            "name": "brick/date-time",
+            "version": "0.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/date-time.git",
+                "reference": "68598d3cd11d9fba4527c8ac600e27e826f1addd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/date-time/zipball/68598d3cd11d9fba4527c8ac600e27e826f1addd",
+                "reference": "68598d3cd11d9fba4527c8ac600e27e826f1addd",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.2",
+                "phpunit/phpunit": "^9.0",
+                "vimeo/psalm": "4.23.0"
+            },
+            "suggest": {
+                "ext-timezonedb": "This PECL extension provides up-to-date timezone information"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\DateTime\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Date and time library",
+            "keywords": [
+                "brick",
+                "date",
+                "datetime",
+                "time"
+            ],
+            "support": {
+                "issues": "https://github.com/brick/date-time/issues",
+                "source": "https://github.com/brick/date-time/tree/0.4.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/BenMorel",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-06-18T22:07:10+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.10.2",

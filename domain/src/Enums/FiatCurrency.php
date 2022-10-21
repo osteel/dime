@@ -2,7 +2,7 @@
 
 namespace Domain\Enums;
 
-enum Currency: string
+enum FiatCurrency: string
 {
     case GBP = 'gbp';
     case EUR = 'eur';
@@ -10,16 +10,16 @@ enum Currency: string
     public function name(): string
     {
         return match ($this) {
-            Currency::GBP => 'Pound sterling',
-            Currency::EUR => 'Euro',
+            FiatCurrency::GBP => 'Pound sterling',
+            FiatCurrency::EUR => 'Euro',
         };
     }
 
     public function symbol(): string
     {
         return match ($this) {
-            Currency::GBP => '£',
-            Currency::EUR => '€',
+            FiatCurrency::GBP => '£',
+            FiatCurrency::EUR => '€',
         };
     }
 }

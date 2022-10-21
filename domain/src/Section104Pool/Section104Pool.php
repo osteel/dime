@@ -23,7 +23,7 @@ final class Section104Pool implements AggregateRoot
     public function acquire(AcquireSection104PoolToken $action): void
     {
         if ($this->costBasis && $this->costBasis->currency !== $action->costBasis->currency) {
-            throw Section104PoolException::cannotAcquireDifferentCostBasisCurrency(
+            throw Section104PoolException::cannotAcquireFromDifferentFiatCurrency(
                 section104PoolId: $action->section104PoolId,
                 from: $this->costBasis->currency,
                 to: $action->costBasis->currency,
@@ -32,6 +32,7 @@ final class Section104Pool implements AggregateRoot
 
         $this->recordThat(new Section104PoolTokenAcquired(
             section104PoolId: $action->section104PoolId,
+            date: $action->date,
             quantity: $action->quantity,
             costBasis: $action->costBasis,
         ));
@@ -61,6 +62,14 @@ final class Section104Pool implements AggregateRoot
 
     public function disposeOf(DisposeOfSection104PoolToken $action): void
     {
+        if ($this->costBasis && $this->costBasis->currency !== $action->disposalProceeds->currency) {
+            throw Section104PoolException::cannotDisposeOfFromDifferentFiatCurrency(
+                section104PoolId: $action->section104PoolId,
+                from: $this->costBasis->currency,
+                to: $action->disposalProceeds->currency,
+            );
+        }
+
         if (Math::gt($action->quantity, $this->quantity)) {
             throw Section104PoolException::disposalQuantityIsTooHigh(
                 section104PoolId: $action->section104PoolId,
@@ -69,10 +78,17 @@ final class Section104Pool implements AggregateRoot
             );
         }
 
+        $costBasis = new FiatAmount(
+            amount: Math::mul($this->averageCostBasisPerUnit->amount, $action->quantity),
+            currency: $this->averageCostBasisPerUnit->currency,
+        );
+
         $this->recordThat(new Section104PoolTokenDisposedOf(
             section104PoolId: $action->section104PoolId,
+            date: $action->date,
             quantity: $action->quantity,
             disposalProceeds: $action->disposalProceeds,
+            costBasis: $costBasis,
         ));
     }
 

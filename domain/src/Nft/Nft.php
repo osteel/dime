@@ -43,7 +43,7 @@ final class Nft implements AggregateRoot
         }
 
         if ($this->costBasis->currency !== $action->costBasisIncrease->currency) {
-            throw NftException::cannotIncreaseCostBasisFromDifferentCurrency(
+            throw NftException::cannotIncreaseCostBasisFromDifferentFiatCurrency(
                 nftId: $action->nftId,
                 from: $this->costBasis->currency,
                 to: $action->costBasisIncrease->currency,
