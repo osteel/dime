@@ -52,7 +52,7 @@ it('can acquire more of the same section 104 pool tokens', function () {
         costBasis: new FiatAmount('300', FiatCurrency::GBP),
     );
 
-    $evenMoreSection104PoolTokenAcquired = new Section104PoolTokenAcquired(
+    $moreSection104PoolTokenAcquired = new Section104PoolTokenAcquired(
         section104PoolId: $acquireMoreSection104PoolToken->section104PoolId,
         date: LocalDate::parse('2015-10-21'),
         quantity: '100',
@@ -62,7 +62,7 @@ it('can acquire more of the same section 104 pool tokens', function () {
     /** @var AggregateRootTestCase $this */
     $this->given($someSection104PoolTokenAcquired)
         ->when($acquireMoreSection104PoolToken)
-        ->then($evenMoreSection104PoolTokenAcquired);
+        ->then($moreSection104PoolTokenAcquired);
 });
 
 it('cannot acquire more of the same section 104 pool tokens because currencies don\'t match', function () {
@@ -184,7 +184,7 @@ it('can dispose of some section 104 pool tokens on the same day they were acquir
     );
 
     $moreSection104PoolTokensAcquired = new Section104PoolTokenAcquired(
-        section104PoolId: $this->section104PoolId,
+        section104PoolId: $someSection104PoolTokensAcquired->section104PoolId,
         date: LocalDate::parse('2015-10-26'),
         quantity: '100',
         costBasis: new FiatAmount('150', FiatCurrency::GBP),
@@ -212,4 +212,53 @@ it('can dispose of some section 104 pool tokens on the same day they were acquir
 });
 
 it('can acquire some section 104 pool tokens within 30 days of their disposal', function () {
+    $someSection104PoolTokensAcquired = new Section104PoolTokenAcquired(
+        section104PoolId: $this->section104PoolId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $someSection104PoolTokensDisposedOf = new Section104PoolTokenDisposedOf(
+        section104PoolId: $someSection104PoolTokensAcquired->section104PoolId,
+        date: LocalDate::parse('2015-10-26'),
+        quantity: '50',
+        disposalProceeds: new FiatAmount('75', FiatCurrency::GBP),
+        costBasis: new FiatAmount('50', FiatCurrency::GBP),
+    );
+
+    $acquireMoreSection104PoolToken = new AcquireSection104PoolToken(
+        section104PoolId: $someSection104PoolTokensDisposedOf->section104PoolId,
+        date: LocalDate::parse('2015-10-29'),
+        quantity: '25',
+        costBasis: new FiatAmount('20', FiatCurrency::GBP),
+    );
+
+    $moreSection104PoolTokenAcquired = new Section104PoolTokenAcquired(
+        section104PoolId: $acquireMoreSection104PoolToken->section104PoolId,
+        date: $acquireMoreSection104PoolToken->date,
+        quantity: $acquireMoreSection104PoolToken->quantity,
+        costBasis: $acquireMoreSection104PoolToken->costBasis,
+    );
+
+    $section104PoolTokenDisposalReverted = new Section104PoolTokenDisposalReverted(
+        section104PoolId: $acquireMoreSection104PoolToken->section104PoolId,
+        date: $someSection104PoolTokensDisposedOf->date,
+        quantity: $someSection104PoolTokensDisposedOf->quantity,
+        disposalProceeds: $someSection104PoolTokensDisposedOf->disposalProceeds,
+        costBasis: $someSection104PoolTokensDisposedOf->costBasis,
+    );
+
+    $correctedSection104PoolTokensDisposedOf = new Section104PoolTokenDisposedOf(
+        section104PoolId: $section104PoolTokenDisposalReverted->section104PoolId,
+        date: $section104PoolTokenDisposalReverted->date,
+        quantity: $section104PoolTokenDisposalReverted->quantity,
+        disposalProceeds: $section104PoolTokenDisposalReverted->disposalProceeds,
+        costBasis: new FiatAmount('45', FiatCurrency::GBP),
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($someSection104PoolTokensAcquired, $someSection104PoolTokensDisposedOf)
+        ->when($acquireMoreSection104PoolToken)
+        ->then($moreSection104PoolTokenAcquired, $section104PoolTokenDisposalReverted, $correctedSection104PoolTokensDisposedOf);
 });

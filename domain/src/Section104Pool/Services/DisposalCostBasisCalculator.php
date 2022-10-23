@@ -29,13 +29,16 @@ final class DisposalCostBasisCalculator
         }
 
         // If the quantity of disposed of tokens is greater than the quantity acquired that day
-        // Find if the asset has been acquired in the next 30 days
-        // For each of these transactions, ordered by date ASC (FIFO)
-        //    apply the transaction's cost basis to the disposed of asset up to the acquired quantity
-        //    continue until there are no more transactions or we've covered all disposed tokens
-        // If there are still some disposed of tokens left
-        // Apply the section 104 pool's average cost basis per unit to the remainder
         if (Math::gt($quantity, '0')) {
+            // Find if the asset has been acquired in the next 30 days
+            // For each of these transactions, ordered by date ASC (FIFO)
+            //    apply the transaction's cost basis to the disposed of asset up to the acquired quantity
+            //    continue until there are no more transactions or we've covered all disposed tokens
+        }
+
+        // If there are still some disposed of tokens left
+        if (Math::gt($quantity, '0')) {
+            // Apply the section 104 pool's average cost basis per unit to the remainder
             $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($quantity));
         }
 
