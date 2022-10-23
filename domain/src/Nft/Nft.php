@@ -9,7 +9,6 @@ use Domain\Nft\Events\NftAcquired;
 use Domain\Nft\Events\NftCostBasisIncreased;
 use Domain\Nft\Events\NftDisposedOf;
 use Domain\Nft\Exceptions\NftException;
-use Domain\Services\Math\Math;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
@@ -60,12 +59,7 @@ final class Nft implements AggregateRoot
     {
         assert(! is_null($this->costBasis));
 
-        $newCostBasis = new FiatAmount(
-            amount: Math::add($this->costBasis->amount, $event->costBasisIncrease->amount),
-            currency: $this->costBasis->currency,
-        );
-
-        $this->costBasis = $newCostBasis;
+        $this->costBasis = $this->costBasis->plus($event->costBasisIncrease);
     }
 
     /** @throws NftException */
