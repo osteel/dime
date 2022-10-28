@@ -5,8 +5,9 @@ namespace Domain\ValueObjects;
 use Domain\Enums\FiatCurrency;
 use Domain\Services\Math\Math;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
+use Stringable;
 
-final class FiatAmount
+final class FiatAmount implements Stringable
 {
     public function __construct(
         public readonly string $amount,
@@ -58,5 +59,10 @@ final class FiatAmount
         if (count($currencies) > 1) {
             throw FiatAmountException::fiatCurrenciesDoNotMatch(...$currencies);
         }
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s%s', $this->currency->symbol(), $this->amount);
     }
 }

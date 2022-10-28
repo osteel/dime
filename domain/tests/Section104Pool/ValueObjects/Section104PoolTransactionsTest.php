@@ -2,7 +2,8 @@
 
 use Brick\DateTime\LocalDate;
 use Domain\Enums\FiatCurrency;
-use Domain\Section104Pool\Enums\Section104PoolTransactionType;
+use Domain\Section104Pool\ValueObjects\Section104PoolAcquisition;
+use Domain\Section104Pool\ValueObjects\Section104PoolDisposal;
 use Domain\Section104Pool\ValueObjects\Section104PoolTransaction;
 use Domain\Section104Pool\ValueObjects\Section104PoolTransactions;
 use Domain\ValueObjects\FiatAmount;
@@ -14,7 +15,8 @@ it('can make an empty collection of transactions', function () {
 });
 
 it('can make a collection of one transaction', function () {
-    $transaction = Section104PoolTransaction::factory()->make();
+    /** @var Section104PoolAcquisition */
+    $transaction = Section104PoolAcquisition::factory()->make();
 
     $section104PoolTransactions = Section104PoolTransactions::make($transaction);
 
@@ -23,10 +25,11 @@ it('can make a collection of one transaction', function () {
 });
 
 it('can make a collection of transactions', function () {
+    /** @var array<int, Section104PoolTransaction> */
     $transactions = [
-        Section104PoolTransaction::factory()->make(),
-        Section104PoolTransaction::factory()->make(),
-        Section104PoolTransaction::factory()->make(),
+        Section104PoolAcquisition::factory()->make(),
+        Section104PoolDisposal::factory()->make(),
+        Section104PoolAcquisition::factory()->make(),
     ];
 
     $section104PoolTransactions = Section104PoolTransactions::make(...$transactions);
@@ -36,7 +39,8 @@ it('can make a collection of transactions', function () {
 });
 
 it('can make a copy of a collection of transactions', function () {
-    $transaction = Section104PoolTransaction::factory()->make();
+    /** @var Section104PoolAcquisition */
+    $transaction = Section104PoolAcquisition::factory()->make();
 
     $section104PoolTransactions = Section104PoolTransactions::make($transaction);
 
@@ -47,7 +51,8 @@ it('can make a copy of a collection of transactions', function () {
 });
 
 it('can add a transaction to a collection of transactions', function () {
-    $transaction = Section104PoolTransaction::factory()->make();
+    /** @var Section104PoolDisposal */
+    $transaction = Section104PoolDisposal::factory()->make();
 
     $section104PoolTransactions = Section104PoolTransactions::make($transaction);
     $section104PoolTransactions = $section104PoolTransactions->add($transaction);
@@ -59,7 +64,7 @@ it('can return the total quantity of a collection of transactions', function (ar
     $transactions = [];
 
     foreach ($quantities as $quantity) {
-        $transactions[] = Section104PoolTransaction::factory()->make(['quantity' => $quantity]);
+        $transactions[] = Section104PoolDisposal::factory()->make(['quantity' => $quantity]);
     }
 
     $section104PoolTransactions = Section104PoolTransactions::make(...$transactions);
@@ -75,7 +80,7 @@ it('can return the average cost basis per unit of a collection of transactions',
     $transactions = [];
 
     foreach ($costBases as $quantity => $costBasis) {
-        $transactions[] = Section104PoolTransaction::factory()->make([
+        $transactions[] = Section104PoolAcquisition::factory()->make([
             'quantity' => $quantity,
             'costBasis' => new FiatAmount($costBasis, FiatCurrency::GBP),
         ]);
@@ -93,13 +98,14 @@ it('can return the average cost basis per unit of a collection of transactions',
 ]);
 
 it('can return a collection of transactions that happened on a specific day', function (string $date, int $count) {
+    /** @var Section104PoolTransactions */
     $section104PoolTransactions = Section104PoolTransactions::make(
-        Section104PoolTransaction::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        Section104PoolTransaction::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        Section104PoolTransaction::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        Section104PoolTransaction::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        Section104PoolTransaction::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        Section104PoolTransaction::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
     $transactions = $section104PoolTransactions->transactionsMadeOn(Localdate::parse($date));
@@ -115,30 +121,12 @@ it('can return a collection of transactions that happened on a specific day', fu
 
 it('can return a collection of acquisitions that happened on a specific day', function (string $date, int $count) {
     $section104PoolTransactions = Section104PoolTransactions::make(
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Disposal,
-            'date' => LocalDate::parse('2015-10-21'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Acquisition,
-            'date' => LocalDate::parse('2015-10-21'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Acquisition,
-            'date' => LocalDate::parse('2015-10-22'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Acquisition,
-            'date' => LocalDate::parse('2015-10-22'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Disposal,
-            'date' => LocalDate::parse('2015-10-23'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Acquisition,
-            'date' => LocalDate::parse('2015-10-24'),
-        ]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
     $transactions = $section104PoolTransactions->AcquisitionsMadeOn(Localdate::parse($date));
@@ -154,30 +142,12 @@ it('can return a collection of acquisitions that happened on a specific day', fu
 
 it('can return a collection of disposals that happened on a specific day', function (string $date, int $count) {
     $section104PoolTransactions = Section104PoolTransactions::make(
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Acquisition,
-            'date' => LocalDate::parse('2015-10-21'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Disposal,
-            'date' => LocalDate::parse('2015-10-21'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Disposal,
-            'date' => LocalDate::parse('2015-10-22'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Disposal,
-            'date' => LocalDate::parse('2015-10-22'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Acquisition,
-            'date' => LocalDate::parse('2015-10-23'),
-        ]),
-        Section104PoolTransaction::factory()->make([
-            'type' => Section104PoolTransactionType::Disposal,
-            'date' => LocalDate::parse('2015-10-24'),
-        ]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        Section104PoolAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
+        Section104PoolDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
     $transactions = $section104PoolTransactions->disposalsMadeOn(Localdate::parse($date));

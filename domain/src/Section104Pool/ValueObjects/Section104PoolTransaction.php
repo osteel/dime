@@ -3,25 +3,23 @@
 namespace Domain\Section104Pool\ValueObjects;
 
 use Brick\DateTime\LocalDate;
-use Domain\Section104Pool\Enums\Section104PoolTransactionType;
-use Domain\Tests\Section104Pool\Factories\ValueObjects\Section104PoolTransactionFactory;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Stringable;
 
-final class Section104PoolTransaction
+abstract class Section104PoolTransaction implements Stringable
 {
     use HasFactory;
 
     public function __construct(
         public readonly LocalDate $date,
-        public readonly Section104PoolTransactionType $type,
         public readonly string $quantity,
         public readonly FiatAmount $costBasis,
     ) {
     }
 
-    protected static function newFactory(): Section104PoolTransactionFactory
+    public function averageCostBasisPerUnit(): ?FiatAmount
     {
-        return Section104PoolTransactionFactory::new();
+        return $this->costBasis()->dividedBy($this->quantity);
     }
 }

@@ -4,6 +4,8 @@ namespace Domain\Section104Pool\Exceptions;
 
 use Domain\Enums\FiatCurrency;
 use Domain\Section104Pool\Section104PoolId;
+use Domain\Section104Pool\ValueObjects\Section104PoolTransaction;
+use Domain\Section104Pool\ValueObjects\Section104PoolTransactions;
 use RuntimeException;
 
 final class Section104PoolException extends RuntimeException
@@ -39,16 +41,27 @@ final class Section104PoolException extends RuntimeException
         ));
     }
 
-    public static function disposalQuantityIsTooHigh(
+    public static function insufficientQuantityAvailable(
         Section104PoolId $section104PoolId,
         string $disposalQuantity,
         string $availableQuantity
     ): self {
         return new self(sprintf(
-            'Cannot dispose of %s section 104 pool %s tokens: %s available',
-            $section104PoolId->toString(),
+            'Tried to dispose of %s section 104 pool %s tokens but only %s are available',
             $disposalQuantity,
+            $section104PoolId->toString(),
             $availableQuantity,
+        ));
+    }
+
+    public static function multipleSameDayDisposalsDetected(
+        Section104PoolId $section104PoolId,
+        Section104PoolTransactions $disposals,
+    ): self {
+        return new self(sprintf(
+            'Multiple same-day section 104 pool %s disposals detected although same-day disposals should be consolidated: %s',
+            $section104PoolId->toString(),
+            print_r(array_map(fn (Section104PoolTransaction $transaction) => $transaction->__toString(), (array) $disposals), true),
         ));
     }
 }

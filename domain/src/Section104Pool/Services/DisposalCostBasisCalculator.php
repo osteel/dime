@@ -12,34 +12,55 @@ final class DisposalCostBasisCalculator
     public static function calculate(
         DisposeOfSection104PoolToken $action,
         Section104PoolTransactions $transactions,
-        FiatAmount $averageCostBasisPerUnit,
     ): FiatAmount {
         $costBasis = new FiatAmount('0', $action->disposalProceeds->currency);
-        $quantity = $action->quantity;
+        $remainingQuantity = $action->quantity;
+        $nilAmount = new FiatAmount('0', $action->disposalProceeds->currency);
 
-        // Find if the asset has been acquired on the same day
-        $sameDayTransactions = $transactions->acquisitionsMadeOn($action->date);
+        // Get acquisitions made before the disposal
+        $priorAcquisitions = $transactions->acquisitionsMadeBefore($action->date);
+        $averageCostBasisPerUnit = $priorAcquisitions?->averageCostBasisPerUnit() ?? $nilAmount;
+
+        // Find out if the asset has been acquired on the same day
+        $sameDayAcquisitions = $transactions->acquisitionsMadeOn($action->date);
 
         // Get the average cost basis
-        if ($sameDayTransactionsAverageCostBasis = $sameDayTransactions->averageCostBasisPerUnit()) {
+        if ($sameDayAcquisitionsAverageCostBasis = $sameDayAcquisitions->averageCostBasisPerUnit()) {
             // Apply this average cost basis to the disposed of asset, up to the quantity acquired that day
-            $multiplier = Math::gt($sameDayTransactions->quantity(), $quantity) ? $quantity : $sameDayTransactions->quantity();
-            $costBasis = $costBasis->plus($sameDayTransactionsAverageCostBasis->multipliedBy($multiplier));
-            $quantity = Math::sub($quantity, $action->quantity);
+            $quantityToApply = Math::min($sameDayAcquisitions->quantity(), $remainingQuantity);
+            $costBasis = $costBasis->plus($sameDayAcquisitionsAverageCostBasis->multipliedBy($quantityToApply));
+            $remainingQuantity = Math::sub($remainingQuantity, $quantityToApply);
+            // If not all of the same-day quantity has been matched, use the rest to update the pool's average cost basis per unit
+            $remainingSameDayQuantity = Math::sub($sameDayAcquisitions->quantity(), $quantityToApply);
+            if (Math::gt($remainingSameDayQuantity, '0')) {
+                $averageCostBasisPerUnit = $sameDayAcquisitionsAverageCostBasis
+                    ->multipliedBy($remainingSameDayQuantity)
+                    ->plus($priorAcquisitions?->costBasis() ?? $nilAmount)
+                    ->dividedBy(Math::add($remainingSameDayQuantity, $priorAcquisitions->quantity()));
+            }
         }
 
         // If the quantity of disposed of tokens is greater than the quantity acquired that day
-        if (Math::gt($quantity, '0')) {
-            // Find if the asset has been acquired in the next 30 days
+        if (Math::gt($remainingQuantity, '0')) {
+            // Find out if the asset has been acquired in the next 30 days
+            $within30DaysAcquisitions = $transactions->acquisitionsMadeBetween($action->date->plusDays(1), $action->date->plusDays(30));
             // For each of these transactions, ordered by date ASC (FIFO)
-            //    apply the transaction's cost basis to the disposed of asset up to the acquired quantity
-            //    continue until there are no more transactions or we've covered all disposed tokens
+            foreach ($within30DaysAcquisitions as $acquisition) {
+                // Apply the transaction's cost basis to the disposed of asset up to the acquired quantity
+                $quantityToApply = Math::min($acquisition->quantity, $remainingQuantity);
+                $costBasis = $costBasis->plus($acquisition->averageCostBasisPerUnit()->multipliedBy($quantityToApply));
+                $remainingQuantity = Math::sub($remainingQuantity, $quantityToApply);
+                // Continue until there are no more transactions or we've covered all disposed tokens
+                if (Math::lte($remainingQuantity, '0')) {
+                    break;
+                }
+            }
         }
 
         // If there are still some disposed of tokens left
-        if (Math::gt($quantity, '0')) {
+        if (Math::gt($remainingQuantity, '0')) {
             // Apply the section 104 pool's average cost basis per unit to the remainder
-            $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($quantity));
+            $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($remainingQuantity));
         }
 
         return $costBasis;

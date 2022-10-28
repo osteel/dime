@@ -99,4 +99,16 @@ final class Math
     {
         return self::lt($term1, $term2, orEqual: true);
     }
+
+    /** @throws MathException */
+    public static function min(string $term1, string $term2): string
+    {
+        return self::lt($term1, $term2) ? $term1 : $term2;
+    }
+
+    /** @throws MathException */
+    public static function max(string $term1, string $term2): string
+    {
+        return self::gt($term1, $term2) ? $term1 : $term2;
+    }
 }

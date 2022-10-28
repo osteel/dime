@@ -5,6 +5,7 @@ use Domain\Enums\FiatCurrency;
 use Domain\Section104Pool\Actions\AcquireSection104PoolToken;
 use Domain\Section104Pool\Actions\DisposeOfSection104PoolToken;
 use Domain\Section104Pool\Events\Section104PoolTokenAcquired;
+use Domain\Section104Pool\Events\Section104PoolTokenDisposalReverted;
 use Domain\Section104Pool\Events\Section104PoolTokenDisposedOf;
 use Domain\Section104Pool\Exceptions\Section104PoolException;
 use Domain\Tests\Section104Pool\Section104PoolTestCase;
@@ -163,7 +164,7 @@ it('cannot dispose of some section 104 pool tokens because the quantity is too h
         disposalProceeds: new FiatAmount('100', FiatCurrency::GBP),
     );
 
-    $cannotDisposeOfSection104PoolToken = Section104PoolException::disposalQuantityIsTooHigh(
+    $cannotDisposeOfSection104PoolToken = Section104PoolException::insufficientQuantityAvailable(
         section104PoolId: $section104PoolTokensAcquired->section104PoolId,
         disposalQuantity: $disposeOfSection104PoolToken->quantity,
         availableQuantity: '100',
@@ -193,16 +194,16 @@ it('can dispose of some section 104 pool tokens on the same day they were acquir
     $disposeOfSection104PoolToken = new DisposeOfSection104PoolToken(
         section104PoolId: $someSection104PoolTokensAcquired->section104PoolId,
         date: LocalDate::parse('2015-10-26'),
-        quantity: '50',
-        disposalProceeds: new FiatAmount('100', FiatCurrency::GBP),
+        quantity: '150',
+        disposalProceeds: new FiatAmount('300', FiatCurrency::GBP),
     );
 
     $section104PoolTokensDisposedOf = new Section104PoolTokenDisposedOf(
         section104PoolId: $disposeOfSection104PoolToken->section104PoolId,
         date: $disposeOfSection104PoolToken->date,
-        quantity: '50',
-        disposalProceeds: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('75', FiatCurrency::GBP),
+        quantity: $disposeOfSection104PoolToken->quantity,
+        disposalProceeds: $disposeOfSection104PoolToken->disposalProceeds,
+        costBasis: new FiatAmount('200', FiatCurrency::GBP),
     );
 
     /** @var AggregateRootTestCase $this */
@@ -245,7 +246,6 @@ it('can acquire some section 104 pool tokens within 30 days of their disposal', 
         section104PoolId: $acquireMoreSection104PoolToken->section104PoolId,
         date: $someSection104PoolTokensDisposedOf->date,
         quantity: $someSection104PoolTokensDisposedOf->quantity,
-        disposalProceeds: $someSection104PoolTokensDisposedOf->disposalProceeds,
         costBasis: $someSection104PoolTokensDisposedOf->costBasis,
     );
 
@@ -253,12 +253,12 @@ it('can acquire some section 104 pool tokens within 30 days of their disposal', 
         section104PoolId: $section104PoolTokenDisposalReverted->section104PoolId,
         date: $section104PoolTokenDisposalReverted->date,
         quantity: $section104PoolTokenDisposalReverted->quantity,
-        disposalProceeds: $section104PoolTokenDisposalReverted->disposalProceeds,
+        disposalProceeds: $someSection104PoolTokensDisposedOf->disposalProceeds,
         costBasis: new FiatAmount('45', FiatCurrency::GBP),
     );
 
     /** @var AggregateRootTestCase $this */
     $this->given($someSection104PoolTokensAcquired, $someSection104PoolTokensDisposedOf)
         ->when($acquireMoreSection104PoolToken)
-        ->then($moreSection104PoolTokenAcquired, $section104PoolTokenDisposalReverted, $correctedSection104PoolTokensDisposedOf);
-});
+        ->then($section104PoolTokenDisposalReverted, $moreSection104PoolTokenAcquired, $correctedSection104PoolTokensDisposedOf);
+})->group('failing');

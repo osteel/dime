@@ -67,3 +67,19 @@ it('can return whether it is less than or equal', function (string $term1, strin
     'scenario 7' => ['0.000000023', '0.0000000230', false, false],
     'scenario 8' => ['0.0000000230', '0.0000000231', false, true],
 ]);
+
+it('can return the smallest number', function (string $term1, string $term2, string $result) {
+    expect(Math::min($term1, $term2))->toBe($result);
+})->with([
+    'scenario 1' => ['2', '1', '1'],
+    'scenario 2' => ['1', '2', '1'],
+    'scenario 3' => ['1', '1', '1'],
+]);
+
+it('can return the biggest number', function (string $term1, string $term2, string $result) {
+    expect(Math::max($term1, $term2))->toBe($result);
+})->with([
+    'scenario 1' => ['2', '1', '2'],
+    'scenario 2' => ['1', '2', '2'],
+    'scenario 3' => ['1', '1', '1'],
+]);
