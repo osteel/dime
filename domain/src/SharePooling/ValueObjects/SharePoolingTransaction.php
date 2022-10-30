@@ -1,13 +1,13 @@
 <?php
 
-namespace Domain\Section104Pool\ValueObjects;
+namespace Domain\SharePooling\ValueObjects;
 
 use Brick\DateTime\LocalDate;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stringable;
 
-abstract class Section104PoolTransaction implements Stringable
+abstract class SharePoolingTransaction implements Stringable
 {
     use HasFactory;
 
@@ -20,6 +20,6 @@ abstract class Section104PoolTransaction implements Stringable
 
     public function averageCostBasisPerUnit(): ?FiatAmount
     {
-        return $this->costBasis()->dividedBy($this->quantity);
+        return $this->costBasis->dividedBy($this->quantity);
     }
 }

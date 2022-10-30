@@ -1,0 +1,264 @@
+<?php
+
+use Brick\DateTime\LocalDate;
+use Domain\Enums\FiatCurrency;
+use Domain\SharePooling\Actions\AcquireSharePoolingToken;
+use Domain\SharePooling\Actions\DisposeOfSharePoolingToken;
+use Domain\SharePooling\Events\SharePoolingTokenAcquired;
+use Domain\SharePooling\Events\SharePoolingTokenDisposalReverted;
+use Domain\SharePooling\Events\SharePoolingTokenDisposedOf;
+use Domain\SharePooling\Exceptions\SharePoolingException;
+use Domain\Tests\SharePooling\SharePoolingTestCase;
+use Domain\ValueObjects\FiatAmount;
+use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
+
+uses(SharePoolingTestCase::class);
+
+beforeEach(function () {
+    $this->sharePoolingId = $this->aggregateRootId();
+});
+
+it('can acquire some section 104 pool tokens', function () {
+    $acquireSharePoolingToken = new AcquireSharePoolingToken(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $sharePoolingTokensAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $acquireSharePoolingToken->sharePoolingId,
+        date: $acquireSharePoolingToken->date,
+        quantity: '100',
+        costBasis: $acquireSharePoolingToken->costBasis,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->when($acquireSharePoolingToken)
+        ->then($sharePoolingTokensAcquired);
+});
+
+it('can acquire more of the same section 104 pool tokens', function () {
+    $someSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $acquireMoreSharePoolingToken = new AcquireSharePoolingToken(
+        sharePoolingId: $someSharePoolingTokenAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('300', FiatCurrency::GBP),
+    );
+
+    $moreSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $acquireMoreSharePoolingToken->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('300', FiatCurrency::GBP),
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($someSharePoolingTokenAcquired)
+        ->when($acquireMoreSharePoolingToken)
+        ->then($moreSharePoolingTokenAcquired);
+});
+
+it('cannot acquire more of the same section 104 pool tokens because currencies don\'t match', function () {
+    $someSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $acquireMoreSharePoolingToken = new AcquireSharePoolingToken(
+        sharePoolingId: $someSharePoolingTokenAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('300', FiatCurrency::EUR),
+    );
+
+    $cannotAcquireSharePoolingToken = SharePoolingException::cannotAcquireFromDifferentFiatCurrency(
+        sharePoolingId: $someSharePoolingTokenAcquired->sharePoolingId,
+        from: FiatCurrency::GBP,
+        to: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($someSharePoolingTokenAcquired)
+        ->when($acquireMoreSharePoolingToken)
+        ->expectToFail($cannotAcquireSharePoolingToken);
+});
+
+it('can dispose of some section 104 pool tokens', function () {
+    $sharePoolingTokensAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('200', FiatCurrency::GBP),
+    );
+
+    $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
+        sharePoolingId: $sharePoolingTokensAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-25'),
+        quantity: '50',
+        disposalProceeds: new FiatAmount('150', FiatCurrency::GBP),
+    );
+
+    $sharePoolingTokensDisposedOf = new SharePoolingTokenDisposedOf(
+        sharePoolingId: $disposeOfSharePoolingToken->sharePoolingId,
+        date: $disposeOfSharePoolingToken->date,
+        quantity: $disposeOfSharePoolingToken->quantity,
+        disposalProceeds: $disposeOfSharePoolingToken->disposalProceeds,
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($sharePoolingTokensAcquired)
+        ->when($disposeOfSharePoolingToken)
+        ->then($sharePoolingTokensDisposedOf);
+});
+
+it('cannot dispose of some section 104 pool tokens because currencies don\'t match', function () {
+    $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
+        sharePoolingId: $sharePoolingTokenAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-25'),
+        quantity: '100',
+        disposalProceeds: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
+    $cannotDisposeOfSharePoolingToken = SharePoolingException::cannotDisposeOfFromDifferentFiatCurrency(
+        sharePoolingId: $sharePoolingTokenAcquired->sharePoolingId,
+        from: FiatCurrency::GBP,
+        to: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($sharePoolingTokenAcquired)
+        ->when($disposeOfSharePoolingToken)
+        ->expectToFail($cannotDisposeOfSharePoolingToken);
+});
+
+it('cannot dispose of some section 104 pool tokens because the quantity is too high', function () {
+    $sharePoolingTokensAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
+        sharePoolingId: $sharePoolingTokensAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-25'),
+        quantity: '101',
+        disposalProceeds: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $cannotDisposeOfSharePoolingToken = SharePoolingException::insufficientQuantityAvailable(
+        sharePoolingId: $sharePoolingTokensAcquired->sharePoolingId,
+        disposalQuantity: $disposeOfSharePoolingToken->quantity,
+        availableQuantity: '100',
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($sharePoolingTokensAcquired)
+        ->when($disposeOfSharePoolingToken)
+        ->expectToFail($cannotDisposeOfSharePoolingToken);
+});
+
+it('can dispose of some section 104 pool tokens on the same day they were acquired', function () {
+    $someSharePoolingTokensAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $moreSharePoolingTokensAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $someSharePoolingTokensAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-26'),
+        quantity: '100',
+        costBasis: new FiatAmount('150', FiatCurrency::GBP),
+    );
+
+    $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
+        sharePoolingId: $someSharePoolingTokensAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-26'),
+        quantity: '150',
+        disposalProceeds: new FiatAmount('300', FiatCurrency::GBP),
+    );
+
+    $sharePoolingTokensDisposedOf = new SharePoolingTokenDisposedOf(
+        sharePoolingId: $disposeOfSharePoolingToken->sharePoolingId,
+        date: $disposeOfSharePoolingToken->date,
+        quantity: $disposeOfSharePoolingToken->quantity,
+        disposalProceeds: $disposeOfSharePoolingToken->disposalProceeds,
+        costBasis: new FiatAmount('200', FiatCurrency::GBP),
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($someSharePoolingTokensAcquired, $moreSharePoolingTokensAcquired)
+        ->when($disposeOfSharePoolingToken)
+        ->then($sharePoolingTokensDisposedOf);
+});
+
+it('can acquire some section 104 pool tokens within 30 days of their disposal', function () {
+    $someSharePoolingTokensAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $this->sharePoolingId,
+        date: LocalDate::parse('2015-10-21'),
+        quantity: '100',
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $someSharePoolingTokensDisposedOf = new SharePoolingTokenDisposedOf(
+        sharePoolingId: $someSharePoolingTokensAcquired->sharePoolingId,
+        date: LocalDate::parse('2015-10-26'),
+        quantity: '50',
+        disposalProceeds: new FiatAmount('75', FiatCurrency::GBP),
+        costBasis: new FiatAmount('50', FiatCurrency::GBP),
+    );
+
+    $acquireMoreSharePoolingToken = new AcquireSharePoolingToken(
+        sharePoolingId: $someSharePoolingTokensDisposedOf->sharePoolingId,
+        date: LocalDate::parse('2015-10-29'),
+        quantity: '25',
+        costBasis: new FiatAmount('20', FiatCurrency::GBP),
+    );
+
+    $moreSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
+        sharePoolingId: $acquireMoreSharePoolingToken->sharePoolingId,
+        date: $acquireMoreSharePoolingToken->date,
+        quantity: $acquireMoreSharePoolingToken->quantity,
+        costBasis: $acquireMoreSharePoolingToken->costBasis,
+    );
+
+    $sharePoolingTokenDisposalReverted = new SharePoolingTokenDisposalReverted(
+        sharePoolingId: $acquireMoreSharePoolingToken->sharePoolingId,
+        date: $someSharePoolingTokensDisposedOf->date,
+        quantity: $someSharePoolingTokensDisposedOf->quantity,
+        costBasis: $someSharePoolingTokensDisposedOf->costBasis,
+    );
+
+    $correctedSharePoolingTokensDisposedOf = new SharePoolingTokenDisposedOf(
+        sharePoolingId: $sharePoolingTokenDisposalReverted->sharePoolingId,
+        date: $sharePoolingTokenDisposalReverted->date,
+        quantity: $sharePoolingTokenDisposalReverted->quantity,
+        disposalProceeds: $someSharePoolingTokensDisposedOf->disposalProceeds,
+        costBasis: new FiatAmount('45', FiatCurrency::GBP),
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($someSharePoolingTokensAcquired, $someSharePoolingTokensDisposedOf)
+        ->when($acquireMoreSharePoolingToken)
+        ->then($sharePoolingTokenDisposalReverted, $moreSharePoolingTokenAcquired, $correctedSharePoolingTokensDisposedOf);
+})->group('failing');

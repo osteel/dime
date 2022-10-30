@@ -1,24 +1,24 @@
 <?php
 
-namespace Domain\Section104Pool\Services;
+namespace Domain\SharePooling\Services;
 
-use Domain\Section104Pool\Actions\DisposeOfSection104PoolToken;
-use Domain\Section104Pool\ValueObjects\Section104PoolTransactions;
+use Domain\SharePooling\Actions\DisposeOfSharePoolingToken;
+use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\Services\Math\Math;
 use Domain\ValueObjects\FiatAmount;
 
 final class DisposalCostBasisCalculator
 {
     public static function calculate(
-        DisposeOfSection104PoolToken $action,
-        Section104PoolTransactions $transactions,
+        DisposeOfSharePoolingToken $action,
+        SharePoolingTransactions $transactions,
     ): FiatAmount {
         $costBasis = new FiatAmount('0', $action->disposalProceeds->currency);
         $remainingQuantity = $action->quantity;
         $nilAmount = new FiatAmount('0', $action->disposalProceeds->currency);
 
         // Get acquisitions made before the disposal
-        $priorAcquisitions = $transactions->acquisitionsMadeBefore($action->date);
+        $priorAcquisitions = $transactions->acquisitionsMadeBefore($action->date)->withSection104Quantity();
         $averageCostBasisPerUnit = $priorAcquisitions?->averageCostBasisPerUnit() ?? $nilAmount;
 
         // Find out if the asset has been acquired on the same day
@@ -35,7 +35,7 @@ final class DisposalCostBasisCalculator
             if (Math::gt($remainingSameDayQuantity, '0')) {
                 $averageCostBasisPerUnit = $sameDayAcquisitionsAverageCostBasis
                     ->multipliedBy($remainingSameDayQuantity)
-                    ->plus($priorAcquisitions?->costBasis() ?? $nilAmount)
+                    ->plus($priorAcquisitions?->section104PoolCostBasis() ?? $nilAmount)
                     ->dividedBy(Math::add($remainingSameDayQuantity, $priorAcquisitions->quantity()));
             }
         }

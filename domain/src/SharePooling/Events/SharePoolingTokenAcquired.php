@@ -1,15 +1,15 @@
 <?php
 
-namespace Domain\Section104Pool\Events;
+namespace Domain\SharePooling\Events;
 
 use Brick\DateTime\LocalDate;
-use Domain\Section104Pool\Section104PoolId;
+use Domain\SharePooling\SharePoolingId;
 use Domain\ValueObjects\FiatAmount;
 
-final class Section104PoolTokenDisposalReverted
+final class SharePoolingTokenAcquired
 {
     public function __construct(
-        public readonly Section104PoolId $section104PoolId,
+        public readonly SharePoolingId $sharePoolingId,
         public readonly LocalDate $date,
         public readonly string $quantity,
         public readonly FiatAmount $costBasis,

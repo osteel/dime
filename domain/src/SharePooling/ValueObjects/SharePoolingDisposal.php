@@ -1,13 +1,13 @@
 <?php
 
-namespace Domain\Section104Pool\ValueObjects;
+namespace Domain\SharePooling\ValueObjects;
 
 use Brick\DateTime\LocalDate;
-use Domain\Tests\Section104Pool\Factories\ValueObjects\Section104PoolDisposalFactory;
+use Domain\Tests\SharePooling\Factories\ValueObjects\SharePoolingDisposalFactory;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-final class Section104PoolDisposal extends Section104PoolTransaction
+final class SharePoolingDisposal extends SharePoolingTransaction
 {
     use HasFactory;
 
@@ -19,9 +19,9 @@ final class Section104PoolDisposal extends Section104PoolTransaction
     ) {
     }
 
-    protected static function newFactory(): Section104PoolDisposalFactory
+    protected static function newFactory(): SharePoolingDisposalFactory
     {
-        return Section104PoolDisposalFactory::new();
+        return SharePoolingDisposalFactory::new();
     }
 
     public function __toString(): string

@@ -1,17 +1,17 @@
 <?php
 
-namespace Domain\Tests\Section104Pool\Factories\ValueObjects;
+namespace Domain\Tests\SharePooling\Factories\ValueObjects;
 
 use Brick\DateTime\LocalDate;
 use Domain\Enums\FiatCurrency;
-use Domain\Section104Pool\ValueObjects\Section104PoolAcquisition;
+use Domain\SharePooling\ValueObjects\SharePoolingAcquisition;
 use Domain\ValueObjects\FiatAmount;
 use Tests\Factories\PlainObjectFactory;
 
-class Section104PoolAcquisitionFactory extends PlainObjectFactory
+class SharePoolingAcquisitionFactory extends PlainObjectFactory
 {
     /** @var string */
-    protected $model = Section104PoolAcquisition::class;
+    protected $model = SharePoolingAcquisition::class;
 
     /** @return array */
     public function definition()
