@@ -3,25 +3,25 @@
 namespace Domain\SharePooling\ValueObjects;
 
 use Brick\DateTime\LocalDate;
-use Domain\Tests\SharePooling\Factories\ValueObjects\SharePoolingDisposalFactory;
+use Domain\Tests\SharePooling\Factories\ValueObjects\SharePoolingTokenDisposalFactory;
 use Domain\ValueObjects\FiatAmount;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-final class SharePoolingDisposal extends SharePoolingTransaction
+final class SharePoolingTokenDisposal extends SharePoolingTransaction
 {
-    use HasFactory;
-
     public function __construct(
         public readonly LocalDate $date,
         public readonly string $quantity,
         public readonly FiatAmount $costBasis,
         public readonly FiatAmount $disposalProceeds,
+        public readonly string $sameDayQuantity,
+        public readonly string $thirtyDayQuantity,
+        public readonly string $section104PoolQuantity,
     ) {
     }
 
-    protected static function newFactory(): SharePoolingDisposalFactory
+    protected static function newFactory(): SharePoolingTokenDisposalFactory
     {
-        return SharePoolingDisposalFactory::new();
+        return SharePoolingTokenDisposalFactory::new();
     }
 
     public function __toString(): string

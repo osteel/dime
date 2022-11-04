@@ -2,8 +2,8 @@
 
 use Brick\DateTime\LocalDate;
 use Domain\Enums\FiatCurrency;
-use Domain\SharePooling\ValueObjects\SharePoolingAcquisition;
-use Domain\SharePooling\ValueObjects\SharePoolingDisposal;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\SharePooling\ValueObjects\SharePoolingTransaction;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\ValueObjects\FiatAmount;
@@ -15,8 +15,8 @@ it('can make an empty collection of transactions', function () {
 });
 
 it('can make a collection of one transaction', function () {
-    /** @var SharePoolingAcquisition */
-    $transaction = SharePoolingAcquisition::factory()->make();
+    /** @var SharePoolingTokenAcquisition */
+    $transaction = SharePoolingTokenAcquisition::factory()->make();
 
     $sharePoolingTransactions = SharePoolingTransactions::make($transaction);
 
@@ -27,9 +27,9 @@ it('can make a collection of one transaction', function () {
 it('can make a collection of transactions', function () {
     /** @var array<int, SharePoolingTransaction> */
     $transactions = [
-        SharePoolingAcquisition::factory()->make(),
-        SharePoolingDisposal::factory()->make(),
-        SharePoolingAcquisition::factory()->make(),
+        SharePoolingTokenAcquisition::factory()->make(),
+        SharePoolingTokenDisposal::factory()->make(),
+        SharePoolingTokenAcquisition::factory()->make(),
     ];
 
     $sharePoolingTransactions = SharePoolingTransactions::make(...$transactions);
@@ -39,8 +39,8 @@ it('can make a collection of transactions', function () {
 });
 
 it('can make a copy of a collection of transactions', function () {
-    /** @var SharePoolingAcquisition */
-    $transaction = SharePoolingAcquisition::factory()->make();
+    /** @var SharePoolingTokenAcquisition */
+    $transaction = SharePoolingTokenAcquisition::factory()->make();
 
     $sharePoolingTransactions = SharePoolingTransactions::make($transaction);
 
@@ -51,8 +51,8 @@ it('can make a copy of a collection of transactions', function () {
 });
 
 it('can add a transaction to a collection of transactions', function () {
-    /** @var SharePoolingDisposal */
-    $transaction = SharePoolingDisposal::factory()->make();
+    /** @var SharePoolingTokenDisposal */
+    $transaction = SharePoolingTokenDisposal::factory()->make();
 
     $sharePoolingTransactions = SharePoolingTransactions::make($transaction);
     $sharePoolingTransactions = $sharePoolingTransactions->add($transaction);
@@ -64,7 +64,7 @@ it('can return the total quantity of a collection of transactions', function (ar
     $transactions = [];
 
     foreach ($quantities as $quantity) {
-        $transactions[] = SharePoolingDisposal::factory()->make(['quantity' => $quantity]);
+        $transactions[] = SharePoolingTokenDisposal::factory()->make(['quantity' => $quantity]);
     }
 
     $sharePoolingTransactions = SharePoolingTransactions::make(...$transactions);
@@ -80,7 +80,7 @@ it('can return the average cost basis per unit of a collection of transactions',
     $transactions = [];
 
     foreach ($costBases as $quantity => $costBasis) {
-        $transactions[] = SharePoolingAcquisition::factory()->make([
+        $transactions[] = SharePoolingTokenAcquisition::factory()->make([
             'quantity' => $quantity,
             'costBasis' => new FiatAmount($costBasis, FiatCurrency::GBP),
         ]);
@@ -100,12 +100,12 @@ it('can return the average cost basis per unit of a collection of transactions',
 it('can return a collection of transactions that happened on a specific day', function (string $date, int $count) {
     /** @var SharePoolingTransactions */
     $sharePoolingTransactions = SharePoolingTransactions::make(
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
     $transactions = $sharePoolingTransactions->transactionsMadeOn(Localdate::parse($date));
@@ -121,12 +121,12 @@ it('can return a collection of transactions that happened on a specific day', fu
 
 it('can return a collection of acquisitions that happened on a specific day', function (string $date, int $count) {
     $sharePoolingTransactions = SharePoolingTransactions::make(
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
     $transactions = $sharePoolingTransactions->AcquisitionsMadeOn(Localdate::parse($date));
@@ -142,12 +142,12 @@ it('can return a collection of acquisitions that happened on a specific day', fu
 
 it('can return a collection of disposals that happened on a specific day', function (string $date, int $count) {
     $sharePoolingTransactions = SharePoolingTransactions::make(
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
-        SharePoolingAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
-        SharePoolingDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
+        SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
+        SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
     $transactions = $sharePoolingTransactions->disposalsMadeOn(Localdate::parse($date));

@@ -15,6 +15,11 @@ final class FiatAmount implements Stringable
     ) {
     }
 
+    public function nilAmount(): FiatAmount
+    {
+        return new self('0', $this->currency);
+    }
+
     /** @throws FiatAmountException */
     public function plus(FiatAmount | string $operand): FiatAmount
     {

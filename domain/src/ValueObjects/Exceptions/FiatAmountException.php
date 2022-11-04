@@ -2,7 +2,6 @@
 
 namespace Domain\ValueObjects\Exceptions;
 
-use Domain\Enums\FiatCurrency;
 use RuntimeException;
 
 final class FiatAmountException extends RuntimeException

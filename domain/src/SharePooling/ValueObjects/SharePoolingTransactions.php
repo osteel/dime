@@ -4,10 +4,8 @@ namespace Domain\SharePooling\ValueObjects;
 
 use ArrayIterator;
 use Brick\DateTime\LocalDate;
-use Domain\SharePooling\ValueObjects\SharePoolingAcquisition;
-use Domain\SharePooling\ValueObjects\SharePoolingDisposal;
 use Domain\Services\Math\Math;
-use Domain\ValueObjects\FiatAmount;
+use Domain\SharePooling\ValueObjects\Exceptions\SharePoolingTransactionException;
 use IteratorAggregate;
 use Traversable;
 
@@ -28,6 +26,13 @@ final class SharePoolingTransactions implements IteratorAggregate
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->transactions);
+    }
+
+    private function collectionClassForType(?string $type = null): string
+    {
+        return $type
+            ? ($type === SharePoolingTokenAcquisition::class ? SharePoolingTokenAcquisitions::class : SharePoolingTokenDisposals::class)
+            : SharePoolingTransactions::class;
     }
 
     public function copy(): SharePoolingTransactions
@@ -55,9 +60,16 @@ final class SharePoolingTransactions implements IteratorAggregate
         return new self(array_reverse($this->transactions));
     }
 
-    public function add(SharePoolingTransaction $transaction): self
+    public function add(SharePoolingTransaction ...$transactions): self
     {
-        $this->transactions[] = $transaction;
+        foreach ($transactions as $transaction) {
+            try {
+                $transaction->setPosition($this->count());
+            } catch (SharePoolingTransactionException) {
+            }
+
+            $this->transactions[$transaction->getPosition()] = $transaction;
+        }
 
         return $this;
     }
@@ -66,66 +78,52 @@ final class SharePoolingTransactions implements IteratorAggregate
     {
         return array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingAcquisition
+            fn (string $total, SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingTokenAcquisition
                 ? Math::add($total, $transaction->quantity)
                 : Math::sub($total, $transaction->quantity),
             '0'
         );
     }
 
-    public function averageSection104PoolCostBasisPerUnit(): ?FiatAmount
+    public function section104PoolQuantity(): string
     {
-        $section104PoolAcquisitions = array_filter(
+        return array_reduce(
             $this->transactions,
-            fn (SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingAcquisition
-                && $transaction->hasSection104PoolQuantity(),
-        );
-
-        if (empty($section104PoolAcquisitions)) {
-            return null;
-        }
-
-        $costBasis = array_reduce(
-            $section104PoolAcquisitions,
-            fn (FiatAmount $total, SharePoolingAcquisition $acquisition) => $total->plus($acquisition->section104PoolCostBasis()),
-            new FiatAmount('0', $section104PoolAcquisitions[0]->costBasis->currency),
-        );
-
-        $quantity = array_reduce(
-            $section104PoolAcquisitions,
-            fn (string $total, SharePoolingAcquisition $acquisition) => Math::add($total, $acquisition->quantity),
+            fn (string $total, SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingTokenAcquisition
+                ? Math::add($total, $transaction->quantity)
+                : Math::sub($total, $transaction->quantity),
             '0'
         );
-
-        return $costBasis->dividedBy($quantity));
     }
 
-    public function transactionsMadeOn(LocalDate $date, ?string $type = null): SharePoolingTransactions
-    {
+    public function transactionsMadeOn(
+        LocalDate $date,
+        ?string $type = null
+    ): SharePoolingTransactions|SharePoolingTokenAcquisitions|SharePoolingTokenDisposals {
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingTransaction $transaction) => $transaction->date->isEqualTo($date)
                 && (is_null($type) ? true : $transaction instanceof $type)
         );
 
-        return new self($transactions);
+        return ($this->collectionClassForType($type))::make(...$transactions);
     }
 
-    public function acquisitionsMadeOn(LocalDate $date): SharePoolingTransactions
+    public function acquisitionsMadeOn(LocalDate $date): SharePoolingTokenAcquisitions
     {
-        return $this->transactionsMadeOn($date, SharePoolingAcquisition::class);
+        return $this->transactionsMadeOn($date, SharePoolingTokenAcquisition::class);
     }
 
-    public function disposalsMadeOn(LocalDate $date): SharePoolingTransactions
+    public function disposalsMadeOn(LocalDate $date): SharePoolingTokenDisposals
     {
-        return $this->transactionsMadeOn($date, SharePoolingDisposal::class);
+        return $this->transactionsMadeOn($date, SharePoolingTokenDisposal::class);
     }
 
     public function transactionsMadeBetween(
         LocalDate $from,
         LocalDate $to,
         ?string $type = null,
-    ): SharePoolingTransactions {
+    ): SharePoolingTransactions|SharePoolingTokenAcquisitions|SharePoolingTokenDisposals {
         if ($from->isEqualTo($to)) {
             return $this->transactionsMadeOn($from, $type);
         }
@@ -138,37 +136,39 @@ final class SharePoolingTransactions implements IteratorAggregate
                 && (is_null($type) ? true : $transaction instanceof $type)
         );
 
-        return new self($transactions);
+        return ($this->collectionClassForType($type))::make(...$transactions);
     }
 
-    public function acquisitionsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTransactions
+    public function acquisitionsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTokenAcquisitions
     {
-        return $this->transactionsMadeBetween($from, $to, SharePoolingAcquisition::class);
+        return $this->transactionsMadeBetween($from, $to, SharePoolingTokenAcquisition::class);
     }
 
-    public function disposalsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTransactions
+    public function disposalsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTokenDisposals
     {
-        return $this->transactionsMadeBetween($from, $to, SharePoolingDisposal::class);
+        return $this->transactionsMadeBetween($from, $to, SharePoolingTokenDisposal::class);
     }
 
-    public function transactionsMadeBefore(LocalDate $date, ?string $type = null): SharePoolingTransactions
-    {
+    public function transactionsMadeBefore(
+        LocalDate $date,
+        ?string $type = null
+    ): SharePoolingTransactions|SharePoolingTokenAcquisitions|SharePoolingTokenDisposals {
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingTransaction $transaction) => $transaction->date->isBefore($date)
                 && (is_null($type) ? true : $transaction instanceof $type)
         );
 
-        return new self($transactions);
+        return ($this->collectionClassForType($type))::make(...$transactions);
     }
 
-    public function acquisitionsMadeBefore(LocalDate $date): SharePoolingTransactions
+    public function acquisitionsMadeBefore(LocalDate $date): SharePoolingTokenAcquisitions
     {
-        return $this->transactionsMadeBefore($date, SharePoolingAcquisition::class);
+        return $this->transactionsMadeBefore($date, SharePoolingTokenAcquisition::class);
     }
 
-    public function disposalsMadeBefore(LocalDate $date): SharePoolingTransactions
+    public function disposalsMadeBefore(LocalDate $date): SharePoolingTokenDisposals
     {
-        return $this->transactionsMadeBefore($date, SharePoolingDisposal::class);
+        return $this->transactionsMadeBefore($date, SharePoolingTokenDisposal::class);
     }
 }

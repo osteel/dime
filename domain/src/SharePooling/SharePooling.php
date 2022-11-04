@@ -9,12 +9,11 @@ use Domain\SharePooling\Events\SharePoolingTokenAcquired;
 use Domain\SharePooling\Events\SharePoolingTokenDisposalReverted;
 use Domain\SharePooling\Events\SharePoolingTokenDisposedOf;
 use Domain\SharePooling\Exceptions\SharePoolingException;
-use Domain\SharePooling\Services\DisposalCostBasisCalculator;
-use Domain\SharePooling\ValueObjects\SharePoolingAcquisition;
-use Domain\SharePooling\ValueObjects\SharePoolingDisposal;
+use Domain\SharePooling\Services\SharePoolingTokenDisposalProcessor;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\Services\Math\Math;
-use Domain\ValueObjects\FiatAmount;
+use Domain\SharePooling\Services\SharePoolingTokenAcquisitionProcessor;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
@@ -44,56 +43,46 @@ final class SharePooling implements AggregateRoot
             );
         }
 
-        // Go through disposals in the past 30 days FIFO
-        $past30DaysDisposals = $this->transactions->disposalsMadeBetween($action->date->minusDays(30), $action->date);
-        $disposalsToReplay = [];
+        $disposalsToRevert = SharePoolingTokenAcquisitionProcessor::getSharePoolingTokenDisposalsToRevert(
+            $action,
+            $this->transactions,
+        );
 
-        foreach ($past30DaysDisposals as $disposal) {
-            // Revert the ones whose quantities are not covered by the acquisitions
-            // made in their next 30 days (including the disposal's date)
-            $subsequentAcquisitions = $this->transactions->acquisitionsMadeBetween($disposal->date, $disposal->date->plusDays(30));
-            if (Math::lt($disposal->quantity, $subsequentAcquisitions->quantity())) {
-                $this->recordThat(new SharePoolingTokenDisposalReverted(
-                    sharePoolingId: $disposal->sharePoolingId,
-                    date: $disposal->date,
-                    quantity: $disposal->quantity,
-                    costBasis: $disposal->costBasis,
-                ));
-                $disposalsToReplay[] = $disposal;
-            }
-            // Stop as soon as a disposal had its entire quantity covered by future acquisitions
+        // Revert the disposals first
+        foreach ($disposalsToRevert as $disposal) {
+            $this->recordThat(new SharePoolingTokenDisposalReverted(
+                sharePoolingId: $action->sharePoolingId,
+                sharePoolingTokenDisposal: $disposal,
+            ));
         }
 
+        // Record the new acquisition
         $this->recordThat(new SharePoolingTokenAcquired(
             sharePoolingId: $action->sharePoolingId,
-            date: $action->date,
-            quantity: $action->quantity,
-            costBasis: $action->costBasis,
+            sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
+                date: $action->date,
+                quantity: $action->quantity,
+                costBasis: $action->costBasis,
+            ),
         ));
 
-        // Replay original disposal events
-        foreach (array_reverse($disposalsToReplay) as $disposal) {
+        // Replay the disposals
+        foreach ($disposalsToRevert as $disposal) {
             $this->disposeOf(new DisposeOfSharePoolingToken(
-                sharePoolingId: $disposal->sharePoolingId,
+                sharePoolingId: $action->sharePoolingId,
                 date: $disposal->date,
                 quantity: $disposal->quantity,
                 disposalProceeds: $disposal->disposalProceeds,
+                position: $disposal->getPosition(),
             ));
         }
     }
 
     public function applySharePoolingTokenAcquired(SharePoolingTokenAcquired $event): void
     {
-        $this->fiatCurrency ??= $event->costBasis->currency;
+        $this->fiatCurrency ??= $event->sharePoolingTokenAcquisition->costBasis->currency;
 
-        // @TODO A service should update past transactions and calculate the quantity that goes to the section 104 pool
-
-        $this->transactions->add(new SharePoolingAcquisition(
-            date: $event->date,
-            quantity: $event->quantity,
-            costBasis: $event->costBasis,
-            section104Quantity: ,
-        ));
+        $this->transactions->add($event->sharePoolingTokenAcquisition);
     }
 
     public function applySharePoolingTokenDisposalReverted(SharePoolingTokenDisposalReverted $event): void
@@ -111,7 +100,6 @@ final class SharePooling implements AggregateRoot
             );
         }
 
-        // @TODO is that correct? Or should it be the sum of the section 104 pool quantities instead?
         $availableQuantity = $this->transactions->quantity();
 
         if (Math::gt($action->quantity, $availableQuantity)) {
@@ -122,27 +110,19 @@ final class SharePooling implements AggregateRoot
             );
         }
 
-        $costBasis = DisposalCostBasisCalculator::calculate(
+        $sharePoolingTokenDisposal = SharePoolingTokenDisposalProcessor::process(
             action: $action,
             transactions: $this->transactions->copy(),
         );
 
         $this->recordThat(new SharePoolingTokenDisposedOf(
             sharePoolingId: $action->sharePoolingId,
-            date: $action->date,
-            quantity: $action->quantity,
-            disposalProceeds: $action->disposalProceeds,
-            costBasis: $costBasis,
+            sharePoolingTokenDisposal: $sharePoolingTokenDisposal,
         ));
     }
 
     public function applySharePoolingTokenDisposedOf(SharePoolingTokenDisposedOf $event): void
     {
-        $this->transactions->add(new SharePoolingDisposal(
-            date: $event->date,
-            quantity: $event->quantity,
-            costBasis: $event->costBasis,
-            disposalProceeds: $event->disposalProceeds,
-        ));
+        $this->transactions->add($event->sharePoolingTokenDisposal);
     }
 }

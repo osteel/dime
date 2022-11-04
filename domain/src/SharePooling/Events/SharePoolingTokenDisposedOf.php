@@ -2,18 +2,14 @@
 
 namespace Domain\SharePooling\Events;
 
-use Brick\DateTime\LocalDate;
 use Domain\SharePooling\SharePoolingId;
-use Domain\ValueObjects\FiatAmount;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 
 final class SharePoolingTokenDisposedOf
 {
     public function __construct(
         public readonly SharePoolingId $sharePoolingId,
-        public readonly LocalDate $date,
-        public readonly string $quantity,
-        public readonly FiatAmount $disposalProceeds,
-        public readonly FiatAmount $costBasis,
+        public readonly SharePoolingTokenDisposal $sharePoolingTokenDisposal,
     ) {
     }
 }

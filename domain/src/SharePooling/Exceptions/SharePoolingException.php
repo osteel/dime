@@ -4,8 +4,6 @@ namespace Domain\SharePooling\Exceptions;
 
 use Domain\Enums\FiatCurrency;
 use Domain\SharePooling\SharePoolingId;
-use Domain\SharePooling\ValueObjects\SharePoolingTransaction;
-use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use RuntimeException;
 
 final class SharePoolingException extends RuntimeException

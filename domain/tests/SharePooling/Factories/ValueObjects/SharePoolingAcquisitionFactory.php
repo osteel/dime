@@ -4,14 +4,14 @@ namespace Domain\Tests\SharePooling\Factories\ValueObjects;
 
 use Brick\DateTime\LocalDate;
 use Domain\Enums\FiatCurrency;
-use Domain\SharePooling\ValueObjects\SharePoolingAcquisition;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\ValueObjects\FiatAmount;
 use Tests\Factories\PlainObjectFactory;
 
-class SharePoolingAcquisitionFactory extends PlainObjectFactory
+class SharePoolingTokenAcquisitionFactory extends PlainObjectFactory
 {
     /** @var string */
-    protected $model = SharePoolingAcquisition::class;
+    protected $model = SharePoolingTokenAcquisition::class;
 
     /** @return array */
     public function definition()
