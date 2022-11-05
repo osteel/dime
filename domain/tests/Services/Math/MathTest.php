@@ -42,7 +42,18 @@ it('can divide', function (string $dividend, string $divisor, string $result) {
     'scenario 5' => ['0.00000000222351', '0.105473', '0.00000002108131938979644079527462'],
 ]);
 
-it('can return whether it is greater than or equal', function (string $term1, string $term2, bool $orEqual, bool $result) {
+it('can return whether it is equal to', function (string $term1, string $term2, bool $result) {
+    expect(Math::eq($term1, $term2))->toBe($result);
+})->with([
+    'scenario 1' => ['1', '2', false,],
+    'scenario 2' => ['1', '1', true,],
+    'scenario 3' => ['2', '1', false],
+    'scenario 4' => ['0.000000023', '0.0000000230', true],
+    'scenario 5' => ['0.000000023', '0.0000000231', false,],
+    'scenario 6' => ['0.0000000231', '0.0000000230', false],
+]);
+
+it('can return whether it is greater than or equal to', function (string $term1, string $term2, bool $orEqual, bool $result) {
     expect(Math::gt($term1, $term2, $orEqual))->toBe($result);
 })->with([
     'scenario 1' => ['1', '2', false, false],
@@ -55,7 +66,7 @@ it('can return whether it is greater than or equal', function (string $term1, st
     'scenario 8' => ['0.0000000231', '0.0000000230', false, true],
 ]);
 
-it('can return whether it is less than or equal', function (string $term1, string $term2, bool $orEqual, bool $result) {
+it('can return whether it is less than or equal to', function (string $term1, string $term2, bool $orEqual, bool $result) {
     expect(Math::lt($term1, $term2, $orEqual))->toBe($result);
 })->with([
     'scenario 1' => ['2', '1', false, false],

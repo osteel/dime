@@ -3,10 +3,13 @@
 use Brick\DateTime\LocalDate;
 use Domain\Enums\FiatCurrency;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisitions;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposals;
 use Domain\SharePooling\ValueObjects\SharePoolingTransaction;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\ValueObjects\FiatAmount;
+use Domain\ValueObjects\Quantity;
 
 it('can make an empty collection of transactions', function () {
     $sharePoolingTransactions = SharePoolingTransactions::make();
@@ -64,12 +67,13 @@ it('can return the total quantity of a collection of transactions', function (ar
     $transactions = [];
 
     foreach ($quantities as $quantity) {
-        $transactions[] = SharePoolingTokenDisposal::factory()->make(['quantity' => $quantity]);
+        $transactions[] = SharePoolingTokenAcquisition::factory()->make(['quantity' => new Quantity($quantity)]);
     }
 
     $sharePoolingTransactions = SharePoolingTransactions::make(...$transactions);
 
-    expect($sharePoolingTransactions->quantity())->toBeString()->toBe($total);
+    //expect($sharePoolingTransactions->quantity())->toBeString()->toBe($total);
+    expect($sharePoolingTransactions->quantity())->toBeInstanceOf(Quantity::class)->toMatchObject(new Quantity($total));
 })->with([
     'scenario 1' => [['10'], '10'],
     'scenario 2' => [['10', '30', '40', '20'], '100'],
@@ -81,7 +85,7 @@ it('can return the average cost basis per unit of a collection of transactions',
 
     foreach ($costBases as $quantity => $costBasis) {
         $transactions[] = SharePoolingTokenAcquisition::factory()->make([
-            'quantity' => $quantity,
+            'quantity' => new Quantity($quantity),
             'costBasis' => new FiatAmount($costBasis, FiatCurrency::GBP),
         ]);
     }
@@ -129,9 +133,9 @@ it('can return a collection of acquisitions that happened on a specific day', fu
         SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
-    $transactions = $sharePoolingTransactions->AcquisitionsMadeOn(Localdate::parse($date));
+    $transactions = $sharePoolingTransactions->acquisitionsMadeOn(Localdate::parse($date));
 
-    expect($transactions)->toBeInstanceOf(SharePoolingTransactions::class);
+    expect($transactions)->toBeInstanceOf(SharePoolingTokenAcquisitions::class);
     expect($transactions->count())->toEqual($count);
 })->with([
     'scenario 1' => ['2015-10-21', 1],
@@ -152,7 +156,7 @@ it('can return a collection of disposals that happened on a specific day', funct
 
     $transactions = $sharePoolingTransactions->disposalsMadeOn(Localdate::parse($date));
 
-    expect($transactions)->toBeInstanceOf(SharePoolingTransactions::class);
+    expect($transactions)->toBeInstanceOf(SharePoolingTokenDisposals::class);
     expect($transactions->count())->toEqual($count);
 })->with([
     'scenario 1' => ['2015-10-21', 1],

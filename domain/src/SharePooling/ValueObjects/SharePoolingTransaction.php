@@ -5,6 +5,7 @@ namespace Domain\SharePooling\ValueObjects;
 use Brick\DateTime\LocalDate;
 use Domain\SharePooling\ValueObjects\Exceptions\SharePoolingTransactionException;
 use Domain\ValueObjects\FiatAmount;
+use Domain\ValueObjects\Quantity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stringable;
 
@@ -16,7 +17,7 @@ abstract class SharePoolingTransaction implements Stringable
 
     public function __construct(
         public readonly LocalDate $date,
-        public readonly string $quantity,
+        public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
     ) {
     }

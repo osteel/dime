@@ -4,6 +4,7 @@ namespace Domain\SharePooling\Exceptions;
 
 use Domain\Enums\FiatCurrency;
 use Domain\SharePooling\SharePoolingId;
+use Domain\ValueObjects\Quantity;
 use RuntimeException;
 
 final class SharePoolingException extends RuntimeException
@@ -41,8 +42,8 @@ final class SharePoolingException extends RuntimeException
 
     public static function insufficientQuantityAvailable(
         SharePoolingId $sharePoolingId,
-        string $disposalQuantity,
-        string $availableQuantity
+        Quantity $disposalQuantity,
+        Quantity $availableQuantity
     ): self {
         return new self(sprintf(
             'Tried to dispose of %s section 104 pool %s tokens but only %s are available',

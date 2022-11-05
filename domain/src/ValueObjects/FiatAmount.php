@@ -21,34 +21,38 @@ final class FiatAmount implements Stringable
     }
 
     /** @throws FiatAmountException */
-    public function plus(FiatAmount | string $operand): FiatAmount
+    public function plus(FiatAmount | Quantity | string $operand): FiatAmount
     {
         return new FiatAmount(Math::add($this->amount, $this->extractValue($operand)), $this->currency);
     }
 
     /** @throws FiatAmountException */
-    public function minus(FiatAmount | string $operand): FiatAmount
+    public function minus(FiatAmount | Quantity | string $operand): FiatAmount
     {
         return new FiatAmount(Math::sub($this->amount, $this->extractValue($operand)), $this->currency);
     }
 
     /** @throws FiatAmountException */
-    public function multipliedBy(FiatAmount | string $multiplier): FiatAmount
+    public function multipliedBy(FiatAmount | Quantity | string $multiplier): FiatAmount
     {
         return new FiatAmount(Math::mul($this->amount, $this->extractValue($multiplier)), $this->currency);
     }
 
     /** @throws FiatAmountException */
-    public function dividedBy(FiatAmount | string $divisor): FiatAmount
+    public function dividedBy(FiatAmount | Quantity | string $divisor): FiatAmount
     {
         return new FiatAmount(Math::div($this->amount, $this->extractValue($divisor)), $this->currency);
     }
 
     /** @throws FiatAmountException */
-    private function extractValue(FiatAmount | string $term): string
+    private function extractValue(FiatAmount | Quantity | string $term): string
     {
         if (is_string($term)) {
             return $term;
+        }
+
+        if ($term instanceof Quantity) {
+            return $term->quantity;
         }
 
         $this->assertCurrenciesMatch($this, $term);

@@ -14,7 +14,11 @@ final class Math
         return rtrim(rtrim($number, '0'), '.');
     }
 
-    /** @throws MathException */
+    /**
+     * Add operands and return the result.
+     *
+     * @throws MathException
+     */
     public static function add(string ...$operands): string
     {
         try {
@@ -28,7 +32,11 @@ final class Math
         }
     }
 
-    /** @throws MathException */
+    /**
+     * Subtract operands and return the result.
+     *
+     * @throws MathException
+     */
     public static function sub(string ...$operands): string
     {
         if (empty($initial = array_shift($operands))) {
@@ -46,7 +54,11 @@ final class Math
         }
     }
 
-    /** @throws MathException */
+    /**
+     * Multiply the multiplicand by the multiplier and return the result.
+     *
+     * @throws MathException
+     */
     public static function mul(string $multiplicand, string $multiplier): string
     {
         try {
@@ -56,7 +68,11 @@ final class Math
         }
     }
 
-    /** @throws MathException */
+    /**
+     * Divide the dividend by the divisor and return the result.
+     *
+     * @throws MathException
+     */
     public static function div(string $dividend, string $divisor): string
     {
         try {
@@ -66,7 +82,26 @@ final class Math
         }
     }
 
-    /** @throws MathException */
+    /**
+     * Whether the terms are equal.
+     *
+     * @throws MathException
+     */
+    public static function eq(string $term1, string $term2): bool
+    {
+        try {
+            $result = bccomp($term1, $term2, self::SCALE);
+            return $result === 0;
+        } catch (Throwable $exception) {
+            throw MathException::fromThrowable($exception);
+        }
+    }
+
+    /**
+     * Whether the first term is greater than (or equal to if the flag is true) the second term.
+     *
+     * @throws MathException
+     */
     public static function gt(string $term1, string $term2, bool $orEqual = false): bool
     {
         try {
@@ -77,13 +112,21 @@ final class Math
         }
     }
 
-    /** @throws MathException */
+    /**
+     * Whether the first term is greater than or equal to the second term.
+     *
+     * @throws MathException
+     */
     public static function gte(string $term1, string $term2): bool
     {
         return self::gt($term1, $term2, orEqual: true);
     }
 
-    /** @throws MathException */
+    /**
+     * Whether the first term is less than (or equal to if the flag is true) the second term.
+     *
+     * @throws MathException
+     */
     public static function lt(string $term1, string $term2, bool $orEqual = false): bool
     {
         try {
@@ -94,21 +137,33 @@ final class Math
         }
     }
 
-    /** @throws MathException */
+    /**
+     * Whether the first term is less than or equal to the second term.
+     *
+     * @throws MathException
+     */
     public static function lte(string $term1, string $term2): bool
     {
         return self::lt($term1, $term2, orEqual: true);
     }
 
-    /** @throws MathException */
-    public static function min(string $term1, string $term2): string
-    {
-        return self::lt($term1, $term2) ? $term1 : $term2;
-    }
-
-    /** @throws MathException */
+    /**
+     * Return the greatest term.
+     *
+     * @throws MathException
+     */
     public static function max(string $term1, string $term2): string
     {
         return self::gt($term1, $term2) ? $term1 : $term2;
+    }
+
+    /**
+     * Return the smallest term.
+     *
+     * @throws MathException
+     */
+    public static function min(string $term1, string $term2): string
+    {
+        return self::lt($term1, $term2) ? $term1 : $term2;
     }
 }

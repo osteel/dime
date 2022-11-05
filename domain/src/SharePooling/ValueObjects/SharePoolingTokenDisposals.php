@@ -3,8 +3,8 @@
 namespace Domain\SharePooling\ValueObjects;
 
 use ArrayIterator;
-use Domain\Services\Math\Math;
 use Domain\SharePooling\ValueObjects\Exceptions\SharePoolingTransactionException;
+use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
 use Traversable;
 
@@ -46,21 +46,26 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return $this;
     }
 
-    public function quantity(): string
+    public function quantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTokenDisposal $transaction) => Math::add($total, $transaction->quantity),
-            '0'
+            fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->quantity),
+            new Quantity('0')
         );
     }
 
-    public function sameDayQuantity(): string
+    public function sameDayQuantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTokenDisposal $transaction) => Math::add($total, $transaction->sameDayQuantity),
-            '0'
+            fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->sameDayQuantity),
+            new Quantity('0')
         );
+    }
+
+    public function hasQuantityAvailableForSameDayMatching(): bool
+    {
+        return $this->quantity()->isGreaterThan($this->sameDayQuantity());
     }
 }

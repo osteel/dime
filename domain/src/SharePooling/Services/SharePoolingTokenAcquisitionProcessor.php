@@ -2,47 +2,91 @@
 
 namespace Domain\SharePooling\Services;
 
-use Domain\Services\Math\Math;
-use Domain\SharePooling\Actions\AcquireSharePoolingToken;
+use Brick\DateTime\LocalDate;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposals;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
+use Domain\ValueObjects\Quantity;
 
 final class SharePoolingTokenAcquisitionProcessor
 {
     public static function getSharePoolingTokenDisposalsToRevert(
-        AcquireSharePoolingToken $action,
         SharePoolingTransactions $transactions,
+        LocalDate $date,
+        Quantity $availableSameDayQuantity,
     ): SharePoolingTokenDisposals {
-        $disposalsToReplay = SharePoolingTokenDisposals::make();
-        $remainingQuantity = $action->quantity;
+        $disposalsToRevert = SharePoolingTokenDisposals::make();
 
-        // Get same-day disposals
-        $sameDayDisposals = $transactions->disposalsMadeOn($action->date);
-        // Revert them if their quantity not matched with same-day acquisitions is less than their total quantity
-        if (Math::gt($sameDayDisposals->quantity(), $sameDayDisposals->sameDayQuantity())) {
-            $disposalsToReplay->add(...$sameDayDisposals);
-            $unmatchedQuantity = Math::sub($sameDayDisposals->quantity(), $sameDayDisposals->sameDayQuantity());
-            $remainingQuantity = Math::sub($remainingQuantity, Math::min($remainingQuantity, $unmatchedQuantity));
+        $availableSameDayQuantity = self::addSameDayDisposalsToRevert(
+            $disposalsToRevert,
+            $transactions,
+            $date,
+            $availableSameDayQuantity,
+        );
+
+        self::add30DayDisposalsToRevert($disposalsToRevert, $transactions, $date, $availableSameDayQuantity);
+
+        return $disposalsToRevert;
+    }
+
+    private static function addSameDayDisposalsToRevert(
+        SharePoolingTokenDisposals $disposalsToRevert,
+        SharePoolingTransactions $transactions,
+        LocalDate $date,
+        Quantity $availableSameDayQuantity,
+    ): Quantity {
+        if ($availableSameDayQuantity->isZero()) {
+            return $availableSameDayQuantity;
         }
 
-        if (Math::gt($remainingQuantity, '0')) {
-            // Go through disposals in the past 30 days
-            $past30DaysDisposals = $transactions->disposalsMadeBetween($action->date->minusDays(30), $action->date);
+        // Get same-day disposals
+        $sameDayDisposals = $transactions->disposalsMadeOn($date);
 
-            foreach ($past30DaysDisposals as $disposal) {
-                // Revert the ones whose quantities not matched with same-day acquisitions or within-30-day acquisitions are less than their total quantity
-                if (Math::gt($disposal->quantity, Math::add($disposal->sameDayQuantity, $disposal->thirtyDayQuantity))) {
-                    $disposalsToReplay->add($disposal);
-                    $unmatchedQuantity = Math::sub($disposal->quantity, Math::add($disposal->sameDayQuantity, $disposal->thirtyDayQuantity));
-                    $remainingQuantity = Math::sub($remainingQuantity, Math::min($remainingQuantity, $unmatchedQuantity));
-                    // Stop as soon as a disposal had its entire quantity covered by future acquisitions
-                    if (! Math::gt($remainingQuantity, '0')) {
-                        break;
-                    }
-                }
+        // Add them to the list only if part of their quantity is not matched with same-day acquisitions
+        if (! $sameDayDisposals->hasQuantityAvailableForSameDayMatching()) {
+            return $availableSameDayQuantity;
+        }
+
+        // As the average cost basis of same-day acquisitions is used to calculate the
+        // cost basis of the disposals, it's simpler to revert them all and start over
+        $disposalsToRevert->add(...$sameDayDisposals);
+
+        // Deduct what's left from the same-day quantity yet to be matched
+        $unmatchedQuantity = $sameDayDisposals->quantity()->minus($sameDayDisposals->sameDayQuantity());
+
+        return $availableSameDayQuantity->minus(Quantity::minimum($availableSameDayQuantity, $unmatchedQuantity));
+    }
+
+    private static function add30DayDisposalsToRevert(
+        SharePoolingTokenDisposals $disposalsToRevert,
+        SharePoolingTransactions $transactions,
+        LocalDate $date,
+        Quantity $availableSameDayQuantity,
+    ): Quantity {
+        if ($availableSameDayQuantity->isZero()) {
+            return $availableSameDayQuantity;
+        }
+
+        // Go through disposals of the past 30 days
+        $past30DaysDisposals = $transactions->disposalsMadeBetween($date->minusDays(30), $date);
+
+        foreach ($past30DaysDisposals as $disposal) {
+            // Revert the ones with quantity not matched with same-day acquisitions or
+            // acquisitions within 30 days, a.k.a disposals with section 104 quantity
+            if (! $disposal->hasSection104PoolQuantity()) {
+                continue;
+            }
+
+            $disposalsToRevert->add($disposal);
+
+            $quantityToApply = Quantity::minimum($availableSameDayQuantity, $disposal->section104PoolQuantity);
+            $availableSameDayQuantity = $availableSameDayQuantity->minus($quantityToApply);
+
+            // Stop as soon as a disposal had its entire quantity covered by future acquisitions
+            if ($availableSameDayQuantity->isZero()) {
+                break;
             }
         }
 
-        return $disposalsToReplay;
+        return $availableSameDayQuantity;
     }
 }

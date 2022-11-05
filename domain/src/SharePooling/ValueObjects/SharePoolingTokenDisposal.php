@@ -5,23 +5,29 @@ namespace Domain\SharePooling\ValueObjects;
 use Brick\DateTime\LocalDate;
 use Domain\Tests\SharePooling\Factories\ValueObjects\SharePoolingTokenDisposalFactory;
 use Domain\ValueObjects\FiatAmount;
+use Domain\ValueObjects\Quantity;
 
 final class SharePoolingTokenDisposal extends SharePoolingTransaction
 {
     public function __construct(
         public readonly LocalDate $date,
-        public readonly string $quantity,
+        public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
         public readonly FiatAmount $disposalProceeds,
-        public readonly string $sameDayQuantity,
-        public readonly string $thirtyDayQuantity,
-        public readonly string $section104PoolQuantity,
+        public readonly Quantity $sameDayQuantity,
+        public readonly Quantity $thirtyDayQuantity,
+        public readonly Quantity $section104PoolQuantity,
     ) {
     }
 
     protected static function newFactory(): SharePoolingTokenDisposalFactory
     {
         return SharePoolingTokenDisposalFactory::new();
+    }
+
+    public function hasSection104PoolQuantity(): bool
+    {
+        return $this->section104PoolQuantity->isGreaterThan('0');
     }
 
     public function __toString(): string

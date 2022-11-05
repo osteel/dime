@@ -4,8 +4,8 @@ namespace Domain\SharePooling\ValueObjects;
 
 use ArrayIterator;
 use Brick\DateTime\LocalDate;
-use Domain\Services\Math\Math;
 use Domain\SharePooling\ValueObjects\Exceptions\SharePoolingTransactionException;
+use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
 use Traversable;
 
@@ -74,25 +74,25 @@ final class SharePoolingTransactions implements IteratorAggregate
         return $this;
     }
 
-    public function quantity(): string
+    public function quantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingTokenAcquisition
-                ? Math::add($total, $transaction->quantity)
-                : Math::sub($total, $transaction->quantity),
-            '0'
+            fn (Quantity $total, SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingTokenAcquisition
+                ? $total->plus($transaction->quantity)
+                : $total->minus($transaction->quantity),
+            new Quantity('0'),
         );
     }
 
-    public function section104PoolQuantity(): string
+    public function section104PoolQuantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingTokenAcquisition
-                ? Math::add($total, $transaction->quantity)
-                : Math::sub($total, $transaction->quantity),
-            '0'
+            fn (Quantity $total, SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingTokenAcquisition
+                ? $total->plus($transaction->quantity)
+                : $total->minus($transaction->quantity),
+            new Quantity('0'),
         );
     }
 

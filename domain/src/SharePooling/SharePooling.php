@@ -12,7 +12,6 @@ use Domain\SharePooling\Exceptions\SharePoolingException;
 use Domain\SharePooling\Services\SharePoolingTokenDisposalProcessor;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
-use Domain\Services\Math\Math;
 use Domain\SharePooling\Services\SharePoolingTokenAcquisitionProcessor;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
@@ -44,8 +43,9 @@ final class SharePooling implements AggregateRoot
         }
 
         $disposalsToRevert = SharePoolingTokenAcquisitionProcessor::getSharePoolingTokenDisposalsToRevert(
-            $action,
             $this->transactions,
+            $action->date,
+            $action->quantity,
         );
 
         // Revert the disposals first
@@ -102,7 +102,7 @@ final class SharePooling implements AggregateRoot
 
         $availableQuantity = $this->transactions->quantity();
 
-        if (Math::gt($action->quantity, $availableQuantity)) {
+        if ($action->quantity->isGreaterThan($availableQuantity)) {
             throw SharePoolingException::insufficientQuantityAvailable(
                 sharePoolingId: $action->sharePoolingId,
                 disposalQuantity: $action->quantity,

@@ -1,0 +1,83 @@
+<?php
+
+namespace Domain\ValueObjects;
+
+use Domain\Services\Math\Math;
+use Stringable;
+
+final class Quantity implements Stringable
+{
+    public function __construct(public readonly string $quantity)
+    {
+    }
+
+    public static function maximum(Quantity | string $quantity1, Quantity | string $quantity2): Quantity
+    {
+        return $quantity1->isGreaterThan($quantity2) ? $quantity1 : $quantity2;
+    }
+
+    public static function minimum(Quantity | string $quantity1, Quantity | string $quantity2): Quantity
+    {
+        return $quantity1->isLessThan($quantity2) ? $quantity1 : $quantity2;
+    }
+
+    public function isZero(): bool
+    {
+        return Math::eq($this->quantity, '0');
+    }
+
+    public function isEqualTo(Quantity | string $quantity): bool
+    {
+        return Math::eq($this->quantity, $this->extractValue($quantity));
+    }
+
+    public function isGreaterThan(Quantity | string $quantity): bool
+    {
+        return Math::gt($this->quantity, $this->extractValue($quantity));
+    }
+
+    public function isGreaterThanOrEqualTo(Quantity | string $quantity): bool
+    {
+        return Math::gte($this->quantity, $this->extractValue($quantity));
+    }
+
+    public function isLessThan(Quantity | string $quantity): bool
+    {
+        return Math::lt($this->quantity, $this->extractValue($quantity));
+    }
+
+    public function isLessThanOrEqualTo(Quantity | string $quantity): bool
+    {
+        return Math::lte($this->quantity, $this->extractValue($quantity));
+    }
+
+    public function plus(Quantity | string $quantity): Quantity
+    {
+        return new Quantity(Math::add($this->quantity, $this->extractValue($quantity)));
+    }
+
+    public function minus(Quantity | string $quantity): Quantity
+    {
+        return new Quantity(Math::sub($this->quantity, $this->extractValue($quantity)));
+    }
+
+    public function multipliedBy(Quantity | string $quantity): Quantity
+    {
+        return new Quantity(Math::mul($this->quantity, $this->extractValue($quantity)));
+    }
+
+    public function dividedBy(Quantity | string $quantity): Quantity
+    {
+        return new Quantity(Math::div($this->quantity, $this->extractValue($quantity)));
+    }
+
+    private function extractValue(Quantity | string $quantity): string
+    {
+        return $quantity instanceof Quantity ? $quantity->quantity : $quantity;
+    }
+
+    public function __toString(): string
+    {
+        return $this->quantity;
+    }
+}

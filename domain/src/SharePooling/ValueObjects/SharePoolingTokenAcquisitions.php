@@ -3,8 +3,8 @@
 namespace Domain\SharePooling\ValueObjects;
 
 use ArrayIterator;
-use Domain\Services\Math\Math;
 use Domain\ValueObjects\FiatAmount;
+use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
 use Traversable;
 
@@ -32,21 +32,26 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         return empty($this->transactions);
     }
 
-    public function quantity(): string
+    public function count(): int
+    {
+        return count($this->transactions);
+    }
+
+    public function quantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTransaction $transaction) => Math::add($total, $transaction->quantity),
-            '0'
+            fn (Quantity $total, SharePoolingTransaction $transaction) => $total->plus($transaction->quantity),
+            new Quantity('0'),
         );
     }
 
-    public function section104PoolQuantity(): string
+    public function section104PoolQuantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTokenAcquisition $transaction) => Math::add($total, $transaction->section104PoolQuantity),
-            '0'
+            fn (Quantity $total, SharePoolingTokenAcquisition $transaction) => $total->plus($transaction->section104PoolQuantity),
+            new Quantity('0'),
         );
     }
 
@@ -64,8 +69,8 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
 
         $quantity = array_reduce(
             $this->transactions,
-            fn (string $total, SharePoolingTokenAcquisition $acquisition) => Math::add($total, $acquisition->quantity),
-            '0'
+            fn (Quantity $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->quantity),
+            new Quantity('0'),
         );
 
         return $costBasis->dividedBy($quantity);
@@ -90,8 +95,8 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
 
         $quantity = array_reduce(
             $section104PoolAcquisitions,
-            fn (string $total, SharePoolingTokenAcquisition $acquisition) => Math::add($total, $acquisition->section104PoolQuantity),
-            '0'
+            fn (Quantity $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->section104PoolQuantity),
+            new Quantity('0'),
         );
 
         return $costBasis->dividedBy($quantity);
