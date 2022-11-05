@@ -87,6 +87,8 @@ final class SharePooling implements AggregateRoot
 
     public function applySharePoolingTokenDisposalReverted(SharePoolingTokenDisposalReverted $event): void
     {
+        // @TODO should this put back the quantities previously deducted from the acquisitions the disposal was initially
+        // matched with? Or should it be done by SharePoolingTokenAcquisitionProcessor::addSameDayDisposalsToRevert?
     }
 
     /** @throws SharePoolingException */
@@ -111,8 +113,10 @@ final class SharePooling implements AggregateRoot
         }
 
         $sharePoolingTokenDisposal = SharePoolingTokenDisposalProcessor::process(
-            action: $action,
             transactions: $this->transactions->copy(),
+            date: $action->date,
+            quantity: $action->quantity,
+            disposalProceeds: $action->disposalProceeds,
         );
 
         $this->recordThat(new SharePoolingTokenDisposedOf(

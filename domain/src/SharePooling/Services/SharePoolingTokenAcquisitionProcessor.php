@@ -38,11 +38,10 @@ final class SharePoolingTokenAcquisitionProcessor
             return $availableSameDayQuantity;
         }
 
-        // Get same-day disposals
-        $sameDayDisposals = $transactions->disposalsMadeOn($date);
+        // Get same-day disposals with part of their quantity not matched with same-day acquisitions
+        $sameDayDisposals = $transactions->disposalsMadeOn($date)->withAvailableSameDayQuantity();
 
-        // Add them to the list only if part of their quantity is not matched with same-day acquisitions
-        if (! $sameDayDisposals->hasQuantityAvailableForSameDayMatching()) {
+        if ($sameDayDisposals->isEmpty()) {
             return $availableSameDayQuantity;
         }
 
@@ -66,16 +65,12 @@ final class SharePoolingTokenAcquisitionProcessor
             return $availableSameDayQuantity;
         }
 
-        // Go through disposals of the past 30 days
-        $past30DaysDisposals = $transactions->disposalsMadeBetween($date->minusDays(30), $date);
+        // Go through disposals of the past 30 days with quantity not matched with same-day acquisitions
+        // or acquisitions made within the next 30 days, a.k.a disposals with section 104 pool quantity
+        $past30DaysDisposals = $transactions->disposalsMadeBetween($date->minusDays(30), $date)
+            ->withSection104PoolQuantity();
 
         foreach ($past30DaysDisposals as $disposal) {
-            // Revert the ones with quantity not matched with same-day acquisitions or
-            // acquisitions within 30 days, a.k.a disposals with section 104 quantity
-            if (! $disposal->hasSection104PoolQuantity()) {
-                continue;
-            }
-
             $disposalsToRevert->add($disposal);
 
             $quantityToApply = Quantity::minimum($availableSameDayQuantity, $disposal->section104PoolQuantity);

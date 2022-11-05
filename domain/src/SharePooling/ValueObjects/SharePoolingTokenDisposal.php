@@ -25,6 +25,11 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
         return SharePoolingTokenDisposalFactory::new();
     }
 
+    public function hasAvailableSameDayQuantity(): bool
+    {
+        return $this->quantity->isGreaterThan($this->sameDayQuantity);
+    }
+
     public function hasSection104PoolQuantity(): bool
     {
         return $this->section104PoolQuantity->isGreaterThan('0');

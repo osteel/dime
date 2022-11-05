@@ -21,6 +21,11 @@ final class Quantity implements Stringable
         return $quantity1->isLessThan($quantity2) ? $quantity1 : $quantity2;
     }
 
+    public function copy(): Quantity
+    {
+        return new Quantity($this->quantity);
+    }
+
     public function isZero(): bool
     {
         return Math::eq($this->quantity, '0');

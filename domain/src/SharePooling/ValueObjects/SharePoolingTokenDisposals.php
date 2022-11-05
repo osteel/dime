@@ -27,6 +27,11 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return new ArrayIterator($this->transactions);
     }
 
+    public function isEmpty(): bool
+    {
+        return empty($this->transactions);
+    }
+
     public function count(): int
     {
         return count($this->transactions);
@@ -64,8 +69,23 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         );
     }
 
-    public function hasQuantityAvailableForSameDayMatching(): bool
+    public function withAvailableSameDayQuantity(): SharePoolingTokenDisposals
     {
-        return $this->quantity()->isGreaterThan($this->sameDayQuantity());
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenDisposal $transaction) => $transaction->hasAvailableSameDayQuantity(),
+        );
+
+        return self::make(...$transactions);
+    }
+
+    public function withSection104PoolQuantity(): SharePoolingTokenDisposals
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenDisposal $transaction) => $transaction->hasSection104PoolQuantity(),
+        );
+
+        return self::make(...$transactions);
     }
 }
