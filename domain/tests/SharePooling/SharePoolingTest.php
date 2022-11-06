@@ -128,8 +128,8 @@ it('can dispose of some section 104 pool tokens', function () {
             quantity: $disposeOfSharePoolingToken->quantity,
             costBasis: new FiatAmount('100', FiatCurrency::GBP),
             disposalProceeds: $disposeOfSharePoolingToken->disposalProceeds,
-            sameDayQuantity: new Quantity('0'),
-            thirtyDayQuantity: new Quantity('0'),
+            sameDayQuantity: Quantity::zero(),
+            thirtyDayQuantity: Quantity::zero(),
             section104PoolQuantity: $disposeOfSharePoolingToken->quantity,
         ))->setPosition(1),
     );
@@ -232,7 +232,7 @@ it('can dispose of some section 104 pool tokens on the same day they were acquir
             costBasis: new FiatAmount('200', FiatCurrency::GBP),
             disposalProceeds: $disposeOfSharePoolingToken->disposalProceeds,
             sameDayQuantity: new Quantity('100'),
-            thirtyDayQuantity: new Quantity('0'),
+            thirtyDayQuantity: Quantity::zero(),
             section104PoolQuantity: new Quantity('50'),
         ))->setPosition(2),
     );
@@ -260,8 +260,8 @@ it('can acquire some section 104 pool tokens within 30 days of their disposal', 
             quantity: new Quantity('50'),
             costBasis: new FiatAmount('50', FiatCurrency::GBP),
             disposalProceeds: new FiatAmount('75', FiatCurrency::GBP),
-            sameDayQuantity: new Quantity('0'),
-            thirtyDayQuantity: new Quantity('0'),
+            sameDayQuantity: Quantity::zero(),
+            thirtyDayQuantity: Quantity::zero(),
             section104PoolQuantity: new Quantity('50'),
         ),
     );
@@ -275,15 +275,13 @@ it('can acquire some section 104 pool tokens within 30 days of their disposal', 
 
     $sharePoolingTokenDisposalReverted = new SharePoolingTokenDisposalReverted(
         sharePoolingId: $acquireMoreSharePoolingToken->sharePoolingId,
-        sharePoolingTokenDisposal: (new SharePoolingTokenDisposal(
-            date: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->date,
-            quantity: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->quantity,
-            costBasis: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->costBasis,
-            disposalProceeds: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->disposalProceeds,
-            sameDayQuantity: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->sameDayQuantity,
-            thirtyDayQuantity: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->thirtyDayQuantity,
-            section104PoolQuantity: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->section104PoolQuantity,
-        ))->setPosition(1),
+        sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
+            ->copyFrom($someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal)
+            ->make([
+                'sameDayQuantity' => Quantity::zero(),
+                'thirtyDayQuantity' => Quantity::zero(),
+            ])
+            ->setPosition(1),
     );
 
     $moreSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
@@ -297,15 +295,15 @@ it('can acquire some section 104 pool tokens within 30 days of their disposal', 
 
     $correctedSharePoolingTokensDisposedOf = new SharePoolingTokenDisposedOf(
         sharePoolingId: $sharePoolingTokenDisposalReverted->sharePoolingId,
-        sharePoolingTokenDisposal: (new SharePoolingTokenDisposal(
-            date: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->date,
-            quantity: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->quantity,
-            costBasis: new FiatAmount('45', FiatCurrency::GBP),
-            disposalProceeds: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal->disposalProceeds,
-            sameDayQuantity: new Quantity('0'),
-            thirtyDayQuantity: new Quantity('25'),
-            section104PoolQuantity: new Quantity('25'),
-        ))->setPosition(3),
+        sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
+            ->copyFrom($someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal)
+            ->make([
+                'costBasis' => new FiatAmount('45', FiatCurrency::GBP),
+                'sameDayQuantity' => Quantity::zero(),
+                'thirtyDayQuantity' => new Quantity('25'),
+                'section104PoolQuantity' => new Quantity('25'),
+            ])
+            ->setPosition(1),
     );
 
     /** @var AggregateRootTestCase $this */

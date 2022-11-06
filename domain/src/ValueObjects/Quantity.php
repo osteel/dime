@@ -11,6 +11,11 @@ final class Quantity implements Stringable
     {
     }
 
+    public static function zero(): Quantity
+    {
+        return new self('0');
+    }
+
     public static function maximum(Quantity | string $quantity1, Quantity | string $quantity2): Quantity
     {
         return $quantity1->isGreaterThan($quantity2) ? $quantity1 : $quantity2;

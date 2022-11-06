@@ -17,6 +17,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
         public readonly Quantity $sameDayQuantity,
         public readonly Quantity $thirtyDayQuantity,
         public readonly Quantity $section104PoolQuantity,
+        protected readonly bool $reverted = false,
     ) {
     }
 
@@ -33,6 +34,23 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
     public function hasSection104PoolQuantity(): bool
     {
         return $this->section104PoolQuantity->isGreaterThan('0');
+    }
+
+    /**
+     * Return a copy of the disposal with reset quantities and marked as reverted.
+     */
+    public function copyAsReverted(): SharePoolingTokenDisposal
+    {
+        return (new SharePoolingTokenDisposal(
+            date: $this->date,
+            quantity: $this->quantity,
+            costBasis: $this->costBasis->nilAmount(),
+            disposalProceeds: $this->disposalProceeds,
+            sameDayQuantity: Quantity::zero(),
+            thirtyDayQuantity: Quantity::zero(),
+            section104PoolQuantity: $this->quantity,
+            reverted: true,
+        ))->setPosition($this->position);
     }
 
     public function __toString(): string

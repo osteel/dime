@@ -14,34 +14,39 @@ final class SharePoolingTokenDisposalProcessor
         SharePoolingTransactions $transactions,
         LocalDate $date,
         Quantity $quantity,
-        FiatAmount $disposalProceeds
+        FiatAmount $disposalProceeds,
+        ?int $position,
     ): SharePoolingTokenDisposal {
-        $costBasis = $disposalProceeds->nilAmount();
-        $remainingQuantity = new Quantity($quantity->quantity);
+        [
+            $costBasis,
+            $sameDayQuantity,
+            $thirtyDayQuantity,
+            $section104PoolSectionQuantity,
+        ] = self::computeDisposalProperties($transactions, $date, $quantity);
 
-        [$sameDayQuantity, $costBasis, $averageCostBasisPerUnit] = self::processSameDayAcquisitions($transactions, $date, $remainingQuantity, $costBasis);
-
-        $remainingQuantity = $remainingQuantity->minus($sameDayQuantity);
-
-        [$thirtyDayQuantity, $costBasis] = self::processAcquisitionsWithin30Days($transactions, $date, $remainingQuantity, $costBasis);
-
-        $remainingQuantity = $remainingQuantity->minus($thirtyDayQuantity);
-
-        // If there are still some disposed of tokens left
-        if ($remainingQuantity->isGreaterThan('0')) {
-            // Apply the section 104 pool's average cost basis per unit to the remainder
-            $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($remainingQuantity));
-        }
-
-        return new SharePoolingTokenDisposal(
+        $disposal = new SharePoolingTokenDisposal(
             date: $date,
             quantity: new Quantity($quantity->quantity),
             costBasis: $costBasis,
             disposalProceeds: $disposalProceeds,
             sameDayQuantity: $sameDayQuantity,
             thirtyDayQuantity: $thirtyDayQuantity,
-            section104PoolQuantity: $remainingQuantity,
+            section104PoolQuantity: $section104PoolSectionQuantity,
         );
+
+        // Disposals being replayed already have a position, in which case we restore
+        // that position to make sure the disposal is inserted back where it should
+        return is_null($position) ? $disposal : $disposal->setPosition($position);
+    }
+
+    private static function computeDisposalProperties(
+        SharePoolingTransactions $transactions,
+        LocalDate $date,
+        Quantity $remainingQuantity,
+    ): array {
+        $costBasis = $transactions->first()->costBasis->nilAmount();
+
+        return self::processSameDayAcquisitions($transactions, $date, $remainingQuantity, $costBasis);
     }
 
     private static function processSameDayAcquisitions(
@@ -50,27 +55,33 @@ final class SharePoolingTokenDisposalProcessor
         Quantity $remainingQuantity,
         FiatAmount $costBasis,
     ): array {
-        $nilAmount = $costBasis->nilAmount();
-
-        // Get acquisitions made before the disposal
-        $priorAcquisitions = $transactions->acquisitionsMadeBefore($date);
-        $averageCostBasisPerUnit = $priorAcquisitions->section104PoolAverageCostBasisPerUnit() ?? $nilAmount;
-
-        // Find out if the asset has been acquired on the same day
-        $sameDayAcquisitions = $transactions->acquisitionsMadeOn($date);
-        $sameDayQuantity = new Quantity('0');
-
-        // Get the average cost basis
-        if (is_null($sameDayAcquisitionsAverageCostBasis = $sameDayAcquisitions->averageCostBasisPerUnit())) {
-            return [$sameDayQuantity, $costBasis, $averageCostBasisPerUnit];
+        if ($remainingQuantity->isZero()) {
+            return [$costBasis, Quantity::zero(), Quantity::zero(), Quantity::zero()];
         }
 
-        // Apply this average cost basis to the disposed of asset, up to the quantity acquired that day
-        $quantityToApply = Quantity::minimum($sameDayAcquisitions->quantity(), $remainingQuantity);
-        $costBasis = $costBasis->plus($sameDayAcquisitionsAverageCostBasis->multipliedBy($quantityToApply));
+        // Get same-day acquisitions with some quantity not matched with same-day disposals yet
+        $sameDayAcquisitions = $transactions->acquisitionsMadeOn($date)->withAvailableSameDayQuantity();
+
+        if ($sameDayAcquisitions->isEmpty()) {
+            return self::processAcquisitionsWithin30Days(
+                $transactions,
+                $date,
+                $remainingQuantity,
+                $costBasis,
+                Quantity::zero(),
+            );
+        }
+
+        // Get the same-day average cost basis per unit
+        $sameDayAcquisitionsAverageCostBasisPerUnit = $sameDayAcquisitions->averageCostBasisPerUnit();
+
+        // Apply this average cost basis to the disposed of asset, up to the
+        // quantity acquired that day not yet matched with same-day disposals
+        $sameDayQuantity = Quantity::minimum($sameDayAcquisitions->availableSameDayQuantity(), $remainingQuantity);
+        $costBasis = $costBasis->plus($sameDayAcquisitionsAverageCostBasisPerUnit->multipliedBy($sameDayQuantity));
 
         // Deduct the applied quantity from the same-day acquisitions
-        $remainder = $quantityToApply;
+        $remainder = $sameDayQuantity;
         foreach ($sameDayAcquisitions as $acquisition) {
             $remainder = $acquisition->increaseSameDayQuantity($remainder);
             if ($remainder->isZero()) {
@@ -78,21 +89,15 @@ final class SharePoolingTokenDisposalProcessor
             }
         }
 
-        // If not all of the same-day quantity has been matched, use the rest to update the pool's average cost basis per unit
-        $remainingSameDayQuantity = $sameDayAcquisitions->quantity()->minus($quantityToApply);
+        $remainingQuantity = $remainingQuantity->minus($sameDayQuantity);
 
-        if ($remainingSameDayQuantity->isGreaterThan('0')) {
-            $averageCostBasisPerUnit = $sameDayAcquisitionsAverageCostBasis
-                ->multipliedBy($remainingSameDayQuantity)
-                // @TODO ??? I get that we recalculate the average cost basis per unit because we've updated the
-                // quantities of the acquisitions above, but surely we should multiply that amount by something?
-                ->plus($priorAcquisitions->section104PoolAverageCostBasisPerUnit() ?? $nilAmount)
-                ->dividedBy($remainingSameDayQuantity->plus($priorAcquisitions->section104PoolQuantity()));
-        }
-
-        $sameDayQuantity = $quantityToApply;
-
-        return [$sameDayQuantity, $costBasis, $averageCostBasisPerUnit];
+        return self::processAcquisitionsWithin30Days(
+            $transactions,
+            $date,
+            $remainingQuantity,
+            $costBasis,
+            $sameDayQuantity,
+        );
     }
 
     private static function processAcquisitionsWithin30Days(
@@ -100,12 +105,13 @@ final class SharePoolingTokenDisposalProcessor
         LocalDate $date,
         Quantity $remainingQuantity,
         FiatAmount $costBasis,
+        Quantity $sameDayQuantity,
     ): array {
-        $thirtyDayQuantity = new Quantity('0');
-
         if ($remainingQuantity->isZero()) {
-            return [$thirtyDayQuantity, $costBasis];
+            return [$costBasis, $sameDayQuantity, Quantity::zero(), Quantity::zero()];
         }
+
+        $thirtyDayQuantity = Quantity::zero();
 
         // Find out if the asset has been acquired in the next 30 days, keeping only the acquisitions
         // with remaining quantity after same-day disposals have been deducted
@@ -115,14 +121,12 @@ final class SharePoolingTokenDisposalProcessor
         foreach ($within30DaysAcquisitions as $acquisition) {
             // Apply the transaction's cost basis to the disposed of asset up to the acquired quantity
             $quantityToApply = Quantity::minimum($acquisition->section104PoolQuantity, $remainingQuantity);
-            // @TODO the quantity from disposals on the same day as the acquisition should be deducted
-            // from the latter... somehow, but shouldn't actually update the acquisition stored in
-            // the aggregate's transactions, because it's possible disposals of the same day as
-            // the acquisition still need to be replayed. E.g. it should work on a copy. Or
-            // should it? Should subsequent disposals be able to revert previous disposals
-            // as well, if they happen on the same day as an acquisition that was within
-            // 30 days of a previous disposal? Because if the 30-day quantities aren't
-            // deducted from the acquisitions now, when will they be?
+            // @TODO the quantity from disposals on the same day as the acquisition (that haven't been matched with
+            // an acquisition yet – the ones that were reverted, basically – use the `isReverted(): bool` method)
+            // should be deducted from the acquisition somehow, but shouldn't actually update the acquisition
+            // as stored in the aggregate's transactions, because these disposals are yet to be replayed.
+            // If the current disposal already has a position (i.e. it's being replayed), the disposal
+            // at that position should be ruled out from the acquisition's same-day disposals.
             $costBasis = $costBasis->plus($acquisition->averageCostBasisPerUnit()->multipliedBy($quantityToApply));
             $thirtyDayQuantity = $thirtyDayQuantity->plus($quantityToApply);
             $remainingQuantity = $remainingQuantity->minus($quantityToApply);
@@ -133,6 +137,41 @@ final class SharePoolingTokenDisposalProcessor
             }
         }
 
-        return [$thirtyDayQuantity, $costBasis];
+        return self::processSection104PoolAcquisitions(
+            $transactions,
+            $date,
+            $remainingQuantity,
+            $costBasis,
+            $sameDayQuantity,
+            $thirtyDayQuantity,
+        );
+    }
+
+    private static function processSection104PoolAcquisitions(
+        SharePoolingTransactions $transactions,
+        LocalDate $date,
+        Quantity $remainingQuantity,
+        FiatAmount $costBasis,
+        Quantity $sameDayQuantity,
+        Quantity $thirtyDayQuantity,
+    ): array {
+        if ($remainingQuantity->isZero()) {
+            return [$costBasis, $sameDayQuantity, $thirtyDayQuantity, Quantity::zero()];
+        }
+
+        // Get acquisitions made before or on the day of the disposal
+        $priorAcquisitions = $transactions->acquisitionsMadeBeforeOrOn($date);
+
+        if ($priorAcquisitions->isEmpty()) {
+            return $costBasis;
+        }
+
+        // Get the average cost basis per unit for the quantity that went to the section 104 pool
+        $averageCostBasisPerUnit = $priorAcquisitions->section104PoolAverageCostBasisPerUnit();
+
+        // Apply the section 104 pool's average cost basis per unit to the remainder
+        $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($remainingQuantity));
+
+        return [$costBasis, $sameDayQuantity, $thirtyDayQuantity, $remainingQuantity];
     }
 }

@@ -42,7 +42,7 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         return array_reduce(
             $this->transactions,
             fn (Quantity $total, SharePoolingTransaction $transaction) => $total->plus($transaction->quantity),
-            new Quantity('0'),
+            Quantity::zero(),
         );
     }
 
@@ -51,7 +51,16 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         return array_reduce(
             $this->transactions,
             fn (Quantity $total, SharePoolingTokenAcquisition $transaction) => $total->plus($transaction->section104PoolQuantity),
-            new Quantity('0'),
+            Quantity::zero(),
+        );
+    }
+
+    public function availableSameDayQuantity(): Quantity
+    {
+        return array_reduce(
+            $this->transactions,
+            fn (Quantity $total, SharePoolingTokenAcquisition $transaction) => $total->plus($transaction->availableSameDayQuantity()),
+            Quantity::zero(),
         );
     }
 
@@ -70,7 +79,7 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         $quantity = array_reduce(
             $this->transactions,
             fn (Quantity $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->quantity),
-            new Quantity('0'),
+            Quantity::zero(),
         );
 
         return $costBasis->dividedBy($quantity);
@@ -96,9 +105,19 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         $quantity = array_reduce(
             $section104PoolAcquisitions,
             fn (Quantity $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->section104PoolQuantity),
-            new Quantity('0'),
+            Quantity::zero(),
         );
 
         return $costBasis->dividedBy($quantity);
+    }
+
+    public function withAvailableSameDayQuantity(): SharePoolingTokenAcquisitions
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenAcquisition $transaction) => $transaction->hasAvailableSameDayQuantity(),
+        );
+
+        return self::make(...$transactions);
     }
 }

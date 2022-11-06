@@ -12,37 +12,36 @@ final class SharePoolingTokenAcquisitionProcessor
     public static function getSharePoolingTokenDisposalsToRevert(
         SharePoolingTransactions $transactions,
         LocalDate $date,
-        Quantity $availableSameDayQuantity,
+        Quantity $quantity,
+    ): SharePoolingTokenDisposals {
+        return self::getDisposalsToRevert($transactions, $date, $quantity);
+    }
+
+    private static function getDisposalsToRevert(
+        SharePoolingTransactions $transactions,
+        LocalDate $date,
+        Quantity $remainingQuantity,
     ): SharePoolingTokenDisposals {
         $disposalsToRevert = SharePoolingTokenDisposals::make();
 
-        $availableSameDayQuantity = self::addSameDayDisposalsToRevert(
-            $disposalsToRevert,
-            $transactions,
-            $date,
-            $availableSameDayQuantity,
-        );
-
-        self::add30DayDisposalsToRevert($disposalsToRevert, $transactions, $date, $availableSameDayQuantity);
-
-        return $disposalsToRevert;
+        return self::addSameDayDisposalsToRevert($disposalsToRevert, $transactions, $date, $remainingQuantity);
     }
 
     private static function addSameDayDisposalsToRevert(
         SharePoolingTokenDisposals $disposalsToRevert,
         SharePoolingTransactions $transactions,
         LocalDate $date,
-        Quantity $availableSameDayQuantity,
-    ): Quantity {
-        if ($availableSameDayQuantity->isZero()) {
-            return $availableSameDayQuantity;
+        Quantity $remainingQuantity,
+    ): SharePoolingTokenDisposals {
+        if ($remainingQuantity->isZero()) {
+            return $disposalsToRevert;
         }
 
         // Get same-day disposals with part of their quantity not matched with same-day acquisitions
         $sameDayDisposals = $transactions->disposalsMadeOn($date)->withAvailableSameDayQuantity();
 
         if ($sameDayDisposals->isEmpty()) {
-            return $availableSameDayQuantity;
+            return self::add30DayDisposalsToRevert($disposalsToRevert, $transactions, $date, $remainingQuantity);
         }
 
         // As the average cost basis of same-day acquisitions is used to calculate the
@@ -52,17 +51,19 @@ final class SharePoolingTokenAcquisitionProcessor
         // Deduct what's left from the same-day quantity yet to be matched
         $unmatchedQuantity = $sameDayDisposals->quantity()->minus($sameDayDisposals->sameDayQuantity());
 
-        return $availableSameDayQuantity->minus(Quantity::minimum($availableSameDayQuantity, $unmatchedQuantity));
+        $remainingQuantity = $remainingQuantity->minus(Quantity::minimum($remainingQuantity, $unmatchedQuantity));
+
+        return self::add30DayDisposalsToRevert($disposalsToRevert, $transactions, $date, $remainingQuantity);
     }
 
     private static function add30DayDisposalsToRevert(
         SharePoolingTokenDisposals $disposalsToRevert,
         SharePoolingTransactions $transactions,
         LocalDate $date,
-        Quantity $availableSameDayQuantity,
-    ): Quantity {
-        if ($availableSameDayQuantity->isZero()) {
-            return $availableSameDayQuantity;
+        Quantity $remainingQuantity,
+    ): SharePoolingTokenDisposals {
+        if ($remainingQuantity->isZero()) {
+            return $disposalsToRevert;
         }
 
         // Go through disposals of the past 30 days with quantity not matched with same-day acquisitions
@@ -73,15 +74,15 @@ final class SharePoolingTokenAcquisitionProcessor
         foreach ($past30DaysDisposals as $disposal) {
             $disposalsToRevert->add($disposal);
 
-            $quantityToApply = Quantity::minimum($availableSameDayQuantity, $disposal->section104PoolQuantity);
-            $availableSameDayQuantity = $availableSameDayQuantity->minus($quantityToApply);
+            $quantityToApply = Quantity::minimum($remainingQuantity, $disposal->section104PoolQuantity);
+            $remainingQuantity = $remainingQuantity->minus($quantityToApply);
 
             // Stop as soon as a disposal had its entire quantity covered by future acquisitions
-            if ($availableSameDayQuantity->isZero()) {
+            if ($remainingQuantity->isZero()) {
                 break;
             }
         }
 
-        return $availableSameDayQuantity;
+        return $disposalsToRevert;
     }
 }

@@ -42,4 +42,9 @@ abstract class SharePoolingTransaction implements Stringable
     {
         return $this->costBasis->dividedBy($this->quantity);
     }
+
+    public function isReverted(): bool
+    {
+        return $this instanceof SharePoolingTokenDisposal ? $this->reverted : false;
+    }
 }

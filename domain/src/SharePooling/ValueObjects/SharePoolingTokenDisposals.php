@@ -56,7 +56,7 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return array_reduce(
             $this->transactions,
             fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->quantity),
-            new Quantity('0')
+            Quantity::zero()
         );
     }
 
@@ -65,7 +65,7 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return array_reduce(
             $this->transactions,
             fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->sameDayQuantity),
-            new Quantity('0')
+            Quantity::zero()
         );
     }
 

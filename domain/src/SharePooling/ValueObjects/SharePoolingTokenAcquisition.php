@@ -18,8 +18,8 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
     ) {
-        $this->sameDayQuantity = new Quantity('0');
-        $this->thirtyDayQuantity = new Quantity('0');
+        $this->sameDayQuantity = Quantity::zero();
+        $this->thirtyDayQuantity = Quantity::zero();
         // Acquisitions always assume that the whole quantity goes to the section
         // 104 pool. It is subsequent disposals (or the disposals being replayed
         // after being reverted) that will update the acquisitions' quantities.
@@ -29,6 +29,16 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
     protected static function newFactory(): SharePoolingTokenAcquisitionFactory
     {
         return SharePoolingTokenAcquisitionFactory::new();
+    }
+
+    public function hasAvailableSameDayQuantity(): bool
+    {
+        return $this->quantity->isGreaterThan($this->sameDayQuantity);
+    }
+
+    public function availableSameDayQuantity(): Quantity
+    {
+        return $this->quantity->minus($this->sameDayQuantity);
     }
 
     public function hasSection104PoolQuantity(): bool
@@ -42,18 +52,26 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
     }
 
     /**
-     * Increase the same-day quantity and adjust the section 104 pool quantity accordingly.
+     * Increase the same-day quantity and adjust the 30-day and section 104 pool quantities accordingly.
      *
      * @return Quantity The remaining quantity
      */
     public function increaseSameDayQuantity(Quantity $quantity): Quantity
     {
-        $quantityToApply = Quantity::minimum($quantity, $this->section104PoolQuantity);
+        // Adjust same-day quantity
+        $quantityToAdd = Quantity::minimum($quantity, $this->availableSameDayQuantity());
+        $this->sameDayQuantity = $this->sameDayQuantity->plus($quantityToAdd);
 
-        $this->sameDayQuantity = $this->sameDayQuantity->plus($quantityToApply);
-        $this->section104PoolQuantity = $this->section104PoolQuantity->minus($quantityToApply);
+        // Adjust 30-day quantity
+        $quantityToDeduct = Quantity::minimum($quantityToAdd, $this->thirtyDayQuantity);
+        $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantityToDeduct);
 
-        return $quantity->minus($quantityToApply);
+        // Adjust section 104 pool quantity
+        $quantityToDeduct = $quantityToAdd->minus($quantityToDeduct);
+        $this->section104PoolQuantity = $this->section104PoolQuantity->minus($quantityToDeduct);
+
+        // Return remaining quantity
+        return $quantity->minus($quantityToAdd);
     }
 
     public function __toString(): string

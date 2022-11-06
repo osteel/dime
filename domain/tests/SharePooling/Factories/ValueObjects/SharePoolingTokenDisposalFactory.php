@@ -22,9 +22,22 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
             'quantity' => new Quantity('100'),
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
             'disposalProceeds' => new FiatAmount('100', FiatCurrency::GBP),
-            'sameDayQuantity' => new Quantity('0'),
-            'thirtyDayQuantity' => new Quantity('0'),
+            'sameDayQuantity' => Quantity::zero(),
+            'thirtyDayQuantity' => Quantity::zero(),
             'section104PoolQuantity' => new Quantity('100'),
         ];
+    }
+
+    public function copyFrom(SharePoolingTokenDisposal $transaction): static
+    {
+        return $this->state([
+            'date' => $transaction->date,
+            'quantity' => $transaction->quantity,
+            'costBasis' => $transaction->costBasis,
+            'disposalProceeds' => $transaction->disposalProceeds,
+            'sameDayQuantity' => $transaction->sameDayQuantity,
+            'thirtyDayQuantity' => $transaction->thirtyDayQuantity,
+            'section104PoolQuantity' => $transaction->section104PoolQuantity,
+        ]);
     }
 }

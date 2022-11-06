@@ -112,7 +112,7 @@ it('can return a collection of transactions that happened on a specific day', fu
         SharePoolingTokenDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
     );
 
-    $transactions = $sharePoolingTransactions->transactionsMadeOn(Localdate::parse($date));
+    $transactions = $sharePoolingTransactions->madeOn(Localdate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingTransactions::class);
     expect($transactions->count())->toEqual($count);
