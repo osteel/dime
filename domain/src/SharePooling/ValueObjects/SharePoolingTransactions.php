@@ -74,11 +74,11 @@ final class SharePoolingTransactions implements IteratorAggregate
         return $this;
     }
 
-    public function excludeReverted(): SharePoolingTransactions
+    public function processed(): SharePoolingTransactions
     {
         $transactions = array_filter(
             $this->transactions,
-            fn (SharePoolingTransaction $transaction) => $transaction->isReverted() === false,
+            fn (SharePoolingTransaction $transaction) => $transaction->processed,
         );
 
         return self::make(...$transactions);

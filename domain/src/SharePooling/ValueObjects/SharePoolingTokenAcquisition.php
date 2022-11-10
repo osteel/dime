@@ -12,6 +12,7 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
     public Quantity $sameDayQuantity;
     public Quantity $thirtyDayQuantity;
     public Quantity $section104PoolQuantity;
+    public readonly bool $processed;
 
     public function __construct(
         public readonly LocalDate $date,
@@ -24,6 +25,7 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         // 104 pool. It is subsequent disposals (or the disposals being replayed
         // after being reverted) that will update the acquisitions' quantities.
         $this->section104PoolQuantity = new Quantity($quantity->quantity);
+        $this->processed = true;
     }
 
     protected static function newFactory(): SharePoolingTokenAcquisitionFactory

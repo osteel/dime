@@ -90,7 +90,7 @@ final class SharePooling implements AggregateRoot
         // Replace the disposal in the array with the same disposal, but with reset quantities. This
         // way, when several disposals are being replayed, a disposal won't be matched with future
         // acquisitions within the next 30 days if these acquisitions have disposals on the same day
-        $this->transactions->add($event->sharePoolingTokenDisposal->copyAsReverted());
+        $this->transactions->add($event->sharePoolingTokenDisposal->copyAsUnprocessed());
 
         // @TODO also restore the quantities previously deducted from the acquisitions that the disposal was initially
         // matched with. Should probably use a method from SharePoolingTokenDisposalProcessor. Is it possible to do
@@ -111,7 +111,7 @@ final class SharePooling implements AggregateRoot
         // We check the absolute available quantity up to and including the disposal's
         // date, excluding potential reverted disposals made later on that day
         $availableQuantity = $this->transactions->madeBeforeOrOn($action->date)
-            ->excludeReverted()
+            ->processed()
             ->quantity();
 
         if ($action->quantity->isGreaterThan($availableQuantity)) {
@@ -153,7 +153,7 @@ final class SharePooling implements AggregateRoot
             ));
         }*/
 
-        // @TODO add the current disposal to the transactions, as reverted, so previous disposals
+        // @TODO add the current disposal to the transactions as unprocessed so previous disposals
         // don't try to match their 30-day quantity with the disposal's same-day acquisitions
         /*$this->transactions->add($disposal = new SharePoolingTokenDisposal(
             date: $action->date,
@@ -163,7 +163,7 @@ final class SharePooling implements AggregateRoot
             sameDayQuantity: Quantity::zero(),
             thirtyDayQuantity: Quantity::zero(),
             section104PoolQuantity: $action->quantity,
-            reverted: true,
+            processed: false,
         ));*/
 
         // @TODO And replay them here, adding the current disposal to the end

@@ -40,4 +40,13 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
             'section104PoolQuantity' => $transaction->section104PoolQuantity,
         ]);
     }
+
+    public function revert(SharePoolingTokenDisposal $transaction): static
+    {
+        return $this->copyFrom($transaction)->state([
+            'sameDayQuantity' => Quantity::zero(),
+            'thirtyDayQuantity' => Quantity::zero(),
+            'section104PoolQuantity' => $transaction->quantity,
+        ]);
+    }
 }

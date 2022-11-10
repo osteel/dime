@@ -17,7 +17,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
         public readonly Quantity $sameDayQuantity,
         public readonly Quantity $thirtyDayQuantity,
         public readonly Quantity $section104PoolQuantity,
-        protected readonly bool $reverted = false,
+        public readonly bool $processed = true,
     ) {
     }
 
@@ -37,9 +37,9 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
     }
 
     /**
-     * Return a copy of the disposal with reset quantities and marked as reverted.
+     * Return a copy of the disposal with reset quantities and marked as unprocessed.
      */
-    public function copyAsReverted(): SharePoolingTokenDisposal
+    public function copyAsUnprocessed(): SharePoolingTokenDisposal
     {
         return (new SharePoolingTokenDisposal(
             date: $this->date,
@@ -49,7 +49,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
             sameDayQuantity: Quantity::zero(),
             thirtyDayQuantity: Quantity::zero(),
             section104PoolQuantity: $this->quantity,
-            reverted: true,
+            processed: false,
         ))->setPosition($this->position);
     }
 
