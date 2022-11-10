@@ -40,7 +40,7 @@ final class SharePoolingException extends RuntimeException
         ));
     }
 
-    public static function insufficientQuantityAvailable(
+    public static function insufficientQuantity(
         SharePoolingId $sharePoolingId,
         Quantity $disposalQuantity,
         Quantity $availableQuantity

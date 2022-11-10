@@ -43,6 +43,11 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         return $this->quantity->minus($this->sameDayQuantity);
     }
 
+    public function has30DayQuantity(): bool
+    {
+        return $this->thirtyDayQuantity->isGreaterThan('0');
+    }
+
     public function hasSection104PoolQuantity(): bool
     {
         return $this->section104PoolQuantity->isGreaterThan('0');

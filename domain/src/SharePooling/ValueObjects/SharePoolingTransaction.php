@@ -11,6 +11,7 @@ abstract class SharePoolingTransaction implements Stringable
 {
     use HasFactory;
 
+    public readonly bool $processed;
     protected ?int $position = null;
 
     public function setPosition(int $position): static

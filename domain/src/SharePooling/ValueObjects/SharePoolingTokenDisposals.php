@@ -79,6 +79,16 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return self::make(...$transactions);
     }
 
+    public function with30DayQuantity(): SharePoolingTokenDisposals
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenDisposal $transaction) => $transaction->has30DayQuantity(),
+        );
+
+        return self::make(...$transactions);
+    }
+
     public function withSection104PoolQuantity(): SharePoolingTokenDisposals
     {
         $transactions = array_filter(

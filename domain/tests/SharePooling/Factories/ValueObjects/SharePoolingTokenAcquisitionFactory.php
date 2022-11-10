@@ -23,4 +23,13 @@ class SharePoolingTokenAcquisitionFactory extends PlainObjectFactory
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
         ];
     }
+
+    public function copyFrom(SharePoolingTokenAcquisition $transaction): static
+    {
+        return $this->state([
+            'date' => $transaction->date,
+            'quantity' => $transaction->quantity,
+            'costBasis' => $transaction->costBasis,
+        ]);
+    }
 }

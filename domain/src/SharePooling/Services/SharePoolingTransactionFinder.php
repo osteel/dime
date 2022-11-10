@@ -7,24 +7,16 @@ use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposals;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\ValueObjects\Quantity;
 
-final class SharePoolingTokenAcquisitionProcessor
+final class SharePoolingTransactionFinder
 {
-    public static function getSharePoolingTokenDisposalsToRevert(
+    public static function getDisposalsToRevertAfterAcquisition(
         SharePoolingTransactions $transactions,
         LocalDate $date,
         Quantity $quantity,
     ): SharePoolingTokenDisposals {
-        return self::getDisposalsToRevert($transactions, $date, $quantity);
-    }
-
-    private static function getDisposalsToRevert(
-        SharePoolingTransactions $transactions,
-        LocalDate $date,
-        Quantity $remainingQuantity,
-    ): SharePoolingTokenDisposals {
         $disposalsToRevert = SharePoolingTokenDisposals::make();
 
-        return self::addSameDayDisposalsToRevert($disposalsToRevert, $transactions, $date, $remainingQuantity);
+        return self::addSameDayDisposalsToRevert($disposalsToRevert, $transactions, $date, $quantity);
     }
 
     private static function addSameDayDisposalsToRevert(
@@ -74,7 +66,7 @@ final class SharePoolingTokenAcquisitionProcessor
         foreach ($past30DaysDisposals as $disposal) {
             $disposalsToRevert->add($disposal);
 
-            $quantityToApply = Quantity::minimum($remainingQuantity, $disposal->section104PoolQuantity);
+            $quantityToApply = Quantity::minimum($remainingQuantity, $disposal->getSection104PoolQuantity());
             $remainingQuantity = $remainingQuantity->minus($quantityToApply);
 
             // Stop as soon as a disposal had its entire quantity covered by future acquisitions

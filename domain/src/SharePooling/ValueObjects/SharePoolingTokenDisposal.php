@@ -14,9 +14,8 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
         public readonly FiatAmount $disposalProceeds,
-        public readonly Quantity $sameDayQuantity,
-        public readonly Quantity $thirtyDayQuantity,
-        public readonly Quantity $section104PoolQuantity,
+        public readonly QuantityBreakdown $sameDayQuantity,
+        public readonly QuantityBreakdown $thirtyDayQuantity,
         public readonly bool $processed = true,
     ) {
     }
@@ -28,12 +27,26 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
 
     public function hasAvailableSameDayQuantity(): bool
     {
-        return $this->quantity->isGreaterThan($this->sameDayQuantity);
+        return $this->quantity->isGreaterThan($this->sameDayQuantity->getQuantity());
+    }
+
+    public function has30DayQuantity(): bool
+    {
+        return $this->thirtyDayQuantity->getQuantity()->isGreaterThan('0');
     }
 
     public function hasSection104PoolQuantity(): bool
     {
-        return $this->section104PoolQuantity->isGreaterThan('0');
+        return $this->quantity->isGreaterThan(
+            $this->sameDayQuantity->getQuantity()->plus($this->thirtyDayQuantity->getQuantity()),
+        );
+    }
+
+    public function getSection104PoolQuantity(): Quantity
+    {
+        return $this->quantity->minus(
+            $this->sameDayQuantity->getQuantity()->plus($this->thirtyDayQuantity->getQuantity()),
+        );
     }
 
     /**
@@ -46,9 +59,8 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
             quantity: $this->quantity,
             costBasis: $this->costBasis->nilAmount(),
             disposalProceeds: $this->disposalProceeds,
-            sameDayQuantity: Quantity::zero(),
-            thirtyDayQuantity: Quantity::zero(),
-            section104PoolQuantity: $this->quantity,
+            sameDayQuantity: new QuantityBreakdown(),
+            thirtyDayQuantity: new QuantityBreakdown(),
             processed: false,
         ))->setPosition($this->position);
     }

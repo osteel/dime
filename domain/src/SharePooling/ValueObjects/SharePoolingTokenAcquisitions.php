@@ -120,4 +120,24 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
 
         return self::make(...$transactions);
     }
+
+    public function with30DayQuantity(): SharePoolingTokenAcquisitions
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenAcquisition $transaction) => $transaction->has30DayQuantity(),
+        );
+
+        return self::make(...$transactions);
+    }
+
+    public function upToTransaction(SharePoolingTokenAcquisition $acquisition): SharePoolingTokenAcquisitions
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenAcquisition $transaction) => $transaction->getPosition() < $acquisition->getPosition(),
+        );
+
+        return self::make(...$transactions);
+    }
 }
