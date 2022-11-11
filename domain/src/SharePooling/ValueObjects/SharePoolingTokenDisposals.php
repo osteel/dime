@@ -51,20 +51,21 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return $this;
     }
 
+    public function unprocessed(): SharePoolingTokenDisposals
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenDisposal $transaction) => ! $transaction->isProcessed(),
+        );
+
+        return self::make(...$transactions);
+    }
+
     public function quantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
             fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->quantity),
-            Quantity::zero()
-        );
-    }
-
-    public function sameDayQuantity(): Quantity
-    {
-        return array_reduce(
-            $this->transactions,
-            fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->sameDayQuantity),
             Quantity::zero()
         );
     }
@@ -79,11 +80,39 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return self::make(...$transactions);
     }
 
-    public function with30DayQuantity(): SharePoolingTokenDisposals
+    public function availableSameDayQuantity(): Quantity
+    {
+        return array_reduce(
+            $this->transactions,
+            fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->availableSameDayQuantity()),
+            Quantity::zero(),
+        );
+    }
+
+    public function withAvailableThirtyDayQuantity(): SharePoolingTokenDisposals
     {
         $transactions = array_filter(
             $this->transactions,
-            fn (SharePoolingTokenDisposal $transaction) => $transaction->has30DayQuantity(),
+            fn (SharePoolingTokenDisposal $transaction) => $transaction->hasAvailableThirtyDayQuantity(),
+        );
+
+        return self::make(...$transactions);
+    }
+
+    public function availableThirtyDayQuantity(): Quantity
+    {
+        return array_reduce(
+            $this->transactions,
+            fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->availableThirtyDayQuantity()),
+            Quantity::zero(),
+        );
+    }
+
+    public function withThirtyDayQuantity(): SharePoolingTokenDisposals
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenDisposal $transaction) => $transaction->hasThirtyDayQuantity(),
         );
 
         return self::make(...$transactions);

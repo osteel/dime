@@ -51,6 +51,8 @@ it('can make a copy of a collection of transactions', function () {
 
     expect($copy)->not->toBe($sharePoolingTransactions);
     expect($copy->count())->toBe(1);
+    expect($copy->first())->not->toBe($transaction);
+    expect($copy->first())->toEqual($transaction);
 });
 
 it('can add a transaction to a collection of transactions', function () {

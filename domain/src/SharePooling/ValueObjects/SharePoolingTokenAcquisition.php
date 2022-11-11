@@ -9,23 +9,15 @@ use Domain\ValueObjects\Quantity;
 
 final class SharePoolingTokenAcquisition extends SharePoolingTransaction
 {
-    public Quantity $sameDayQuantity;
-    public Quantity $thirtyDayQuantity;
-    public Quantity $section104PoolQuantity;
-    public readonly bool $processed;
-
     public function __construct(
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
+        private ?Quantity $sameDayQuantity = null,
+        private ?Quantity $thirtyDayQuantity = null,
     ) {
-        $this->sameDayQuantity = Quantity::zero();
-        $this->thirtyDayQuantity = Quantity::zero();
-        // Acquisitions always assume that the whole quantity goes to the section
-        // 104 pool. It is subsequent disposals (or the disposals being replayed
-        // after being reverted) that will update the acquisitions' quantities.
-        $this->section104PoolQuantity = new Quantity($quantity->quantity);
-        $this->processed = true;
+        $this->sameDayQuantity = $sameDayQuantity ?? Quantity::zero();
+        $this->thirtyDayQuantity = $thirtyDayQuantity ?? Quantity::zero();
     }
 
     protected static function newFactory(): SharePoolingTokenAcquisitionFactory
@@ -33,9 +25,50 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         return SharePoolingTokenAcquisitionFactory::new();
     }
 
+    public function copy(): static
+    {
+        return (new self(
+            $this->date,
+            $this->quantity,
+            $this->costBasis,
+            $this->sameDayQuantity,
+            $this->thirtyDayQuantity,
+        ))->setPosition($this->position);
+    }
+
+    public function hasSameDayQuantity(): bool
+    {
+        return $this->sameDayQuantity->isGreaterThan('0');
+    }
+
+    public function sameDayQuantity(): Quantity
+    {
+        return $this->sameDayQuantity;
+    }
+
+    public function hasThirtyDayQuantity(): bool
+    {
+        return $this->thirtyDayQuantity->isGreaterThan('0');
+    }
+
+    public function thirtyDayQuantity(): Quantity
+    {
+        return $this->thirtyDayQuantity;
+    }
+
+    public function hasSection104PoolQuantity(): bool
+    {
+        return $this->section104PoolQuantity()->isGreaterThan('0');
+    }
+
+    public function section104PoolQuantity(): Quantity
+    {
+        return $this->quantity->minus($this->sameDayQuantity->plus($this->thirtyDayQuantity));
+    }
+
     public function hasAvailableSameDayQuantity(): bool
     {
-        return $this->quantity->isGreaterThan($this->sameDayQuantity);
+        return $this->availableSameDayQuantity()->isGreaterThan('0');
     }
 
     public function availableSameDayQuantity(): Quantity
@@ -43,23 +76,26 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         return $this->quantity->minus($this->sameDayQuantity);
     }
 
-    public function has30DayQuantity(): bool
+    public function hasAvailableThirtyDayQuantity(): bool
     {
-        return $this->thirtyDayQuantity->isGreaterThan('0');
+        return $this->availableThirtyDayQuantity()->isGreaterThan('0');
     }
 
-    public function hasSection104PoolQuantity(): bool
+    public function availableThirtyDayQuantity(): Quantity
     {
-        return $this->section104PoolQuantity->isGreaterThan('0');
+        // Same-day quantity always gets priority, and it is assumed that the existing
+        // 30-day quantity has already been matched with older disposals. That leaves
+        // us with the current section 104 pool quantity, which is what we return
+        return $this->section104PoolQuantity();
     }
 
     public function section104PoolCostBasis(): FiatAmount
     {
-        return $this->costBasis->dividedBy($this->quantity)->multipliedBy($this->section104PoolQuantity);
+        return $this->costBasis->dividedBy($this->quantity)->multipliedBy($this->section104PoolQuantity());
     }
 
     /**
-     * Increase the same-day quantity and adjust the 30-day and section 104 pool quantities accordingly.
+     * Increase the same-day quantity and adjust the 30-day quantity accordingly.
      *
      * @return Quantity The remaining quantity
      */
@@ -73,12 +109,50 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         $quantityToDeduct = Quantity::minimum($quantityToAdd, $this->thirtyDayQuantity);
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantityToDeduct);
 
-        // Adjust section 104 pool quantity
-        $quantityToDeduct = $quantityToAdd->minus($quantityToDeduct);
-        $this->section104PoolQuantity = $this->section104PoolQuantity->minus($quantityToDeduct);
+        // Return remaining quantity
+        return $quantity->minus($quantityToAdd);
+    }
+
+    public function decreaseSameDayQuantity(Quantity $quantity): void
+    {
+        if ($quantity->isGreaterThan($this->sameDayQuantity)) {
+            // @TODO move to proper exception
+            throw new \Exception(sprintf(
+                'Cannot decrease same-day quantity by %s: only %s available',
+                $quantity,
+                $this->sameDayQuantity,
+            ));
+        }
+
+        $this->sameDayQuantity = $this->sameDayQuantity->minus(($quantity));
+    }
+
+    /**
+     * Increase the 30-day quantity.
+     *
+     * @return Quantity The remaining quantity
+     */
+    public function increaseThirtyDayQuantity(Quantity $quantity): Quantity
+    {
+        $quantityToAdd = Quantity::minimum($quantity, $this->availableThirtyDayQuantity());
+        $this->thirtyDayQuantity = $this->thirtyDayQuantity->plus($quantityToAdd);
 
         // Return remaining quantity
         return $quantity->minus($quantityToAdd);
+    }
+
+    public function decreaseThirtyDayQuantity(Quantity $quantity): void
+    {
+        if ($quantity->isGreaterThan($this->thirtyDayQuantity)) {
+            // @TODO move to proper exception
+            throw new \Exception(sprintf(
+                'Cannot decrease 30-day quantity by %s: only %s available',
+                $quantity,
+                $this->thirtyDayQuantity,
+            ));
+        }
+
+        $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus(($quantity));
     }
 
     public function __toString(): string

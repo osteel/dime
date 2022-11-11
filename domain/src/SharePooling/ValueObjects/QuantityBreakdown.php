@@ -19,15 +19,30 @@ final class QuantityBreakdown
         );
     }
 
-    public function getQuantity(): Quantity
+    public function copy(): QuantityBreakdown
+    {
+        return new self($this->breakdown);
+    }
+
+    public function quantity(): Quantity
     {
         return $this->quantity;
     }
 
     /** @throws QuantityBreakdownException */
-    public function assignQuantity(Quantity $quantity, SharePoolingTransaction $transaction): self
+    public function quantityFor(SharePoolingTokenAcquisition $transaction): Quantity
     {
-        if (! $transaction->processed || is_null($transaction->getPosition())) {
+        if (is_null($transaction->getPosition())) {
+            throw QuantityBreakdownException::unassignableTransaction($transaction);
+        }
+
+        return $this->breakdown[$transaction->getPosition()] ?? Quantity::zero();
+    }
+
+    /** @throws QuantityBreakdownException */
+    public function assignQuantity(Quantity $quantity, SharePoolingTokenAcquisition $transaction): self
+    {
+        if (! $transaction->isProcessed() || is_null($transaction->getPosition())) {
             throw QuantityBreakdownException::unassignableTransaction($transaction);
         }
 
@@ -39,8 +54,8 @@ final class QuantityBreakdown
         return $this;
     }
 
-    public function copy(): QuantityBreakdown
+    public function positions(): array
     {
-        return new self($this->breakdown);
+        return array_keys($this->breakdown);
     }
 }

@@ -11,10 +11,12 @@ abstract class SharePoolingTransaction implements Stringable
 {
     use HasFactory;
 
-    public readonly bool $processed;
+    protected bool $processed;
     protected ?int $position = null;
 
-    public function setPosition(int $position): static
+    abstract public function copy(): static;
+
+    public function setPosition(?int $position = null): static
     {
         if (! is_null($this->position)) {
             throw SharePoolingTransactionException::positionAlreadySet($this, $position);
@@ -28,6 +30,11 @@ abstract class SharePoolingTransaction implements Stringable
     public function getPosition(): ?int
     {
         return $this->position;
+    }
+
+    public function isProcessed(): bool
+    {
+        return $this instanceof SharePoolingTokenAcquisition ? true : $this->processed;
     }
 
     public function averageCostBasisPerUnit(): ?FiatAmount

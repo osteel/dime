@@ -37,7 +37,10 @@ final class SharePoolingTransactions implements IteratorAggregate
 
     public function copy(): SharePoolingTransactions
     {
-        return new self($this->transactions);
+        return new self(array_map(
+            fn (SharePoolingTransaction $transation) => $transation->copy(),
+            $this->transactions,
+        ));
     }
 
     public function isEmpty(): bool
@@ -55,9 +58,9 @@ final class SharePoolingTransactions implements IteratorAggregate
         return $this->transactions[0] ?? null;
     }
 
-    public function reverse(): SharePoolingTransactions
+    public function get(int $position): ?SharePoolingTransaction
     {
-        return new self(array_reverse($this->transactions));
+        return $this->transactions[$position] ?? null;
     }
 
     public function add(SharePoolingTransaction ...$transactions): self
@@ -78,7 +81,7 @@ final class SharePoolingTransactions implements IteratorAggregate
     {
         $transactions = array_filter(
             $this->transactions,
-            fn (SharePoolingTransaction $transaction) => $transaction->processed,
+            fn (SharePoolingTransaction $transaction) => $transaction->isProcessed(),
         );
 
         return self::make(...$transactions);

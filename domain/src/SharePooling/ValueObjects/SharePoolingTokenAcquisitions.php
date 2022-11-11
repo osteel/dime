@@ -27,6 +27,14 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         return new ArrayIterator($this->transactions);
     }
 
+    public function copy(): SharePoolingTokenAcquisitions
+    {
+        return new self(array_map(
+            fn (SharePoolingTokenAcquisition $transation) => $transation->copy(),
+            $this->transactions,
+        ));
+    }
+
     public function isEmpty(): bool
     {
         return empty($this->transactions);
@@ -46,13 +54,58 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         );
     }
 
+    public function costBasis(): ?FiatAmount
+    {
+        if ($this->isEmpty()) {
+            return null;
+        }
+
+        return array_reduce(
+            $this->transactions,
+            fn (FiatAmount $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->costBasis),
+            $this->transactions[0]->costBasis->nilAmount(),
+        );
+    }
+
+    public function averageCostBasisPerUnit(): ?FiatAmount
+    {
+        return $this->costBasis()?->dividedBy($this->quantity());
+    }
+
     public function section104PoolQuantity(): Quantity
     {
         return array_reduce(
             $this->transactions,
-            fn (Quantity $total, SharePoolingTokenAcquisition $transaction) => $total->plus($transaction->section104PoolQuantity),
+            fn (Quantity $total, SharePoolingTokenAcquisition $transaction) => $total->plus($transaction->section104PoolQuantity()),
             Quantity::zero(),
         );
+    }
+
+    public function section104PoolCostBasis(): ?FiatAmount
+    {
+        if ($this->isEmpty()) {
+            return null;
+        }
+
+        $section104PoolAcquisitions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenAcquisition $transaction) => $transaction->hasSection104PoolQuantity(),
+        );
+
+        if (empty($section104PoolAcquisitions)) {
+            $this->transactions[0]->costBasis->nilAmount();
+        }
+
+        return array_reduce(
+            $section104PoolAcquisitions,
+            fn (FiatAmount $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->costBasis),
+            $this->transactions[0]->costBasis->nilAmount(),
+        );
+    }
+
+    public function averageSection104PoolCostBasisPerUnit(): ?FiatAmount
+    {
+        return $this->section104PoolCostBasis()?->dividedBy($this->section104PoolQuantity());
     }
 
     public function availableSameDayQuantity(): Quantity
@@ -62,53 +115,6 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
             fn (Quantity $total, SharePoolingTokenAcquisition $transaction) => $total->plus($transaction->availableSameDayQuantity()),
             Quantity::zero(),
         );
-    }
-
-    public function averageCostBasisPerUnit(): ?FiatAmount
-    {
-        if ($this->isEmpty()) {
-            return null;
-        }
-
-        $costBasis = array_reduce(
-            $this->transactions,
-            fn (FiatAmount $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->costBasis),
-            $this->transactions[0]->costBasis->nilAmount(),
-        );
-
-        $quantity = array_reduce(
-            $this->transactions,
-            fn (Quantity $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->quantity),
-            Quantity::zero(),
-        );
-
-        return $costBasis->dividedBy($quantity);
-    }
-
-    public function section104PoolAverageCostBasisPerUnit(): ?FiatAmount
-    {
-        $section104PoolAcquisitions = array_filter(
-            $this->transactions,
-            fn (SharePoolingTokenAcquisition $transaction) => $transaction->hasSection104PoolQuantity(),
-        );
-
-        if (empty($section104PoolAcquisitions)) {
-            return null;
-        }
-
-        $costBasis = array_reduce(
-            $section104PoolAcquisitions,
-            fn (FiatAmount $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->section104PoolCostBasis()),
-            $section104PoolAcquisitions[0]->costBasis->nilAmount(),
-        );
-
-        $quantity = array_reduce(
-            $section104PoolAcquisitions,
-            fn (Quantity $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->section104PoolQuantity),
-            Quantity::zero(),
-        );
-
-        return $costBasis->dividedBy($quantity);
     }
 
     public function withAvailableSameDayQuantity(): SharePoolingTokenAcquisitions
@@ -121,11 +127,21 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         return self::make(...$transactions);
     }
 
-    public function with30DayQuantity(): SharePoolingTokenAcquisitions
+    public function withAvailableThirtyDayQuantity(): SharePoolingTokenAcquisitions
     {
         $transactions = array_filter(
             $this->transactions,
-            fn (SharePoolingTokenAcquisition $transaction) => $transaction->has30DayQuantity(),
+            fn (SharePoolingTokenAcquisition $transaction) => $transaction->hasAvailableThirtyDayQuantity(),
+        );
+
+        return self::make(...$transactions);
+    }
+
+    public function withThirtyDayQuantity(): SharePoolingTokenAcquisitions
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTokenAcquisition $transaction) => $transaction->hasThirtyDayQuantity(),
         );
 
         return self::make(...$transactions);

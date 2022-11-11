@@ -9,7 +9,8 @@ use Domain\SharePooling\Events\SharePoolingTokenAcquired;
 use Domain\SharePooling\Events\SharePoolingTokenDisposalReverted;
 use Domain\SharePooling\Events\SharePoolingTokenDisposedOf;
 use Domain\SharePooling\Exceptions\SharePoolingException;
-use Domain\SharePooling\Services\SharePoolingTokenDisposalProcessor;
+use Domain\SharePooling\Services\QuantityAdjuster;
+use Domain\SharePooling\Services\SharePoolingTokenDisposalBuilder;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\SharePooling\Services\SharePoolingTransactionFinder;
@@ -51,8 +52,6 @@ final class SharePooling implements AggregateRoot
 
         // Revert the disposals first
         foreach ($disposalsToRevert as $disposal) {
-            print_r('FOREACH' . "\n");
-            print_r($disposal);
             $this->recordThat(new SharePoolingTokenDisposalReverted(
                 sharePoolingId: $action->sharePoolingId,
                 sharePoolingTokenDisposal: $disposal,
@@ -95,9 +94,8 @@ final class SharePooling implements AggregateRoot
         // acquisitions within the next 30 days if these acquisitions have disposals on the same day
         $this->transactions->add($event->sharePoolingTokenDisposal->copyAsUnprocessed());
 
-        // @TODO also restore the quantities previously deducted from the acquisitions that the disposal was initially
-        // matched with. Should probably use a method from SharePoolingTokenDisposalProcessor. Is it possible to do
-        // it without tracking which disposals an acquisition's same-day and 30-day quantities were matched with?
+        // Restore quantities deducted from the acquisitions that the disposal was initially matched with
+        QuantityAdjuster::restoreAcquisitionQuantities($event->sharePoolingTokenDisposal, $this->transactions);
     }
 
     /** @throws SharePoolingException */
@@ -126,13 +124,13 @@ final class SharePooling implements AggregateRoot
         // @TODO should also revert the disposals that would have been matched with acquisitions
         // made on the same day as the current disposal, that were within 30 days of those disposals
         $disposalsToRevert = SharePoolingTokenDisposals::make();
-        $sameDayAcquisitions = $this->transactions->acquisitionsMadeOn($action->date)->with30DayQuantity();
-        $past30DaysDisposals = $this->transactions->disposalsMadeBetween($action->date->minusDays(30), $action->date)->with30DayQuantity();
+        $sameDayAcquisitions = $this->transactions->acquisitionsMadeOn($action->date)->withThirtyDayQuantity();
+        $pastThirtyDaysDisposals = $this->transactions->disposalsMadeBetween($action->date->minusDays(30), $action->date)->withThirtyDayQuantity();
         foreach ($sameDayAcquisitions as $acquisition) {
             $remainingAcquisitionQuantity = $acquisition->thirtyDayQuantity;
             // Get past 30 days disposals whose 30 day quantity isn't matched with subsequent acquisitions, up to
             // the current acquisition. If the disposal still has some available quantity left by then, revert it.
-            foreach ($past30DaysDisposals as $disposal) {
+            foreach ($pastThirtyDaysDisposals as $disposal) {
                 $remainingDisposalQuantity = $disposal->thirtyDayQuantity;
                 $subsequentAcquisitions = $this->transactions->acquisitionsMadeAfter($disposal->date)->upToTransaction($acquisition);
                 foreach ($subsequentAcquisitions as $subsequentAcquisition) {
@@ -146,8 +144,8 @@ final class SharePooling implements AggregateRoot
 
         // @TODO if there aren't any, process the disposal normally and record the event
         // if ($disposalsToRevert->isEmpty()) {
-            $sharePoolingTokenDisposal = SharePoolingTokenDisposalProcessor::process(
-                transactions: $this->transactions->copy(),
+            $sharePoolingTokenDisposal = SharePoolingTokenDisposalBuilder::make(
+                transactions: $this->transactions,
                 date: $action->date,
                 quantity: $action->quantity,
                 disposalProceeds: $action->disposalProceeds,

@@ -40,10 +40,10 @@ final class SharePoolingTransactionFinder
         // cost basis of the disposals, it's simpler to revert them all and start over
         $disposalsToRevert->add(...$sameDayDisposals);
 
-        // Deduct what's left from the same-day quantity yet to be matched
-        $unmatchedQuantity = $sameDayDisposals->quantity()->minus($sameDayDisposals->sameDayQuantity());
-
-        $remainingQuantity = $remainingQuantity->minus(Quantity::minimum($remainingQuantity, $unmatchedQuantity));
+        // Deduct what's left (either the whole remaining quantity or the disposals' unmatched
+        // same-day quantity, whichever is smaller) from the remaining quantity to be matched
+        $quantityToDeduct = Quantity::minimum($remainingQuantity, $sameDayDisposals->availableSameDayQuantity());
+        $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
         return self::add30DayDisposalsToRevert($disposalsToRevert, $transactions, $date, $remainingQuantity);
     }
@@ -58,16 +58,17 @@ final class SharePoolingTransactionFinder
             return $disposalsToRevert;
         }
 
-        // Go through disposals of the past 30 days with quantity not matched with same-day acquisitions
-        // or acquisitions made within the next 30 days, a.k.a disposals with section 104 pool quantity
-        $past30DaysDisposals = $transactions->disposalsMadeBetween($date->minusDays(30), $date)
-            ->withSection104PoolQuantity();
+        // Go through disposals of the past 30 days with available 30-day quantity
+        $pastThirtyDaysDisposals = $transactions->disposalsMadeBetween($date->minusDays(30), $date)
+            ->withAvailableThirtyDayQuantity();
 
-        foreach ($past30DaysDisposals as $disposal) {
+        foreach ($pastThirtyDaysDisposals as $disposal) {
             $disposalsToRevert->add($disposal);
 
-            $quantityToApply = Quantity::minimum($remainingQuantity, $disposal->getSection104PoolQuantity());
-            $remainingQuantity = $remainingQuantity->minus($quantityToApply);
+            // Deduct what's left (either the whole remaining quantity or the disposal's available
+            // 30-day quantity, whichever is smaller) from the remaining quantity to be matched
+            $quantityToDeduct = Quantity::minimum($remainingQuantity, $disposal->availableThirtyDayQuantity());
+            $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
             // Stop as soon as a disposal had its entire quantity covered by future acquisitions
             if ($remainingQuantity->isZero()) {
