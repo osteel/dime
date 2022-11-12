@@ -3,20 +3,26 @@
 namespace Domain\SharePooling\Services;
 
 use Brick\DateTime\LocalDate;
+use Domain\SharePooling\Actions\AcquireSharePoolingToken;
+use Domain\SharePooling\Actions\DisposeOfSharePoolingToken;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposals;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\ValueObjects\Quantity;
 
-final class SharePoolingTransactionFinder
+final class ReversionFinder
 {
-    public static function getDisposalsToRevertAfterAcquisition(
+    public static function disposalsToRevertOnAcquisition(
+        AcquireSharePoolingToken $acquisition,
         SharePoolingTransactions $transactions,
-        LocalDate $date,
-        Quantity $quantity,
     ): SharePoolingTokenDisposals {
         $disposalsToRevert = SharePoolingTokenDisposals::make();
 
-        return self::addSameDayDisposalsToRevert($disposalsToRevert, $transactions, $date, $quantity);
+        return self::addSameDayDisposalsToRevert(
+            disposalsToRevert: $disposalsToRevert,
+            transactions: $transactions,
+            date: $acquisition->date,
+            remainingQuantity: $acquisition->quantity,
+        );
     }
 
     private static function addSameDayDisposalsToRevert(
@@ -73,6 +79,39 @@ final class SharePoolingTransactionFinder
             // Stop as soon as a disposal had its entire quantity covered by future acquisitions
             if ($remainingQuantity->isZero()) {
                 break;
+            }
+        }
+
+        return $disposalsToRevert;
+    }
+
+    public static function disposalsToRevertOnDisposal(
+        DisposeOfSharePoolingToken $disposal,
+        SharePoolingTransactions $transactions,
+    ): SharePoolingTokenDisposals {
+        $disposalsToRevert = SharePoolingTokenDisposals::make();
+
+        // Get processed disposals with 30-day quantity matched with acquisitions on the same
+        // day as the disposal, with same-day quantity about to be matched with the disposal
+        $sameDayAcquisitions = $transactions->acquisitionsMadeOn($disposal->date)->withThirtyDayQuantity();
+
+        $remainingQuantity = $disposal->quantity;
+        foreach ($sameDayAcquisitions as $acquisition) {
+            // Add disposals up to the disposal's quantity, starting with the most recent ones
+            $disposalsWithMatchedThirtyDayQuantity = $transactions->processed()
+                ->disposalsWithThirtyDayQuantityMatchedWith($acquisition)
+                ->reverse();
+
+            foreach ($disposalsWithMatchedThirtyDayQuantity as $disposal) {
+                $disposalsToRevert->add($disposal);
+
+                $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityMatchedWith($acquisition), $remainingQuantity);
+                $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
+
+                // Stop as soon as the disposal's quantity has fully been matched
+                if ($remainingQuantity->isZero()) {
+                    break(2);
+                }
             }
         }
 

@@ -23,7 +23,7 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
             'date' => LocalDate::parse('2015-10-21'),
             'quantity' => new Quantity('100'),
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
-            'disposalProceeds' => new FiatAmount('100', FiatCurrency::GBP),
+            'proceeds' => new FiatAmount('100', FiatCurrency::GBP),
             'sameDayQuantityBreakdown' => new QuantityBreakdown(),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
         ];
@@ -44,7 +44,7 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
             'date' => $transaction->date,
             'quantity' => $transaction->quantity,
             'costBasis' => $transaction->costBasis,
-            'disposalProceeds' => $transaction->disposalProceeds,
+            'proceeds' => $transaction->proceeds,
             'sameDayQuantityBreakdown' => $transaction->sameDayQuantityBreakdown->copy(),
             'thirtyDayQuantityBreakdown' => $transaction->thirtyDayQuantityBreakdown->copy(),
         ]);

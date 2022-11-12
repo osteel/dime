@@ -35,14 +35,6 @@ final class SharePoolingTransactions implements IteratorAggregate
             : SharePoolingTransactions::class;
     }
 
-    public function copy(): SharePoolingTransactions
-    {
-        return new self(array_map(
-            fn (SharePoolingTransaction $transation) => $transation->copy(),
-            $this->transactions,
-        ));
-    }
-
     public function isEmpty(): bool
     {
         return empty($this->transactions);

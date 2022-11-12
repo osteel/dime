@@ -3,7 +3,7 @@
 namespace Domain\ValueObjects;
 
 use Domain\Enums\FiatCurrency;
-use Domain\Services\Math\Math;
+use Domain\Services\Math;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
 use Stringable;
 

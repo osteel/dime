@@ -72,7 +72,7 @@ final class Nft implements AggregateRoot
         $this->recordThat(new NftDisposedOf(
             nftId: $action->nftId,
             costBasis: $this->costBasis,
-            disposalProceeds: $action->disposalProceeds
+            proceeds: $action->proceeds
         ));
     }
 

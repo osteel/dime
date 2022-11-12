@@ -2,7 +2,7 @@
 
 namespace Domain\ValueObjects;
 
-use Domain\Services\Math\Math;
+use Domain\Services\Math;
 use Stringable;
 
 final class Quantity implements Stringable

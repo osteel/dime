@@ -1,6 +1,6 @@
 <?php
 
-use Domain\Services\Math\Math;
+use Domain\Services\Math;
 
 it('can add', function (array $operands, string $result) {
     expect(Math::add(...$operands))->toBe($result);

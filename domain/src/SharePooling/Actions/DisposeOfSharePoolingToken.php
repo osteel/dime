@@ -13,7 +13,7 @@ final class DisposeOfSharePoolingToken
         public readonly SharePoolingId $sharePoolingId,
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
-        public readonly FiatAmount $disposalProceeds,
+        public readonly FiatAmount $proceeds,
         public readonly ?int $position = null,
     ) {
     }

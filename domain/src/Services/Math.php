@@ -1,8 +1,8 @@
 <?php
 
-namespace Domain\Services\Math;
+namespace Domain\Services;
 
-use Domain\Services\Math\Exceptions\MathException;
+use Domain\Services\Exceptions\MathException;
 use Throwable;
 
 final class Math

@@ -3,44 +3,41 @@
 namespace Domain\SharePooling\Services;
 
 use Brick\DateTime\LocalDate;
+use Domain\SharePooling\Actions\DisposeOfSharePoolingToken;
 use Domain\SharePooling\ValueObjects\QuantityBreakdown;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
-final class SharePoolingTokenDisposalBuilder
+final class DisposalProcessor
 {
-    public static function make(
+    public static function process(
+        DisposeOfSharePoolingToken $disposal,
         SharePoolingTransactions $transactions,
-        LocalDate $date,
-        Quantity $quantity,
-        FiatAmount $disposalProceeds,
         ?int $position,
     ): SharePoolingTokenDisposal {
         $sameDayQuantityBreakdown = new QuantityBreakdown();
         $thirtyDayQuantityBreakdown = new QuantityBreakdown();
 
         $costBasis = self::calculateCostBasis(
-            $transactions,
-            $date,
-            $sameDayQuantityBreakdown,
-            $thirtyDayQuantityBreakdown,
-            $quantity,
-        );
-
-        $disposal = new SharePoolingTokenDisposal(
-            date: $date,
-            quantity: $quantity,
-            costBasis: $costBasis,
-            disposalProceeds: $disposalProceeds,
+            transactions: $transactions,
+            date: $disposal->date,
             sameDayQuantityBreakdown: $sameDayQuantityBreakdown,
             thirtyDayQuantityBreakdown: $thirtyDayQuantityBreakdown,
+            remainingQuantity: $disposal->quantity,
         );
 
         // Disposals being replayed already have a position, in which case we restore
         // that position to make sure the disposal is inserted back where it should
-        return is_null($position) ? $disposal : $disposal->setPosition($position);
+        return (new SharePoolingTokenDisposal(
+            date: $disposal->date,
+            quantity: $disposal->quantity,
+            costBasis: $costBasis,
+            proceeds: $disposal->proceeds,
+            sameDayQuantityBreakdown: $sameDayQuantityBreakdown,
+            thirtyDayQuantityBreakdown: $thirtyDayQuantityBreakdown,
+        ))->setPosition($position);
     }
 
     private static function calculateCostBasis(

@@ -78,11 +78,11 @@ it('cannot increase the cost basis of a NFT because the currency is different', 
 
 it('can dispose of a NFT', function () {
     $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
-    $disposeOfNft = new DisposeOfNft(nftId: $this->nftId, disposalProceeds: new FiatAmount('150', FiatCurrency::GBP));
+    $disposeOfNft = new DisposeOfNft(nftId: $this->nftId, proceeds: new FiatAmount('150', FiatCurrency::GBP));
     $nftDisposedOf = new NftDisposedOf(
         nftId: $disposeOfNft->nftId,
         costBasis: $nftAcquired->costBasis,
-        disposalProceeds: $disposeOfNft->disposalProceeds,
+        proceeds: $disposeOfNft->proceeds,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -92,7 +92,7 @@ it('can dispose of a NFT', function () {
 });
 
 it('cannot dispose of a NFT that has not been acquired', function () {
-    $disposeOfNft = new DisposeOfNft(nftId: $this->nftId, disposalProceeds: new FiatAmount('100', FiatCurrency::GBP));
+    $disposeOfNft = new DisposeOfNft(nftId: $this->nftId, proceeds: new FiatAmount('100', FiatCurrency::GBP));
     $cannotDisposeOf = NftException::cannotDisposeOfBeforeAcquisition($disposeOfNft->nftId);
 
     /** @var AggregateRootTestCase $this */

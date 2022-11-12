@@ -27,14 +27,6 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         return new ArrayIterator($this->transactions);
     }
 
-    public function copy(): SharePoolingTokenAcquisitions
-    {
-        return new self(array_map(
-            fn (SharePoolingTokenAcquisition $transation) => $transation->copy(),
-            $this->transactions,
-        ));
-    }
-
     public function isEmpty(): bool
     {
         return empty($this->transactions);
@@ -142,16 +134,6 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingTokenAcquisition $transaction) => $transaction->hasThirtyDayQuantity(),
-        );
-
-        return self::make(...$transactions);
-    }
-
-    public function upToTransaction(SharePoolingTokenAcquisition $acquisition): SharePoolingTokenAcquisitions
-    {
-        $transactions = array_filter(
-            $this->transactions,
-            fn (SharePoolingTokenAcquisition $transaction) => $transaction->getPosition() < $acquisition->getPosition(),
         );
 
         return self::make(...$transactions);

@@ -13,7 +13,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
-        public readonly FiatAmount $disposalProceeds,
+        public readonly FiatAmount $proceeds,
         public readonly QuantityBreakdown $sameDayQuantityBreakdown,
         public readonly QuantityBreakdown $thirtyDayQuantityBreakdown,
         protected bool $processed = true,
@@ -31,7 +31,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
             $this->date,
             $this->quantity,
             $this->costBasis,
-            $this->disposalProceeds,
+            $this->proceeds,
             $this->sameDayQuantityBreakdown->copy(),
             $this->thirtyDayQuantityBreakdown->copy(),
             $this->processed,
@@ -45,16 +45,11 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
             date: $this->date,
             quantity: $this->quantity,
             costBasis: $this->costBasis->nilAmount(),
-            disposalProceeds: $this->disposalProceeds,
+            proceeds: $this->proceeds,
             sameDayQuantityBreakdown: new QuantityBreakdown(),
             thirtyDayQuantityBreakdown: new QuantityBreakdown(),
             processed: false,
         ))->setPosition($this->position);
-    }
-
-    public function hasSameDayQuantity(): bool
-    {
-        return $this->sameDayQuantity()->isGreaterThan('0');
     }
 
     public function sameDayQuantity(): Quantity
@@ -62,47 +57,9 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
         return $this->sameDayQuantityBreakdown->quantity();
     }
 
-    public function hasThirtyDayQuantity(): bool
-    {
-        return $this->thirtyDayQuantity()->isGreaterThan('0');
-    }
-
     public function thirtyDayQuantity(): Quantity
     {
         return $this->thirtyDayQuantityBreakdown->quantity();
-    }
-
-    public function hasSection104PoolQuantity(): bool
-    {
-        return $this->section104PoolQuantity()->isGreaterThan('0');
-    }
-
-    public function section104PoolQuantity(): Quantity
-    {
-        return $this->quantity->minus($this->sameDayQuantity()->plus($this->thirtyDayQuantity()));
-    }
-
-    public function hasAvailableSameDayQuantity(): bool
-    {
-        return $this->availableSameDayQuantity()->isGreaterThan('0');
-    }
-
-    public function availableSameDayQuantity(): Quantity
-    {
-        return $this->quantity->minus($this->sameDayQuantity());
-    }
-
-    public function hasAvailableThirtyDayQuantity(): bool
-    {
-        return $this->availableThirtyDayQuantity()->isGreaterThan('0');
-    }
-
-    public function availableThirtyDayQuantity(): Quantity
-    {
-        // Same-day quantity always gets priority, and it is assumed that the existing 30-
-        // day quantity has already been matched with acquisitions closest in time. That
-        // leaves us with the current section 104 pool quantity, which is what we return
-        return $this->section104PoolQuantity();
     }
 
     /** @throws \Domain\SharePooling\ValueObjects\Exceptions\QuantityBreakdownException */
@@ -123,7 +80,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
             '%s: disposed of %s tokens for %s (cost basis: %s)',
             $this->date,
             $this->quantity,
-            $this->disposalProceeds,
+            $this->proceeds,
             $this->costBasis,
         );
     }

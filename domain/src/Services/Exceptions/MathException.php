@@ -1,6 +1,6 @@
 <?php
 
-namespace Domain\Services\Math\Exceptions;
+namespace Domain\Services\Exceptions;
 
 use RuntimeException;
 use Throwable;

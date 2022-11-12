@@ -66,15 +66,6 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return self::make(...$transactions);
     }
 
-    public function quantity(): Quantity
-    {
-        return array_reduce(
-            $this->transactions,
-            fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->quantity),
-            Quantity::zero()
-        );
-    }
-
     public function withAvailableSameDayQuantity(): SharePoolingTokenDisposals
     {
         $transactions = array_filter(
@@ -99,35 +90,6 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingTokenDisposal $transaction) => $transaction->hasAvailableThirtyDayQuantity(),
-        );
-
-        return self::make(...$transactions);
-    }
-
-    public function availableThirtyDayQuantity(): Quantity
-    {
-        return array_reduce(
-            $this->transactions,
-            fn (Quantity $total, SharePoolingTokenDisposal $transaction) => $total->plus($transaction->availableThirtyDayQuantity()),
-            Quantity::zero(),
-        );
-    }
-
-    public function withThirtyDayQuantity(): SharePoolingTokenDisposals
-    {
-        $transactions = array_filter(
-            $this->transactions,
-            fn (SharePoolingTokenDisposal $transaction) => $transaction->hasThirtyDayQuantity(),
-        );
-
-        return self::make(...$transactions);
-    }
-
-    public function withSection104PoolQuantity(): SharePoolingTokenDisposals
-    {
-        $transactions = array_filter(
-            $this->transactions,
-            fn (SharePoolingTokenDisposal $transaction) => $transaction->hasSection104PoolQuantity(),
         );
 
         return self::make(...$transactions);

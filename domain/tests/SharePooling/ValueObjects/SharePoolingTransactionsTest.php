@@ -1,14 +1,12 @@
 <?php
 
 use Brick\DateTime\LocalDate;
-use Domain\Enums\FiatCurrency;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisitions;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposals;
 use Domain\SharePooling\ValueObjects\SharePoolingTransaction;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
-use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
 it('can make an empty collection of transactions', function () {
@@ -41,20 +39,6 @@ it('can make a collection of transactions', function () {
     expect($sharePoolingTransactions->count())->toBeInt()->toBe(3);
 });
 
-it('can make a copy of a collection of transactions', function () {
-    /** @var SharePoolingTokenAcquisition */
-    $transaction = SharePoolingTokenAcquisition::factory()->make();
-
-    $sharePoolingTransactions = SharePoolingTransactions::make($transaction);
-
-    $copy = $sharePoolingTransactions->copy();
-
-    expect($copy)->not->toBe($sharePoolingTransactions);
-    expect($copy->count())->toBe(1);
-    expect($copy->first())->not->toBe($transaction);
-    expect($copy->first())->toEqual($transaction);
-});
-
 it('can add a transaction to a collection of transactions', function () {
     /** @var SharePoolingTokenDisposal */
     $transaction = SharePoolingTokenDisposal::factory()->make();
@@ -80,27 +64,6 @@ it('can return the total quantity of a collection of transactions', function (ar
     'scenario 1' => [['10'], '10'],
     'scenario 2' => [['10', '30', '40', '20'], '100'],
     'scenario 3' => [['1.12345678', '1.123456789'], '2.246913569'],
-]);
-
-it('can return the average cost basis per unit of a collection of transactions', function (array $costBases, string $average) {
-    $transactions = [];
-
-    foreach ($costBases as $quantity => $costBasis) {
-        $transactions[] = SharePoolingTokenAcquisition::factory()->make([
-            'quantity' => new Quantity($quantity),
-            'costBasis' => new FiatAmount($costBasis, FiatCurrency::GBP),
-        ]);
-    }
-
-    $sharePoolingTransactions = SharePoolingTransactions::make(...$transactions);
-
-    expect($sharePoolingTransactions->averageCostBasisPerUnit())
-        ->toBeInstanceOf(FiatAmount::class)
-        ->toEqual(new FiatAmount($average, FiatCurrency::GBP));
-})->with([
-    'scenario 1' => [['10' => '10'], '1'],
-    'scenario 2' => [['10' => '4', '20' => '10', '20' => '11'], '0.5'],
-    'scenario 3' => [['35' => '1.12345678', '65' => '1.123456789'], '0.02246913569'],
 ]);
 
 it('can return a collection of transactions that happened on a specific day', function (string $date, int $count) {

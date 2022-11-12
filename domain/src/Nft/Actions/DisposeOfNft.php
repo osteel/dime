@@ -9,7 +9,7 @@ final class DisposeOfNft
 {
     public function __construct(
         public readonly NftId $nftId,
-        public readonly FiatAmount $disposalProceeds,
+        public readonly FiatAmount $proceeds,
     ) {
     }
 }
