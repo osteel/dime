@@ -128,13 +128,9 @@ final class SharePoolingTokenDisposalBuilder
             return $costBasis;
         }
 
-        // Get acquisitions with available 30-day quantity, made within 30 days. We work on
-        // a copy of those because we don't want the changes to be applied to the aggregate
-        // @TODO if it turns out we're not updating the acquisitions
-        // after all in the below, no need to work on a copy anymore
+        // Get acquisitions with available 30-day quantity, made within 30 days
         $withinThirtyDaysAcquisitions = $transactions->acquisitionsMadeBetween($date->plusDays(1), $date->plusDays(30))
             ->withAvailableThirtyDayQuantity();
-        //->copy();
 
         foreach ($withinThirtyDaysAcquisitions as $acquisition) {
             // Apply the acquisition's cost basis to the disposed of asset up to the remaining quantity
@@ -150,7 +146,6 @@ final class SharePoolingTokenDisposalBuilder
             foreach ($sameDayDisposals as $disposal) {
                 $sameDayQuantityToApply = Quantity::minimum($disposal->availableSameDayQuantity(), $thirtyDayQuantityToApply);
                 $disposal->sameDayQuantityBreakdown->assignQuantity($sameDayQuantityToApply, $acquisition);
-                // @TODO While not incorrect, not sure we actually care about this update
                 $acquisition->increaseSameDayQuantity($sameDayQuantityToApply);
                 $thirtyDayQuantityToApply = $thirtyDayQuantityToApply->minus($sameDayQuantityToApply);
                 if ($thirtyDayQuantityToApply->isZero()) {
@@ -164,7 +159,6 @@ final class SharePoolingTokenDisposalBuilder
 
             $costBasis = $costBasis->plus($acquisition->averageCostBasisPerUnit()->multipliedBy($thirtyDayQuantityToApply));
             $thirtyDayQuantityBreakdown->assignQuantity($thirtyDayQuantityToApply, $acquisition);
-            // @TODO While not incorrect, not sure we actually care about this update
             $acquisition->increaseThirtyDayQuantity($thirtyDayQuantityToApply);
             $remainingQuantity = $remainingQuantity->minus($thirtyDayQuantityToApply);
 
