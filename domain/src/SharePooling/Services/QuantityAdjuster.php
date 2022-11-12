@@ -14,11 +14,11 @@ final class QuantityAdjuster
         SharePoolingTransactions $transactions,
     ): void {
         foreach (self::getAcquisitions($disposal->sameDayQuantityBreakdown, $transactions) as $acquisition) {
-            $acquisition->decreaseSameDayQuantity($disposal->sameDayQuantityBreakdown->quantityFor($acquisition));
+            $acquisition->decreaseSameDayQuantity($disposal->sameDayQuantityBreakdown->quantityMatchedWith($acquisition));
         }
 
         foreach (self::getAcquisitions($disposal->thirtyDayQuantityBreakdown, $transactions) as $acquisition) {
-            $acquisition->decreaseThirtyDayQuantity($disposal->thirtyDayQuantityBreakdown->quantityFor($acquisition));
+            $acquisition->decreaseThirtyDayQuantity($disposal->thirtyDayQuantityBreakdown->quantityMatchedWith($acquisition));
         }
     }
 

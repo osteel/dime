@@ -58,26 +58,26 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
         ]);
     }
 
-    public function withSameDayQuantity(Quantity $quantity, SharePoolingTokenAcquisition $transaction, int $position): static
+    public function withSameDayQuantity(Quantity $quantity, int $position): static
     {
         $sameDayQuantity = $this->getLatest('sameDayQuantityBreakdown') ?? new QuantityBreakdown();
 
         return $this->state([
             'sameDayQuantityBreakdown' => $sameDayQuantity->assignQuantity(
                 $quantity,
-                SharePoolingTokenAcquisition::factory()->copyFrom($transaction)->make()->setPosition($position),
+                SharePoolingTokenAcquisition::factory()->make()->setPosition($position),
             ),
         ]);
     }
 
-    public function withThirtyDayQuantity(Quantity $quantity, SharePoolingTokenAcquisition $transaction, int $position): static
+    public function withThirtyDayQuantity(Quantity $quantity, int $position): static
     {
         $thirtyDayQuantity = $this->getLatest('thirtyDayQuantityBreakdown') ?? new QuantityBreakdown();
 
         return $this->state([
             'thirtyDayQuantityBreakdown' => $thirtyDayQuantity->assignQuantity(
                 $quantity,
-                SharePoolingTokenAcquisition::factory()->copyFrom($transaction)->make()->setPosition($position),
+                SharePoolingTokenAcquisition::factory()->make()->setPosition($position),
             ),
         ]);
     }

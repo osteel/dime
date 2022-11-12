@@ -116,6 +116,7 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
     public function decreaseSameDayQuantity(Quantity $quantity): void
     {
         if ($quantity->isGreaterThan($this->sameDayQuantity)) {
+            debug_print_backtrace();
             // @TODO move to proper exception
             throw new \Exception(sprintf(
                 'Cannot decrease same-day quantity by %s: only %s available',

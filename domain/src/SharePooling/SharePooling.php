@@ -5,16 +5,19 @@ namespace Domain\SharePooling;
 use Domain\Enums\FiatCurrency;
 use Domain\SharePooling\Actions\AcquireSharePoolingToken;
 use Domain\SharePooling\Actions\DisposeOfSharePoolingToken;
+use Domain\SharePooling\Actions\RevertSharePoolingTokenDisposal;
 use Domain\SharePooling\Events\SharePoolingTokenAcquired;
 use Domain\SharePooling\Events\SharePoolingTokenDisposalReverted;
 use Domain\SharePooling\Events\SharePoolingTokenDisposedOf;
 use Domain\SharePooling\Exceptions\SharePoolingException;
 use Domain\SharePooling\Services\QuantityAdjuster;
 use Domain\SharePooling\Services\SharePoolingTokenDisposalBuilder;
-use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
-use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\SharePooling\Services\SharePoolingTransactionFinder;
+use Domain\SharePooling\ValueObjects\QuantityBreakdown;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposals;
+use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
@@ -52,7 +55,7 @@ final class SharePooling implements AggregateRoot
 
         // Revert the disposals first
         foreach ($disposalsToRevert as $disposal) {
-            $this->recordThat(new SharePoolingTokenDisposalReverted(
+            $this->revertDisposal(new RevertSharePoolingTokenDisposal(
                 sharePoolingId: $action->sharePoolingId,
                 sharePoolingTokenDisposal: $disposal,
             ));
@@ -87,15 +90,23 @@ final class SharePooling implements AggregateRoot
         $this->transactions->add($event->sharePoolingTokenAcquisition);
     }
 
+    private function revertDisposal(RevertSharePoolingTokenDisposal $action): void
+    {
+        // Restore quantities deducted from the acquisitions that the disposal was initially matched with
+        QuantityAdjuster::restoreAcquisitionQuantities($action->sharePoolingTokenDisposal, $this->transactions);
+
+        $this->recordThat(new SharePoolingTokenDisposalReverted(
+            sharePoolingId: $action->sharePoolingId,
+            sharePoolingTokenDisposal: $action->sharePoolingTokenDisposal,
+        ));
+    }
+
     public function applySharePoolingTokenDisposalReverted(SharePoolingTokenDisposalReverted $event): void
     {
         // Replace the disposal in the array with the same disposal, but with reset quantities. This
         // way, when several disposals are being replayed, a disposal won't be matched with future
         // acquisitions within the next 30 days if these acquisitions have disposals on the same day
         $this->transactions->add($event->sharePoolingTokenDisposal->copyAsUnprocessed());
-
-        // Restore quantities deducted from the acquisitions that the disposal was initially matched with
-        QuantityAdjuster::restoreAcquisitionQuantities($event->sharePoolingTokenDisposal, $this->transactions);
     }
 
     /** @throws SharePoolingException */
@@ -121,29 +132,17 @@ final class SharePooling implements AggregateRoot
             );
         }
 
-        // @TODO should also revert the disposals that would have been matched with acquisitions
-        // made on the same day as the current disposal, that were within 30 days of those disposals
+        // Revert processed disposals whose 30-day quantity was matched with acquisitions on the same day as
+        // the current disposal, whose same-day quantity is about to be matched with the current disposal
+        // @TODO move this to SharePoolingTransactionFinder?
         $disposalsToRevert = SharePoolingTokenDisposals::make();
         $sameDayAcquisitions = $this->transactions->acquisitionsMadeOn($action->date)->withThirtyDayQuantity();
-        $pastThirtyDaysDisposals = $this->transactions->disposalsMadeBetween($action->date->minusDays(30), $action->date)->withThirtyDayQuantity();
         foreach ($sameDayAcquisitions as $acquisition) {
-            $remainingAcquisitionQuantity = $acquisition->thirtyDayQuantity;
-            // Get past 30 days disposals whose 30 day quantity isn't matched with subsequent acquisitions, up to
-            // the current acquisition. If the disposal still has some available quantity left by then, revert it.
-            foreach ($pastThirtyDaysDisposals as $disposal) {
-                $remainingDisposalQuantity = $disposal->thirtyDayQuantity;
-                $subsequentAcquisitions = $this->transactions->acquisitionsMadeAfter($disposal->date)->upToTransaction($acquisition);
-                foreach ($subsequentAcquisitions as $subsequentAcquisition) {
-                    $remainingSubsequentAcquisitionQuantity = $subsequentAcquisition->thirtyDayQuantity;
-
-                }
-            }
+            $disposalsToRevert->add(...$this->transactions->processed()->disposalsWithThirtyDayQuantityMatchedWith($acquisition));
         }
 
-        // @TODO get those disposals here
-
-        // @TODO if there aren't any, process the disposal normally and record the event
-        // if ($disposalsToRevert->isEmpty()) {
+        // If there are no disposals to revert, process the current disposal normally and record the event
+        if ($disposalsToRevert->isEmpty()) {
             $sharePoolingTokenDisposal = SharePoolingTokenDisposalBuilder::make(
                 transactions: $this->transactions,
                 date: $action->date,
@@ -157,32 +156,31 @@ final class SharePooling implements AggregateRoot
                 sharePoolingTokenDisposal: $sharePoolingTokenDisposal,
             ));
 
-            // return;
-        //}
+            return;
+        }
 
-        // @TODO If there are some, revert them here
-        /*foreach ($disposalsToRevert as $disposal) {
-            $this->recordThat(new SharePoolingTokenDisposalReverted(
+        // Revert the disposals
+        foreach ($disposalsToRevert as $disposal) {
+            $this->revertDisposal(new RevertSharePoolingTokenDisposal(
                 sharePoolingId: $action->sharePoolingId,
                 sharePoolingTokenDisposal: $disposal,
             ));
-        }*/
+        }
 
-        // @TODO add the current disposal to the transactions (as unprocessed) so previous disposals
+        // Add the current disposal to the transactions (as unprocessed) so previous disposals
         // don't try to match their 30-day quantity with the disposal's same-day acquisitions
-        /*$this->transactions->add($disposal = new SharePoolingTokenDisposal(
+        $this->transactions->add($disposal = new SharePoolingTokenDisposal(
             date: $action->date,
             quantity: $action->quantity,
             costBasis: $action->disposalProceeds->nilAmount(),
             disposalProceeds: $action->disposalProceeds,
-            sameDayQuantity: Quantity::zero(),
-            thirtyDayQuantity: Quantity::zero(),
-            section104PoolQuantity: $action->quantity,
+            sameDayQuantityBreakdown: new QuantityBreakdown(),
+            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
             processed: false,
-        ));*/
+        ));
 
-        // @TODO And replay them here, adding the current disposal to the end
-        /*$disposalsToRevert->add($disposal); // @TODO make sure it's got assigned a position by the `add` method above
+        // Replay the disposals, processing the current disposal last
+        $disposalsToRevert->add($disposal);
         foreach ($disposalsToRevert as $disposal) {
             $this->disposeOf(new DisposeOfSharePoolingToken(
                 sharePoolingId: $action->sharePoolingId,
@@ -191,7 +189,7 @@ final class SharePooling implements AggregateRoot
                 disposalProceeds: $disposal->disposalProceeds,
                 position: $disposal->getPosition(),
             ));
-        }*/
+        }
     }
 
     public function applySharePoolingTokenDisposedOf(SharePoolingTokenDisposedOf $event): void

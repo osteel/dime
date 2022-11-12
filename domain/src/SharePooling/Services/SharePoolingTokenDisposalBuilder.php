@@ -134,7 +134,7 @@ final class SharePoolingTokenDisposalBuilder
         // after all in the below, no need to work on a copy anymore
         $withinThirtyDaysAcquisitions = $transactions->acquisitionsMadeBetween($date->plusDays(1), $date->plusDays(30))
             ->withAvailableThirtyDayQuantity();
-            //->copy();
+        //->copy();
 
         foreach ($withinThirtyDaysAcquisitions as $acquisition) {
             // Apply the acquisition's cost basis to the disposed of asset up to the remaining quantity
@@ -151,7 +151,7 @@ final class SharePoolingTokenDisposalBuilder
                 $sameDayQuantityToApply = Quantity::minimum($disposal->availableSameDayQuantity(), $thirtyDayQuantityToApply);
                 $disposal->sameDayQuantityBreakdown->assignQuantity($sameDayQuantityToApply, $acquisition);
                 // @TODO While not incorrect, not sure we actually care about this update
-                //$acquisition->increaseSameDayQuantity($sameDayQuantityToApply);
+                $acquisition->increaseSameDayQuantity($sameDayQuantityToApply);
                 $thirtyDayQuantityToApply = $thirtyDayQuantityToApply->minus($sameDayQuantityToApply);
                 if ($thirtyDayQuantityToApply->isZero()) {
                     break;
@@ -165,7 +165,7 @@ final class SharePoolingTokenDisposalBuilder
             $costBasis = $costBasis->plus($acquisition->averageCostBasisPerUnit()->multipliedBy($thirtyDayQuantityToApply));
             $thirtyDayQuantityBreakdown->assignQuantity($thirtyDayQuantityToApply, $acquisition);
             // @TODO While not incorrect, not sure we actually care about this update
-            //$acquisition->increaseThirtyDayQuantity($thirtyDayQuantityToApply);
+            $acquisition->increaseThirtyDayQuantity($thirtyDayQuantityToApply);
             $remainingQuantity = $remainingQuantity->minus($thirtyDayQuantityToApply);
 
             // Continue until there are no more transactions or we've covered all disposed tokens

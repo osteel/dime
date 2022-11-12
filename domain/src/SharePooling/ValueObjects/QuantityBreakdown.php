@@ -30,25 +30,31 @@ final class QuantityBreakdown
     }
 
     /** @throws QuantityBreakdownException */
-    public function quantityFor(SharePoolingTokenAcquisition $transaction): Quantity
+    public function hasQuantityMatchedWith(SharePoolingTokenAcquisition $acquisition): bool
     {
-        if (is_null($transaction->getPosition())) {
-            throw QuantityBreakdownException::unassignableTransaction($transaction);
-        }
-
-        return $this->breakdown[$transaction->getPosition()] ?? Quantity::zero();
+        return $this->quantityMatchedWith($acquisition)->isGreaterThan('0');
     }
 
     /** @throws QuantityBreakdownException */
-    public function assignQuantity(Quantity $quantity, SharePoolingTokenAcquisition $transaction): self
+    public function quantityMatchedWith(SharePoolingTokenAcquisition $acquisition): Quantity
     {
-        if (! $transaction->isProcessed() || is_null($transaction->getPosition())) {
-            throw QuantityBreakdownException::unassignableTransaction($transaction);
+        if (is_null($acquisition->getPosition())) {
+            throw QuantityBreakdownException::unassignableTransaction($acquisition);
         }
 
-        $assigned = ($this->breakdown[$transaction->getPosition()] ?? Quantity::zero())->plus($quantity);
+        return $this->breakdown[$acquisition->getPosition()] ?? Quantity::zero();
+    }
 
-        $this->breakdown[$transaction->getPosition()] = $assigned;
+    /** @throws QuantityBreakdownException */
+    public function assignQuantity(Quantity $quantity, SharePoolingTokenAcquisition $acquisition): self
+    {
+        if (! $acquisition->isProcessed() || is_null($acquisition->getPosition())) {
+            throw QuantityBreakdownException::unassignableTransaction($acquisition);
+        }
+
+        $assigned = ($this->breakdown[$acquisition->getPosition()] ?? Quantity::zero())->plus($quantity);
+
+        $this->breakdown[$acquisition->getPosition()] = $assigned;
         $this->quantity = $this->quantity->plus($quantity);
 
         return $this;

@@ -105,6 +105,12 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
         return $this->section104PoolQuantity();
     }
 
+    /** @throws \Domain\SharePooling\ValueObjects\Exceptions\QuantityBreakdownException */
+    public function hasThirtyDayQuantityMatchedWith(SharePoolingTokenAcquisition $acquisition): bool
+    {
+        return $this->thirtyDayQuantityBreakdown->hasQuantityMatchedWith($acquisition);
+    }
+
     public function __toString(): string
     {
         return sprintf(

@@ -105,7 +105,7 @@ final class SharePoolingTransactions implements IteratorAggregate
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingTransaction $transaction) => $transaction->date->isEqualTo($date)
-                && (is_null($type) ? true : $transaction instanceof $type)
+                && (is_null($type) ? true : $transaction instanceof $type),
         );
 
         return ($this->collectionClassForType($type))::make(...$transactions);
@@ -135,7 +135,7 @@ final class SharePoolingTransactions implements IteratorAggregate
             fn (SharePoolingTransaction $transaction) =>
                 $transaction->date->isAfterOrEqualTo($from->isBefore($to) ? $from : $to)
                 && $transaction->date->isBeforeOrEqualTo($to->isAfter($from) ? $to : $from)
-                && (is_null($type) ? true : $transaction instanceof $type)
+                && (is_null($type) ? true : $transaction instanceof $type),
         );
 
         return ($this->collectionClassForType($type))::make(...$transactions);
@@ -158,7 +158,7 @@ final class SharePoolingTransactions implements IteratorAggregate
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingTransaction $transaction) => $transaction->date->isBefore($date)
-                && (is_null($type) ? true : $transaction instanceof $type)
+                && (is_null($type) ? true : $transaction instanceof $type),
         );
 
         return ($this->collectionClassForType($type))::make(...$transactions);
@@ -198,7 +198,7 @@ final class SharePoolingTransactions implements IteratorAggregate
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingTransaction $transaction) => $transaction->date->isAfter($date)
-                && (is_null($type) ? true : $transaction instanceof $type)
+                && (is_null($type) ? true : $transaction instanceof $type),
         );
 
         return ($this->collectionClassForType($type))::make(...$transactions);
@@ -229,5 +229,17 @@ final class SharePoolingTransactions implements IteratorAggregate
     public function disposalsMadeAfterOrOn(LocalDate $date): SharePoolingTokenDisposals
     {
         return $this->disposalsMadeAfter($date->minusDays(1));
+    }
+
+    /** @throws \Domain\SharePooling\ValueObjects\Exceptions\QuantityBreakdownException */
+    public function disposalsWithThirtyDayQuantityMatchedWith(SharePoolingTokenAcquisition $acquisition): SharePoolingTokenDisposals
+    {
+        $transactions = array_filter(
+            $this->transactions,
+            fn (SharePoolingTransaction $transaction) => $transaction instanceof SharePoolingTokenDisposal
+                && $transaction->hasThirtyDayQuantityMatchedWith($acquisition),
+        );
+
+        return SharePoolingTokenDisposals::make(...$transactions);
     }
 }
