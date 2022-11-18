@@ -84,9 +84,10 @@ final class DisposalProcessor
             );
         }
 
-        // Get the same-day average cost basis per unit. We want the absolute value here,
+        // Get the same-day average cost basis per unit, of all acquisitions of that day (not
+        // just the ones with available same-day quantity). We want the absolute value here,
         // regardless of other types of matching, because same-day matching gets priority
-        $sameDayAcquisitionsAverageCostBasisPerUnit = $sameDayAcquisitions->averageCostBasisPerUnit();
+        $sameDayAcquisitionsAverageCostBasisPerUnit = $transactions->acquisitionsMadeOn($date)->averageCostBasisPerUnit();
 
         // Apply this average cost basis to the disposed of asset, up to the
         // quantity acquired that day not yet matched with same-day disposals
