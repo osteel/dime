@@ -26,6 +26,8 @@ class SharePoolingTokenAcquisitionFactory extends PlainObjectFactory
             'date' => LocalDate::parse('2015-10-21'),
             'quantity' => new Quantity('100'),
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'sameDayQuantity' => null,
+            'thirtyDayQuantity' => null,
         ];
     }
 
