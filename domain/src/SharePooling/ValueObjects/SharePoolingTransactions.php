@@ -113,6 +113,7 @@ final class SharePoolingTransactions implements IteratorAggregate
         return $this->madeOn($date, SharePoolingTokenDisposal::class);
     }
 
+    /** Return transactions made between two dates (inclusive) */
     public function madeBetween(
         LocalDate $from,
         LocalDate $to,
@@ -133,16 +134,19 @@ final class SharePoolingTransactions implements IteratorAggregate
         return ($this->collectionClassForType($type))::make(...$transactions);
     }
 
+    /** Return acquisitions made between two dates (inclusive) */
     public function acquisitionsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTokenAcquisitions
     {
         return $this->madeBetween($from, $to, SharePoolingTokenAcquisition::class);
     }
 
+    /** Return disposals made between two dates (inclusive) */
     public function disposalsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTokenDisposals
     {
         return $this->madeBetween($from, $to, SharePoolingTokenDisposal::class);
     }
 
+    /** Return transactions made before a date (exclusive) */
     public function madeBefore(
         LocalDate $date,
         ?string $type = null
@@ -156,6 +160,7 @@ final class SharePoolingTransactions implements IteratorAggregate
         return ($this->collectionClassForType($type))::make(...$transactions);
     }
 
+    /** Return transactions made before a date (inclusive) */
     public function madeBeforeOrOn(
         LocalDate $date,
         ?string $type = null
@@ -163,26 +168,31 @@ final class SharePoolingTransactions implements IteratorAggregate
         return $this->madeBefore($date->plusDays(1), $type);
     }
 
+    /** Return acquisitions made before a date (exclusive) */
     public function acquisitionsMadeBefore(LocalDate $date): SharePoolingTokenAcquisitions
     {
         return $this->madeBefore($date, SharePoolingTokenAcquisition::class);
     }
 
+    /** Return acquisitions made before a date (inclusive) */
     public function acquisitionsMadeBeforeOrOn(LocalDate $date): SharePoolingTokenAcquisitions
     {
         return $this->acquisitionsMadeBefore($date->plusDays(1));
     }
 
+    /** Return disposals made before a date (exclusive) */
     public function disposalsMadeBefore(LocalDate $date): SharePoolingTokenDisposals
     {
         return $this->madeBefore($date, SharePoolingTokenDisposal::class);
     }
 
+    /** Return disposals made before a date (inclusive) */
     public function disposalsMadeBeforeOrOn(LocalDate $date): SharePoolingTokenDisposals
     {
         return $this->disposalsMadeBefore($date->plusDays(1));
     }
 
+    /** Return transactions made after a date (exclusive) */
     public function madeAfter(
         LocalDate $date,
         ?string $type = null
@@ -196,6 +206,7 @@ final class SharePoolingTransactions implements IteratorAggregate
         return ($this->collectionClassForType($type))::make(...$transactions);
     }
 
+    /** Return transactions made after a date (inclusive) */
     public function madeAfterOrOn(
         LocalDate $date,
         ?string $type = null
@@ -203,21 +214,25 @@ final class SharePoolingTransactions implements IteratorAggregate
         return $this->madeAfter($date->minusDays(1), $type);
     }
 
+    /** Return acquisitions made after a date (exclusive) */
     public function acquisitionsMadeAfter(LocalDate $date): SharePoolingTokenAcquisitions
     {
         return $this->madeAfter($date, SharePoolingTokenAcquisition::class);
     }
 
+    /** Return acquisitions made after a date (inclusive) */
     public function acquisitionsMadeAfterOrOn(LocalDate $date): SharePoolingTokenAcquisitions
     {
         return $this->acquisitionsMadeAfter($date->minusDays(1));
     }
 
+    /** Return disposals made after a date (exclusive) */
     public function disposalsMadeAfter(LocalDate $date): SharePoolingTokenDisposals
     {
         return $this->madeAfter($date, SharePoolingTokenDisposal::class);
     }
 
+    /** Return disposals made after a date (inclusive) */
     public function disposalsMadeAfterOrOn(LocalDate $date): SharePoolingTokenDisposals
     {
         return $this->disposalsMadeAfter($date->minusDays(1));

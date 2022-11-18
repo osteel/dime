@@ -11,6 +11,11 @@ use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Tests\Factories\PlainObjectFactory;
 
+/**
+ * @template TModel of SharePoolingTokenDisposal
+ *
+ * @extends PlainObjectFactory
+ */
 class SharePoolingTokenDisposalFactory extends PlainObjectFactory
 {
     /** @var string */
@@ -26,16 +31,8 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
             'proceeds' => new FiatAmount('100', FiatCurrency::GBP),
             'sameDayQuantityBreakdown' => new QuantityBreakdown(),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
+            'processed' => true,
         ];
-    }
-
-    private function getLatest(string $attribute): mixed
-    {
-        $state = $this->states->last(function (callable $state) use ($attribute) {
-            return isset($state()[$attribute]);
-        });
-
-        return $state ? $state()[$attribute] : null;
     }
 
     public function copyFrom(SharePoolingTokenDisposal $transaction): static
@@ -50,12 +47,22 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
         ]);
     }
 
+    public function processed(): static
+    {
+        return $this->state(['processed' => true]);
+    }
+
     public function revert(SharePoolingTokenDisposal $transaction): static
     {
         return $this->copyFrom($transaction)->state([
             'sameDayQuantityBreakdown' => new QuantityBreakdown(),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
         ]);
+    }
+
+    public function unprocessed(): static
+    {
+        return $this->state(['processed' => false]);
     }
 
     public function withSameDayQuantity(Quantity $quantity, int $position): static

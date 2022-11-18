@@ -23,4 +23,13 @@ abstract class PlainObjectFactory extends Factory
 
         return new $model(...$attributes);
     }
+
+    protected function getLatest(string $attribute): mixed
+    {
+        $state = $this->states->last(function (callable $state) use ($attribute) {
+            return isset($state()[$attribute]);
+        });
+
+        return $state ? $state()[$attribute] : null;
+    }
 }

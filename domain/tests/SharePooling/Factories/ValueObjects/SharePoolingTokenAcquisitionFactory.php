@@ -9,6 +9,11 @@ use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Tests\Factories\PlainObjectFactory;
 
+/**
+ * @template TModel of SharePoolingTokenAcquisition
+ *
+ * @extends PlainObjectFactory
+ */
 class SharePoolingTokenAcquisitionFactory extends PlainObjectFactory
 {
     /** @var string */
