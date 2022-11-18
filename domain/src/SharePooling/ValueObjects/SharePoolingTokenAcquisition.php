@@ -52,12 +52,8 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         return $this->costBasis->dividedBy($this->quantity)->multipliedBy($this->section104PoolQuantity());
     }
 
-    /**
-     * Increase the same-day quantity and adjust the 30-day quantity accordingly.
-     *
-     * @return Quantity The remaining quantity
-     */
-    public function increaseSameDayQuantity(Quantity $quantity): Quantity
+    /** Increase the same-day quantity and adjust the 30-day quantity accordingly. */
+    public function increaseSameDayQuantity(Quantity $quantity): self
     {
         // Adjust same-day quantity
         $quantityToAdd = Quantity::minimum($quantity, $this->availableSameDayQuantity());
@@ -67,38 +63,39 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction
         $quantityToDeduct = Quantity::minimum($quantityToAdd, $this->thirtyDayQuantity);
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantityToDeduct);
 
-        // Return remaining quantity
-        return $quantity->minus($quantityToAdd);
+        return $this;
     }
 
     /** @throws SharePoolingTokenAcquisitionException */
-    public function decreaseSameDayQuantity(Quantity $quantity): void
+    public function decreaseSameDayQuantity(Quantity $quantity): self
     {
         if ($quantity->isGreaterThan($this->sameDayQuantity)) {
             throw SharePoolingTokenAcquisitionException::insufficientSameDayQuantity($quantity, $this->sameDayQuantity);
         }
 
         $this->sameDayQuantity = $this->sameDayQuantity->minus(($quantity));
+
+        return $this;
     }
 
-    /** @return Quantity The remaining quantity */
-    public function increaseThirtyDayQuantity(Quantity $quantity): Quantity
+    public function increaseThirtyDayQuantity(Quantity $quantity): self
     {
         $quantityToAdd = Quantity::minimum($quantity, $this->availableThirtyDayQuantity());
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->plus($quantityToAdd);
 
-        // Return remaining quantity
-        return $quantity->minus($quantityToAdd);
+        return $this;
     }
 
     /** @throws SharePoolingTokenAcquisitionException */
-    public function decreaseThirtyDayQuantity(Quantity $quantity): void
+    public function decreaseThirtyDayQuantity(Quantity $quantity): self
     {
         if ($quantity->isGreaterThan($this->thirtyDayQuantity)) {
             throw SharePoolingTokenAcquisitionException::insufficientThirtyDayQuantity($quantity, $this->thirtyDayQuantity);
         }
 
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus(($quantity));
+
+        return $this;
     }
 
     public function __toString(): string

@@ -96,8 +96,10 @@ final class DisposalProcessor
         // Deduct the applied quantity from the same-day acquisitions
         $remainder = $availableSameDayQuantity;
         foreach ($sameDayAcquisitions as $acquisition) {
-            $sameDayQuantityBreakdown->assignQuantity($remainder, $acquisition);
-            $remainder = $acquisition->increaseSameDayQuantity($remainder);
+            $quantityToAssign = Quantity::minimum($remainder, $acquisition->availableSameDayQuantity());
+            $sameDayQuantityBreakdown->assignQuantity($quantityToAssign, $acquisition);
+            $acquisition->increaseSameDayQuantity($remainder);
+            $remainder =  $remainder->minus($quantityToAssign);
             if ($remainder->isZero()) {
                 break;
             }
