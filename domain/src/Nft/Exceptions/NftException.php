@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Nft\Exceptions;
 
 use Domain\Nft\NftId;
