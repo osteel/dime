@@ -56,7 +56,7 @@ final class TaxYear implements AggregateRoot
             throw TaxYearException::cannotRevertCapitalGainBeforeCapitalGainIsRecorded(taxYearId: $action->taxYearId);
         }
 
-        if ($this->currency !== $action->amount->currency) {
+        if ($this->currency && $this->currency !== $action->amount->currency) {
             throw TaxYearException::cannotRevertCapitalGainFromDifferentCurrency(
                 taxYearId: $action->taxYearId,
                 from: $this->currency,
@@ -100,7 +100,7 @@ final class TaxYear implements AggregateRoot
             throw TaxYearException::cannotRevertCapitalLossBeforeCapitalLossIsRecorded(taxYearId: $action->taxYearId);
         }
 
-        if ($this->currency !== $action->amount->currency) {
+        if ($this->currency && $this->currency !== $action->amount->currency) {
             throw TaxYearException::cannotRevertCapitalLossFromDifferentCurrency(
                 taxYearId: $action->taxYearId,
                 from: $this->currency,
