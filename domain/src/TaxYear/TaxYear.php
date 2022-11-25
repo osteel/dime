@@ -60,6 +60,8 @@ final class TaxYear implements AggregateRoot
 
     public function applyCapitalGainReverted(CapitalGainReverted $event): void
     {
+        assert(! is_null($this->capitalGainOrLoss));
+
         $this->capitalGainOrLoss = $this->capitalGainOrLoss->minus($event->amount);
     }
 
@@ -101,6 +103,8 @@ final class TaxYear implements AggregateRoot
 
     public function applyCapitalLossReverted(CapitalLossReverted $event): void
     {
+        assert(! is_null($this->capitalGainOrLoss));
+
         $this->capitalGainOrLoss = $this->capitalGainOrLoss->plus($event->amount);
     }
 }

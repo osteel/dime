@@ -6,7 +6,6 @@ namespace Domain\TaxYear\Exceptions;
 
 use Domain\Enums\FiatCurrency;
 use Domain\TaxYear\TaxYearId;
-use Domain\ValueObjects\FiatAmount;
 use RuntimeException;
 
 final class TaxYearException extends RuntimeException
