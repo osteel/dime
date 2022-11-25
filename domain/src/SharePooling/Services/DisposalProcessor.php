@@ -10,6 +10,10 @@ use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
+/**
+ * This service essentially calculates the cost basis of a disposal by looking at past and future
+ * transactions, following the various share pooling rules (same-day, 30-day, section 104 pool).
+ */
 final class DisposalProcessor
 {
     public static function process(
@@ -140,9 +144,7 @@ final class DisposalProcessor
             // Apply the acquisition's cost basis to the disposed of asset up to the remaining quantity
             $thirtyDayQuantityToApply = Quantity::minimum($acquisition->availableThirtyDayQuantity(), $remainingQuantity);
 
-            // Also deduct same-day disposals with available same-day quantity that haven't been
-            // processed yet. It's OK not to work on copies here, as these will soon be replaced
-            // and we actually want to keep track of their share of same-day quantity until then
+            // Also deduct same-day disposals with available same-day quantity that haven't been processed yet
             $sameDayDisposals = $transactions->disposalsMadeOn($acquisition->date)
                 ->unprocessed()
                 ->withAvailableSameDayQuantity();

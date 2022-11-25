@@ -9,6 +9,10 @@ use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisitions;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 
+/**
+ * This service restores the quantities from acquisitions that were
+ * previously matched with a disposal that is now being reverted.
+ */
 final class QuantityAdjuster
 {
     public static function revertDisposal(
