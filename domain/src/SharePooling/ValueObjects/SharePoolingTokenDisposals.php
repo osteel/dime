@@ -37,11 +37,6 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         return count($this->disposals);
     }
 
-    public function reverse(): SharePoolingTokenDisposals
-    {
-        return new self(array_reverse($this->disposals));
-    }
-
     public function add(SharePoolingTokenDisposal ...$disposals): self
     {
         foreach ($disposals as $disposal) {
@@ -54,6 +49,11 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
         }
 
         return $this;
+    }
+
+    public function reverse(): SharePoolingTokenDisposals
+    {
+        return new self(array_reverse($this->disposals));
     }
 
     public function unprocessed(): SharePoolingTokenDisposals
