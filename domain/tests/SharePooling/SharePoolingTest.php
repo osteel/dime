@@ -93,7 +93,7 @@ it('cannot acquire more of the same share pooling tokens because currencies don\
         costBasis: new FiatAmount('300', FiatCurrency::EUR),
     );
 
-    $cannotAcquireSharePoolingToken = SharePoolingException::cannotAcquireFromDifferentFiatCurrency(
+    $cannotAcquireSharePoolingToken = SharePoolingException::cannotAcquireFromDifferentCurrency(
         sharePoolingId: $this->sharePoolingId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
@@ -157,7 +157,7 @@ it('cannot dispose of some share pooling tokens because currencies don\'t match'
         proceeds: new FiatAmount('100', FiatCurrency::EUR),
     );
 
-    $cannotDisposeOfSharePoolingToken = SharePoolingException::cannotDisposeOfFromDifferentFiatCurrency(
+    $cannotDisposeOfSharePoolingToken = SharePoolingException::cannotDisposeOfFromDifferentCurrency(
         sharePoolingId: $this->sharePoolingId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,

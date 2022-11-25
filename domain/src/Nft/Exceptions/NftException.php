@@ -28,7 +28,7 @@ final class NftException extends RuntimeException
         ));
     }
 
-    public static function cannotIncreaseCostBasisFromDifferentFiatCurrency(
+    public static function cannotIncreaseCostBasisFromDifferentCurrency(
         NftId $nftId,
         FiatCurrency $from,
         FiatCurrency $to

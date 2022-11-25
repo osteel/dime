@@ -64,7 +64,7 @@ it('cannot increase the cost basis of a NFT that has not been acquired', functio
 it('cannot increase the cost basis of a NFT because the currency is different', function () {
     $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
     $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, costBasisIncrease: new FiatAmount('100', FiatCurrency::EUR));
-    $cannotIncreaseCostBasis = NftException::cannotIncreaseCostBasisFromDifferentFiatCurrency(
+    $cannotIncreaseCostBasis = NftException::cannotIncreaseCostBasisFromDifferentCurrency(
         nftId: $increaseNftCostBasis->nftId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,

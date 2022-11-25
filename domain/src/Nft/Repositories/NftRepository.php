@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain\Repositories;
+namespace Domain\Nft\Repositories;
 
 use Domain\Nft\Nft;
 use EventSauce\EventSourcing\ClassNameInflector;
