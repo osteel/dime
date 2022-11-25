@@ -65,7 +65,9 @@ final class SharePoolingTransactions implements IteratorAggregate
             } catch (SharePoolingTransactionException) {
             }
 
-            assert(! is_null($position = $transaction->getPosition()));
+            $position = $transaction->getPosition();
+
+            assert(! is_null($position));
 
             $this->transactions[$position] = $transaction;
         }
