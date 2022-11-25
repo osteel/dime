@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\SharePooling\Events;
 
 use Domain\SharePooling\SharePoolingId;

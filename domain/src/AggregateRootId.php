@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain;
 
 use EventSauce\EventSourcing\AggregateRootId as AggregateRootIdInterface;
@@ -13,7 +15,7 @@ abstract class AggregateRootId implements AggregateRootIdInterface
 
     public static function generate(): static
     {
-        return new static(Str::uuid());
+        return new static(Str::uuid()->toString());
     }
 
     public function toString(): string

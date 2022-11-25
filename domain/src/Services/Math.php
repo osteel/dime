@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Services;
 
 use Domain\Services\Exceptions\MathException;

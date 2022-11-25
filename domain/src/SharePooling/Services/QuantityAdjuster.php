@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\SharePooling\Services;
 
 use Domain\SharePooling\Services\Exceptions\QuantityAdjusterException;

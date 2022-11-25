@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\SharePooling\Exceptions;
 
 use Domain\Enums\FiatCurrency;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Domain\Nft;
 
 use Domain\Nft\Actions\AcquireNft;
