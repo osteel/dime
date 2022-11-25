@@ -42,7 +42,7 @@ final class SharePooling implements AggregateRoot
     public function acquire(AcquireSharePoolingToken $action): void
     {
         if ($this->fiatCurrency && $this->fiatCurrency !== $action->costBasis->currency) {
-            throw SharePoolingException::cannotAcquireFromDifferentFiatCurrency(
+            throw SharePoolingException::cannotAcquireFromDifferentCurrency(
                 sharePoolingId: $action->sharePoolingId,
                 from: $this->fiatCurrency,
                 to: $action->costBasis->currency,
@@ -99,7 +99,7 @@ final class SharePooling implements AggregateRoot
     public function disposeOf(DisposeOfSharePoolingToken $action): void
     {
         if ($this->fiatCurrency && $this->fiatCurrency !== $action->proceeds->currency) {
-            throw SharePoolingException::cannotDisposeOfFromDifferentFiatCurrency(
+            throw SharePoolingException::cannotDisposeOfFromDifferentCurrency(
                 sharePoolingId: $action->sharePoolingId,
                 from: $this->fiatCurrency,
                 to: $action->proceeds->currency,

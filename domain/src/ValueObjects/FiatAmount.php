@@ -22,6 +22,31 @@ final class FiatAmount implements Stringable
         return new self('0', $this->currency);
     }
 
+    public function isEqualTo(FiatAmount | Quantity | string $amount): bool
+    {
+        return Math::eq($this->amount, $this->extractValue($amount));
+    }
+
+    public function isGreaterThan(FiatAmount | Quantity | string $amount): bool
+    {
+        return Math::gt($this->amount, $this->extractValue($amount));
+    }
+
+    public function isGreaterThanOrEqualTo(FiatAmount | Quantity | string $amount): bool
+    {
+        return Math::gte($this->amount, $this->extractValue($amount));
+    }
+
+    public function isLessThan(FiatAmount | Quantity | string $amount): bool
+    {
+        return Math::lt($this->amount, $this->extractValue($amount));
+    }
+
+    public function isLessThanOrEqualTo(FiatAmount | Quantity | string $amount): bool
+    {
+        return Math::lte($this->amount, $this->extractValue($amount));
+    }
+
     /** @throws FiatAmountException */
     public function plus(FiatAmount | Quantity | string $operand): FiatAmount
     {

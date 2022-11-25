@@ -16,7 +16,7 @@ final class SharePoolingException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function cannotAcquireFromDifferentFiatCurrency(
+    public static function cannotAcquireFromDifferentCurrency(
         SharePoolingId $sharePoolingId,
         FiatCurrency $from,
         FiatCurrency $to
@@ -29,7 +29,7 @@ final class SharePoolingException extends RuntimeException
         ));
     }
 
-    public static function cannotDisposeOfFromDifferentFiatCurrency(
+    public static function cannotDisposeOfFromDifferentCurrency(
         SharePoolingId $sharePoolingId,
         FiatCurrency $from,
         FiatCurrency $to
@@ -48,7 +48,7 @@ final class SharePoolingException extends RuntimeException
         Quantity $availableQuantity
     ): self {
         return new self(sprintf(
-            'Tried to dispose of %s section 104 pool %s tokens but only %s are available',
+            'Trying to dispose of %s section 104 pool %s tokens but only %s are available',
             $disposalQuantity,
             $sharePoolingId->toString(),
             $availableQuantity,
