@@ -8,6 +8,7 @@ use Domain\Enums\FiatCurrency;
 use Domain\TaxYear\Actions\RecordCapitalGain;
 use Domain\TaxYear\Actions\RecordCapitalLoss;
 use Domain\TaxYear\Actions\RecordIncome;
+use Domain\TaxYear\Actions\RecordNonAttributableAllowableCost;
 use Domain\TaxYear\Actions\RevertCapitalGain;
 use Domain\TaxYear\Actions\RevertCapitalLoss;
 use Domain\TaxYear\Events\CapitalGainRecorded;
@@ -15,6 +16,7 @@ use Domain\TaxYear\Events\CapitalGainReverted;
 use Domain\TaxYear\Events\CapitalLossRecorded;
 use Domain\TaxYear\Events\CapitalLossReverted;
 use Domain\TaxYear\Events\IncomeRecorded;
+use Domain\TaxYear\Events\NonAttributableAllowableCostRecorded;
 use Domain\TaxYear\Exceptions\TaxYearException;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
@@ -27,6 +29,7 @@ final class TaxYear implements AggregateRoot
     private ?FiatCurrency $currency = null;
     private ?FiatAmount $capitalGainOrLoss = null;
     private ?FiatAmount $income = null;
+    private ?FiatAmount $nonAttributableAllowableCosts = null;
 
     public function recordCapitalGain(RecordCapitalGain $action): void
     {
@@ -117,10 +120,10 @@ final class TaxYear implements AggregateRoot
 
     public function recordIncome(RecordIncome $action): void
     {
-        if ($this->income && $this->income->currency !== $action->amount->currency) {
+        if ($this->currency && $this->currency !== $action->amount->currency) {
             throw TaxYearException::cannotRecordIncomeFromDifferentCurrency(
                 taxYearId: $action->taxYearId,
-                from: $this->income->currency,
+                from: $this->currency,
                 to: $action->amount->currency,
             );
         }
@@ -132,5 +135,24 @@ final class TaxYear implements AggregateRoot
     {
         $this->currency ??= $event->amount->currency;
         $this->income = $this->income?->plus($event->amount) ?? $event->amount;
+    }
+
+    public function recordNonAttributableAllowableCost(RecordNonAttributableAllowableCost $action): void
+    {
+        if ($this->currency && $this->currency !== $action->amount->currency) {
+            throw TaxYearException::cannotRecordNonAttributableAllowableCostFromDifferentCurrency(
+                taxYearId: $action->taxYearId,
+                from: $this->currency,
+                to: $action->amount->currency,
+            );
+        }
+
+        $this->recordThat(new NonAttributableAllowableCostRecorded(taxYearId: $action->taxYearId, amount: $action->amount));
+    }
+
+    public function applyNonAttributableAllowableCostRecorded(NonAttributableAllowableCostRecorded $event): void
+    {
+        $this->currency ??= $event->amount->currency;
+        $this->nonAttributableAllowableCosts = $this->nonAttributableAllowableCosts?->plus($event->amount) ?? $event->amount;
     }
 }

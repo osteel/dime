@@ -95,4 +95,17 @@ final class TaxYearException extends RuntimeException
             $to->name(),
         ));
     }
+
+    public static function cannotRecordNonAttributableAllowableCostFromDifferentCurrency(
+        TaxYearId $taxYearId,
+        FiatCurrency $from,
+        FiatCurrency $to
+    ): self {
+        return new self(sprintf(
+            'Cannot record a non-attributable allowable cost for tax year %s because the currencies don\'t match (from %s to %s)',
+            $taxYearId->toString(),
+            $from->name(),
+            $to->name(),
+        ));
+    }
 }

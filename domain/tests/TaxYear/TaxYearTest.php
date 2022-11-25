@@ -4,6 +4,7 @@ use Domain\Enums\FiatCurrency;
 use Domain\TaxYear\Actions\RecordCapitalGain;
 use Domain\TaxYear\Actions\RecordCapitalLoss;
 use Domain\TaxYear\Actions\RecordIncome;
+use Domain\TaxYear\Actions\RecordNonAttributableAllowableCost;
 use Domain\TaxYear\Actions\RevertCapitalGain;
 use Domain\TaxYear\Actions\RevertCapitalLoss;
 use Domain\TaxYear\Events\CapitalGainRecorded;
@@ -11,6 +12,7 @@ use Domain\TaxYear\Events\CapitalGainReverted;
 use Domain\TaxYear\Events\CapitalLossRecorded;
 use Domain\TaxYear\Events\CapitalLossReverted;
 use Domain\TaxYear\Events\IncomeRecorded;
+use Domain\TaxYear\Events\NonAttributableAllowableCostRecorded;
 use Domain\TaxYear\Exceptions\TaxYearException;
 use Domain\Tests\TaxYear\TaxYearTestCase;
 use Domain\ValueObjects\FiatAmount;
@@ -257,4 +259,43 @@ it('cannot record some income because the currency is different', function () {
     $this->given($incomeRecorded)
         ->when($recordIncome)
         ->expectToFail($cannotRecordIncome);
+});
+
+it('can record a non-attributable allowable cost', function () {
+    $recordNonAttributableAllowableCost = new RecordNonAttributableAllowableCost(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
+        taxYearId: $recordNonAttributableAllowableCost->taxYearId,
+        amount: $recordNonAttributableAllowableCost->amount,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->when($recordNonAttributableAllowableCost)
+        ->then($nonAttributableAllowableCostRecorded);
+});
+
+it('cannot record a non-attributable allowable cost because the currency is different', function () {
+    $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $recordNonAttributableAllowableCost = new RecordNonAttributableAllowableCost(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
+    $cannotRecordNonAttributableAllowableCost = TaxYearException::cannotRecordNonAttributableAllowableCostFromDifferentCurrency(
+        taxYearId: $recordNonAttributableAllowableCost->taxYearId,
+        from: FiatCurrency::GBP,
+        to: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($nonAttributableAllowableCostRecorded)
+        ->when($recordNonAttributableAllowableCost)
+        ->expectToFail($cannotRecordNonAttributableAllowableCost);
 });
