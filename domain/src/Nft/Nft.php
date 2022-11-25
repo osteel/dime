@@ -9,7 +9,6 @@ use Domain\Nft\Events\NftAcquired;
 use Domain\Nft\Events\NftCostBasisIncreased;
 use Domain\Nft\Events\NftDisposedOf;
 use Domain\Nft\Exceptions\NftException;
-use Domain\Services\Math;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
@@ -43,7 +42,7 @@ final class Nft implements AggregateRoot
         }
 
         if ($this->costBasis->currency !== $action->costBasisIncrease->currency) {
-            throw NftException::cannotIncreaseCostBasisFromDifferentCurrency(
+            throw NftException::cannotIncreaseCostBasisFromDifferentFiatCurrency(
                 nftId: $action->nftId,
                 from: $this->costBasis->currency,
                 to: $action->costBasisIncrease->currency,
@@ -60,12 +59,7 @@ final class Nft implements AggregateRoot
     {
         assert(! is_null($this->costBasis));
 
-        $newCostBasis = new FiatAmount(
-            amount: Math::add($this->costBasis->amount, $event->costBasisIncrease->amount),
-            currency: $this->costBasis->currency,
-        );
-
-        $this->costBasis = $newCostBasis;
+        $this->costBasis = $this->costBasis->plus($event->costBasisIncrease);
     }
 
     /** @throws NftException */
@@ -78,7 +72,7 @@ final class Nft implements AggregateRoot
         $this->recordThat(new NftDisposedOf(
             nftId: $action->nftId,
             costBasis: $this->costBasis,
-            disposalProceeds: $action->disposalProceeds
+            proceeds: $action->proceeds
         ));
     }
 

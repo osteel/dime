@@ -20,6 +20,7 @@
     "require": {
         "php": "^8.1",
         "ext-bcmath": "*",
+        "brick/date-time": "^0.4.1",
         "eventsauce/eventsauce": "^3.0",
         "illuminate/database": "^9.0",
         "laravel-zero/framework": "^9.1.3",

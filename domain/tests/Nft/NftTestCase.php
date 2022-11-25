@@ -7,10 +7,8 @@ use Domain\Nft\Actions\DisposeOfNft;
 use Domain\Nft\Actions\IncreaseNftCostBasis;
 use Domain\Nft\Nft;
 use Domain\Nft\NftId;
+use Domain\Tests\AggregateRootTestCase;
 use EventSauce\EventSourcing\AggregateRootId;
-use EventSauce\EventSourcing\MessageDispatcher;
-use EventSauce\EventSourcing\SynchronousMessageDispatcher;
-use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 
 abstract class NftTestCase extends AggregateRootTestCase
 {
@@ -35,10 +33,5 @@ abstract class NftTestCase extends AggregateRootTestCase
         };
 
         $this->repository->persist($nft);
-    }
-
-    protected function messageDispatcher(): MessageDispatcher
-    {
-        return new SynchronousMessageDispatcher();
     }
 }

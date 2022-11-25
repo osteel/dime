@@ -9,9 +9,7 @@ use EventSauce\EventSourcing\MessageDecorator;
 use EventSauce\EventSourcing\MessageDispatcher;
 use EventSauce\EventSourcing\MessageRepository;
 
-/**
- * @extends EventSourcedAggregateRootRepository<Nft>
- */
+/** @extends EventSourcedAggregateRootRepository<Nft> */
 final class NftRepository extends EventSourcedAggregateRootRepository
 {
     public function __construct(

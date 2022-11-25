@@ -3,7 +3,7 @@
 namespace Domain\Nft\Exceptions;
 
 use Domain\Nft\NftId;
-use Domain\Enums\Currency;
+use Domain\Enums\FiatCurrency;
 use RuntimeException;
 
 final class NftException extends RuntimeException
@@ -26,8 +26,11 @@ final class NftException extends RuntimeException
         ));
     }
 
-    public static function cannotIncreaseCostBasisFromDifferentCurrency(NftId $nftId, Currency $from, Currency $to): self
-    {
+    public static function cannotIncreaseCostBasisFromDifferentFiatCurrency(
+        NftId $nftId,
+        FiatCurrency $from,
+        FiatCurrency $to
+    ): self {
         return new self(sprintf(
             'Cannot increase the cost basis of NFT %s because the currencies don\'t match (from %s to %s)',
             $nftId->toString(),
