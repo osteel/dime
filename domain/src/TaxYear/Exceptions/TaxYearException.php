@@ -32,7 +32,7 @@ final class TaxYearException extends RuntimeException
     public static function cannotRevertCapitalGainBeforeCapitalGainIsRecorded(TaxYearId $taxYearId): self
     {
         return new self(sprintf(
-            'Cannot revert capital gain for tax year %s because no capital gain was recorded yet',
+            'Cannot revert capital gain for tax year %s because no capital gain or loss was recorded yet',
             $taxYearId->toString(),
         ));
     }
@@ -50,16 +50,37 @@ final class TaxYearException extends RuntimeException
         ));
     }
 
-    public static function cannotRevertCapitalGainBecauseAmountIsTooHigh(
+    public static function cannotRecordCapitalLossForDifferentCurrency(
         TaxYearId $taxYearId,
-        FiatAmount $amountToRevert,
-        FiatAmount $availableAmount
+        FiatCurrency $from,
+        FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Trying to revert capital gain of %s for tax year %s but only %s is available',
-            $amountToRevert,
+            'Cannot record capital loss for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
-            $availableAmount,
+            $from->name(),
+            $to->name(),
+        ));
+    }
+
+    public static function cannotRevertCapitalLossBeforeCapitalLossIsRecorded(TaxYearId $taxYearId): self
+    {
+        return new self(sprintf(
+            'Cannot revert capital loss for tax year %s because no capital gain or loss was recorded yet',
+            $taxYearId->toString(),
+        ));
+    }
+
+    public static function cannotRevertCapitalLossFromDifferentCurrency(
+        TaxYearId $taxYearId,
+        FiatCurrency $from,
+        FiatCurrency $to
+    ): self {
+        return new self(sprintf(
+            'Cannot revert capital loss for tax year %s because the currencies don\'t match (from %s to %s)',
+            $taxYearId->toString(),
+            $from->name(),
+            $to->name(),
         ));
     }
 }

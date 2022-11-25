@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Domain\TaxYear;
 
 use Domain\TaxYear\Actions\RecordCapitalGain;
+use Domain\TaxYear\Actions\RecordCapitalLoss;
 use Domain\TaxYear\Actions\RevertCapitalGain;
+use Domain\TaxYear\Actions\RevertCapitalLoss;
 use Domain\TaxYear\Events\CapitalGainRecorded;
 use Domain\TaxYear\Events\CapitalGainReverted;
+use Domain\TaxYear\Events\CapitalLossRecorded;
+use Domain\TaxYear\Events\CapitalLossReverted;
 use Domain\TaxYear\Exceptions\TaxYearException;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
@@ -17,14 +21,14 @@ final class TaxYear implements AggregateRoot
 {
     use AggregateRootBehaviour;
 
-    private ?FiatAmount $capitalGain = null;
+    private ?FiatAmount $capitalGainOrLoss = null;
 
     public function recordCapitalGain(RecordCapitalGain $action): void
     {
-        if ($this->capitalGain && $this->capitalGain->currency !== $action->amount->currency) {
+        if ($this->capitalGainOrLoss && $this->capitalGainOrLoss->currency !== $action->amount->currency) {
             throw TaxYearException::cannotRecordCapitalGainForDifferentCurrency(
                 taxYearId: $action->taxYearId,
-                from: $this->capitalGain->currency,
+                from: $this->capitalGainOrLoss->currency,
                 to: $action->amount->currency,
             );
         }
@@ -34,28 +38,20 @@ final class TaxYear implements AggregateRoot
 
     public function applyCapitalGainRecorded(CapitalGainRecorded $event): void
     {
-        $this->capitalGain = $this->capitalGain?->plus($event->amount) ?? $event->amount;
+        $this->capitalGainOrLoss = $this->capitalGainOrLoss?->plus($event->amount) ?? $event->amount;
     }
 
     public function revertCapitalGain(RevertCapitalGain $action): void
     {
-        if (is_null($this->capitalGain)) {
+        if (is_null($this->capitalGainOrLoss)) {
             throw TaxYearException::cannotRevertCapitalGainBeforeCapitalGainIsRecorded(taxYearId: $action->taxYearId);
         }
 
-        if ($this->capitalGain->currency !== $action->amount->currency) {
+        if ($this->capitalGainOrLoss->currency !== $action->amount->currency) {
             throw TaxYearException::cannotRevertCapitalGainFromDifferentCurrency(
                 taxYearId: $action->taxYearId,
-                from: $this->capitalGain->currency,
+                from: $this->capitalGainOrLoss->currency,
                 to: $action->amount->currency,
-            );
-        }
-
-        if ($this->capitalGain->isLessThan($action->amount)) {
-            throw TaxYearException::cannotRevertCapitalGainBecauseAmountIsTooHigh(
-                taxYearId: $action->taxYearId,
-                amountToRevert: $action->amount,
-                availableAmount: $this->capitalGain,
             );
         }
 
@@ -64,6 +60,47 @@ final class TaxYear implements AggregateRoot
 
     public function applyCapitalGainReverted(CapitalGainReverted $event): void
     {
-        $this->capitalGain = $this->capitalGain->minus($event->amount);
+        $this->capitalGainOrLoss = $this->capitalGainOrLoss->minus($event->amount);
+    }
+
+    public function recordCapitalLoss(RecordCapitalLoss $action): void
+    {
+        if ($this->capitalGainOrLoss && $this->capitalGainOrLoss->currency !== $action->amount->currency) {
+            throw TaxYearException::cannotRecordCapitalLossForDifferentCurrency(
+                taxYearId: $action->taxYearId,
+                from: $this->capitalGainOrLoss->currency,
+                to: $action->amount->currency,
+            );
+        }
+
+        $this->recordThat(new CapitalLossRecorded(taxYearId: $action->taxYearId, amount: $action->amount));
+    }
+
+    public function applyCapitalLossRecorded(CapitalLossRecorded $event): void
+    {
+        $this->capitalGainOrLoss = $this->capitalGainOrLoss?->minus($event->amount)
+            ?? $event->amount->nilAmount()->minus($event->amount);
+    }
+
+    public function revertCapitalLoss(RevertCapitalLoss $action): void
+    {
+        if (is_null($this->capitalGainOrLoss)) {
+            throw TaxYearException::cannotRevertCapitalLossBeforeCapitalLossIsRecorded(taxYearId: $action->taxYearId);
+        }
+
+        if ($this->capitalGainOrLoss->currency !== $action->amount->currency) {
+            throw TaxYearException::cannotRevertCapitalLossFromDifferentCurrency(
+                taxYearId: $action->taxYearId,
+                from: $this->capitalGainOrLoss->currency,
+                to: $action->amount->currency,
+            );
+        }
+
+        $this->recordThat(new CapitalLossReverted(taxYearId: $action->taxYearId, amount: $action->amount));
+    }
+
+    public function applyCapitalLossReverted(CapitalLossReverted $event): void
+    {
+        $this->capitalGainOrLoss = $this->capitalGainOrLoss->plus($event->amount);
     }
 }

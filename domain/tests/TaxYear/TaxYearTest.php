@@ -2,9 +2,13 @@
 
 use Domain\Enums\FiatCurrency;
 use Domain\TaxYear\Actions\RecordCapitalGain;
+use Domain\TaxYear\Actions\RecordCapitalLoss;
 use Domain\TaxYear\Actions\RevertCapitalGain;
+use Domain\TaxYear\Actions\RevertCapitalLoss;
 use Domain\TaxYear\Events\CapitalGainRecorded;
 use Domain\TaxYear\Events\CapitalGainReverted;
+use Domain\TaxYear\Events\CapitalLossRecorded;
+use Domain\TaxYear\Events\CapitalLossReverted;
 use Domain\TaxYear\Exceptions\TaxYearException;
 use Domain\Tests\TaxYear\TaxYearTestCase;
 use Domain\ValueObjects\FiatAmount;
@@ -115,25 +119,101 @@ it('cannot revert a capital gain because the currency is different', function ()
         ->expectToFail($cannotRevertCapitalGain);
 });
 
-it('cannot revert a capital gain because the amount is too high', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(
-        taxYearId: $this->taxYearId,
-        amount: new FiatAmount('50', FiatCurrency::GBP),
-    );
-
-    $revertCapitalGain = new RevertCapitalGain(
+it('can record a capital loss', function () {
+    $recordCapitalLoss = new RecordCapitalLoss(
         taxYearId: $this->taxYearId,
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
-    $cannotRevertCapitalGain = TaxYearException::cannotRevertCapitalGainBecauseAmountIsTooHigh(
-        taxYearId: $revertCapitalGain->taxYearId,
-        amountToRevert: $revertCapitalGain->amount,
-        availableAmount: $capitalGainRecorded->amount,
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYearId: $recordCapitalLoss->taxYearId,
+        amount: $recordCapitalLoss->amount,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($capitalGainRecorded)
-        ->when($revertCapitalGain)
-        ->expectToFail($cannotRevertCapitalGain);
+    $this->when($recordCapitalLoss)
+        ->then($capitalLossRecorded);
+});
+
+it('cannot record a capital loss because the currency is different', function () {
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $recordCapitalLoss = new RecordCapitalLoss(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
+    $cannotRecordCapitalLoss = TaxYearException::cannotRecordCapitalLossForDifferentCurrency(
+        taxYearId: $recordCapitalLoss->taxYearId,
+        from: FiatCurrency::GBP,
+        to: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($capitalLossRecorded)
+        ->when($recordCapitalLoss)
+        ->expectToFail($cannotRecordCapitalLoss);
+});
+
+it('can revert a capital loss', function () {
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $revertCapitalLoss = new RevertCapitalLoss(
+        taxYearId: $capitalLossRecorded->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $capitalLossReverted = new CapitalLossReverted(
+        taxYearId: $capitalLossRecorded->taxYearId,
+        amount: $revertCapitalLoss->amount,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($capitalLossRecorded)
+        ->when($revertCapitalLoss)
+        ->then($capitalLossReverted);
+});
+
+it('cannot revert a capital loss before a capital loss was recorded', function () {
+    $revertCapitalLoss = new RevertCapitalLoss(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
+    $cannotRevertCapitalLoss = TaxYearException::cannotRevertCapitalLossBeforeCapitalLossIsRecorded(
+        taxYearId: $revertCapitalLoss->taxYearId,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->when($revertCapitalLoss)
+        ->expectToFail($cannotRevertCapitalLoss);
+});
+
+it('cannot revert a capital loss because the currency is different', function () {
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $revertCapitalLoss = new RevertCapitalLoss(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
+    $cannotRevertCapitalLoss = TaxYearException::cannotRevertCapitalLossFromDifferentCurrency(
+        taxYearId: $revertCapitalLoss->taxYearId,
+        from: FiatCurrency::GBP,
+        to: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($capitalLossRecorded)
+        ->when($revertCapitalLoss)
+        ->expectToFail($cannotRevertCapitalLoss);
 });
