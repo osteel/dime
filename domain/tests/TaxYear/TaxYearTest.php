@@ -3,12 +3,14 @@
 use Domain\Enums\FiatCurrency;
 use Domain\TaxYear\Actions\RecordCapitalGain;
 use Domain\TaxYear\Actions\RecordCapitalLoss;
+use Domain\TaxYear\Actions\RecordIncome;
 use Domain\TaxYear\Actions\RevertCapitalGain;
 use Domain\TaxYear\Actions\RevertCapitalLoss;
 use Domain\TaxYear\Events\CapitalGainRecorded;
 use Domain\TaxYear\Events\CapitalGainReverted;
 use Domain\TaxYear\Events\CapitalLossRecorded;
 use Domain\TaxYear\Events\CapitalLossReverted;
+use Domain\TaxYear\Events\IncomeRecorded;
 use Domain\TaxYear\Exceptions\TaxYearException;
 use Domain\Tests\TaxYear\TaxYearTestCase;
 use Domain\ValueObjects\FiatAmount;
@@ -216,4 +218,43 @@ it('cannot revert a capital loss because the currency is different', function ()
     $this->given($capitalLossRecorded)
         ->when($revertCapitalLoss)
         ->expectToFail($cannotRevertCapitalLoss);
+});
+
+it('can record some income', function () {
+    $recordIncome = new RecordIncome(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $incomeRecorded = new IncomeRecorded(
+        taxYearId: $recordIncome->taxYearId,
+        amount: $recordIncome->amount,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->when($recordIncome)
+        ->then($incomeRecorded);
+});
+
+it('cannot record some income because the currency is different', function () {
+    $incomeRecorded = new IncomeRecorded(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $recordIncome = new RecordIncome(
+        taxYearId: $this->taxYearId,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
+    $cannotRecordIncome = TaxYearException::cannotRecordIncomeFromDifferentCurrency(
+        taxYearId: $recordIncome->taxYearId,
+        from: FiatCurrency::GBP,
+        to: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($incomeRecorded)
+        ->when($recordIncome)
+        ->expectToFail($cannotRecordIncome);
 });

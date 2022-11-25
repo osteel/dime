@@ -4,6 +4,7 @@ namespace Domain\Tests\TaxYear;
 
 use Domain\TaxYear\Actions\RecordCapitalGain;
 use Domain\TaxYear\Actions\RecordCapitalLoss;
+use Domain\TaxYear\Actions\RecordIncome;
 use Domain\TaxYear\Actions\RevertCapitalGain;
 use Domain\TaxYear\Actions\RevertCapitalLoss;
 use Domain\TaxYear\TaxYear;
@@ -32,6 +33,7 @@ abstract class TaxYearTestCase extends AggregateRootTestCase
             RevertCapitalGain::class => $taxYear->revertCapitalGain($action),
             RecordCapitalLoss::class => $taxYear->recordCapitalLoss($action),
             RevertCapitalLoss::class => $taxYear->revertCapitalLoss($action),
+            RecordIncome::class => $taxYear->recordIncome($action),
         };
 
         $this->repository->persist($taxYear);

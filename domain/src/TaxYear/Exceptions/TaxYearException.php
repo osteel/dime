@@ -82,4 +82,17 @@ final class TaxYearException extends RuntimeException
             $to->name(),
         ));
     }
+
+    public static function cannotRecordIncomeFromDifferentCurrency(
+        TaxYearId $taxYearId,
+        FiatCurrency $from,
+        FiatCurrency $to
+    ): self {
+        return new self(sprintf(
+            'Cannot record some income for tax year %s because the currencies don\'t match (from %s to %s)',
+            $taxYearId->toString(),
+            $from->name(),
+            $to->name(),
+        ));
+    }
 }
