@@ -2,6 +2,7 @@
 
 namespace Domain\SharePooling\ValueObjects;
 
+use Brick\DateTime\LocalDate;
 use Domain\SharePooling\ValueObjects\Exceptions\SharePoolingTransactionException;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
@@ -15,12 +16,20 @@ abstract class SharePoolingTransaction implements Stringable
     protected bool $processed;
     protected ?int $position = null;
 
+    public function __construct(
+        public readonly LocalDate $date,
+        public readonly Quantity $quantity,
+        public readonly FiatAmount $costBasis,
+    ) {
+    }
+
     abstract public function copy(): static;
 
+    /** @throws SharePoolingTransactionException */
     public function setPosition(?int $position = null): static
     {
         if (! is_null($this->position)) {
-            throw SharePoolingTransactionException::positionAlreadySet($this, $position);
+            throw SharePoolingTransactionException::positionAlreadySet($this, $this->position);
         }
 
         $this->position = $position;

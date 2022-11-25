@@ -30,9 +30,11 @@ final class SharePoolingTransactions implements IteratorAggregate
 
     private function collectionClassForType(?string $type = null): string
     {
-        return $type
-            ? ($type === SharePoolingTokenAcquisition::class ? SharePoolingTokenAcquisitions::class : SharePoolingTokenDisposals::class)
-            : SharePoolingTransactions::class;
+        return match ($type) {
+            SharePoolingTokenAcquisition::class => SharePoolingTokenAcquisitions::class,
+            SharePoolingTokenDisposal::class => SharePoolingTokenDisposals::class,
+            default => SharePoolingTransactions::class,
+        };
     }
 
     public function isEmpty(): bool
@@ -63,7 +65,9 @@ final class SharePoolingTransactions implements IteratorAggregate
             } catch (SharePoolingTransactionException) {
             }
 
-            $this->transactions[$transaction->getPosition()] = $transaction;
+            assert(! is_null($position = $transaction->getPosition()));
+
+            $this->transactions[$position] = $transaction;
         }
 
         return $this;
@@ -105,11 +109,13 @@ final class SharePoolingTransactions implements IteratorAggregate
 
     public function acquisitionsMadeOn(LocalDate $date): SharePoolingTokenAcquisitions
     {
+        // @phpstan-ignore-next-line
         return $this->madeOn($date, SharePoolingTokenAcquisition::class);
     }
 
     public function disposalsMadeOn(LocalDate $date): SharePoolingTokenDisposals
     {
+        // @phpstan-ignore-next-line
         return $this->madeOn($date, SharePoolingTokenDisposal::class);
     }
 
@@ -137,12 +143,14 @@ final class SharePoolingTransactions implements IteratorAggregate
     /** Return acquisitions made between two dates (inclusive) */
     public function acquisitionsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTokenAcquisitions
     {
+        // @phpstan-ignore-next-line
         return $this->madeBetween($from, $to, SharePoolingTokenAcquisition::class);
     }
 
     /** Return disposals made between two dates (inclusive) */
     public function disposalsMadeBetween(LocalDate $from, LocalDate $to): SharePoolingTokenDisposals
     {
+        // @phpstan-ignore-next-line
         return $this->madeBetween($from, $to, SharePoolingTokenDisposal::class);
     }
 
@@ -171,6 +179,7 @@ final class SharePoolingTransactions implements IteratorAggregate
     /** Return acquisitions made before a date (exclusive) */
     public function acquisitionsMadeBefore(LocalDate $date): SharePoolingTokenAcquisitions
     {
+        // @phpstan-ignore-next-line
         return $this->madeBefore($date, SharePoolingTokenAcquisition::class);
     }
 
@@ -183,6 +192,7 @@ final class SharePoolingTransactions implements IteratorAggregate
     /** Return disposals made before a date (exclusive) */
     public function disposalsMadeBefore(LocalDate $date): SharePoolingTokenDisposals
     {
+        // @phpstan-ignore-next-line
         return $this->madeBefore($date, SharePoolingTokenDisposal::class);
     }
 
@@ -217,6 +227,7 @@ final class SharePoolingTransactions implements IteratorAggregate
     /** Return acquisitions made after a date (exclusive) */
     public function acquisitionsMadeAfter(LocalDate $date): SharePoolingTokenAcquisitions
     {
+        // @phpstan-ignore-next-line
         return $this->madeAfter($date, SharePoolingTokenAcquisition::class);
     }
 
@@ -229,6 +240,7 @@ final class SharePoolingTransactions implements IteratorAggregate
     /** Return disposals made after a date (exclusive) */
     public function disposalsMadeAfter(LocalDate $date): SharePoolingTokenDisposals
     {
+        // @phpstan-ignore-next-line
         return $this->madeAfter($date, SharePoolingTokenDisposal::class);
     }
 

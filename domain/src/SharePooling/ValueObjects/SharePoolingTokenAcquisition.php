@@ -10,17 +10,21 @@ use Domain\ValueObjects\Quantity;
 
 final class SharePoolingTokenAcquisition extends SharePoolingTransaction
 {
+    private Quantity $sameDayQuantity;
+    private Quantity $thirtyDayQuantity;
+
     public function __construct(
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
-        private ?Quantity $sameDayQuantity = null,
-        private ?Quantity $thirtyDayQuantity = null,
+        ?Quantity $sameDayQuantity = null,
+        ?Quantity $thirtyDayQuantity = null,
     ) {
         $this->sameDayQuantity = $sameDayQuantity ?? Quantity::zero();
         $this->thirtyDayQuantity = $thirtyDayQuantity ?? Quantity::zero();
     }
 
+    /** @return SharePoolingTokenAcquisitionFactory<static> */
     protected static function newFactory(): SharePoolingTokenAcquisitionFactory
     {
         return SharePoolingTokenAcquisitionFactory::new();

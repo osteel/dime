@@ -163,7 +163,7 @@ it('can return a collection of disposals that happened on a specific day', funct
     'scenario 4' => ['2015-10-24', 1],
 ]);
 
-it('can return a collection of transactions that happened between two dates', function (string $date1, string $date2,  int $count) {
+it('can return a collection of transactions that happened between two dates', function (string $date1, string $date2, int $count) {
     /** @var SharePoolingTransactions */
     $transactions = SharePoolingTransactions::make(
         SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
@@ -185,7 +185,7 @@ it('can return a collection of transactions that happened between two dates', fu
     'scenario 6' => ['2015-10-26', '2015-10-27', 0],
 ]);
 
-it('can return a collection of acquisitions that happened between two dates', function (string $date1, string $date2,  int $count) {
+it('can return a collection of acquisitions that happened between two dates', function (string $date1, string $date2, int $count) {
     /** @var SharePoolingTransactions */
     $transactions = SharePoolingTransactions::make(
         SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),
@@ -207,7 +207,7 @@ it('can return a collection of acquisitions that happened between two dates', fu
     'scenario 6' => ['2015-10-26', '2015-10-27', 0],
 ]);
 
-it('can return a collection of disposals that happened between two dates', function (string $date1, string $date2,  int $count) {
+it('can return a collection of disposals that happened between two dates', function (string $date1, string $date2, int $count) {
     /** @var SharePoolingTransactions */
     $transactions = SharePoolingTransactions::make(
         SharePoolingTokenAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-21')]),

@@ -5,6 +5,7 @@ namespace Domain\SharePooling\Services;
 use Domain\SharePooling\Services\Exceptions\QuantityAdjusterException;
 use Domain\SharePooling\ValueObjects\QuantityBreakdown;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenAcquisitions;
 use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\SharePooling\ValueObjects\SharePoolingTransactions;
 
@@ -23,26 +24,23 @@ final class QuantityAdjuster
         }
     }
 
-    /**
-     * @return array<int, SharePoolingTokenAcquisition>
-     * @throws QuantityAdjusterException
-     */
+    /** @throws QuantityAdjusterException */
     private static function getAcquisitions(
         QuantityBreakdown $breakdown,
         SharePoolingTransactions $transactions,
-    ): array {
-        $acquisitions = [];
+    ): SharePoolingTokenAcquisitions {
+        $acquisitions = SharePoolingTokenAcquisitions::make();
 
         foreach ($breakdown->positions() as $position) {
             if (is_null($acquisition = $transactions->get($position))) {
-                QuantityAdjusterException::transactionNotFound($position);
+                throw QuantityAdjusterException::transactionNotFound($position);
             }
 
             if (! $acquisition instanceof SharePoolingTokenAcquisition) {
-                QuantityAdjusterException::notAnAcquisition($position);
+                throw QuantityAdjusterException::notAnAcquisition($position);
             }
 
-            $acquisitions[] = $acquisition;
+            $acquisitions->add($acquisition);
         }
 
         return $acquisitions;

@@ -47,6 +47,8 @@ final class DisposalProcessor
         QuantityBreakdown $thirtyDayQuantityBreakdown,
         Quantity $remainingQuantity,
     ): FiatAmount {
+        assert($transactions->first() !== null);
+
         $costBasis = $transactions->first()->costBasis->nilAmount();
 
         return self::processSameDayAcquisitions(
@@ -88,6 +90,8 @@ final class DisposalProcessor
         // just the ones with available same-day quantity). We want the absolute value here,
         // regardless of other types of matching, because same-day matching gets priority
         $sameDayAcquisitionsAverageCostBasisPerUnit = $transactions->acquisitionsMadeOn($date)->averageCostBasisPerUnit();
+
+        assert($sameDayAcquisitionsAverageCostBasisPerUnit !== null);
 
         // Apply this average cost basis to the disposed of asset, up to the
         // quantity acquired that day not yet matched with same-day disposals
@@ -157,7 +161,12 @@ final class DisposalProcessor
                 continue;
             }
 
-            $costBasis = $costBasis->plus($acquisition->averageCostBasisPerUnit()->multipliedBy($thirtyDayQuantityToApply));
+            $averageCostBasisPerUnit = $acquisition->averageCostBasisPerUnit();
+
+            $costBasis = $averageCostBasisPerUnit
+                ? $costBasis->plus($averageCostBasisPerUnit->multipliedBy($thirtyDayQuantityToApply))
+                : $costBasis;
+
             $thirtyDayQuantityBreakdown->assignQuantity($thirtyDayQuantityToApply, $acquisition);
             $acquisition->increaseThirtyDayQuantity($thirtyDayQuantityToApply);
             $remainingQuantity = $remainingQuantity->minus($thirtyDayQuantityToApply);
@@ -190,7 +199,9 @@ final class DisposalProcessor
         $averageCostBasisPerUnit = $priorAcquisitions->averageSection104PoolCostBasisPerUnit();
 
         // Apply the section 104 pool's average cost basis per unit to the remainder
-        $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($remainingQuantity));
+        $costBasis = $averageCostBasisPerUnit
+            ? $costBasis->plus($averageCostBasisPerUnit->multipliedBy($remainingQuantity))
+            : $costBasis;
 
         return $costBasis;
     }

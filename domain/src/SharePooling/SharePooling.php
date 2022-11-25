@@ -106,7 +106,9 @@ final class SharePooling implements AggregateRoot
 
         // We check the absolute available quantity up to and including the disposal's
         // date, excluding potential reverted disposals made later on that day
-        $availableQuantity = $this->transactions->madeBeforeOrOn($action->date)->processed()->quantity();
+        $previousTransactions = $this->transactions->madeBeforeOrOn($action->date);
+        assert($previousTransactions instanceof SharePoolingTransactions);
+        $availableQuantity = $previousTransactions->processed()->quantity();
 
         if ($action->quantity->isGreaterThan($availableQuantity)) {
             throw SharePoolingException::insufficientQuantity(

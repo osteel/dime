@@ -20,6 +20,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
     ) {
     }
 
+    /** @return SharePoolingTokenDisposalFactory<static> */
     protected static function newFactory(): SharePoolingTokenDisposalFactory
     {
         return SharePoolingTokenDisposalFactory::new();

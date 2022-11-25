@@ -60,6 +60,7 @@ final class QuantityBreakdown
         return $this;
     }
 
+    /** @return array<int> */
     public function positions(): array
     {
         return array_keys($this->breakdown);

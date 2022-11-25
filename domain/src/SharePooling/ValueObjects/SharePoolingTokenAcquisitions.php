@@ -3,6 +3,7 @@
 namespace Domain\SharePooling\ValueObjects;
 
 use ArrayIterator;
+use Domain\SharePooling\ValueObjects\Exceptions\SharePoolingTransactionException;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
@@ -35,6 +36,22 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
     public function count(): int
     {
         return count($this->acquisitions);
+    }
+
+    public function add(SharePoolingTokenAcquisition ...$acquisitions): self
+    {
+        foreach ($acquisitions as $acquisition) {
+            try {
+                $acquisition->setPosition($this->count());
+            } catch (SharePoolingTransactionException) {
+            }
+
+            assert(! is_null($position = $acquisition->getPosition()));
+
+            $this->acquisitions[$position] = $acquisition;
+        }
+
+        return $this;
     }
 
     public function quantity(): Quantity

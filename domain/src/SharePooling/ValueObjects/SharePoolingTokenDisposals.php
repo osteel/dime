@@ -45,7 +45,9 @@ final class SharePoolingTokenDisposals implements IteratorAggregate
             } catch (SharePoolingTransactionException) {
             }
 
-            $this->disposals[$disposal->getPosition()] = $disposal;
+            assert(! is_null($position = $disposal->getPosition()));
+
+            $this->disposals[$position] = $disposal;
         }
 
         return $this;

@@ -36,6 +36,15 @@ it('can make a collection of acquisitions', function () {
     expect($acquisitions->count())->toBeInt()->toBe(3);
 });
 
+it('can add an acquisition to a collection of acquisitions', function () {
+    /** @var SharePoolingTokenAcquisition */
+    $acquisition = SharePoolingTokenAcquisition::factory()->make();
+
+    $acquisitions = SharePoolingTokenAcquisitions::make($acquisition)->add($acquisition);
+
+    expect($acquisitions->count())->toBeInt()->toBe(2);
+});
+
 it('can return the total quantity of a collection of acquisitions', function (array $quantities, string $total) {
     $items = [];
 
