@@ -70,6 +70,8 @@ return [
 
     'providers' => [
         App\Providers\AppServiceProvider::class,
+        App\Nft\NftServiceProvider::class,
+        App\TaxYear\TaxYearServiceProvider::class,
     ],
 
 ];

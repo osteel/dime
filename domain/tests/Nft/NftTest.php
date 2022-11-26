@@ -1,5 +1,6 @@
 <?php
 
+use Brick\DateTime\LocalDate;
 use Domain\Enums\FiatCurrency;
 use Domain\Nft\Actions\AcquireNft;
 use Domain\Nft\Actions\DisposeOfNft;
@@ -19,8 +20,17 @@ beforeEach(function () {
 });
 
 it('can acquire a NFT', function () {
-    $acquireNft = new AcquireNft(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
-    $nftAcquired = new NftAcquired(nftId: $acquireNft->nftId, costBasis: $acquireNft->costBasis);
+    $acquireNft = new AcquireNft(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $nftAcquired = new NftAcquired(
+        nftId: $acquireNft->nftId,
+        date: $acquireNft->date,
+        costBasis: $acquireNft->costBasis,
+    );
 
     /** @var AggregateRootTestCase $this */
     $this->when($acquireNft)
@@ -28,8 +38,18 @@ it('can acquire a NFT', function () {
 });
 
 it('cannot acquire the same NFT more than once', function () {
-    $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
-    $acquireSameNft = new AcquireNft(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
+    $nftAcquired = new NftAcquired(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $acquireSameNft = new AcquireNft(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
     $alreadyAcquired = NftException::alreadyAcquired($acquireSameNft->nftId);
 
     /** @var AggregateRootTestCase $this */
@@ -39,10 +59,21 @@ it('cannot acquire the same NFT more than once', function () {
 });
 
 it('can increase the cost basis of a NFT', function () {
-    $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
-    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, costBasisIncrease: new FiatAmount('50', FiatCurrency::GBP));
+    $nftAcquired = new NftAcquired(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $increaseNftCostBasis = new IncreaseNftCostBasis(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasisIncrease: new FiatAmount('50', FiatCurrency::GBP),
+    );
+
     $nftCostBasisIncreased = new NftCostBasisIncreased(
         nftId: $increaseNftCostBasis->nftId,
+        date: $increaseNftCostBasis->date,
         costBasisIncrease: $increaseNftCostBasis->costBasisIncrease,
     );
 
@@ -53,7 +84,12 @@ it('can increase the cost basis of a NFT', function () {
 });
 
 it('cannot increase the cost basis of a NFT that has not been acquired', function () {
-    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, costBasisIncrease: new FiatAmount('100', FiatCurrency::GBP));
+    $increaseNftCostBasis = new IncreaseNftCostBasis(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasisIncrease: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
     $cannotIncreaseCostBasis = NftException::cannotIncreaseCostBasisBeforeAcquisition($increaseNftCostBasis->nftId);
 
     /** @var AggregateRootTestCase $this */
@@ -62,8 +98,18 @@ it('cannot increase the cost basis of a NFT that has not been acquired', functio
 });
 
 it('cannot increase the cost basis of a NFT because the currency is different', function () {
-    $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
-    $increaseNftCostBasis = new IncreaseNftCostBasis(nftId: $this->nftId, costBasisIncrease: new FiatAmount('100', FiatCurrency::EUR));
+    $nftAcquired = new NftAcquired(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $increaseNftCostBasis = new IncreaseNftCostBasis(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasisIncrease: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
     $cannotIncreaseCostBasis = NftException::cannotIncreaseCostBasisFromDifferentCurrency(
         nftId: $increaseNftCostBasis->nftId,
         from: FiatCurrency::GBP,
@@ -77,10 +123,21 @@ it('cannot increase the cost basis of a NFT because the currency is different', 
 });
 
 it('can dispose of a NFT', function () {
-    $nftAcquired = new NftAcquired(nftId: $this->nftId, costBasis: new FiatAmount('100', FiatCurrency::GBP));
-    $disposeOfNft = new DisposeOfNft(nftId: $this->nftId, proceeds: new FiatAmount('150', FiatCurrency::GBP));
+    $nftAcquired = new NftAcquired(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $disposeOfNft = new DisposeOfNft(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+    );
+
     $nftDisposedOf = new NftDisposedOf(
         nftId: $disposeOfNft->nftId,
+        date: $disposeOfNft->date,
         costBasis: $nftAcquired->costBasis,
         proceeds: $disposeOfNft->proceeds,
     );
@@ -92,7 +149,12 @@ it('can dispose of a NFT', function () {
 });
 
 it('cannot dispose of a NFT that has not been acquired', function () {
-    $disposeOfNft = new DisposeOfNft(nftId: $this->nftId, proceeds: new FiatAmount('100', FiatCurrency::GBP));
+    $disposeOfNft = new DisposeOfNft(
+        nftId: $this->nftId,
+        date: LocalDate::parse('2015-10-21'),
+        proceeds: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
     $cannotDisposeOf = NftException::cannotDisposeOfBeforeAcquisition($disposeOfNft->nftId);
 
     /** @var AggregateRootTestCase $this */

@@ -7,9 +7,11 @@ namespace Domain\ValueObjects;
 use Domain\Enums\FiatCurrency;
 use Domain\Services\Math;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
+use Illuminate\Contracts\Support\Arrayable;
 use Stringable;
 
-final class FiatAmount implements Stringable
+/** @implements Arrayable<string, string|array<string, string>> */
+final class FiatAmount implements Arrayable, Stringable
 {
     public function __construct(
         public readonly string $amount,
@@ -95,6 +97,24 @@ final class FiatAmount implements Stringable
         if (count($currencies) > 1) {
             throw FiatAmountException::fiatCurrenciesDoNotMatch(...$currencies);
         }
+    }
+
+    /** @return array<string, string> */
+    public function toArray(): array
+    {
+        return [
+            'amount' => $this->amount,
+            'currency' => $this->currency->value,
+        ];
+    }
+
+    /** @param array<string, string> $attributes */
+    public static function fromArray(array $attributes): FiatAmount
+    {
+        return new self(
+            amount: $attributes['amount'],
+            currency: FiatCurrency::from($attributes['currency']),
+        );
     }
 
     public function __toString(): string
