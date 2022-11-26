@@ -30,9 +30,9 @@ final class TaxYearRepository extends EventSourcedAggregateRootRepository implem
         return $this->retrieve($taxYearId);
     }
 
-    public function save(TaxYearId $taxYearId): TaxYear
+    public function save(TaxYear $taxYear): self
     {
-        $this->persist($taxYearId);
+        $this->persist($taxYear);
 
         return $this;
     }

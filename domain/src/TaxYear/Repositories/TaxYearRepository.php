@@ -11,5 +11,5 @@ interface TaxYearRepository
 {
     public function get(TaxYearId $taxYearId): TaxYear;
 
-    public function save(TaxYearId $taxYearId): TaxYear;
+    public function save(TaxYear $taxYear): self;
 }

@@ -33,6 +33,6 @@ final class NftReactor extends EventConsumer
             );
         }
 
-        $this->taxYearRepository->save($taxYearId);
+        $this->taxYearRepository->save($taxYear);
     }
 }
