@@ -28,7 +28,11 @@ final class Nft implements AggregateRoot
             throw NftException::alreadyAcquired($action->nftId);
         }
 
-        $this->recordThat(new NftAcquired(nftId: $action->nftId, costBasis: $action->costBasis));
+        $this->recordThat(new NftAcquired(
+            nftId: $action->nftId,
+            date: $action->date,
+            costBasis: $action->costBasis,
+        ));
     }
 
     public function applyNftAcquired(NftAcquired $event): void
@@ -53,6 +57,7 @@ final class Nft implements AggregateRoot
 
         $this->recordThat(new NftCostBasisIncreased(
             nftId: $action->nftId,
+            date: $action->date,
             costBasisIncrease: $action->costBasisIncrease,
         ));
     }
@@ -73,6 +78,7 @@ final class Nft implements AggregateRoot
 
         $this->recordThat(new NftDisposedOf(
             nftId: $action->nftId,
+            date: $action->date,
             costBasis: $this->costBasis,
             proceeds: $action->proceeds
         ));

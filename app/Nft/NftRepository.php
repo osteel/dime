@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Nft;
 
 use Domain\Nft\Nft;
+use Domain\Nft\NftId;
+use Domain\Nft\Repositories\NftRepository as NftRepositoryInterface;
 use EventSauce\EventSourcing\ClassNameInflector;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\MessageDecorator;
@@ -12,7 +14,7 @@ use EventSauce\EventSourcing\MessageDispatcher;
 use EventSauce\EventSourcing\MessageRepository;
 
 /** @extends EventSourcedAggregateRootRepository<Nft> */
-final class NftRepository extends EventSourcedAggregateRootRepository
+final class NftRepository extends EventSourcedAggregateRootRepository implements NftRepositoryInterface
 {
     public function __construct(
         MessageRepository $messageRepository,
@@ -21,5 +23,10 @@ final class NftRepository extends EventSourcedAggregateRootRepository
         ClassNameInflector $classNameInflector,
     ) {
         parent::__construct(Nft::class, $messageRepository, $dispatcher, $decorator, $classNameInflector);
+    }
+
+    public function get(NftId $nftId): Nft
+    {
+        return $this->retrieve($nftId);
     }
 }

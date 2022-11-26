@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Nft\Events;
 
+use Brick\DateTime\LocalDate;
 use Domain\Nft\NftId;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
@@ -12,6 +13,7 @@ final class NftCostBasisIncreased implements SerializablePayload
 {
     public function __construct(
         public readonly NftId $nftId,
+        public readonly LocalDate $date,
         public readonly FiatAmount $costBasisIncrease,
     ) {
     }
@@ -21,6 +23,7 @@ final class NftCostBasisIncreased implements SerializablePayload
     {
         return [
             'nft_id' => $this->nftId->id,
+            'date' => $this->date->__toString(),
             'cost_basis_increase' => $this->costBasisIncrease->toArray(),
         ];
     }
@@ -30,6 +33,7 @@ final class NftCostBasisIncreased implements SerializablePayload
     {
         return new static(
             NftId::fromString($payload['nft_id']), // @phpstan-ignore-line
+            LocalDate::parse($payload['date']), // @phpstan-ignore-line
             FiatAmount::fromArray($payload['cost_basis_increase']), // @phpstan-ignore-line
         );
     }

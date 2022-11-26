@@ -12,8 +12,7 @@ return new class () extends Migration {
      */
     public function up()
     {
-        Schema::create('nft_events', function (Blueprint $table) {
-            $table->id()->unsigned();
+        Schema::create('tax_year_events', function (Blueprint $table) {
             $table->uuid('event_id');
             $table->uuid('aggregate_root_id');
             $table->unsignedInteger('version')->nullable();
@@ -30,6 +29,6 @@ return new class () extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('nft_events');
+        Schema::dropIfExists('tax_year_events');
     }
 };
