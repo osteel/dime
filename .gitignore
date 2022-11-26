@@ -2,6 +2,7 @@
 /.idea
 /.vscode
 /.vagrant
+/database/database.sqlite
 .phpunit.result.cache
 composer.lock/database/database.sqlite
 .env
