@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Domain;
 
 use EventSauce\EventSourcing\AggregateRootId as AggregateRootIdInterface;
-use Illuminate\Support\Str;
+use Ramsey\Uuid\Uuid;
 
 abstract class AggregateRootId implements AggregateRootIdInterface
 {
@@ -15,7 +15,7 @@ abstract class AggregateRootId implements AggregateRootIdInterface
 
     public static function generate(): static
     {
-        return new static(Str::uuid()->toString());
+        return new static(Uuid::uuid4()->toString());
     }
 
     public function toString(): string
