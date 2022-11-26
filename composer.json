@@ -35,6 +35,7 @@
         "laravel/pint": "^1.2",
         "mockery/mockery": "^1.4.4",
         "pestphp/pest": "^1.21.3",
+        "pestphp/pest-plugin-mock": "^1.0",
         "phpstan/phpstan": "^1.8"
     },
     "autoload": {

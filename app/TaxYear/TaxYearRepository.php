@@ -29,4 +29,11 @@ final class TaxYearRepository extends EventSourcedAggregateRootRepository implem
     {
         return $this->retrieve($taxYearId);
     }
+
+    public function save(TaxYearId $taxYearId): TaxYear
+    {
+        $this->persist($taxYearId);
+
+        return $this;
+    }
 }
