@@ -27,7 +27,7 @@ abstract class TaxYearTestCase extends AggregateRootTestCase
 
     public function handle(object $action)
     {
-        $taxYear = $this->repository->retrieve($action->taxYearId);
+        $taxYear = $this->repository->retrieve($this->aggregateRootId);
 
         match ($action::class) {
             RecordCapitalGain::class => $taxYear->recordCapitalGain($action),
