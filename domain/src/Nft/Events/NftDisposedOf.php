@@ -22,8 +22,8 @@ final class NftDisposedOf implements SerializablePayload
     {
         return [
             'date' => $this->date->__toString(),
-            'cost_basis' => $this->costBasis->toArray(),
-            'proceeds' => $this->proceeds->toArray(),
+            'cost_basis' => $this->costBasis->toPayload(),
+            'proceeds' => $this->proceeds->toPayload(),
         ];
     }
 
@@ -32,8 +32,8 @@ final class NftDisposedOf implements SerializablePayload
     {
         return new static(
             LocalDate::parse($payload['date']), // @phpstan-ignore-line
-            FiatAmount::fromArray($payload['cost_basis']), // @phpstan-ignore-line
-            FiatAmount::fromArray($payload['proceeds']), // @phpstan-ignore-line
+            FiatAmount::fromPayload($payload['cost_basis']), // @phpstan-ignore-line
+            FiatAmount::fromPayload($payload['proceeds']), // @phpstan-ignore-line
         );
     }
 }

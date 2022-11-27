@@ -6,8 +6,9 @@ namespace Domain\SharePooling\ValueObjects;
 
 use Domain\SharePooling\ValueObjects\Exceptions\QuantityBreakdownException;
 use Domain\ValueObjects\Quantity;
+use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class QuantityBreakdown
+final class QuantityBreakdown implements SerializablePayload
 {
     private Quantity $quantity;
 
@@ -66,5 +67,21 @@ final class QuantityBreakdown
     public function positions(): array
     {
         return array_keys($this->breakdown);
+    }
+
+    /** @return array<string, array<string>> */
+    public function toPayload(): array
+    {
+        return [
+            'breakdown' => array_map(fn (Quantity $quantity) => $quantity->__toString(), $this->breakdown),
+        ];
+    }
+
+    /** @param array<string, array<string>> $payload */
+    public static function fromPayload(array $payload): static
+    {
+        return new self(
+            breakdown: array_map(fn (string $quantity) => new Quantity($quantity), $payload['breakdown']),
+        );
     }
 }

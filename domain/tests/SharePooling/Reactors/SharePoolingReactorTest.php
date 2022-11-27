@@ -1,0 +1,116 @@
+<?php
+
+use Brick\DateTime\LocalDate;
+use Domain\Enums\FiatCurrency;
+use Domain\SharePooling\Events\SharePoolingTokenDisposalReverted;
+use Domain\SharePooling\Events\SharePoolingTokenDisposedOf;
+use Domain\SharePooling\ValueObjects\QuantityBreakdown;
+use Domain\SharePooling\ValueObjects\SharePoolingTokenDisposal;
+use Domain\TaxYear\Actions\RecordCapitalGain;
+use Domain\TaxYear\Actions\RecordCapitalLoss;
+use Domain\TaxYear\Actions\RevertCapitalGain;
+use Domain\TaxYear\Actions\RevertCapitalLoss;
+use Domain\TaxYear\TaxYear;
+use Domain\Tests\SharePooling\Reactors\SharePoolingReactorTestCase;
+use Domain\ValueObjects\FiatAmount;
+use Domain\ValueObjects\Quantity;
+use EventSauce\EventSourcing\Message;
+use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
+
+uses(SharePoolingReactorTestCase::class);
+
+it('can handle a capital gain', function () {
+    $taxYearSpy = Mockery::spy(TaxYear::class);
+    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
+    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
+
+    $sharePoolingTokenDisposedOf = new SharePoolingTokenDisposedOf(
+        new SharePoolingTokenDisposal(
+            date: LocalDate::parse('2015-10-21'),
+            quantity: new Quantity('100'),
+            costBasis: new FiatAmount('100', FiatCurrency::GBP),
+            proceeds: new FiatAmount('101', FiatCurrency::GBP),
+            sameDayQuantityBreakdown: new QuantityBreakdown(),
+            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+        ),
+    );
+
+    /** @var MessageConsumerTestCase $this */
+    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
+        ->when(new Message($sharePoolingTokenDisposedOf))
+        ->then(fn () => $taxYearSpy->shouldHaveReceived('recordCapitalGain')
+            ->once()
+            ->withArgs(fn (RecordCapitalGain $action) => $action->amount->isEqualTo('1')));
+});
+
+it('can handle a capital loss', function () {
+    $taxYearSpy = Mockery::spy(TaxYear::class);
+    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
+    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
+
+    $sharePoolingTokenDisposedOf = new SharePoolingTokenDisposedOf(
+        new SharePoolingTokenDisposal(
+            quantity: new Quantity('100'),
+            date: LocalDate::parse('2015-10-21'),
+            costBasis: new FiatAmount('100', FiatCurrency::GBP),
+            proceeds: new FiatAmount('99', FiatCurrency::GBP),
+            sameDayQuantityBreakdown: new QuantityBreakdown(),
+            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+        ),
+    );
+
+    /** @var MessageConsumerTestCase $this */
+    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
+        ->when(new Message($sharePoolingTokenDisposedOf))
+        ->then(fn () => $taxYearSpy->shouldHaveReceived('recordCapitalLoss')
+            ->once()
+            ->withArgs(fn (RecordCapitalLoss $action) => $action->amount->isEqualTo('1')));
+});
+
+it('can handle a capital gain reversion', function () {
+    $taxYearSpy = Mockery::spy(TaxYear::class);
+    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
+    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
+
+    $sharePoolingTokenDisposalReverted = new SharePoolingTokenDisposalReverted(
+        new SharePoolingTokenDisposal(
+            date: LocalDate::parse('2015-10-21'),
+            quantity: new Quantity('100'),
+            costBasis: new FiatAmount('100', FiatCurrency::GBP),
+            proceeds: new FiatAmount('101', FiatCurrency::GBP),
+            sameDayQuantityBreakdown: new QuantityBreakdown(),
+            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+        ),
+    );
+
+    /** @var MessageConsumerTestCase $this */
+    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
+        ->when(new Message($sharePoolingTokenDisposalReverted))
+        ->then(fn () => $taxYearSpy->shouldHaveReceived('revertCapitalGain')
+            ->once()
+            ->withArgs(fn (RevertCapitalGain $action) => $action->amount->isEqualTo('1')));
+});
+
+it('can handle a capital loss reversion', function () {
+    $taxYearSpy = Mockery::spy(TaxYear::class);
+    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
+    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
+
+    $sharePoolingTokenDisposalReverted = new SharePoolingTokenDisposalReverted(
+        new SharePoolingTokenDisposal(
+            date: LocalDate::parse('2015-10-21'),
+            quantity: new Quantity('100'),
+            costBasis: new FiatAmount('100', FiatCurrency::GBP),
+            proceeds: new FiatAmount('99', FiatCurrency::GBP),
+            sameDayQuantityBreakdown: new QuantityBreakdown(),
+            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+        ),
+    );
+
+    /** @var MessageConsumerTestCase $this */
+    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
+        ->when(new Message($sharePoolingTokenDisposalReverted))
+        ->then(fn () => $taxYearSpy->shouldHaveReceived('revertCapitalLoss')
+            ->once()
+            ->withArgs(fn (RevertCapitalLoss $action) => $action->amount->isEqualTo('1')));
+});
