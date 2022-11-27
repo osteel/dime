@@ -7,11 +7,10 @@ namespace Domain\ValueObjects;
 use Domain\Enums\FiatCurrency;
 use Domain\Services\Math;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
-use Illuminate\Contracts\Support\Arrayable;
+use EventSauce\EventSourcing\Serialization\SerializablePayload;
 use Stringable;
 
-/** @implements Arrayable<string, string|array<string, string>> */
-final class FiatAmount implements Arrayable, Stringable
+final class FiatAmount implements SerializablePayload, Stringable
 {
     public function __construct(
         public readonly string $amount,
@@ -100,7 +99,7 @@ final class FiatAmount implements Arrayable, Stringable
     }
 
     /** @return array<string, string> */
-    public function toArray(): array
+    public function toPayload(): array
     {
         return [
             'amount' => $this->amount,
@@ -108,12 +107,12 @@ final class FiatAmount implements Arrayable, Stringable
         ];
     }
 
-    /** @param array<string, string> $attributes */
-    public static function fromArray(array $attributes): FiatAmount
+    /** @param array<string, string> $payload */
+    public static function fromPayload(array $payload): static
     {
         return new self(
-            amount: $attributes['amount'],
-            currency: FiatCurrency::from($attributes['currency']),
+            amount: $payload['amount'],
+            currency: FiatCurrency::from($payload['currency']),
         );
     }
 

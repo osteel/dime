@@ -8,8 +8,9 @@ use Brick\DateTime\LocalDate;
 use Domain\Tests\SharePooling\Factories\ValueObjects\SharePoolingTokenDisposalFactory;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
+use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class SharePoolingTokenDisposal extends SharePoolingTransaction
+final class SharePoolingTokenDisposal extends SharePoolingTransaction implements SerializablePayload
 {
     public function __construct(
         public readonly LocalDate $date,
@@ -75,6 +76,32 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction
     public function thirtyDayQuantityMatchedWith(SharePoolingTokenAcquisition $acquisition): Quantity
     {
         return $this->thirtyDayQuantityBreakdown->quantityMatchedWith($acquisition);
+    }
+
+    /** @return array<string, string|array<string, string|array<string>>> */
+    public function toPayload(): array
+    {
+        return [
+            'date' => $this->date->__toString(),
+            'quantity' => $this->quantity->__toString(),
+            'cost_basis' => $this->costBasis->toPayload(),
+            'proceeds' => $this->proceeds->toPayload(),
+            'same_day_quantity_breakdown' => $this->sameDayQuantityBreakdown->toPayload(),
+            'thirty_day_quantity_breakdown' => $this->thirtyDayQuantityBreakdown->toPayload(),
+        ];
+    }
+
+    /** @param array<string, string|array<string, string|array<string>>> $payload */
+    public static function fromPayload(array $payload): static
+    {
+        return new static(
+            LocalDate::parse($payload['date']), // @phpstan-ignore-line
+            new Quantity($payload['quantity']), // @phpstan-ignore-line
+            FiatAmount::fromPayload($payload['cost_basis']), // @phpstan-ignore-line
+            FiatAmount::fromPayload($payload['proceeds']), // @phpstan-ignore-line
+            QuantityBreakdown::fromPayload($payload['same_day_quantity_breakdown']), // @phpstan-ignore-line
+            QuantityBreakdown::fromPayload($payload['thirty_day_quantity_breakdown']), // @phpstan-ignore-line
+        );
     }
 
     public function __toString(): string
