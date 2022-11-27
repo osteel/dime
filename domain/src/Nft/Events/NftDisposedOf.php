@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Domain\Nft\Events;
 
 use Brick\DateTime\LocalDate;
-use Domain\Nft\NftId;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
 final class NftDisposedOf implements SerializablePayload
 {
     public function __construct(
-        public readonly NftId $nftId,
         public readonly LocalDate $date,
         public readonly FiatAmount $costBasis,
         public readonly FiatAmount $proceeds,
@@ -23,7 +21,6 @@ final class NftDisposedOf implements SerializablePayload
     public function toPayload(): array
     {
         return [
-            'nft_id' => $this->nftId->id,
             'date' => $this->date->__toString(),
             'cost_basis' => $this->costBasis->toArray(),
             'proceeds' => $this->proceeds->toArray(),
@@ -34,7 +31,6 @@ final class NftDisposedOf implements SerializablePayload
     public static function fromPayload(array $payload): static
     {
         return new static(
-            NftId::fromString($payload['nft_id']), // @phpstan-ignore-line
             LocalDate::parse($payload['date']), // @phpstan-ignore-line
             FiatAmount::fromArray($payload['cost_basis']), // @phpstan-ignore-line
             FiatAmount::fromArray($payload['proceeds']), // @phpstan-ignore-line
