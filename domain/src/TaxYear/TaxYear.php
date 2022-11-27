@@ -22,7 +22,7 @@ use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 
-/** @property \Domain\TaxYear\TaxYearId $aggregateRootId */
+/** @property TaxYearId $aggregateRootId */
 class TaxYear implements AggregateRoot
 {
     use AggregateRootBehaviour;

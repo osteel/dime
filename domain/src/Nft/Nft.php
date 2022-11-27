@@ -15,7 +15,7 @@ use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 
-/** @property \Domain\Nft\NftId $aggregateRootId */
+/** @property NftId $aggregateRootId */
 final class Nft implements AggregateRoot
 {
     use AggregateRootBehaviour;
