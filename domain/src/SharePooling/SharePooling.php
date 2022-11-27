@@ -24,6 +24,7 @@ use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 
+/** @property SharePoolingId $aggregateRootId */
 final class SharePooling implements AggregateRoot
 {
     use AggregateRootBehaviour;
@@ -33,8 +34,7 @@ final class SharePooling implements AggregateRoot
 
     private function __construct(AggregateRootId $aggregateRootId)
     {
-        $this->aggregateRootId = $aggregateRootId;
-
+        $this->aggregateRootId = SharePoolingId::fromString($aggregateRootId->toString());
         $this->transactions = SharePoolingTransactions::make();
     }
 
@@ -43,7 +43,7 @@ final class SharePooling implements AggregateRoot
     {
         if ($this->fiatCurrency && $this->fiatCurrency !== $action->costBasis->currency) {
             throw SharePoolingException::cannotAcquireFromDifferentCurrency(
-                sharePoolingId: $action->sharePoolingId,
+                sharePoolingId: $this->aggregateRootId,
                 from: $this->fiatCurrency,
                 to: $action->costBasis->currency,
             );
@@ -54,11 +54,10 @@ final class SharePooling implements AggregateRoot
             transactions: $this->transactions,
         );
 
-        $this->revertDisposals($action->sharePoolingId, $disposalsToRevert);
+        $this->revertDisposals($disposalsToRevert);
 
         // Record the new acquisition
         $this->recordThat(new SharePoolingTokenAcquired(
-            sharePoolingId: $action->sharePoolingId,
             sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
                 date: $action->date,
                 quantity: $action->quantity,
@@ -66,13 +65,12 @@ final class SharePooling implements AggregateRoot
             ),
         ));
 
-        $this->replayDisposals($action->sharePoolingId, $disposalsToRevert);
+        $this->replayDisposals($disposalsToRevert);
     }
 
     public function applySharePoolingTokenAcquired(SharePoolingTokenAcquired $event): void
     {
         $this->fiatCurrency ??= $event->sharePoolingTokenAcquisition->costBasis->currency;
-
         $this->transactions->add($event->sharePoolingTokenAcquisition);
     }
 
@@ -82,7 +80,6 @@ final class SharePooling implements AggregateRoot
         QuantityAdjuster::revertDisposal($action->sharePoolingTokenDisposal, $this->transactions);
 
         $this->recordThat(new SharePoolingTokenDisposalReverted(
-            sharePoolingId: $action->sharePoolingId,
             sharePoolingTokenDisposal: $action->sharePoolingTokenDisposal,
         ));
     }
@@ -100,7 +97,7 @@ final class SharePooling implements AggregateRoot
     {
         if ($this->fiatCurrency && $this->fiatCurrency !== $action->proceeds->currency) {
             throw SharePoolingException::cannotDisposeOfFromDifferentCurrency(
-                sharePoolingId: $action->sharePoolingId,
+                sharePoolingId: $this->aggregateRootId,
                 from: $this->fiatCurrency,
                 to: $action->proceeds->currency,
             );
@@ -114,7 +111,7 @@ final class SharePooling implements AggregateRoot
 
         if ($action->quantity->isGreaterThan($availableQuantity)) {
             throw SharePoolingException::insufficientQuantity(
-                sharePoolingId: $action->sharePoolingId,
+                sharePoolingId: $this->aggregateRootId,
                 disposalQuantity: $action->quantity,
                 availableQuantity: $availableQuantity,
             );
@@ -132,7 +129,7 @@ final class SharePooling implements AggregateRoot
             return;
         }
 
-        $this->revertDisposals($action->sharePoolingId, $disposalsToRevert);
+        $this->revertDisposals($disposalsToRevert);
 
         // Add the current disposal to the transactions (as unprocessed) so previous disposals
         // don't try to match their 30-day quantity with the disposal's same-day acquisitions
@@ -146,7 +143,7 @@ final class SharePooling implements AggregateRoot
             processed: false,
         ))->setPosition($action->position));
 
-        $this->replayDisposals($action->sharePoolingId, $disposalsToRevert);
+        $this->replayDisposals($disposalsToRevert);
 
         $this->recordDisposal($action, $disposal->getPosition());
     }
@@ -164,27 +161,20 @@ final class SharePooling implements AggregateRoot
             position: $position,
         );
 
-        $this->recordThat(new SharePoolingTokenDisposedOf(
-            sharePoolingId: $action->sharePoolingId,
-            sharePoolingTokenDisposal: $sharePoolingTokenDisposal,
-        ));
+        $this->recordThat(new SharePoolingTokenDisposedOf(sharePoolingTokenDisposal: $sharePoolingTokenDisposal));
     }
 
-    private function revertDisposals(SharePoolingId $sharePoolingId, SharePoolingTokenDisposals $disposals): void
+    private function revertDisposals(SharePoolingTokenDisposals $disposals): void
     {
         foreach ($disposals as $disposal) {
-            $this->revertDisposal(new RevertSharePoolingTokenDisposal(
-                sharePoolingId: $sharePoolingId,
-                sharePoolingTokenDisposal: $disposal,
-            ));
+            $this->revertDisposal(new RevertSharePoolingTokenDisposal(sharePoolingTokenDisposal: $disposal));
         }
     }
 
-    private function replayDisposals(SharePoolingId $sharePoolingId, SharePoolingTokenDisposals $disposals): void
+    private function replayDisposals(SharePoolingTokenDisposals $disposals): void
     {
         foreach ($disposals as $disposal) {
             $this->disposeOf(new DisposeOfSharePoolingToken(
-                sharePoolingId: $sharePoolingId,
                 date: $disposal->date,
                 quantity: $disposal->quantity,
                 proceeds: $disposal->proceeds,

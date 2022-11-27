@@ -18,20 +18,14 @@ use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 
 uses(SharePoolingTestCase::class);
 
-beforeEach(function () {
-    $this->sharePoolingId = $this->aggregateRootId();
-});
-
 it('can acquire some share pooling tokens', function () {
     $acquireSharePoolingToken = new AcquireSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: new FiatAmount('100', FiatCurrency::GBP),
     );
 
     $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: $acquireSharePoolingToken->date,
             quantity: new Quantity('100'),
@@ -46,7 +40,6 @@ it('can acquire some share pooling tokens', function () {
 
 it('can acquire more of the same share pooling tokens', function () {
     $someSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -55,14 +48,12 @@ it('can acquire more of the same share pooling tokens', function () {
     );
 
     $acquireMoreSharePoolingToken = new AcquireSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: new FiatAmount('300', FiatCurrency::GBP),
     );
 
     $moreSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: (new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -78,7 +69,6 @@ it('can acquire more of the same share pooling tokens', function () {
 
 it('cannot acquire more of the same share pooling tokens because currencies don\'t match', function () {
     $someSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -87,14 +77,13 @@ it('cannot acquire more of the same share pooling tokens because currencies don\
     );
 
     $acquireMoreSharePoolingToken = new AcquireSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: new FiatAmount('300', FiatCurrency::EUR),
     );
 
     $cannotAcquireSharePoolingToken = SharePoolingException::cannotAcquireFromDifferentCurrency(
-        sharePoolingId: $this->sharePoolingId,
+        sharePoolingId: $this->aggregateRootId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
@@ -107,7 +96,6 @@ it('cannot acquire more of the same share pooling tokens because currencies don\
 
 it('can dispose of some share pooling tokens', function () {
     $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -116,14 +104,12 @@ it('can dispose of some share pooling tokens', function () {
     );
 
     $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('50'),
         proceeds: new FiatAmount('150', FiatCurrency::GBP),
     );
 
     $sharePoolingTokenDisposedOf = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: (new SharePoolingTokenDisposal(
             date: $disposeOfSharePoolingToken->date,
             quantity: $disposeOfSharePoolingToken->quantity,
@@ -142,7 +128,6 @@ it('can dispose of some share pooling tokens', function () {
 
 it('cannot dispose of some share pooling tokens because currencies don\'t match', function () {
     $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -151,14 +136,13 @@ it('cannot dispose of some share pooling tokens because currencies don\'t match'
     );
 
     $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('100'),
         proceeds: new FiatAmount('100', FiatCurrency::EUR),
     );
 
     $cannotDisposeOfSharePoolingToken = SharePoolingException::cannotDisposeOfFromDifferentCurrency(
-        sharePoolingId: $this->sharePoolingId,
+        sharePoolingId: $this->aggregateRootId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
@@ -171,7 +155,6 @@ it('cannot dispose of some share pooling tokens because currencies don\'t match'
 
 it('cannot dispose of some share pooling tokens because the quantity is too high', function () {
     $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -180,14 +163,13 @@ it('cannot dispose of some share pooling tokens because the quantity is too high
     );
 
     $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('101'),
         proceeds: new FiatAmount('100', FiatCurrency::GBP),
     );
 
     $cannotDisposeOfSharePoolingToken = SharePoolingException::insufficientQuantity(
-        sharePoolingId: $this->sharePoolingId,
+        sharePoolingId: $this->aggregateRootId,
         disposalQuantity: $disposeOfSharePoolingToken->quantity,
         availableQuantity: new Quantity('100'),
     );
@@ -200,7 +182,6 @@ it('cannot dispose of some share pooling tokens because the quantity is too high
 
 it('can dispose of some share pooling tokens on the same day they were acquired', function () {
     $someSharePoolingTokensAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -209,7 +190,6 @@ it('can dispose of some share pooling tokens on the same day they were acquired'
     );
 
     $moreSharePoolingTokensAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-26'),
             quantity: new Quantity('100'),
@@ -218,14 +198,12 @@ it('can dispose of some share pooling tokens on the same day they were acquired'
     );
 
     $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-26'),
         quantity: new Quantity('150'),
         proceeds: new FiatAmount('300', FiatCurrency::GBP),
     );
 
     $sharePoolingTokenDisposedOf = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->withSameDayQuantity(new Quantity('100'), position: 1) // $moreSharePoolingTokensAcquired
             ->make([
@@ -247,7 +225,6 @@ it('can acquire some share pooling tokens within 30 days of their disposal', fun
     // Given
 
     $someSharePoolingTokensAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -256,7 +233,6 @@ it('can acquire some share pooling tokens within 30 days of their disposal', fun
     );
 
     $someSharePoolingTokensDisposedOf = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: new SharePoolingTokenDisposal(
             date: LocalDate::parse('2015-10-26'),
             quantity: new Quantity('50'),
@@ -270,7 +246,6 @@ it('can acquire some share pooling tokens within 30 days of their disposal', fun
     // When
 
     $acquireMoreSharePoolingToken = new AcquireSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('25'),
         costBasis: new FiatAmount('20', FiatCurrency::GBP),
@@ -279,12 +254,10 @@ it('can acquire some share pooling tokens within 30 days of their disposal', fun
     // Then
 
     $sharePoolingTokenDisposalReverted = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal,
     );
 
     $moreSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: (new SharePoolingTokenAcquisition(
             date: $acquireMoreSharePoolingToken->date,
             quantity: $acquireMoreSharePoolingToken->quantity,
@@ -294,7 +267,6 @@ it('can acquire some share pooling tokens within 30 days of their disposal', fun
     );
 
     $correctedSharePoolingTokensDisposedOf = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->copyFrom($someSharePoolingTokensDisposedOf->sharePoolingTokenDisposal)
             ->withThirtyDayQuantity(new Quantity('25'), position: 2) // $acquireMoreSharePoolingToken
@@ -315,7 +287,6 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     // Given
 
     $sharePoolingTokenAcquired1 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -324,7 +295,6 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     );
 
     $sharePoolingTokenAcquired2 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('25'),
@@ -334,7 +304,6 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     );
 
     $sharePoolingTokenDisposedOf1 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->withSameDayQuantity(new Quantity('25'), position: 1) // $sharePoolingTokenAcquired2
             ->withThirtyDayQuantity(new Quantity('20'), position: 4) // $sharePoolingTokenAcquired3
@@ -346,7 +315,6 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     );
 
     $sharePoolingTokenDisposedOf2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: new SharePoolingTokenDisposal(
             date: LocalDate::parse('2015-10-25'),
             quantity: new Quantity('25'),
@@ -358,7 +326,6 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     );
 
     $sharePoolingTokenAcquired3 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-28'),
             quantity: new Quantity('20'),
@@ -368,19 +335,16 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     );
 
     $sharePoolingTokenDisposal1Reverted1 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenDisposedOf1Corrected1 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1->sharePoolingTokenDisposal,
     );
 
     // When
 
     $acquireSharePoolingToken4 = new AcquireSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('20'),
         costBasis: new FiatAmount('40', FiatCurrency::GBP),
@@ -389,17 +353,14 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     // Then
 
     $sharePoolingTokenDisposal1Reverted2 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1Corrected1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenDisposal2Reverted = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf2->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenAcquired4 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: (new SharePoolingTokenAcquisition(
             date: $acquireSharePoolingToken4->date,
             quantity: $acquireSharePoolingToken4->quantity,
@@ -409,7 +370,6 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     );
 
     $sharePoolingTokenDisposedOf1Corrected2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->copyFrom($sharePoolingTokenDisposedOf1Corrected1->sharePoolingTokenDisposal)
             ->withThirtyDayQuantity(new Quantity('5'), position: 5) // $sharePoolingTokenAcquired4
@@ -418,7 +378,6 @@ it('can acquire some share pooling tokens several times within 30 days of their 
     );
 
     $sharePoolingTokenDisposedOf2Corrected = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->copyFrom($sharePoolingTokenDisposedOf2->sharePoolingTokenDisposal)
             ->withThirtyDayQuantity(new Quantity('15'), position: 5) // $sharePoolingTokenAcquired4
@@ -453,7 +412,6 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     // Given
 
     $sharePoolingTokenAcquired1 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -462,7 +420,6 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     );
 
     $sharePoolingTokenAcquired2 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('25'),
@@ -472,7 +429,6 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     );
 
     $sharePoolingTokenDisposedOf1 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->withSameDayQuantity(new Quantity('25'), position: 1) // $sharePoolingTokenAcquired2
             ->withThirtyDayQuantity(new Quantity('20'), position: 4) // $sharePoolingTokenAcquired3
@@ -485,7 +441,6 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     );
 
     $sharePoolingTokenDisposedOf2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->withThirtyDayQuantity(new Quantity('15'), position: 5) // $sharePoolingTokenAcquired4
             ->make([
@@ -496,7 +451,6 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     );
 
     $sharePoolingTokenAcquired3 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-28'),
             quantity: new Quantity('20'),
@@ -506,17 +460,14 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     );
 
     $sharePoolingTokenDisposal1Reverted1 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenDisposedOf1Corrected1 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenAcquired4 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-29'),
             quantity: new Quantity('20'),
@@ -526,29 +477,24 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     );
 
     $sharePoolingTokenDisposal1Reverted2 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1Corrected1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenDisposal2Reverted1 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf2->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenDisposedOf1Corrected2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1Corrected1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenDisposedOf2Corrected1 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf2->sharePoolingTokenDisposal,
     );
 
     // When
 
     $disposeOfSharePoolingToken3 = new DisposeOfSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('10'),
         proceeds: new FiatAmount('30', FiatCurrency::GBP),
@@ -557,12 +503,10 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     // Then
 
     $sharePoolingTokenDisposal2Reverted2 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf2Corrected1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenDisposedOf2Corrected2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->revert($sharePoolingTokenDisposedOf2->sharePoolingTokenDisposal)
             ->withThirtyDayQuantity(new Quantity('5'), position: 5) // $sharePoolingTokenAcquired4
@@ -571,7 +515,6 @@ it('can dispose of some share pooling tokens on the same day as an acquisition w
     );
 
     $sharePoolingTokenDisposedOf3 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: (
             SharePoolingTokenDisposal::factory()
                 ->withSameDayQuantity(new Quantity('10'), position: 5) // $sharePoolingTokenAcquired4
@@ -608,7 +551,6 @@ it('can acquire some same-day share pooling tokens several times on the same day
     // Given
 
     $sharePoolingTokenAcquired1 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -617,7 +559,6 @@ it('can acquire some same-day share pooling tokens several times on the same day
     );
 
     $sharePoolingTokenDisposedOf = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: new SharePoolingTokenDisposal(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('50'),
@@ -629,12 +570,10 @@ it('can acquire some same-day share pooling tokens several times on the same day
     );
 
     $sharePoolingTokenDisposalReverted = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenAcquired2 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('20'),
@@ -644,7 +583,6 @@ it('can acquire some same-day share pooling tokens several times on the same day
     );
 
     $sharePoolingTokenDisposedOfCorrected = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->revert($sharePoolingTokenDisposedOf->sharePoolingTokenDisposal)
             ->withSameDayQuantity(new Quantity('20'), position: 2) // $sharePoolingTokenAcquired2
@@ -659,7 +597,6 @@ it('can acquire some same-day share pooling tokens several times on the same day
     // When
 
     $acquireSharePoolingToken3 = new AcquireSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('10'),
         costBasis: new FiatAmount('14', FiatCurrency::GBP),
@@ -668,12 +605,10 @@ it('can acquire some same-day share pooling tokens several times on the same day
     // Then
 
     $sharePoolingTokenDisposalReverted2 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOfCorrected->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenAcquired3 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: (new SharePoolingTokenAcquisition(
             date: $acquireSharePoolingToken3->date,
             quantity: $acquireSharePoolingToken3->quantity,
@@ -683,7 +618,6 @@ it('can acquire some same-day share pooling tokens several times on the same day
     );
 
     $sharePoolingTokensDisposedOfCorrected2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->revert($sharePoolingTokenDisposedOfCorrected->sharePoolingTokenDisposal)
             ->withSameDayQuantity(new Quantity('20'), position: 2) // $sharePoolingTokenAcquired2
@@ -711,7 +645,6 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     // Given
 
     $sharePoolingTokenAcquired1 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
@@ -720,7 +653,6 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     );
 
     $sharePoolingTokenDisposedOf1 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: new SharePoolingTokenDisposal(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('50'),
@@ -732,12 +664,10 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     );
 
     $sharePoolingTokenDisposalReverted1 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenAcquired2 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('20'),
@@ -747,7 +677,6 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     );
 
     $sharePoolingTokenDisposedOf1Corrected1 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->withSameDayQuantity(new Quantity('20'), position: 2) // $sharePoolingTokenAcquired2
             ->make([
@@ -759,12 +688,10 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     );
 
     $sharePoolingTokenDisposalReverted2 = new SharePoolingTokenDisposalReverted(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: $sharePoolingTokenDisposedOf1Corrected1->sharePoolingTokenDisposal,
     );
 
     $sharePoolingTokenAcquired3 = new SharePoolingTokenAcquired(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('60'),
@@ -774,7 +701,6 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     );
 
     $sharePoolingTokenDisposedOf1Corrected2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: SharePoolingTokenDisposal::factory()
             ->withSameDayQuantity(new Quantity('20'), position: 2) // $sharePoolingTokenAcquired2
             ->withSameDayQuantity(new Quantity('30'), position: 3) // $sharePoolingTokenAcquired3
@@ -789,7 +715,6 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     // When
 
     $disposeOfSharePoolingToken2 = new DisposeOfSharePoolingToken(
-        sharePoolingId: $this->sharePoolingId,
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('40'),
         proceeds: new FiatAmount('50', FiatCurrency::GBP),
@@ -798,7 +723,6 @@ it('can dispose of some same-day share pooling tokens several times on the same 
     // Then
 
     $sharePoolingTokenDisposedOf2 = new SharePoolingTokenDisposedOf(
-        sharePoolingId: $this->sharePoolingId,
         sharePoolingTokenDisposal: (
             SharePoolingTokenDisposal::factory()
             ->withSameDayQuantity(new Quantity('30'), position: 3) // $sharePoolingTokenAcquired3

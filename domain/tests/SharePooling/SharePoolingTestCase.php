@@ -23,7 +23,7 @@ abstract class SharePoolingTestCase extends AggregateRootTestCase
 
     public function handle(object $action)
     {
-        $sharePooling = $this->repository->retrieve($action->sharePoolingId);
+        $sharePooling = $this->repository->retrieve($this->aggregateRootId);
 
         match ($action::class) {
             AcquireSharePoolingToken::class => $sharePooling->acquire($action),
