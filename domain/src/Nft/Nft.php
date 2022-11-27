@@ -14,6 +14,7 @@ use Domain\Nft\Exceptions\NftException;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
+use EventSauce\EventSourcing\AggregateRootId;
 
 /** @property NftId $aggregateRootId */
 final class Nft implements AggregateRoot
@@ -21,6 +22,11 @@ final class Nft implements AggregateRoot
     use AggregateRootBehaviour;
 
     private ?FiatAmount $costBasis = null;
+
+    private function __construct(AggregateRootId $aggregateRootId)
+    {
+        $this->aggregateRootId = NftId::fromString($aggregateRootId->toString());
+    }
 
     /** @throws NftException */
     public function acquire(AcquireNft $action): void

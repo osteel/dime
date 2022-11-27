@@ -21,6 +21,7 @@ use Domain\TaxYear\Exceptions\TaxYearException;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
+use EventSauce\EventSourcing\AggregateRootId;
 
 /** @property TaxYearId $aggregateRootId */
 class TaxYear implements AggregateRoot
@@ -31,6 +32,11 @@ class TaxYear implements AggregateRoot
     private ?FiatAmount $capitalGainOrLoss = null;
     private ?FiatAmount $income = null;
     private ?FiatAmount $nonAttributableAllowableCosts = null;
+
+    private function __construct(AggregateRootId $aggregateRootId)
+    {
+        $this->aggregateRootId = TaxYearId::fromString($aggregateRootId->toString());
+    }
 
     public function recordCapitalGain(RecordCapitalGain $action): void
     {
