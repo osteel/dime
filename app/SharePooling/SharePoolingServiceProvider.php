@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\SharePooling;
 
+use App\SharePooling\Repositories\SharePoolingMessageRepository;
+use App\SharePooling\Repositories\SharePoolingRepository;
 use Domain\SharePooling\Reactors\SharePoolingReactor;
 use Domain\SharePooling\Repositories\SharePoolingMessageRepository as SharePoolingMessageRepositoryInterface;
 use Domain\SharePooling\Repositories\SharePoolingRepository as SharePoolingRepositoryInterface;

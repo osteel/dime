@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\TaxYear;
 
+use App\TaxYear\Repositories\TaxYearMessageRepository;
+use App\TaxYear\Repositories\TaxYearRepository;
+use App\TaxYear\Repositories\TaxYearSummaryRepository;
 use Domain\TaxYear\Projectors\TaxYearSummaryProjector;
 use Domain\TaxYear\Repositories\TaxYearMessageRepository as TaxYearMessageRepositoryInterface;
 use Domain\TaxYear\Repositories\TaxYearRepository as TaxYearRepositoryInterface;

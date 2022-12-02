@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\SharePooling;
+namespace App\SharePooling\Repositories;
 
 use Domain\SharePooling\Repositories\SharePoolingMessageRepository as SharePoolingMessageRepositoryInterface;
 use EventSauce\MessageRepository\IlluminateMessageRepository\IlluminateUuidV4MessageRepository;
