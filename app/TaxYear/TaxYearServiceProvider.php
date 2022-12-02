@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\TaxYear;
 
+use Domain\TaxYear\Projectors\TaxYearSummaryProjector;
 use Domain\TaxYear\Repositories\TaxYearMessageRepository as TaxYearMessageRepositoryInterface;
 use Domain\TaxYear\Repositories\TaxYearRepository as TaxYearRepositoryInterface;
+use Domain\TaxYear\Repositories\TaxYearSummaryRepository as TaxYearSummaryRepositoryInterface;
 use EventSauce\EventSourcing\DefaultHeadersDecorator;
 use EventSauce\EventSourcing\ExplicitlyMappedClassNameInflector;
 use EventSauce\EventSourcing\MessageDecoratorChain;
@@ -27,6 +29,11 @@ class TaxYearServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(
+            TaxYearSummaryRepositoryInterface::class,
+            fn (Application $app) => new TaxYearSummaryRepository(),
+        );
+
         // @phpstan-ignore-next-line
         $classNameInflector = new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map'));
 
@@ -44,7 +51,8 @@ class TaxYearServiceProvider extends ServiceProvider
         $this->app->bind(TaxYearRepositoryInterface::class, fn () => new TaxYearRepository(
             // @phpstan-ignore-next-line
             $this->app->make(TaxYearMessageRepositoryInterface::class),
-            new MessageDispatcherChain(new SynchronousMessageDispatcher()),
+            // @phpstan-ignore-next-line
+            new MessageDispatcherChain(new SynchronousMessageDispatcher($this->app->make(TaxYearSummaryProjector::class))),
             new MessageDecoratorChain(new DefaultHeadersDecorator($classNameInflector)),
             $classNameInflector,
         ));

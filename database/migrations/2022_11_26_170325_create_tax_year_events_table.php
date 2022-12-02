@@ -13,6 +13,7 @@ return new class () extends Migration {
     public function up()
     {
         Schema::create('tax_year_events', function (Blueprint $table) {
+            $table->id()->unsigned();
             $table->uuid('event_id');
             $table->uuid('aggregate_root_id');
             $table->unsignedInteger('version')->nullable();

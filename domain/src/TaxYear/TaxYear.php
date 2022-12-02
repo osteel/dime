@@ -48,7 +48,10 @@ class TaxYear implements AggregateRoot
             );
         }
 
-        $this->recordThat(new CapitalGainRecorded(amount: $action->amount));
+        $this->recordThat(new CapitalGainRecorded(
+            taxYear: $action->taxYear,
+            amount: $action->amount,
+        ));
     }
 
     public function applyCapitalGainRecorded(CapitalGainRecorded $event): void
@@ -71,7 +74,10 @@ class TaxYear implements AggregateRoot
             );
         }
 
-        $this->recordThat(new CapitalGainReverted(amount: $action->amount));
+        $this->recordThat(new CapitalGainReverted(
+            taxYear: $action->taxYear,
+            amount: $action->amount,
+        ));
     }
 
     public function applyCapitalGainReverted(CapitalGainReverted $event): void
@@ -91,7 +97,10 @@ class TaxYear implements AggregateRoot
             );
         }
 
-        $this->recordThat(new CapitalLossRecorded(amount: $action->amount));
+        $this->recordThat(new CapitalLossRecorded(
+            taxYear: $action->taxYear,
+            amount: $action->amount,
+        ));
     }
 
     public function applyCapitalLossRecorded(CapitalLossRecorded $event): void
@@ -115,7 +124,10 @@ class TaxYear implements AggregateRoot
             );
         }
 
-        $this->recordThat(new CapitalLossReverted(amount: $action->amount));
+        $this->recordThat(new CapitalLossReverted(
+            taxYear: $action->taxYear,
+            amount: $action->amount,
+        ));
     }
 
     public function applyCapitalLossReverted(CapitalLossReverted $event): void
@@ -135,7 +147,10 @@ class TaxYear implements AggregateRoot
             );
         }
 
-        $this->recordThat(new IncomeRecorded(amount: $action->amount));
+        $this->recordThat(new IncomeRecorded(
+            taxYear: $action->taxYear,
+            amount: $action->amount,
+        ));
     }
 
     public function applyIncomeRecorded(IncomeRecorded $event): void
@@ -154,7 +169,10 @@ class TaxYear implements AggregateRoot
             );
         }
 
-        $this->recordThat(new NonAttributableAllowableCostRecorded(amount: $action->amount));
+        $this->recordThat(new NonAttributableAllowableCostRecorded(
+            taxYear: $action->taxYear,
+            amount: $action->amount,
+        ));
     }
 
     public function applyNonAttributableAllowableCostRecorded(NonAttributableAllowableCostRecorded $event): void

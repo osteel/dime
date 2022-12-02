@@ -11,6 +11,7 @@ use Domain\TaxYear\Actions\RecordCapitalLoss;
 use Domain\TaxYear\Actions\RevertCapitalGain;
 use Domain\TaxYear\Actions\RevertCapitalLoss;
 use Domain\TaxYear\Repositories\TaxYearRepository;
+use Domain\TaxYear\Services\TaxYearGenerator;
 use Domain\TaxYear\TaxYearId;
 use EventSauce\EventSourcing\EventConsumption\EventConsumer;
 use EventSauce\EventSourcing\Message;
@@ -24,30 +25,44 @@ final class SharePoolingReactor extends EventConsumer
     public function handleSharePoolingTokenDisposedOf(SharePoolingTokenDisposedOf $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYearId = TaxYearId::fromYear($disposal->date->getYear());
-        $taxYear = $this->taxYearRepository->get($taxYearId);
+        $taxYear = TaxYearGenerator::fromYear($disposal->date->getYear());
+        $taxYearId = TaxYearId::fromTaxYear($taxYear);
+        $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
         if ($disposal->proceeds->isGreaterThan($disposal->costBasis)) {
-            $taxYear->recordCapitalGain(new RecordCapitalGain(amount: $disposal->proceeds->minus($disposal->costBasis)));
+            $taxYearAggregate->recordCapitalGain(new RecordCapitalGain(
+                taxYear: $taxYear,
+                amount: $disposal->proceeds->minus($disposal->costBasis),
+            ));
         } else {
-            $taxYear->recordCapitalLoss(new RecordCapitalLoss(amount: $disposal->costBasis->minus($disposal->proceeds)));
+            $taxYearAggregate->recordCapitalLoss(new RecordCapitalLoss(
+                taxYear: $taxYear,
+                amount: $disposal->costBasis->minus($disposal->proceeds),
+            ));
         }
 
-        $this->taxYearRepository->save($taxYear);
+        $this->taxYearRepository->save($taxYearAggregate);
     }
 
     public function handleSharePoolingTokenDisposalReverted(SharePoolingTokenDisposalReverted $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYearId = TaxYearId::fromYear($disposal->date->getYear());
-        $taxYear = $this->taxYearRepository->get($taxYearId);
+        $taxYear = TaxYearGenerator::fromYear($disposal->date->getYear());
+        $taxYearId = TaxYearId::fromTaxYear($taxYear);
+        $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
         if ($disposal->proceeds->isGreaterThan($disposal->costBasis)) {
-            $taxYear->revertCapitalGain(new RevertCapitalGain(amount: $disposal->proceeds->minus($disposal->costBasis)));
+            $taxYearAggregate->revertCapitalGain(new RevertCapitalGain(
+                taxYear: $taxYear,
+                amount: $disposal->proceeds->minus($disposal->costBasis),
+            ));
         } else {
-            $taxYear->revertCapitalLoss(new RevertCapitalLoss(amount: $disposal->costBasis->minus($disposal->proceeds)));
+            $taxYearAggregate->revertCapitalLoss(new RevertCapitalLoss(
+                taxYear: $taxYear,
+                amount: $disposal->costBasis->minus($disposal->proceeds),
+            ));
         }
 
-        $this->taxYearRepository->save($taxYear);
+        $this->taxYearRepository->save($taxYearAggregate);
     }
 }

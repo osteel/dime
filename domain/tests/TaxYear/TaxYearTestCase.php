@@ -15,6 +15,8 @@ use EventSauce\EventSourcing\AggregateRootId;
 
 abstract class TaxYearTestCase extends AggregateRootTestCase
 {
+    protected string $taxYear = '2015-2016';
+
     protected function newAggregateRootId(): AggregateRootId
     {
         return TaxYearId::generate();
