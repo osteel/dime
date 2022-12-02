@@ -21,8 +21,15 @@ use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 uses(TaxYearTestCase::class);
 
 it('can record a capital gain', function () {
-    $recordCapitalGain = new RecordCapitalGain(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $capitalGainRecorded = new CapitalGainRecorded(amount: $recordCapitalGain->amount);
+    $recordCapitalGain = new RecordCapitalGain(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $capitalGainRecorded = new CapitalGainRecorded(
+        taxYear: $this->taxYear,
+        amount: $recordCapitalGain->amount,
+    );
 
     /** @var AggregateRootTestCase $this */
     $this->when($recordCapitalGain)
@@ -30,8 +37,15 @@ it('can record a capital gain', function () {
 });
 
 it('cannot record a capital gain because the currency is different', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $recordCapitalGain = new RecordCapitalGain(amount: new FiatAmount('100', FiatCurrency::EUR));
+    $capitalGainRecorded = new CapitalGainRecorded(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $recordCapitalGain = new RecordCapitalGain(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
 
     $cannotRecordCapitalGain = TaxYearException::cannotRecordCapitalGainForDifferentCurrency(
         taxYearId: $this->aggregateRootId,
@@ -46,9 +60,20 @@ it('cannot record a capital gain because the currency is different', function ()
 });
 
 it('can revert a capital gain', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $revertCapitalGain = new RevertCapitalGain(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $capitalGainReverted = new CapitalGainReverted(amount: $revertCapitalGain->amount);
+    $capitalGainRecorded = new CapitalGainRecorded(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $revertCapitalGain = new RevertCapitalGain(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $capitalGainReverted = new CapitalGainReverted(
+        taxYear: $this->taxYear,
+        amount: $revertCapitalGain->amount,
+    );
 
     /** @var AggregateRootTestCase $this */
     $this->given($capitalGainRecorded)
@@ -57,7 +82,11 @@ it('can revert a capital gain', function () {
 });
 
 it('cannot revert a capital gain before a capital gain was recorded', function () {
-    $revertCapitalGain = new RevertCapitalGain(amount: new FiatAmount('100', FiatCurrency::EUR));
+    $revertCapitalGain = new RevertCapitalGain(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
     $cannotRevertCapitalGain = TaxYearException::cannotRevertCapitalGainBeforeCapitalGainIsRecorded(
         taxYearId: $this->aggregateRootId,
     );
@@ -68,8 +97,15 @@ it('cannot revert a capital gain before a capital gain was recorded', function (
 });
 
 it('cannot revert a capital gain because the currency is different', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $revertCapitalGain = new RevertCapitalGain(amount: new FiatAmount('100', FiatCurrency::EUR));
+    $capitalGainRecorded = new CapitalGainRecorded(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $revertCapitalGain = new RevertCapitalGain(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
 
     $cannotRevertCapitalGain = TaxYearException::cannotRevertCapitalGainFromDifferentCurrency(
         taxYearId: $this->aggregateRootId,
@@ -84,8 +120,15 @@ it('cannot revert a capital gain because the currency is different', function ()
 });
 
 it('can record a capital loss', function () {
-    $recordCapitalLoss = new RecordCapitalLoss(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $capitalLossRecorded = new CapitalLossRecorded(amount: $recordCapitalLoss->amount);
+    $recordCapitalLoss = new RecordCapitalLoss(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYear: $this->taxYear,
+        amount: $recordCapitalLoss->amount,
+    );
 
     /** @var AggregateRootTestCase $this */
     $this->when($recordCapitalLoss)
@@ -93,8 +136,15 @@ it('can record a capital loss', function () {
 });
 
 it('cannot record a capital loss because the currency is different', function () {
-    $capitalLossRecorded = new CapitalLossRecorded(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $recordCapitalLoss = new RecordCapitalLoss(amount: new FiatAmount('100', FiatCurrency::EUR));
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $recordCapitalLoss = new RecordCapitalLoss(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
 
     $cannotRecordCapitalLoss = TaxYearException::cannotRecordCapitalLossForDifferentCurrency(
         taxYearId: $this->aggregateRootId,
@@ -109,9 +159,20 @@ it('cannot record a capital loss because the currency is different', function ()
 });
 
 it('can revert a capital loss', function () {
-    $capitalLossRecorded = new CapitalLossRecorded(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $revertCapitalLoss = new RevertCapitalLoss(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $capitalLossReverted = new CapitalLossReverted(amount: $revertCapitalLoss->amount);
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $revertCapitalLoss = new RevertCapitalLoss(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $capitalLossReverted = new CapitalLossReverted(
+        taxYear: $this->taxYear,
+        amount: $revertCapitalLoss->amount,
+    );
 
     /** @var AggregateRootTestCase $this */
     $this->given($capitalLossRecorded)
@@ -120,7 +181,11 @@ it('can revert a capital loss', function () {
 });
 
 it('cannot revert a capital loss before a capital loss was recorded', function () {
-    $revertCapitalLoss = new RevertCapitalLoss(amount: new FiatAmount('100', FiatCurrency::EUR));
+    $revertCapitalLoss = new RevertCapitalLoss(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
     $cannotRevertCapitalLoss = TaxYearException::cannotRevertCapitalLossBeforeCapitalLossIsRecorded(
         taxYearId: $this->aggregateRootId,
     );
@@ -131,8 +196,15 @@ it('cannot revert a capital loss before a capital loss was recorded', function (
 });
 
 it('cannot revert a capital loss because the currency is different', function () {
-    $capitalLossRecorded = new CapitalLossRecorded(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $revertCapitalLoss = new RevertCapitalLoss(amount: new FiatAmount('100', FiatCurrency::EUR));
+    $capitalLossRecorded = new CapitalLossRecorded(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $revertCapitalLoss = new RevertCapitalLoss(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
 
     $cannotRevertCapitalLoss = TaxYearException::cannotRevertCapitalLossFromDifferentCurrency(
         taxYearId: $this->aggregateRootId,
@@ -147,8 +219,15 @@ it('cannot revert a capital loss because the currency is different', function ()
 });
 
 it('can record some income', function () {
-    $recordIncome = new RecordIncome(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $incomeRecorded = new IncomeRecorded(amount: $recordIncome->amount);
+    $recordIncome = new RecordIncome(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $incomeRecorded = new IncomeRecorded(
+        taxYear: $this->taxYear,
+        amount: $recordIncome->amount,
+    );
 
     /** @var AggregateRootTestCase $this */
     $this->when($recordIncome)
@@ -156,8 +235,15 @@ it('can record some income', function () {
 });
 
 it('cannot record some income because the currency is different', function () {
-    $incomeRecorded = new IncomeRecorded(amount: new FiatAmount('100', FiatCurrency::GBP));
-    $recordIncome = new RecordIncome(amount: new FiatAmount('100', FiatCurrency::EUR));
+    $incomeRecorded = new IncomeRecorded(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::GBP),
+    );
+
+    $recordIncome = new RecordIncome(
+        taxYear: $this->taxYear,
+        amount: new FiatAmount('100', FiatCurrency::EUR),
+    );
 
     $cannotRecordIncome = TaxYearException::cannotRecordIncomeFromDifferentCurrency(
         taxYearId: $this->aggregateRootId,
@@ -173,10 +259,12 @@ it('cannot record some income because the currency is different', function () {
 
 it('can record a non-attributable allowable cost', function () {
     $recordNonAttributableAllowableCost = new RecordNonAttributableAllowableCost(
+        taxYear: $this->taxYear,
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
     $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
+        taxYear: $this->taxYear,
         amount: $recordNonAttributableAllowableCost->amount,
     );
 
@@ -187,10 +275,12 @@ it('can record a non-attributable allowable cost', function () {
 
 it('cannot record a non-attributable allowable cost because the currency is different', function () {
     $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
+        taxYear: $this->taxYear,
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
     $recordNonAttributableAllowableCost = new RecordNonAttributableAllowableCost(
+        taxYear: $this->taxYear,
         amount: new FiatAmount('100', FiatCurrency::EUR),
     );
 

@@ -25,31 +25,51 @@ final class TaxYearSummaryProjector extends EventConsumer
     /** @throws TaxYearSummaryProjectionException */
     public function handleCapitalGainRecorded(CapitalGainRecorded $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->recordCapitalGain($this->getTaxYearId($message), $event->amount);
+        $this->taxYearSummaryRepository->recordCapitalGain(
+            $this->getTaxYearId($message),
+            $event->taxYear,
+            $event->amount,
+        );
     }
 
     /** @throws TaxYearSummaryProjectionException */
     public function handleCapitalGainReverted(CapitalGainReverted $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->revertCapitalGain($this->getTaxYearId($message), $event->amount);
+        $this->taxYearSummaryRepository->revertCapitalGain(
+            $this->getTaxYearId($message),
+            $event->taxYear,
+            $event->amount,
+        );
     }
 
     /** @throws TaxYearSummaryProjectionException */
     public function handleCapitalLossRecorded(CapitalLossRecorded $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->recordCapitalLoss($this->getTaxYearId($message), $event->amount);
+        $this->taxYearSummaryRepository->recordCapitalLoss(
+            $this->getTaxYearId($message),
+            $event->taxYear,
+            $event->amount,
+        );
     }
 
     /** @throws TaxYearSummaryProjectionException */
     public function handleCapitalLossReverted(CapitalLossReverted $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->revertCapitalLoss($this->getTaxYearId($message), $event->amount);
+        $this->taxYearSummaryRepository->revertCapitalLoss(
+            $this->getTaxYearId($message),
+            $event->taxYear,
+            $event->amount,
+        );
     }
 
     /** @throws TaxYearSummaryProjectionException */
     public function handleIncomeRecorded(IncomeRecorded $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->recordIncome($this->getTaxYearId($message), $event->amount);
+        $this->taxYearSummaryRepository->recordIncome(
+            $this->getTaxYearId($message),
+            $event->taxYear,
+            $event->amount,
+        );
     }
 
     /** @throws TaxYearSummaryProjectionException */
@@ -59,6 +79,7 @@ final class TaxYearSummaryProjector extends EventConsumer
     ): void {
         $this->taxYearSummaryRepository->recordNonAttributableAllowableCost(
             $this->getTaxYearId($message),
+            $event->taxYear,
             $event->amount,
         );
     }
