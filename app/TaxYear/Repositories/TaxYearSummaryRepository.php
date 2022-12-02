@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\TaxYear;
+namespace App\TaxYear\Repositories;
 
 use Domain\TaxYear\Projections\TaxYearSummary;
 use Domain\TaxYear\Repositories\TaxYearSummaryRepository as TaxYearSummaryRepositoryInterface;
@@ -56,8 +56,8 @@ class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
     private function fetchTaxYearSummary(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): TaxYearSummary
     {
         return TaxYearSummary::firstOrNew(
-            ['tax_year_id' => $taxYearId->toString(), 'currency' => $amount->currency],
-            ['tax_year' => $taxYear],
+            ['tax_year_id' => $taxYearId->toString()],
+            ['tax_year' => $taxYear, 'currency' => $amount->currency],
         );
     }
 }

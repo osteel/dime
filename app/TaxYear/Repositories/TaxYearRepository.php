@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\TaxYear;
+namespace App\TaxYear\Repositories;
 
 use Domain\TaxYear\Repositories\TaxYearRepository as TaxYearRepositoryInterface;
 use Domain\TaxYear\TaxYear;

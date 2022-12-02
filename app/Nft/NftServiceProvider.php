@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Nft;
 
+use App\Nft\Repositories\NftMessageRepository;
+use App\Nft\Repositories\NftRepository;
 use Domain\Nft\Reactors\NftReactor;
 use Domain\Nft\Repositories\NftMessageRepository as NftMessageRepositoryInterface;
 use Domain\Nft\Repositories\NftRepository as NftRepositoryInterface;

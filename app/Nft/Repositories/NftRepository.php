@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Nft;
+namespace App\Nft\Repositories;
 
 use Domain\Nft\Nft;
 use Domain\Nft\NftId;
