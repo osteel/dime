@@ -2,24 +2,24 @@
 
 declare(strict_types=1);
 
-use Domain\Nft\Events\NftAcquired;
-use Domain\Nft\Events\NftCostBasisIncreased;
-use Domain\Nft\Events\NftDisposedOf;
-use Domain\Nft\Nft;
-use Domain\Nft\NftId;
-use Domain\SharePooling\Events\SharePoolingTokenAcquired;
-use Domain\SharePooling\Events\SharePoolingTokenDisposalReverted;
-use Domain\SharePooling\Events\SharePoolingTokenDisposedOf;
-use Domain\SharePooling\SharePooling;
-use Domain\SharePooling\SharePoolingId;
-use Domain\TaxYear\Events\CapitalGainRecorded;
-use Domain\TaxYear\Events\CapitalGainReverted;
-use Domain\TaxYear\Events\CapitalLossRecorded;
-use Domain\TaxYear\Events\CapitalLossReverted;
-use Domain\TaxYear\Events\IncomeRecorded;
-use Domain\TaxYear\Events\NonAttributableAllowableCostRecorded;
-use Domain\TaxYear\TaxYear;
-use Domain\TaxYear\TaxYearId;
+use Domain\Aggregates\Nft\Events\NftAcquired;
+use Domain\Aggregates\Nft\Events\NftCostBasisIncreased;
+use Domain\Aggregates\Nft\Events\NftDisposedOf;
+use Domain\Aggregates\Nft\Nft;
+use Domain\Aggregates\Nft\NftId;
+use Domain\Aggregates\SharePooling\Events\SharePoolingTokenAcquired;
+use Domain\Aggregates\SharePooling\Events\SharePoolingTokenDisposalReverted;
+use Domain\Aggregates\SharePooling\Events\SharePoolingTokenDisposedOf;
+use Domain\Aggregates\SharePooling\SharePooling;
+use Domain\Aggregates\SharePooling\SharePoolingId;
+use Domain\Aggregates\TaxYear\Events\CapitalGainRecorded;
+use Domain\Aggregates\TaxYear\Events\CapitalGainReverted;
+use Domain\Aggregates\TaxYear\Events\CapitalLossRecorded;
+use Domain\Aggregates\TaxYear\Events\CapitalLossReverted;
+use Domain\Aggregates\TaxYear\Events\IncomeRecorded;
+use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostRecorded;
+use Domain\Aggregates\TaxYear\TaxYear;
+use Domain\Aggregates\TaxYear\TaxYearId;
 
 return [
     'class_map' => [

@@ -70,9 +70,9 @@ return [
 
     'providers' => [
         App\Providers\AppServiceProvider::class,
-        App\Nft\NftServiceProvider::class,
-        App\SharePooling\SharePoolingServiceProvider::class,
-        App\TaxYear\TaxYearServiceProvider::class,
+        App\Aggregates\Nft\NftServiceProvider::class,
+        App\Aggregates\SharePooling\SharePoolingServiceProvider::class,
+        App\Aggregates\TaxYear\TaxYearServiceProvider::class,
     ],
 
 ];
