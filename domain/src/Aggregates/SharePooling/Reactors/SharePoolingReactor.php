@@ -11,7 +11,7 @@ use Domain\Aggregates\TaxYear\Actions\RecordCapitalLoss;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalGain;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalLoss;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
-use Domain\Aggregates\TaxYear\Services\TaxYearGenerator\TaxYearGenerator;
+use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use EventSauce\EventSourcing\EventConsumption\EventConsumer;
 use EventSauce\EventSourcing\Message;
@@ -25,7 +25,7 @@ final class SharePoolingReactor extends EventConsumer
     public function handleSharePoolingTokenDisposedOf(SharePoolingTokenDisposedOf $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYear = TaxYearGenerator::fromYear($disposal->date->getYear());
+        $taxYear = TaxYearNormaliser::fromYear($disposal->date->getYear());
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
@@ -47,7 +47,7 @@ final class SharePoolingReactor extends EventConsumer
     public function handleSharePoolingTokenDisposalReverted(SharePoolingTokenDisposalReverted $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYear = TaxYearGenerator::fromYear($disposal->date->getYear());
+        $taxYear = TaxYearNormaliser::fromYear($disposal->date->getYear());
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 

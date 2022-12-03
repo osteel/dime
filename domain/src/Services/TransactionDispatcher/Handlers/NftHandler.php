@@ -22,12 +22,12 @@ class NftHandler
     {
         $this->validate($transaction);
 
-        if ($transaction->receivedAssetIsNft) {
-            $this->handleReceive($transaction);
+        if ($transaction->sentAssetIsNft) {
+            $this->handleDisposal($transaction);
         }
 
-        if ($transaction->sentAssetIsNft) {
-            $this->handleSend($transaction);
+        if ($transaction->receivedAssetIsNft) {
+            $this->handleAcquisition($transaction);
         }
     }
 
@@ -44,23 +44,23 @@ class NftHandler
             || throw NftHandlerException::invalidTransaction('neither asset is a NFT', $transaction);
     }
 
-    private function handleReceive(Transaction $transaction): void
-    {
-        assert($transaction->receivedAsset !== null);
-
-        $nftId = NftId::fromNftId($transaction->receivedAsset);
-        $nftAggregate = $this->nftRepository->get($nftId);
-
-        $nftAggregate->acquire(new AcquireNft($transaction->date, $transaction->costBasis));
-    }
-
-    private function handleSend(Transaction $transaction): void
+    private function handleDisposal(Transaction $transaction): void
     {
         assert($transaction->sentAsset !== null);
 
         $nftId = NftId::fromNftId($transaction->sentAsset);
-        $nftAggregate = $this->nftRepository->get($nftId);
+        $nft = $this->nftRepository->get($nftId);
 
-        $nftAggregate->disposeOf(new DisposeOfNft($transaction->date, $transaction->costBasis));
+        $nft->disposeOf(new DisposeOfNft($transaction->date, $transaction->costBasis));
+    }
+
+    private function handleAcquisition(Transaction $transaction): void
+    {
+        assert($transaction->receivedAsset !== null);
+
+        $nftId = NftId::fromNftId($transaction->receivedAsset);
+        $nft = $this->nftRepository->get($nftId);
+
+        $nft->acquire(new AcquireNft($transaction->date, $transaction->costBasis));
     }
 }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\TaxYear\Services\TaxYearGenerator;
+namespace Domain\Aggregates\TaxYear\Services\TaxYearNormaliser;
 
-final class TaxYearGenerator
+final class TaxYearNormaliser
 {
     public static function fromYear(int $year): string
     {
