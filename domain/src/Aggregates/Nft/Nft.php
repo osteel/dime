@@ -17,7 +17,7 @@ use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 
 /** @property NftId $aggregateRootId */
-final class Nft implements AggregateRoot
+class Nft implements AggregateRoot
 {
     use AggregateRootBehaviour;
 
