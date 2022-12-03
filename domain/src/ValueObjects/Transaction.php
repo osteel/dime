@@ -29,8 +29,10 @@ final class Transaction implements Stringable
         public readonly bool $receivedAssetIsNft,
         public readonly ?string $transactionFeeCurrency,
         public readonly Quantity $transactionFeeQuantity,
+        public readonly ?FiatAmount $transactionFeeCostBasis,
         public readonly ?string $exchangeFeeCurrency,
         public readonly Quantity $exchangeFeeQuantity,
+        public readonly ?FiatAmount $exchangeFeeCostBasis,
     ) {
         match ($operation) {
             Operation::Receive => $this->validateReceive($sentAsset, $receivedAsset, $receivedQuantity),
