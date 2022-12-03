@@ -9,32 +9,28 @@ use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Transaction;
 
-it('can handle some income', function () {
+beforeEach(function () {
+    $this->taxYearRepository = Mockery::mock(TaxYearRepository::class);
+});
+
+it('can handle an income transaction', function () {
     $taxYear = Mockery::spy(TaxYear::class);
 
-    $taxYearRepository = Mockery::mock(TaxYearRepository::class)
-        ->shouldReceive('get')
-        ->once()
-        ->andReturn($taxYear)
-        ->getMock();
+    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
 
-    $amount = new FiatAmount('50', FiatCurrency::GBP);
+    $transaction = Transaction::factory()->income()->make(['costBasis' => new FiatAmount('50', FiatCurrency::GBP)]);
 
-    (new IncomeHandler($taxYearRepository))->handle(Transaction::factory()->income()->make(['costBasis' => $amount]));
+    (new IncomeHandler($this->taxYearRepository))->handle($transaction);
 
     $taxYear->shouldHaveReceived('recordIncome')
         ->once()
-        ->withArgs(fn (RecordIncome $action) => $action->amount->isEqualTo($amount));
+        ->withArgs(fn (RecordIncome $action) => $action->amount->isEqualTo($transaction->costBasis));
 });
 
-it('cannot handle some income because the operation is not receive', function () {
-    $taxYearRepository = Mockery::mock(TaxYearRepository::class);
-
-    (new IncomeHandler($taxYearRepository))->handle(Transaction::factory()->send()->make());
+it('cannot handle a transaction because the operation is not receive', function () {
+    (new IncomeHandler($this->taxYearRepository))->handle(Transaction::factory()->send()->make());
 })->throws(IncomeHandlerException::class);
 
-it('cannot handle some income because the transaction is not income', function () {
-    $taxYearRepository = Mockery::mock(TaxYearRepository::class);
-
-    (new IncomeHandler($taxYearRepository))->handle(Transaction::factory()->receive()->make());
+it('cannot handle a transaction because it is not income', function () {
+    (new IncomeHandler($this->taxYearRepository))->handle(Transaction::factory()->receive()->make());
 })->throws(IncomeHandlerException::class);

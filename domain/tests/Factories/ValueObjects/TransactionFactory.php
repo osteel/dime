@@ -43,13 +43,6 @@ class TransactionFactory extends PlainObjectFactory
         ];
     }
 
-    public function income(): static
-    {
-        return $this->receive()->state([
-            'isIncome' => true,
-        ]);
-    }
-
     public function receive(): static
     {
         return $this->state([
@@ -58,6 +51,21 @@ class TransactionFactory extends PlainObjectFactory
             'sentQuantity' => Quantity::zero(),
             'receivedAsset' => 'BTC',
             'receivedQuantity' => new Quantity('1'),
+        ]);
+    }
+
+    public function income(): static
+    {
+        return $this->receive()->state([
+            'isIncome' => true,
+        ]);
+    }
+
+    public function receiveNft(): static
+    {
+        return $this->receive()->state([
+            'receivedAsset' => md5(time() . 'receive'),
+            'receivedAssetIsNft' => true,
         ]);
     }
 
@@ -72,15 +80,44 @@ class TransactionFactory extends PlainObjectFactory
         ]);
     }
 
+    public function sendNft(): static
+    {
+        return $this->send()->state([
+            'sentAsset' => md5(time() . 'send'),
+            'sentAssetIsNft' => true,
+        ]);
+    }
+
     public function swap(): static
     {
         return $this->state([
-            'operation' => Operation::Send,
+            'operation' => Operation::Swap,
             'sentAsset' => 'BTC',
             'sentQuantity' => new Quantity('1'),
             'receivedAsset' => 'ETH',
             'receivedQuantity' => new Quantity('10'),
         ]);
+    }
+
+    public function swapToNft(): static
+    {
+        return $this->swap()->state([
+            'receivedAsset' => md5(time() . 'receive'),
+            'receivedAssetIsNft' => true,
+        ]);
+    }
+
+    public function swapFromNft(): static
+    {
+        return $this->swap()->state([
+            'sentAsset' => md5(time() . 'send'),
+            'sentAssetIsNft' => true,
+        ]);
+    }
+
+    public function swapNfts(): static
+    {
+        return $this->swapToNft()->swapFromNft();
     }
 
     public function transfer(): static
