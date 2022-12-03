@@ -36,8 +36,10 @@ class TransactionFactory extends PlainObjectFactory
             'receivedAssetIsNft' => false,
             'transactionFeeCurrency' => null,
             'transactionFeeQuantity' => Quantity::zero(),
+            'transactionFeeCostBasis' => null,
             'exchangeFeeCurrency' => null,
             'exchangeFeeQuantity' => Quantity::zero(),
+            'exchangeFeeCostBasis' => null,
         ];
     }
 
@@ -84,11 +86,29 @@ class TransactionFactory extends PlainObjectFactory
     public function transfer(): static
     {
         return $this->state([
-            'operation' => Operation::Send,
+            'operation' => Operation::Transfer,
             'sentAsset' => 'BTC',
             'sentQuantity' => new Quantity('1'),
             'receivedAsset' => null,
             'receivedQuantity' => Quantity::zero(),
+        ]);
+    }
+
+    public function withTransactionFee(?FiatAmount $costBasis = null): static
+    {
+        return $this->state([
+            'transactionFeeCurrency' => 'BTC',
+            'transactionFeeQuantity' => new Quantity('0.0001'),
+            'transactionFeeCostBasis' => $costBasis ?? new FiatAmount('10', FiatCurrency::GBP),
+        ]);
+    }
+
+    public function withExchangeFee(?FiatAmount $costBasis = null): static
+    {
+        return $this->state([
+            'exchangeFeeCurrency' => 'BTC',
+            'exchangeFeeQuantity' => new Quantity('0.0001'),
+            'exchangeFeeCostBasis' => $costBasis ?? new FiatAmount('10', FiatCurrency::GBP),
         ]);
     }
 }
