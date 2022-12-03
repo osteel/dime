@@ -25,7 +25,7 @@ use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 
 /** @property SharePoolingId $aggregateRootId */
-final class SharePooling implements AggregateRoot
+class SharePooling implements AggregateRoot
 {
     use AggregateRootBehaviour;
 

@@ -6,7 +6,7 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\TaxYear\Actions\RecordNonAttributableAllowableCost;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
-use Domain\Aggregates\TaxYear\Services\TaxYearGenerator\TaxYearGenerator;
+use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
 use Domain\ValueObjects\Transaction;
@@ -26,7 +26,7 @@ class TransferHandler
             return;
         }
 
-        $taxYear = TaxYearGenerator::fromYear($transaction->date->getYear());
+        $taxYear = TaxYearNormaliser::fromYear($transaction->date->getYear());
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 

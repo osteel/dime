@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Domain\ValueObjects;
 
 use Brick\DateTime\LocalDate;
+use Domain\Aggregates\SharePooling\Services\AssetSymbolNormaliser\AssetSymbolNormaliser;
 use Domain\Enums\Operation;
 use Domain\Tests\Factories\ValueObjects\TransactionFactory;
 use Domain\ValueObjects\Exceptions\TransactionException;
@@ -15,16 +16,19 @@ final class Transaction implements Stringable
 {
     use HasFactory;
 
+    public readonly ?string $sentAsset;
+    public readonly ?string $receivedAsset;
+
     /** @throws TransactionException */
     public function __construct(
         public readonly LocalDate $date,
         public readonly Operation $operation,
         public readonly bool $isIncome,
         public readonly FiatAmount $costBasis,
-        public readonly ?string $sentAsset,
+        ?string $sentAsset,
         public readonly Quantity $sentQuantity,
         public readonly bool $sentAssetIsNft,
-        public readonly ?string $receivedAsset,
+        ?string $receivedAsset,
         public readonly Quantity $receivedQuantity,
         public readonly bool $receivedAssetIsNft,
         public readonly ?string $transactionFeeCurrency,
@@ -34,11 +38,14 @@ final class Transaction implements Stringable
         public readonly Quantity $exchangeFeeQuantity,
         public readonly ?FiatAmount $exchangeFeeCostBasis,
     ) {
+        $this->sentAsset = $sentAssetIsNft ? $sentAsset : AssetSymbolNormaliser::normalise($sentAsset);
+        $this->receivedAsset = $receivedAssetIsNft ? $receivedAsset : AssetSymbolNormaliser::normalise($receivedAsset);
+
         match ($operation) {
-            Operation::Receive => $this->validateReceive($sentAsset, $receivedAsset, $receivedQuantity),
-            Operation::Send => $this->validateSend($sentAsset, $sentQuantity, $receivedAsset),
-            Operation::Swap => $this->validateSwap($sentAsset, $sentQuantity, $receivedAsset, $receivedQuantity),
-            Operation::Transfer => $this->validateTransfer($sentAsset, $sentQuantity, $receivedAsset),
+            Operation::Receive => $this->validateReceive(),
+            Operation::Send => $this->validateSend(),
+            Operation::Swap => $this->validateSwap(),
+            Operation::Transfer => $this->validateTransfer(),
         };
     }
 
@@ -69,90 +76,99 @@ final class Transaction implements Stringable
     }
 
     /** @throws TransactionException */
-    private function validateReceive(?string $sentAsset, ?string $receivedAsset, Quantity $receivedQuantity): void
+    private function validateReceive(): void
     {
         $error = 'Receive operations should %s';
 
-        $this->notHaveASentAsset($sentAsset, $error);
-        $this->haveAReceivedAsset($receivedAsset, $error);
-        $this->haveAReceivedQuantity($receivedQuantity, $error);
+        $this->notHaveASentAsset($error)->haveAReceivedAsset($error)->haveAReceivedQuantity($error);
     }
 
     /** @throws TransactionException */
-    private function validateSend(?string $sentAsset, Quantity $sentQuantity, ?string $receivedAsset): void
+    private function validateSend(): void
     {
         $error = 'Send operations should %s';
 
-        $this->haveASentAsset($sentAsset, $error);
-        $this->haveASentQuantity($sentQuantity, $error);
-        $this->notHaveAReceivedAsset($receivedAsset, $error);
+        $this->haveASentAsset($error)->haveASentQuantity($error)->notHaveAReceivedAsset($error);
     }
 
     /** @throws TransactionException */
-    private function validateSwap(
-        ?string $sentAsset,
-        Quantity $sentQuantity,
-        ?string $receivedAsset,
-        Quantity $receivedQuantity,
-    ): void {
+    private function validateSwap(): void
+    {
         $error = 'Swap operations should %s';
 
-        $this->haveASentAsset($sentAsset, $error);
-        $this->haveASentQuantity($sentQuantity, $error);
-        $this->haveAReceivedAsset($receivedAsset, $error);
-        $this->haveAReceivedQuantity($receivedQuantity, $error);
+        $this->haveASentAsset($error)
+            ->haveASentQuantity($error)
+            ->haveAReceivedAsset($error)
+            ->haveAReceivedQuantity($error);
+
+        $this->sentAsset !== $this->receivedAsset
+            || throw TransactionException::invalidData(sprintf($error, 'have different assets'), $this);
     }
 
     /** @throws TransactionException */
-    private function validateTransfer(?string $sentAsset, Quantity $sentQuantity, ?string $receivedAsset): void
+    private function validateTransfer(): void
     {
         $error = 'Transfer operations should %s';
 
-        $this->haveASentAsset($sentAsset, $error);
-        $this->haveASentQuantity($sentQuantity, $error);
-        $this->notHaveAReceivedAsset($receivedAsset, $error);
+        $this->haveASentAsset($error)->haveASentQuantity($error)->notHaveAReceivedAsset($error);
     }
 
     /** @throws TransactionException */
-    private function haveASentAsset(?string $asset, string $error): void
+    private function haveASentAsset(string $error): self
     {
-        ! is_null($asset) || throw TransactionException::invalidData(sprintf($error, 'have a sent asset'), $this);
+        ! is_null($this->sentAsset)
+            || throw TransactionException::invalidData(sprintf($error, 'have a sent asset'), $this);
+
+        return $this;
     }
 
     /** @throws TransactionException */
-    private function notHaveASentAsset(?string $asset, string $error): void
+    private function notHaveASentAsset(string $error): self
     {
-        is_null($asset) || throw TransactionException::invalidData(sprintf($error, 'not have a sent asset'), $this);
+        is_null($this->sentAsset)
+            || throw TransactionException::invalidData(sprintf($error, 'not have a sent asset'), $this);
+
+        return $this;
     }
 
     /** @throws TransactionException */
-    private function haveAReceivedAsset(?string $asset, string $error): void
+    private function haveAReceivedAsset(string $error): self
     {
-        ! is_null($asset) || throw TransactionException::invalidData(sprintf($error, 'have a received asset'), $this);
+        ! is_null($this->receivedAsset)
+            || throw TransactionException::invalidData(sprintf($error, 'have a received asset'), $this);
+
+        return $this;
     }
 
     /** @throws TransactionException */
-    private function notHaveAReceivedAsset(?string $asset, string $error): void
+    private function notHaveAReceivedAsset(string $error): self
     {
-        is_null($asset) || throw TransactionException::invalidData(sprintf($error, 'not have a received asset'), $this);
+        is_null($this->receivedAsset)
+            || throw TransactionException::invalidData(sprintf($error, 'not have a received asset'), $this);
+
+        return $this;
     }
 
     /** @throws TransactionException */
-    private function haveAReceivedQuantity(Quantity $quantity, string $error): void
+    private function haveAReceivedQuantity(string $error): self
     {
-        $quantity->isGreaterThan('0') || throw TransactionException::invalidData(
+        $this->receivedQuantity->isGreaterThan('0') || throw TransactionException::invalidData(
             sprintf($error, 'have a received quantity greater than zero'),
             $this,
         );
+
+        return $this;
     }
 
     /** @throws TransactionException */
-    private function haveASentQuantity(Quantity $quantity, string $error): void
+    private function haveASentQuantity(string $error): self
     {
-        $quantity->isGreaterThan('0') || throw TransactionException::invalidData(
+        $this->sentQuantity->isGreaterThan('0') || throw TransactionException::invalidData(
             sprintf($error, 'have a sent quantity greater than zero'),
             $this,
         );
+
+        return $this;
     }
 
     public function __toString(): string
