@@ -14,8 +14,8 @@ final class TransferHandlerException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function invalidTransaction(string $error, Transaction $transaction): self
+    public static function notTransfer(Transaction $transaction): self
     {
-        return new self(sprintf('Invalid transaction: %s. Transaction: %s', $error, $transaction->__toString()));
+        return new self(sprintf('The transaction is not a transfer operation: %s', $transaction->__toString()));
     }
 }

@@ -14,8 +14,13 @@ final class IncomeHandlerException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function invalidTransaction(string $error, Transaction $transaction): self
+    public static function operationIsNotReceive(Transaction $transaction): self
     {
-        return new self(sprintf('Invalid transaction: %s. Transaction: %s', $error, $transaction->__toString()));
+        return new self(sprintf('The transaction is not a receive operation: %s', $transaction->__toString()));
+    }
+
+    public static function notIncome(Transaction $transaction): self
+    {
+        return new self(sprintf('The transaction is not flagged as income: %s', $transaction->__toString()));
     }
 }

@@ -48,7 +48,7 @@ class TransferHandler
     /** @throws TransferHandlerException */
     private function validate(Transaction $transaction): void
     {
-        $transaction->isTransfer() || throw TransferHandlerException::invalidTransaction('not transfer', $transaction);
+        $transaction->isTransfer() || throw TransferHandlerException::notTransfer($transaction);
     }
 
     private function transactionHasNoFee(Transaction $transaction): bool

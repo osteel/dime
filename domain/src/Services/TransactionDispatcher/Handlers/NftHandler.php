@@ -37,11 +37,9 @@ class NftHandler
         $transaction->isReceive()
             || $transaction->isSend()
             || $transaction->isSwap()
-            || throw NftHandlerException::invalidTransaction('unsupported operation', $transaction);
+            || throw NftHandlerException::unsupportedOperation($transaction);
 
-        $transaction->receivedAssetIsNft
-            || $transaction->sentAssetIsNft
-            || throw NftHandlerException::invalidTransaction('neither asset is a NFT', $transaction);
+        $transaction->receivedAssetIsNft || $transaction->sentAssetIsNft || throw NftHandlerException::noNft($transaction);
     }
 
     private function handleDisposal(Transaction $transaction): void

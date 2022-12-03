@@ -37,11 +37,11 @@ class SharePoolingHandler
         $transaction->isReceive()
             || $transaction->isSend()
             || $transaction->isSwap()
-            || throw SharePoolingHandlerException::invalidTransaction('unsupported operation', $transaction);
+            || throw SharePoolingHandlerException::unsupportedOperation($transaction);
 
         $transaction->receivedAssetIsNft
             && $transaction->sentAssetIsNft
-            && throw SharePoolingHandlerException::invalidTransaction('both assets are NFTs', $transaction);
+            && throw SharePoolingHandlerException::bothNfts($transaction);
     }
 
     private function handleDisposal(Transaction $transaction): void

@@ -89,9 +89,15 @@ it('can handle a swap operation where neither asset is a NFT', function () {
 });
 
 it('cannot handle a transaction because the operation is not supported', function () {
-    (new SharePoolingHandler($this->sharePoolingRepository))->handle(Transaction::factory()->transfer()->make());
-})->throws(SharePoolingHandlerException::class);
+    $transaction = Transaction::factory()->transfer()->make();
+
+    expect(fn () => (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction))
+        ->toThrow(SharePoolingHandlerException::class, SharePoolingHandlerException::unsupportedOperation($transaction)->getMessage());
+});
 
 it('cannot handle a transaction because one of the assets is a NFT', function () {
-    (new SharePoolingHandler($this->sharePoolingRepository))->handle(Transaction::factory()->swapNfts()->make());
-})->throws(SharePoolingHandlerException::class);
+    $transaction = Transaction::factory()->swapNfts()->make();
+
+    expect(fn () => (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction))
+        ->toThrow(SharePoolingHandlerException::class, SharePoolingHandlerException::bothNfts($transaction)->getMessage());
+});

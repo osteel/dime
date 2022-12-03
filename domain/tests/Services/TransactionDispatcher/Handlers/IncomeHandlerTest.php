@@ -28,9 +28,15 @@ it('can handle an income transaction', function () {
 });
 
 it('cannot handle a transaction because the operation is not receive', function () {
-    (new IncomeHandler($this->taxYearRepository))->handle(Transaction::factory()->send()->make());
-})->throws(IncomeHandlerException::class);
+    $transaction = Transaction::factory()->send()->make();
+
+    expect(fn () => (new IncomeHandler($this->taxYearRepository))->handle($transaction))
+        ->toThrow(IncomeHandlerException::class, IncomeHandlerException::operationIsNotReceive($transaction)->getMessage());
+});
 
 it('cannot handle a transaction because it is not income', function () {
-    (new IncomeHandler($this->taxYearRepository))->handle(Transaction::factory()->receive()->make());
-})->throws(IncomeHandlerException::class);
+    $transaction = Transaction::factory()->receive()->make();
+
+    expect(fn () => (new IncomeHandler($this->taxYearRepository))->handle($transaction))
+        ->toThrow(IncomeHandlerException::class, IncomeHandlerException::notIncome($transaction)->getMessage());
+});

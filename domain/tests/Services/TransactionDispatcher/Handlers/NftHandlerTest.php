@@ -111,9 +111,15 @@ it('can handle a swap operation where both assets are NFTs', function () {
 });
 
 it('cannot handle a transaction because the operation is not supported', function () {
-    (new NftHandler($this->nftRepository))->handle(Transaction::factory()->transfer()->make());
-})->throws(NftHandlerException::class);
+    $transaction = Transaction::factory()->transfer()->make();
+
+    expect(fn () => (new NftHandler($this->nftRepository))->handle($transaction))
+        ->toThrow(NftHandlerException::class, NftHandlerException::unsupportedOperation($transaction)->getMessage());
+});
 
 it('cannot handle a transaction because none of the assets is a NFT', function () {
-    (new NftHandler($this->nftRepository))->handle(Transaction::factory()->swap()->make());
-})->throws(NftHandlerException::class);
+    $transaction = Transaction::factory()->swap()->make();
+
+    expect(fn () => (new NftHandler($this->nftRepository))->handle($transaction))
+        ->toThrow(NftHandlerException::class, NftHandlerException::noNft($transaction)->getMessage());
+});
