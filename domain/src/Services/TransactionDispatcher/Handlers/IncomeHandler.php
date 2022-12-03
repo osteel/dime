@@ -32,7 +32,7 @@ class IncomeHandler
     /** @throws IncomeHandlerException */
     private function validate(Transaction $transaction): void
     {
-        $transaction->isReceive() || throw IncomeHandlerException::invalidTransaction('not receive', $transaction);
-        $transaction->isIncome || throw IncomeHandlerException::invalidTransaction('not income', $transaction);
+        $transaction->isReceive() || throw IncomeHandlerException::operationIsNotReceive($transaction);
+        $transaction->isIncome || throw IncomeHandlerException::notIncome($transaction);
     }
 }

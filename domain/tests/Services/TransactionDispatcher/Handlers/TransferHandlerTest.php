@@ -38,5 +38,8 @@ it('can handle a transfer operation with no fees', function () {
 });
 
 it('cannot handle a transaction because the operation is not transfer', function () {
-    (new TransferHandler($this->taxYearRepository))->handle(Transaction::factory()->send()->make());
-})->throws(TransferHandlerException::class);
+    $transaction = Transaction::factory()->send()->make();
+
+    expect(fn () => (new TransferHandler($this->taxYearRepository))->handle($transaction))
+        ->toThrow(TransferHandlerException::class, TransferHandlerException::notTransfer($transaction)->getMessage());
+});

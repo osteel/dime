@@ -14,8 +14,13 @@ final class SharePoolingHandlerException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function invalidTransaction(string $error, Transaction $transaction): self
+    public static function unsupportedOperation(Transaction $transaction): self
     {
-        return new self(sprintf('Invalid transaction: %s. Transaction: %s', $error, $transaction->__toString()));
+        return new self(sprintf('Unsupported transaction operation: %s', $transaction->__toString()));
+    }
+
+    public static function bothNfts(Transaction $transaction): self
+    {
+        return new self(sprintf('Both assets are NFTs: %s', $transaction->__toString()));
     }
 }
