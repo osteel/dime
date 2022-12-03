@@ -58,4 +58,37 @@ class TransactionFactory extends PlainObjectFactory
             'receivedQuantity' => new Quantity('1'),
         ]);
     }
+
+    public function send(): static
+    {
+        return $this->state([
+            'operation' => Operation::Send,
+            'sentAsset' => 'BTC',
+            'sentQuantity' => new Quantity('1'),
+            'receivedAsset' => null,
+            'receivedQuantity' => Quantity::zero(),
+        ]);
+    }
+
+    public function swap(): static
+    {
+        return $this->state([
+            'operation' => Operation::Send,
+            'sentAsset' => 'BTC',
+            'sentQuantity' => new Quantity('1'),
+            'receivedAsset' => 'ETH',
+            'receivedQuantity' => new Quantity('10'),
+        ]);
+    }
+
+    public function transfer(): static
+    {
+        return $this->state([
+            'operation' => Operation::Send,
+            'sentAsset' => 'BTC',
+            'sentQuantity' => new Quantity('1'),
+            'receivedAsset' => null,
+            'receivedQuantity' => Quantity::zero(),
+        ]);
+    }
 }
