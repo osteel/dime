@@ -8,7 +8,6 @@ use Brick\DateTime\LocalDate;
 use Domain\Enums\Operation;
 use Domain\Tests\Factories\ValueObjects\TransactionFactory;
 use Domain\ValueObjects\Exceptions\TransactionException;
-use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stringable;
 
