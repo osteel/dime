@@ -26,8 +26,8 @@ class TransactionFactory extends PlainObjectFactory
         return [
             'date' => LocalDate::parse('2015-10-21'),
             'operation' => Operation::Receive,
-            'isIncome' => false,
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'isIncome' => false,
             'sentAsset' => null,
             'sentQuantity' => Quantity::zero(),
             'sentAssetIsNft' => false,

@@ -17,29 +17,37 @@ final class Transaction implements Stringable
     use HasFactory;
 
     public readonly ?string $sentAsset;
+    public readonly Quantity $sentQuantity;
     public readonly ?string $receivedAsset;
+    public readonly Quantity $receivedQuantity;
+    public readonly Quantity $transactionFeeQuantity;
+    public readonly Quantity $exchangeFeeQuantity;
 
     /** @throws TransactionException */
     public function __construct(
         public readonly LocalDate $date,
         public readonly Operation $operation,
-        public readonly bool $isIncome,
         public readonly FiatAmount $costBasis,
-        ?string $sentAsset,
-        public readonly Quantity $sentQuantity,
-        public readonly bool $sentAssetIsNft,
-        ?string $receivedAsset,
-        public readonly Quantity $receivedQuantity,
-        public readonly bool $receivedAssetIsNft,
-        public readonly ?string $transactionFeeCurrency,
-        public readonly Quantity $transactionFeeQuantity,
-        public readonly ?FiatAmount $transactionFeeCostBasis,
-        public readonly ?string $exchangeFeeCurrency,
-        public readonly Quantity $exchangeFeeQuantity,
-        public readonly ?FiatAmount $exchangeFeeCostBasis,
+        public readonly bool $isIncome = false,
+        ?string $sentAsset = null,
+        ?Quantity $sentQuantity = null,
+        public readonly bool $sentAssetIsNft = false,
+        ?string $receivedAsset = null,
+        ?Quantity $receivedQuantity = null,
+        public readonly bool $receivedAssetIsNft = false,
+        public readonly ?string $transactionFeeCurrency = null,
+        ?Quantity $transactionFeeQuantity = null,
+        public readonly ?FiatAmount $transactionFeeCostBasis = null,
+        public readonly ?string $exchangeFeeCurrency = null,
+        ?Quantity $exchangeFeeQuantity = null,
+        public readonly ?FiatAmount $exchangeFeeCostBasis = null,
     ) {
         $this->sentAsset = $sentAssetIsNft ? $sentAsset : AssetSymbolNormaliser::normalise($sentAsset);
+        $this->sentQuantity = $sentQuantity ?? Quantity::zero();
         $this->receivedAsset = $receivedAssetIsNft ? $receivedAsset : AssetSymbolNormaliser::normalise($receivedAsset);
+        $this->receivedQuantity = $receivedQuantity ?? Quantity::zero();
+        $this->transactionFeeQuantity = $transactionFeeQuantity ?? Quantity::zero();
+        $this->exchangeFeeQuantity = $exchangeFeeQuantity ?? Quantity::zero();
 
         match ($operation) {
             Operation::Receive => $this->validateReceive(),
@@ -73,6 +81,16 @@ final class Transaction implements Stringable
     public function isTransfer(): bool
     {
         return $this->operation === Operation::Transfer;
+    }
+
+    public function involvesNfts(): bool
+    {
+        return $this->sentAssetIsNft || $this->receivedAssetIsNft;
+    }
+
+    public function involvesSharePooling(): bool
+    {
+        return ! $this->isTransfer() && (! $this->sentAssetIsNft || ! $this->receivedAssetIsNft);
     }
 
     /** @throws TransactionException */
