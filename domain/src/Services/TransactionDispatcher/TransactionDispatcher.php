@@ -27,8 +27,8 @@ final class TransactionDispatcher
             ->handleTransfer($transaction)
             ->handleNft($transaction)
             ->handleSharePooling($transaction)
-            ->handleTransactionFee($transaction)
-            ->handleExchangeFee($transaction);
+            ->handleNetworkFee($transaction)
+            ->handlePlatformFee($transaction);
     }
 
     private function handleIncome(Transaction $transaction): self
@@ -55,7 +55,7 @@ final class TransactionDispatcher
 
     private function handleNft(Transaction $transaction): self
     {
-        if (! $transaction->involvesNfts()) {
+        if (! $transaction->involvesNfts() || $transaction->isTransfer()) {
             return $this;
         }
 
@@ -66,7 +66,7 @@ final class TransactionDispatcher
 
     private function handleSharePooling(Transaction $transaction): self
     {
-        if (! $transaction->involvesSharePooling()) {
+        if (! $transaction->involvesSharePooling() || $transaction->isTransfer()) {
             return $this;
         }
 
@@ -75,35 +75,35 @@ final class TransactionDispatcher
         return $this;
     }
 
-    private function handleTransactionFee(Transaction $transaction): self
+    private function handleNetworkFee(Transaction $transaction): self
     {
-        if (is_null($transaction->transactionFeeCostBasis)) {
+        if (is_null($transaction->networkFeeMarketValue) || $transaction->networkFeeIsFiat()) {
             return $this;
         }
 
         $this->sharePoolingHandler->handle(new Transaction(
             date: $transaction->date,
             operation: Operation::Send,
-            costBasis: $transaction->transactionFeeCostBasis,
-            sentAsset: $transaction->transactionFeeCurrency,
-            sentQuantity: $transaction->transactionFeeQuantity,
+            marketValue: $transaction->networkFeeMarketValue,
+            sentAsset: $transaction->networkFeeCurrency,
+            sentQuantity: $transaction->networkFeeQuantity,
         ));
 
         return $this;
     }
 
-    private function handleExchangeFee(Transaction $transaction): self
+    private function handlePlatformFee(Transaction $transaction): self
     {
-        if (is_null($transaction->exchangeFeeCostBasis)) {
+        if (is_null($transaction->platformFeeMarketValue) || $transaction->platformFeeIsFiat()) {
             return $this;
         }
 
         $this->sharePoolingHandler->handle(new Transaction(
             date: $transaction->date,
             operation: Operation::Send,
-            costBasis: $transaction->exchangeFeeCostBasis,
-            sentAsset: $transaction->exchangeFeeCurrency,
-            sentQuantity: $transaction->exchangeFeeQuantity,
+            marketValue: $transaction->platformFeeMarketValue,
+            sentAsset: $transaction->platformFeeCurrency,
+            sentQuantity: $transaction->platformFeeQuantity,
         ));
 
         return $this;

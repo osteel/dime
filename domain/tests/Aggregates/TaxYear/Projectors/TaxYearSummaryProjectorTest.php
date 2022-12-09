@@ -25,12 +25,12 @@ it('can handle a capital gain', function () {
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalGainRecorded))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordCapitalGain')
-            ->once()
             ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalGainRecorded) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
                     && $amount === $capitalGainRecorded->amount;
-            }));
+            })
+            ->once());
 });
 
 it('can handle a capital gain reversion', function () {
@@ -43,12 +43,12 @@ it('can handle a capital gain reversion', function () {
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalGainReverted))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('revertCapitalGain')
-            ->once()
             ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalGainReverted) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
                     && $amount === $capitalGainReverted->amount;
-            }));
+            })
+            ->once());
 });
 
 it('can handle a capital loss', function () {
@@ -61,12 +61,12 @@ it('can handle a capital loss', function () {
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalLossRecorded))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordCapitalLoss')
-            ->once()
             ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalLossRecorded) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
                     && $amount === $capitalLossRecorded->amount;
-            }));
+            })
+            ->once());
 });
 
 it('can handle a capital loss reversion', function () {
@@ -79,12 +79,12 @@ it('can handle a capital loss reversion', function () {
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalLossReverted))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('revertCapitalLoss')
-            ->once()
             ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalLossReverted) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
                     && $amount === $capitalLossReverted->amount;
-            }));
+            })
+            ->once());
 });
 
 it('can handle some income', function () {
@@ -97,12 +97,12 @@ it('can handle some income', function () {
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($incomeRecorded))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordIncome')
-            ->once()
             ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($incomeRecorded) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
                     && $amount === $incomeRecorded->amount;
-            }));
+            })
+            ->once());
 });
 
 it('can handle a non-attributable allowable cost', function () {
@@ -115,10 +115,10 @@ it('can handle a non-attributable allowable cost', function () {
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($nonAttributableAllowableCostRecorded))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordNonAttributableAllowableCost')
-            ->once()
             ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($nonAttributableAllowableCostRecorded) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
                     && $amount === $nonAttributableAllowableCostRecorded->amount;
-            }));
+            })
+            ->once());
 });

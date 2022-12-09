@@ -54,7 +54,7 @@ class SharePoolingHandler
         $sharePooling->disposeOf(new DisposeOfSharePoolingToken(
             date: $transaction->date,
             quantity: $transaction->sentQuantity,
-            proceeds: $transaction->costBasis,
+            proceeds: $transaction->marketValue, // @phpstan-ignore-line
         ));
     }
 
@@ -68,7 +68,7 @@ class SharePoolingHandler
         $sharePooling->acquire(new AcquireSharePoolingToken(
             date: $transaction->date,
             quantity: $transaction->receivedQuantity,
-            costBasis: $transaction->costBasis,
+            costBasis: $transaction->marketValue, // @phpstan-ignore-line
         ));
     }
 }

@@ -26,7 +26,7 @@ class TransactionFactory extends PlainObjectFactory
         return [
             'date' => LocalDate::parse('2015-10-21'),
             'operation' => Operation::Receive,
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'marketValue' => new FiatAmount('100', FiatCurrency::GBP),
             'isIncome' => false,
             'sentAsset' => null,
             'sentQuantity' => Quantity::zero(),
@@ -34,12 +34,12 @@ class TransactionFactory extends PlainObjectFactory
             'receivedAsset' => 'BTC',
             'receivedQuantity' => new Quantity('1'),
             'receivedAssetIsNft' => false,
-            'transactionFeeCurrency' => null,
-            'transactionFeeQuantity' => Quantity::zero(),
-            'transactionFeeCostBasis' => null,
-            'exchangeFeeCurrency' => null,
-            'exchangeFeeQuantity' => Quantity::zero(),
-            'exchangeFeeCostBasis' => null,
+            'networkFeeCurrency' => null,
+            'networkFeeQuantity' => Quantity::zero(),
+            'networkFeeMarketValue' => null,
+            'platformFeeCurrency' => null,
+            'platformFeeQuantity' => Quantity::zero(),
+            'platformFeeMarketValue' => null,
         ];
     }
 
@@ -66,6 +66,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->receive()->state([
             'receivedAsset' => md5(time() . 'receive'),
             'receivedAssetIsNft' => true,
+            'receivedQuantity' => new Quantity('1'),
         ]);
     }
 
@@ -85,6 +86,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->send()->state([
             'sentAsset' => md5(time() . 'send'),
             'sentAssetIsNft' => true,
+            'sentQuantity' => new Quantity('1'),
         ]);
     }
 
@@ -104,6 +106,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->swap()->state([
             'receivedAsset' => md5(time() . 'receive'),
             'receivedAssetIsNft' => true,
+            'receivedQuantity' => new Quantity('1'),
         ]);
     }
 
@@ -112,6 +115,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->swap()->state([
             'sentAsset' => md5(time() . 'send'),
             'sentAssetIsNft' => true,
+            'sentQuantity' => new Quantity('1'),
         ]);
     }
 
@@ -131,21 +135,48 @@ class TransactionFactory extends PlainObjectFactory
         ]);
     }
 
-    public function withTransactionFee(?FiatAmount $costBasis = null): static
+    public function transferNft(): static
     {
-        return $this->state([
-            'transactionFeeCurrency' => 'BTC',
-            'transactionFeeQuantity' => new Quantity('0.0001'),
-            'transactionFeeCostBasis' => $costBasis ?? new FiatAmount('10', FiatCurrency::GBP),
+        return $this->transfer()->state([
+            'sentAsset' => md5(time() . 'send'),
+            'sentAssetIsNft' => true,
+            'sentQuantity' => new Quantity('1'),
         ]);
     }
 
-    public function withExchangeFee(?FiatAmount $costBasis = null): static
+    public function withNetworkFee(?FiatAmount $marketValue = null): static
     {
         return $this->state([
-            'exchangeFeeCurrency' => 'BTC',
-            'exchangeFeeQuantity' => new Quantity('0.0001'),
-            'exchangeFeeCostBasis' => $costBasis ?? new FiatAmount('10', FiatCurrency::GBP),
+            'networkFeeCurrency' => 'BTC',
+            'networkFeeQuantity' => new Quantity('0.0001'),
+            'networkFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
+        ]);
+    }
+
+    public function withNetworkFeeInFiat(?FiatAmount $marketValue = null): static
+    {
+        return $this->state([
+            'networkFeeCurrency' => $marketValue?->currency->value ?? FiatCurrency::GBP->value,
+            'networkFeeQuantity' => new Quantity($marketValue?->amount ?? '10'),
+            'networkFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
+        ]);
+    }
+
+    public function withPlatformFee(?FiatAmount $marketValue = null): static
+    {
+        return $this->state([
+            'platformFeeCurrency' => 'BTC',
+            'platformFeeQuantity' => new Quantity('0.0001'),
+            'platformFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
+        ]);
+    }
+
+    public function withPlatformFeeInFiat(?FiatAmount $marketValue = null): static
+    {
+        return $this->state([
+            'platformFeeCurrency' => $marketValue?->currency->value ?? FiatCurrency::GBP->value,
+            'platformFeeQuantity' => new Quantity($marketValue?->amount ?? '10'),
+            'platformFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
         ]);
     }
 }

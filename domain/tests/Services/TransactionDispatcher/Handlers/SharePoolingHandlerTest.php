@@ -19,13 +19,14 @@ it('can handle a receive operation', function () {
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
 
-    $transaction = Transaction::factory()->receive()->make(['costBasis' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->receive()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
 
     (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
 
-    $sharePooling->shouldHaveReceived('acquire')
-        ->once()
-        ->withArgs(fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo($transaction->costBasis));
+    $sharePooling->shouldHaveReceived(
+        'acquire',
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('can handle a send operation', function () {
@@ -33,13 +34,14 @@ it('can handle a send operation', function () {
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
 
-    $transaction = Transaction::factory()->send()->make(['costBasis' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->send()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
 
     (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
 
-    $sharePooling->shouldHaveReceived('disposeOf')
-        ->once()
-        ->withArgs(fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo($transaction->costBasis));
+    $sharePooling->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('can handle a swap operation where the received asset is not a NFT', function () {
@@ -47,13 +49,14 @@ it('can handle a swap operation where the received asset is not a NFT', function
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
 
-    $transaction = Transaction::factory()->swapFromNft()->make(['costBasis' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swapFromNft()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
 
     (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
 
-    $sharePooling->shouldHaveReceived('acquire')
-        ->once()
-        ->withArgs(fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo($transaction->costBasis));
+    $sharePooling->shouldHaveReceived(
+        'acquire',
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('can handle a swap operation where the sent asset is not a NFT', function () {
@@ -61,13 +64,14 @@ it('can handle a swap operation where the sent asset is not a NFT', function () 
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
 
-    $transaction = Transaction::factory()->swapToNft()->make(['costBasis' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swapToNft()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
 
     (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
 
-    $sharePooling->shouldHaveReceived('disposeOf')
-        ->once()
-        ->withArgs(fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo($transaction->costBasis));
+    $sharePooling->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('can handle a swap operation where neither asset is a NFT', function () {
@@ -75,17 +79,19 @@ it('can handle a swap operation where neither asset is a NFT', function () {
 
     $this->sharePoolingRepository->shouldReceive('get')->twice()->andReturn($sharePooling);
 
-    $transaction = Transaction::factory()->swap()->make(['costBasis' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swap()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
 
     (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
 
-    $sharePooling->shouldHaveReceived('disposeOf')
-        ->once()
-        ->withArgs(fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo($transaction->costBasis));
+    $sharePooling->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
 
-    $sharePooling->shouldHaveReceived('acquire')
-        ->once()
-        ->withArgs(fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo($transaction->costBasis));
+    $sharePooling->shouldHaveReceived(
+        'acquire',
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('cannot handle a transaction because the operation is not supported', function () {

@@ -26,22 +26,25 @@ it('can dispatch to the income handler', function () {
 
     $this->transactionDispatcher->dispatch($transaction);
 
-    $this->incomeHandler->shouldHaveReceived('handle')->once()->with($transaction);
+    $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
     $this->transferHandler->shouldNotHaveReceived('handle');
     $this->nftHandler->shouldNotHaveReceived('handle');
-    $this->sharePoolingHandler->shouldHaveReceived('handle')->once()->with($transaction);
+    $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
 });
 
-it('can dispatch to the transfer handler', function () {
-    $transaction = Transaction::factory()->transfer()->make();
+it('can dispatch to the transfer handler', function (string $method) {
+    $transaction = Transaction::factory()->$method()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
     $this->incomeHandler->shouldNotHaveReceived('handle');
-    $this->transferHandler->shouldHaveReceived('handle')->once()->with($transaction);
+    $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
     $this->nftHandler->shouldNotHaveReceived('handle');
     $this->sharePoolingHandler->shouldNotHaveReceived('handle');
-});
+})->with([
+    'transfer' => ['transfer'],
+    'transfer NFT' => ['transferNft'],
+]);
 
 it('can dispatch to the NFT handler', function (string $method, bool $sharePoolingHandler) {
     $transaction = Transaction::factory()->$method()->make();
@@ -50,10 +53,10 @@ it('can dispatch to the NFT handler', function (string $method, bool $sharePooli
 
     $this->incomeHandler->shouldNotHaveReceived('handle');
     $this->transferHandler->shouldNotHaveReceived('handle');
-    $this->nftHandler->shouldHaveReceived('handle')->once()->with($transaction);
+    $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
 
     if ($sharePoolingHandler) {
-        $this->sharePoolingHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->sharePoolingHandler->shouldNotHaveReceived('handle');
     }
@@ -71,7 +74,7 @@ it('can dispatch to the share pooling handler', function (string $method, bool $
     $this->transactionDispatcher->dispatch($transaction);
 
     if ($method === 'income') {
-        $this->incomeHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->incomeHandler->shouldNotHaveReceived('handle');
     }
@@ -79,12 +82,12 @@ it('can dispatch to the share pooling handler', function (string $method, bool $
     $this->transferHandler->shouldNotHaveReceived('handle');
 
     if ($nftHandler) {
-        $this->nftHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->nftHandler->shouldNotHaveReceived('handle');
     }
 
-    $this->sharePoolingHandler->shouldHaveReceived('handle')->once()->with($transaction);
+    $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
 })->with([
     'send' => ['send', false],
     'receive' => ['receive', false],
@@ -96,39 +99,39 @@ it('can dispatch to the share pooling handler', function (string $method, bool $
     'dispose of NFT' => ['swapFromNft', true],
 ]);
 
-it('can dispatch the transaction fee to the share pooling handler', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('can dispatch the network fee to the share pooling handler', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
-    $transaction = Transaction::factory()->$method()->withTransactionFee()->make();
+    $transaction = Transaction::factory()->$method()->withNetworkFee()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
     if ($method === 'income') {
-        $this->incomeHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->incomeHandler->shouldNotHaveReceived('handle');
     }
 
     if ($method === 'transfer') {
-        $this->transferHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->transferHandler->shouldNotHaveReceived('handle');
     }
 
     if ($nftHandler) {
-        $this->nftHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->nftHandler->shouldNotHaveReceived('handle');
     }
 
     if ($sharePoolingHandler) {
-        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction);
+        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
     }
 
-    $this->sharePoolingHandler->shouldHaveReceived('handle')
-        ->withArgs(function (Transaction $feeTransaction) use ($transaction) {
-            return $feeTransaction->isSend()
-                && $feeTransaction->costBasis->isEqualTo($transaction->transactionFeeCostBasis);
-        });
+    $this->sharePoolingHandler->shouldHaveReceived(
+        'handle',
+        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
+            && $feeTransaction->marketValue->isEqualTo($transaction->networkFeeMarketValue),
+    )->once();
 })->with([
     'send' => ['send', true, false],
     'receive' => ['receive', true, false],
@@ -141,39 +144,90 @@ it('can dispatch the transaction fee to the share pooling handler', function (st
     'dispose of NFT' => ['swapFromNft', false, true],
 ]);
 
-it('can dispatch the exchange fee to the share pooling handler', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('can dispatch the platform fee to the share pooling handler', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
-    $transaction = Transaction::factory()->$method()->withExchangeFee()->make();
+    $transaction = Transaction::factory()->$method()->withPlatformFee()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
     if ($method === 'income') {
-        $this->incomeHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->incomeHandler->shouldNotHaveReceived('handle');
     }
 
     if ($method === 'transfer') {
-        $this->transferHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->transferHandler->shouldNotHaveReceived('handle');
     }
 
     if ($nftHandler) {
-        $this->nftHandler->shouldHaveReceived('handle')->once()->with($transaction);
+        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->nftHandler->shouldNotHaveReceived('handle');
     }
 
     if ($sharePoolingHandler) {
-        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction);
+        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
     }
 
-    $this->sharePoolingHandler->shouldHaveReceived('handle')
-        ->withArgs(function (Transaction $feeTransaction) use ($transaction) {
-            return $feeTransaction->isSend()
-                && $feeTransaction->costBasis->isEqualTo($transaction->exchangeFeeCostBasis);
-        });
+    $this->sharePoolingHandler->shouldHaveReceived(
+        'handle',
+        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
+            && $feeTransaction->marketValue->isEqualTo($transaction->platformFeeMarketValue),
+    )->once();
+})->with([
+    'send' => ['send', true, false],
+    'receive' => ['receive', true, false],
+    'swap' => ['swap', true, false],
+    'income' => ['income', true, false],
+    'transfer' => ['transfer', false, false],
+    'send NFT' => ['sendNft', false, true],
+    'receive NFT' => ['receiveNft', false, true],
+    'acquire NFT' => ['swapToNft', false, true],
+    'dispose of NFT' => ['swapFromNft', false, true],
+]);
+
+it('does not dispatch the fees to the share pooling handler when they are in fiat', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
+    /** @var Transaction */
+    $transaction = Transaction::factory()->$method()->withNetworkFeeInFiat()->withPlatformFeeInFiat()->make();
+
+    $this->transactionDispatcher->dispatch($transaction);
+
+    if ($method === 'income') {
+        $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    } else {
+        $this->incomeHandler->shouldNotHaveReceived('handle');
+    }
+
+    if ($method === 'transfer') {
+        $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    } else {
+        $this->transferHandler->shouldNotHaveReceived('handle');
+    }
+
+    if ($nftHandler) {
+        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    } else {
+        $this->nftHandler->shouldNotHaveReceived('handle');
+    }
+
+    if ($sharePoolingHandler) {
+        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    }
+
+    $this->sharePoolingHandler->shouldNotHaveReceived(
+        'handle',
+        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
+            && $feeTransaction->marketValue->isEqualTo($transaction->networkFeeMarketValue),
+    );
+
+    $this->sharePoolingHandler->shouldNotHaveReceived(
+        'handle',
+        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
+            && $feeTransaction->marketValue->isEqualTo($transaction->platformFeeMarketValue),
+    );
 })->with([
     'send' => ['send', true, false],
     'receive' => ['receive', true, false],

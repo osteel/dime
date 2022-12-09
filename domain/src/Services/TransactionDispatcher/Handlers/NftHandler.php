@@ -49,7 +49,8 @@ class NftHandler
         $nftId = NftId::fromNftId($transaction->sentAsset);
         $nft = $this->nftRepository->get($nftId);
 
-        $nft->disposeOf(new DisposeOfNft($transaction->date, $transaction->costBasis));
+        // @phpstan-ignore-next-line
+        $nft->disposeOf(new DisposeOfNft($transaction->date, $transaction->marketValue));
     }
 
     private function handleAcquisition(Transaction $transaction): void
@@ -59,6 +60,7 @@ class NftHandler
         $nftId = NftId::fromNftId($transaction->receivedAsset);
         $nft = $this->nftRepository->get($nftId);
 
-        $nft->acquire(new AcquireNft($transaction->date, $transaction->costBasis));
+        // @phpstan-ignore-next-line
+        $nft->acquire(new AcquireNft($transaction->date, $transaction->marketValue));
     }
 }

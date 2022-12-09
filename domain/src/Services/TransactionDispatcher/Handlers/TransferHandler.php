@@ -30,17 +30,17 @@ class TransferHandler
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
-        if ($transaction->transactionFeeCostBasis?->isGreaterThan('0')) {
+        if ($transaction->networkFeeMarketValue?->isGreaterThan('0')) {
             $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
                 taxYear: $taxYear,
-                amount: $transaction->transactionFeeCostBasis,
+                amount: $transaction->networkFeeMarketValue,
             ));
         }
 
-        if ($transaction->exchangeFeeCostBasis?->isGreaterThan('0')) {
+        if ($transaction->platformFeeMarketValue?->isGreaterThan('0')) {
             $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
                 taxYear: $taxYear,
-                amount: $transaction->exchangeFeeCostBasis,
+                amount: $transaction->platformFeeMarketValue,
             ));
         }
     }
@@ -53,7 +53,7 @@ class TransferHandler
 
     private function transactionHasNoFee(Transaction $transaction): bool
     {
-        return (bool) ($transaction->transactionFeeCostBasis?->isGreaterThan('0')) === false
-            && (bool) ($transaction->exchangeFeeCostBasis?->isGreaterThan('0')) === false;
+        return (bool) ($transaction->networkFeeMarketValue?->isGreaterThan('0')) === false
+            && (bool) ($transaction->platformFeeMarketValue?->isGreaterThan('0')) === false;
     }
 }

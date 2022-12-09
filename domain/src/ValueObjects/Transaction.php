@@ -6,6 +6,7 @@ namespace Domain\ValueObjects;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePooling\Services\AssetSymbolNormaliser\AssetSymbolNormaliser;
+use Domain\Enums\FiatCurrency;
 use Domain\Enums\Operation;
 use Domain\Tests\Factories\ValueObjects\TransactionFactory;
 use Domain\ValueObjects\Exceptions\TransactionException;
@@ -20,14 +21,14 @@ final class Transaction implements Stringable
     public readonly Quantity $sentQuantity;
     public readonly ?string $receivedAsset;
     public readonly Quantity $receivedQuantity;
-    public readonly Quantity $transactionFeeQuantity;
-    public readonly Quantity $exchangeFeeQuantity;
+    public readonly Quantity $networkFeeQuantity;
+    public readonly Quantity $platformFeeQuantity;
 
     /** @throws TransactionException */
     public function __construct(
         public readonly LocalDate $date,
         public readonly Operation $operation,
-        public readonly FiatAmount $costBasis,
+        public readonly ?FiatAmount $marketValue = null,
         public readonly bool $isIncome = false,
         ?string $sentAsset = null,
         ?Quantity $sentQuantity = null,
@@ -35,19 +36,19 @@ final class Transaction implements Stringable
         ?string $receivedAsset = null,
         ?Quantity $receivedQuantity = null,
         public readonly bool $receivedAssetIsNft = false,
-        public readonly ?string $transactionFeeCurrency = null,
-        ?Quantity $transactionFeeQuantity = null,
-        public readonly ?FiatAmount $transactionFeeCostBasis = null,
-        public readonly ?string $exchangeFeeCurrency = null,
-        ?Quantity $exchangeFeeQuantity = null,
-        public readonly ?FiatAmount $exchangeFeeCostBasis = null,
+        public readonly ?string $networkFeeCurrency = null,
+        ?Quantity $networkFeeQuantity = null,
+        public readonly ?FiatAmount $networkFeeMarketValue = null,
+        public readonly ?string $platformFeeCurrency = null,
+        ?Quantity $platformFeeQuantity = null,
+        public readonly ?FiatAmount $platformFeeMarketValue = null,
     ) {
         $this->sentAsset = $sentAssetIsNft ? $sentAsset : AssetSymbolNormaliser::normalise($sentAsset);
         $this->sentQuantity = $sentQuantity ?? Quantity::zero();
         $this->receivedAsset = $receivedAssetIsNft ? $receivedAsset : AssetSymbolNormaliser::normalise($receivedAsset);
         $this->receivedQuantity = $receivedQuantity ?? Quantity::zero();
-        $this->transactionFeeQuantity = $transactionFeeQuantity ?? Quantity::zero();
-        $this->exchangeFeeQuantity = $exchangeFeeQuantity ?? Quantity::zero();
+        $this->networkFeeQuantity = $networkFeeQuantity ?? Quantity::zero();
+        $this->platformFeeQuantity = $platformFeeQuantity ?? Quantity::zero();
 
         match ($operation) {
             Operation::Receive => $this->validateReceive(),
@@ -90,7 +91,17 @@ final class Transaction implements Stringable
 
     public function involvesSharePooling(): bool
     {
-        return ! $this->isTransfer() && (! $this->sentAssetIsNft || ! $this->receivedAssetIsNft);
+        return ! $this->sentAssetIsNft || ! $this->receivedAssetIsNft;
+    }
+
+    public function networkFeeIsFiat(): bool
+    {
+        return $this->networkFeeCurrency ? FiatCurrency::tryFrom($this->networkFeeCurrency) !== null : false;
+    }
+
+    public function platformFeeIsFiat(): bool
+    {
+        return $this->platformFeeCurrency ? FiatCurrency::tryFrom($this->platformFeeCurrency) !== null : false;
     }
 
     /** @throws TransactionException */
@@ -98,7 +109,10 @@ final class Transaction implements Stringable
     {
         $error = 'Receive operations should %s';
 
-        $this->notHaveASentAsset($error)->haveAReceivedAsset($error)->haveAReceivedQuantity($error);
+        $this->haveAMarketValue($error)
+            ->notHaveASentAsset($error)
+            ->haveAReceivedAsset($error)
+            ->haveAReceivedQuantity($error);
     }
 
     /** @throws TransactionException */
@@ -106,7 +120,10 @@ final class Transaction implements Stringable
     {
         $error = 'Send operations should %s';
 
-        $this->haveASentAsset($error)->haveASentQuantity($error)->notHaveAReceivedAsset($error);
+        $this->haveAMarketValue($error)
+            ->haveASentAsset($error)
+            ->haveASentQuantity($error)
+            ->notHaveAReceivedAsset($error);
     }
 
     /** @throws TransactionException */
@@ -114,7 +131,8 @@ final class Transaction implements Stringable
     {
         $error = 'Swap operations should %s';
 
-        $this->haveASentAsset($error)
+        $this->haveAMarketValue($error)
+            ->haveASentAsset($error)
             ->haveASentQuantity($error)
             ->haveAReceivedAsset($error)
             ->haveAReceivedQuantity($error);
@@ -129,6 +147,15 @@ final class Transaction implements Stringable
         $error = 'Transfer operations should %s';
 
         $this->haveASentAsset($error)->haveASentQuantity($error)->notHaveAReceivedAsset($error);
+    }
+
+    /** @throws TransactionException */
+    private function haveAMarketValue(string $error): self
+    {
+        ! is_null($this->marketValue)
+            || throw TransactionException::invalidData(sprintf($error, 'have a market value'), $this);
+
+        return $this;
     }
 
     /** @throws TransactionException */
@@ -196,17 +223,17 @@ final class Transaction implements Stringable
             $this->date->__toString(),
             $this->operation->value,
             $this->isIncome ? 'yes' : 'no',
-            $this->costBasis->__toString(),
+            $this->marketValue?->__toString() ?? 'N/A',
             $this->sentAsset,
             $this->sentQuantity->__toString(),
             $this->sentAssetIsNft ? 'yes' : 'no',
             $this->receivedAsset,
             $this->receivedQuantity->__toString(),
             $this->receivedAssetIsNft ? 'yes' : 'no',
-            $this->transactionFeeCurrency,
-            $this->transactionFeeQuantity->__toString(),
-            $this->exchangeFeeCurrency,
-            $this->exchangeFeeQuantity->__toString(),
+            $this->networkFeeCurrency,
+            $this->networkFeeQuantity->__toString(),
+            $this->platformFeeCurrency,
+            $this->platformFeeQuantity->__toString(),
         );
     }
 }
