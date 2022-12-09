@@ -9,10 +9,13 @@ use Domain\Aggregates\SharePooling\Actions\DisposeOfSharePoolingToken;
 use Domain\Aggregates\SharePooling\Repositories\SharePoolingRepository;
 use Domain\Aggregates\SharePooling\SharePoolingId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\SharePoolingHandlerException;
+use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
 use Domain\ValueObjects\Transaction;
 
 class SharePoolingHandler
 {
+    use AttributesFees;
+
     public function __construct(private SharePoolingRepository $sharePoolingRepository)
     {
     }
@@ -54,7 +57,7 @@ class SharePoolingHandler
         $sharePooling->disposeOf(new DisposeOfSharePoolingToken(
             date: $transaction->date,
             quantity: $transaction->sentQuantity,
-            proceeds: $transaction->marketValue, // @phpstan-ignore-line
+            proceeds: $transaction->marketValue->minus($this->splitFees($transaction)), // @phpstan-ignore-line
         ));
     }
 
@@ -68,7 +71,7 @@ class SharePoolingHandler
         $sharePooling->acquire(new AcquireSharePoolingToken(
             date: $transaction->date,
             quantity: $transaction->receivedQuantity,
-            costBasis: $transaction->marketValue, // @phpstan-ignore-line
+            costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
         ));
     }
 }

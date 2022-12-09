@@ -94,9 +94,19 @@ final class Transaction implements Stringable
         return ! $this->sentAssetIsNft || ! $this->receivedAssetIsNft;
     }
 
+    public function hasNetworkFee(): bool
+    {
+        return $this->networkFeeMarketValue?->isGreaterThan('0') ?? false;
+    }
+
     public function networkFeeIsFiat(): bool
     {
         return $this->networkFeeCurrency ? FiatCurrency::tryFrom($this->networkFeeCurrency) !== null : false;
+    }
+
+    public function hasPlatformFee(): bool
+    {
+        return $this->platformFeeMarketValue?->isGreaterThan('0') ?? false;
     }
 
     public function platformFeeIsFiat(): bool

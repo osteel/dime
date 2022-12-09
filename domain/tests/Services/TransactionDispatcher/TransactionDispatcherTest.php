@@ -1,10 +1,12 @@
 <?php
 
+use Domain\Enums\FiatCurrency;
 use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
 use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
+use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Transaction;
 
 beforeEach(function () {
@@ -177,6 +179,61 @@ it('can dispatch the platform fee to the share pooling handler', function (strin
         fn (Transaction $feeTransaction) => $feeTransaction->isSend()
             && $feeTransaction->marketValue->isEqualTo($transaction->platformFeeMarketValue),
     )->once();
+})->with([
+    'send' => ['send', true, false],
+    'receive' => ['receive', true, false],
+    'swap' => ['swap', true, false],
+    'income' => ['income', true, false],
+    'transfer' => ['transfer', false, false],
+    'send NFT' => ['sendNft', false, true],
+    'receive NFT' => ['receiveNft', false, true],
+    'acquire NFT' => ['swapToNft', false, true],
+    'dispose of NFT' => ['swapFromNft', false, true],
+]);
+
+it('does not dispatch the fees to the share pooling handler when they are zero', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
+    /** @var Transaction */
+    $transaction = Transaction::factory()
+        ->$method()
+        ->withNetworkFee(new FiatAmount('0', FiatCurrency::GBP))
+        ->withPlatformFee(new FiatAmount('0', FiatCurrency::GBP))
+        ->make();
+
+    $this->transactionDispatcher->dispatch($transaction);
+
+    if ($method === 'income') {
+        $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    } else {
+        $this->incomeHandler->shouldNotHaveReceived('handle');
+    }
+
+    if ($method === 'transfer') {
+        $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    } else {
+        $this->transferHandler->shouldNotHaveReceived('handle');
+    }
+
+    if ($nftHandler) {
+        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    } else {
+        $this->nftHandler->shouldNotHaveReceived('handle');
+    }
+
+    if ($sharePoolingHandler) {
+        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    }
+
+    $this->sharePoolingHandler->shouldNotHaveReceived(
+        'handle',
+        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
+            && $feeTransaction->marketValue->isEqualTo($transaction->networkFeeMarketValue),
+    );
+
+    $this->sharePoolingHandler->shouldNotHaveReceived(
+        'handle',
+        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
+            && $feeTransaction->marketValue->isEqualTo($transaction->platformFeeMarketValue),
+    );
 })->with([
     'send' => ['send', true, false],
     'receive' => ['receive', true, false],

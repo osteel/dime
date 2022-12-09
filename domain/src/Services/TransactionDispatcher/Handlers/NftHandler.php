@@ -9,10 +9,13 @@ use Domain\Aggregates\Nft\Actions\DisposeOfNft;
 use Domain\Aggregates\Nft\Repositories\NftRepository;
 use Domain\Aggregates\Nft\NftId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NftHandlerException;
+use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
 use Domain\ValueObjects\Transaction;
 
 class NftHandler
 {
+    use AttributesFees;
+
     public function __construct(private NftRepository $nftRepository)
     {
     }
@@ -49,8 +52,10 @@ class NftHandler
         $nftId = NftId::fromNftId($transaction->sentAsset);
         $nft = $this->nftRepository->get($nftId);
 
-        // @phpstan-ignore-next-line
-        $nft->disposeOf(new DisposeOfNft($transaction->date, $transaction->marketValue));
+        $nft->disposeOf(new DisposeOfNft(
+            date: $transaction->date,
+            proceeds: $transaction->marketValue->minus($this->splitFees($transaction)), // @phpstan-ignore-line
+        ));
     }
 
     private function handleAcquisition(Transaction $transaction): void
@@ -60,7 +65,9 @@ class NftHandler
         $nftId = NftId::fromNftId($transaction->receivedAsset);
         $nft = $this->nftRepository->get($nftId);
 
-        // @phpstan-ignore-next-line
-        $nft->acquire(new AcquireNft($transaction->date, $transaction->marketValue));
+        $nft->acquire(new AcquireNft(
+            date: $transaction->date,
+            costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
+        ));
     }
 }

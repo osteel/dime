@@ -77,7 +77,7 @@ final class TransactionDispatcher
 
     private function handleNetworkFee(Transaction $transaction): self
     {
-        if (is_null($transaction->networkFeeMarketValue) || $transaction->networkFeeIsFiat()) {
+        if (! $transaction->hasNetworkFee() || $transaction->networkFeeIsFiat()) {
             return $this;
         }
 
@@ -94,7 +94,7 @@ final class TransactionDispatcher
 
     private function handlePlatformFee(Transaction $transaction): self
     {
-        if (is_null($transaction->platformFeeMarketValue) || $transaction->platformFeeIsFiat()) {
+        if (! $transaction->hasPlatformFee() || $transaction->platformFeeIsFiat()) {
             return $this;
         }
 

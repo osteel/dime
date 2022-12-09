@@ -29,6 +29,25 @@ it('can handle a receive operation', function () {
     )->once();
 });
 
+it('can handle a receive operation with fees', function () {
+    $sharePooling = Mockery::spy(SharePooling::class);
+
+    $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
+
+    $transaction = Transaction::factory()
+        ->receive()
+        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
+        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+
+    (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
+
+    $sharePooling->shouldHaveReceived(
+        'acquire',
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(new FiatAmount('60', FiatCurrency::GBP)),
+    )->once();
+});
+
 it('can handle a send operation', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
@@ -41,6 +60,25 @@ it('can handle a send operation', function () {
     $sharePooling->shouldHaveReceived(
         'disposeOf',
         fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
+});
+
+it('can handle a send operation with fees', function () {
+    $sharePooling = Mockery::spy(SharePooling::class);
+
+    $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
+
+    $transaction = Transaction::factory()
+        ->send()
+        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
+        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+
+    (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
+
+    $sharePooling->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(new FiatAmount('40', FiatCurrency::GBP)),
     )->once();
 });
 
@@ -91,6 +129,30 @@ it('can handle a swap operation where neither asset is a NFT', function () {
     $sharePooling->shouldHaveReceived(
         'acquire',
         fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo($transaction->marketValue),
+    )->once();
+});
+
+it('can handle a swap operation with fees', function () {
+    $sharePooling = Mockery::spy(SharePooling::class);
+
+    $this->sharePoolingRepository->shouldReceive('get')->twice()->andReturn($sharePooling);
+
+    $transaction = Transaction::factory()
+        ->swap()
+        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
+        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+
+    (new SharePoolingHandler($this->sharePoolingRepository))->handle($transaction);
+
+    $sharePooling->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(new FiatAmount('45', FiatCurrency::GBP)),
+    )->once();
+
+    $sharePooling->shouldHaveReceived(
+        'acquire',
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(new FiatAmount('55', FiatCurrency::GBP)),
     )->once();
 });
 
