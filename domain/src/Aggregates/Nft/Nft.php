@@ -16,9 +16,13 @@ use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 
-/** @property NftId $aggregateRootId */
+/**
+ * @implements AggregateRoot<NftId>
+ * @property NftId $aggregateRootId
+ */
 class Nft implements AggregateRoot
 {
+    /** @phpstan-use AggregateRootBehaviour<NftId> */
     use AggregateRootBehaviour;
 
     private ?FiatAmount $costBasis = null;

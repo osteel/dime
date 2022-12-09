@@ -111,7 +111,7 @@ final class Transaction implements Stringable
 
     public function platformFeeIsFiat(): bool
     {
-        return $this->platformFeeCurrency ? FiatCurrency::tryFrom($this->platformFeeCurrency) !== null : false;
+        return $this->platformFeeCurrency ? FiatCurrency::tryFrom(strtoupper($this->platformFeeCurrency)) !== null : false;
     }
 
     /** @throws TransactionException */

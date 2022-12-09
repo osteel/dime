@@ -11,7 +11,7 @@ use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\ValueObjects\Transaction;
 
-final class TransactionDispatcher
+class TransactionDispatcher
 {
     public function __construct(
         private readonly IncomeHandler $incomeHandler,

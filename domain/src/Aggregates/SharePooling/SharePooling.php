@@ -24,9 +24,13 @@ use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 
-/** @property SharePoolingId $aggregateRootId */
+/**
+ * @implements AggregateRoot<SharePoolingId>
+ * @property SharePoolingId $aggregateRootId
+ */
 class SharePooling implements AggregateRoot
 {
+    /** @phpstan-use AggregateRootBehaviour<SharePoolingId> */
     use AggregateRootBehaviour;
 
     private ?FiatCurrency $fiatCurrency = null;

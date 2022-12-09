@@ -128,6 +128,7 @@ class TransactionFactory extends PlainObjectFactory
     {
         return $this->state([
             'operation' => Operation::Transfer,
+            'marketValue' => null,
             'sentAsset' => 'BTC',
             'sentQuantity' => new Quantity('1'),
             'receivedAsset' => null,
