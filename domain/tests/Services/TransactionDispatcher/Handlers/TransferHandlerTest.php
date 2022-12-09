@@ -20,15 +20,21 @@ it('can handle a transfer operation', function () {
 
     $transaction = Transaction::factory()
         ->transfer()
-        ->withTransactionFee($transactionFee = new FiatAmount('5', FiatCurrency::GBP))
-        ->withExchangeFee($exchangeFee = new FiatAmount('10', FiatCurrency::GBP))
+        ->withNetworkFee($networkFee = new FiatAmount('5', FiatCurrency::GBP))
+        ->withPlatformFee($platformFee = new FiatAmount('10', FiatCurrency::GBP))
         ->make();
 
     (new TransferHandler($this->taxYearRepository))->handle($transaction);
 
-    $taxYear->shouldHaveReceived('recordNonAttributableAllowableCost')
-        ->withArgs(fn (RecordNonAttributableAllowableCost $action) => $action->amount->isEqualTo($transactionFee))
-        ->withArgs(fn (RecordNonAttributableAllowableCost $action) => $action->amount->isEqualTo($exchangeFee));
+    $taxYear->shouldHaveReceived(
+        'recordNonAttributableAllowableCost',
+        fn (RecordNonAttributableAllowableCost $action) => $action->amount->isEqualTo($networkFee),
+    )->once();
+
+    $taxYear->shouldHaveReceived(
+        'recordNonAttributableAllowableCost',
+        fn (RecordNonAttributableAllowableCost $action) => $action->amount->isEqualTo($platformFee),
+    )->once();
 });
 
 it('can handle a transfer operation with no fees', function () {

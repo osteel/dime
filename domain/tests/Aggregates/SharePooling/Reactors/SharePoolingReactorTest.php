@@ -38,9 +38,12 @@ it('can handle a capital gain', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingTokenDisposedOf))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived('recordCapitalGain')
-            ->once()
-            ->withArgs(fn (RecordCapitalGain $action) => $action->amount->isEqualTo('1')));
+        ->then(function () use ($taxYearSpy) {
+            return $taxYearSpy->shouldHaveReceived(
+                'recordCapitalGain',
+                fn (RecordCapitalGain $action) => $action->amount->isEqualTo('1')
+            )->once();
+        });
 });
 
 it('can handle a capital loss', function () {
@@ -62,9 +65,12 @@ it('can handle a capital loss', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingTokenDisposedOf))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived('recordCapitalLoss')
-            ->once()
-            ->withArgs(fn (RecordCapitalLoss $action) => $action->amount->isEqualTo('1')));
+        ->then(function () use ($taxYearSpy) {
+            return $taxYearSpy->shouldHaveReceived(
+                'recordCapitalLoss',
+                fn (RecordCapitalLoss $action) => $action->amount->isEqualTo('1')
+            )->once();
+        });
 });
 
 it('can handle a capital gain reversion', function () {
@@ -86,9 +92,12 @@ it('can handle a capital gain reversion', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingTokenDisposalReverted))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived('revertCapitalGain')
-            ->once()
-            ->withArgs(fn (RevertCapitalGain $action) => $action->amount->isEqualTo('1')));
+        ->then(function () use ($taxYearSpy) {
+            return $taxYearSpy->shouldHaveReceived(
+                'revertCapitalGain',
+                fn (RevertCapitalGain $action) => $action->amount->isEqualTo('1')
+            )->once();
+        });
 });
 
 it('can handle a capital loss reversion', function () {
@@ -110,7 +119,10 @@ it('can handle a capital loss reversion', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingTokenDisposalReverted))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived('revertCapitalLoss')
-            ->once()
-            ->withArgs(fn (RevertCapitalLoss $action) => $action->amount->isEqualTo('1')));
+        ->then(function () use ($taxYearSpy) {
+            return $taxYearSpy->shouldHaveReceived(
+                'revertCapitalLoss',
+                fn (RevertCapitalLoss $action) => $action->amount->isEqualTo('1')
+            )->once();
+        });
 });

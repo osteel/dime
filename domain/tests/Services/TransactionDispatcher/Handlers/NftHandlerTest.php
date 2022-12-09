@@ -20,17 +20,43 @@ it('can handle a receive operation', function () {
 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
 
+    /** @var Transaction */
     $transaction = Transaction::factory()->receiveNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'costBasis' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
     (new NftHandler($this->nftRepository))->handle($transaction);
 
-    $nft->shouldHaveReceived('acquire')
-        ->once()
-        ->withArgs(fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->costBasis->isEqualTo($transaction->costBasis));
+    $nft->shouldHaveReceived(
+        'acquire',
+        fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->costBasis->isEqualTo($transaction->marketValue),
+    )->once();
+});
+
+it('can handle a receive operation with fees', function () {
+    $nft = Mockery::spy(Nft::class);
+
+    $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
+
+    /** @var Transaction */
+    $transaction = Transaction::factory()
+        ->receiveNft()
+        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
+        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->make([
+            'date' => LocalDate::parse('2015-10-21'),
+            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        ]);
+
+    (new NftHandler($this->nftRepository))->handle($transaction);
+
+    $nft->shouldHaveReceived(
+        'acquire',
+        fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->costBasis->isEqualTo(new FiatAmount('60', FiatCurrency::GBP)),
+    )->once();
 });
 
 it('can handle a send operation', function () {
@@ -40,15 +66,39 @@ it('can handle a send operation', function () {
 
     $transaction = Transaction::factory()->sendNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'costBasis' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
     (new NftHandler($this->nftRepository))->handle($transaction);
 
-    $nft->shouldHaveReceived('disposeOf')
-        ->once()
-        ->withArgs(fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->proceeds->isEqualTo($transaction->costBasis));
+    $nft->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
+});
+
+it('can handle a send operation with fees', function () {
+    $nft = Mockery::spy(Nft::class);
+
+    $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
+
+    $transaction = Transaction::factory()
+        ->sendNft()
+        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
+        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->make([
+            'date' => LocalDate::parse('2015-10-21'),
+            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        ]);
+
+    (new NftHandler($this->nftRepository))->handle($transaction);
+
+    $nft->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->proceeds->isEqualTo(new FiatAmount('40', FiatCurrency::GBP)),
+    )->once();
 });
 
 it('can handle a swap operation where the received asset is a NFT', function () {
@@ -58,15 +108,16 @@ it('can handle a swap operation where the received asset is a NFT', function () 
 
     $transaction = Transaction::factory()->swapToNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'costBasis' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
     (new NftHandler($this->nftRepository))->handle($transaction);
 
-    $nft->shouldHaveReceived('acquire')
-        ->once()
-        ->withArgs(fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->costBasis->isEqualTo($transaction->costBasis));
+    $nft->shouldHaveReceived(
+        'acquire',
+        fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->costBasis->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('can handle a swap operation where the sent asset is a NFT', function () {
@@ -76,15 +127,16 @@ it('can handle a swap operation where the sent asset is a NFT', function () {
 
     $transaction = Transaction::factory()->swapFromNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'costBasis' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
     (new NftHandler($this->nftRepository))->handle($transaction);
 
-    $nft->shouldHaveReceived('disposeOf')
-        ->once()
-        ->withArgs(fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->proceeds->isEqualTo($transaction->costBasis));
+    $nft->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('can handle a swap operation where both assets are NFTs', function () {
@@ -94,20 +146,51 @@ it('can handle a swap operation where both assets are NFTs', function () {
 
     $transaction = Transaction::factory()->swapNfts()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'costBasis' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
     (new NftHandler($this->nftRepository))->handle($transaction);
 
-    $nft->shouldHaveReceived('disposeOf')
-        ->once()
-        ->withArgs(fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->proceeds->isEqualTo($transaction->costBasis));
+    $nft->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
 
-    $nft->shouldHaveReceived('acquire')
-        ->once()
-        ->withArgs(fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->costBasis->isEqualTo($transaction->costBasis));
+    $nft->shouldHaveReceived(
+        'acquire',
+        fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->costBasis->isEqualTo($transaction->marketValue),
+    )->once();
+});
+
+it('can handle a swap operation with fees', function () {
+    $nft = Mockery::spy(Nft::class);
+
+    $this->nftRepository->shouldReceive('get')->twice()->andReturn($nft);
+
+    $transaction = Transaction::factory()
+        ->swapNfts()
+        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
+        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->make([
+            'date' => LocalDate::parse('2015-10-21'),
+            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        ]);
+
+    (new NftHandler($this->nftRepository))->handle($transaction);
+
+    $nft->shouldHaveReceived(
+        'disposeOf',
+        fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->proceeds->isEqualTo(new FiatAmount('45', FiatCurrency::GBP)),
+    )->once();
+
+    $nft->shouldHaveReceived(
+        'acquire',
+        fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->costBasis->isEqualTo(new FiatAmount('55', FiatCurrency::GBP)),
+    )->once();
 });
 
 it('cannot handle a transaction because the operation is not supported', function () {

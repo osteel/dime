@@ -18,13 +18,14 @@ it('can handle an income transaction', function () {
 
     $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
 
-    $transaction = Transaction::factory()->income()->make(['costBasis' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->income()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
 
     (new IncomeHandler($this->taxYearRepository))->handle($transaction);
 
-    $taxYear->shouldHaveReceived('recordIncome')
-        ->once()
-        ->withArgs(fn (RecordIncome $action) => $action->amount->isEqualTo($transaction->costBasis));
+    $taxYear->shouldHaveReceived(
+        'recordIncome',
+        fn (RecordIncome $action) => $action->amount->isEqualTo($transaction->marketValue),
+    )->once();
 });
 
 it('cannot handle a transaction because the operation is not receive', function () {

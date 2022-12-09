@@ -26,7 +26,8 @@ class IncomeHandler
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
-        $taxYearAggregate->recordIncome(new RecordIncome(taxYear: $taxYear, amount: $transaction->costBasis));
+        // @phpstan-ignore-next-line
+        $taxYearAggregate->recordIncome(new RecordIncome(taxYear: $taxYear, amount: $transaction->marketValue));
     }
 
     /** @throws IncomeHandlerException */
