@@ -1,0 +1,7 @@
+Date,Operation,Market value,Sent asset,Sent quantity,Sent asset is NFT,Received asset,Received quantity,Received asset is NFT,Network fee currency,Network fee quantity,Network fee market value,Platform fee currency,Platform fee quantity,Platform fee market value,Income
+08/01/2020,swap,9900,GBP,10000,FALSE,BTC,0.99,FALSE,,,,GBP,100,100,FALSE
+08/01/2020,transfer,,BTC,0.989,FALSE,,,FALSE,BTC,0.001,10,,,,FALSE
+08/01/2020,swap,4950,GBP,5000,FALSE,ETH,4.95,FALSE,,,,GBP,50,50,FALSE
+08/01/2020,transfer,,ETH,4.9,FALSE,,,FALSE,ETH,0.05,50,,,,FALSE
+21/10/2020,transfer,,ETH,3,FALSE,,,FALSE,ETH,0.03,60,,,,FALSE
+21/10/2020,swap,6000,ETH,3,FALSE,GBP,5940,FALSE,,,,GBP,60,60,FALSE

@@ -25,11 +25,11 @@ class SharePoolingHandler
     {
         $this->validate($transaction);
 
-        if (! is_null($transaction->sentAsset) && ! $transaction->sentAssetIsNft) {
+        if ($transaction->sentAssetFallsUnderSharePooling()) {
             $this->handleDisposal($transaction);
         }
 
-        if (! is_null($transaction->receivedAsset) && ! $transaction->receivedAssetIsNft) {
+        if ($transaction->receivedAssetFallsUnderSharePooling()) {
             $this->handleAcquisition($transaction);
         }
     }

@@ -13,6 +13,7 @@ use Domain\ValueObjects\Transaction;
 
 beforeEach(function () {
     $this->nftRepository = Mockery::mock(NftRepository::class);
+    $this->nftHandler = new NftHandler($this->nftRepository);
 });
 
 it('can handle a receive operation', function () {
@@ -26,7 +27,7 @@ it('can handle a receive operation', function () {
         'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'acquire',
@@ -50,7 +51,7 @@ it('can handle a receive operation with fees', function () {
             'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
         ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'acquire',
@@ -69,7 +70,7 @@ it('can handle a send operation', function () {
         'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'disposeOf',
@@ -92,7 +93,7 @@ it('can handle a send operation with fees', function () {
             'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
         ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'disposeOf',
@@ -111,7 +112,7 @@ it('can handle a swap operation where the received asset is a NFT', function () 
         'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'acquire',
@@ -130,7 +131,7 @@ it('can handle a swap operation where the sent asset is a NFT', function () {
         'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'disposeOf',
@@ -149,7 +150,7 @@ it('can handle a swap operation where both assets are NFTs', function () {
         'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
     ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'disposeOf',
@@ -178,7 +179,7 @@ it('can handle a swap operation with fees', function () {
             'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
         ]);
 
-    (new NftHandler($this->nftRepository))->handle($transaction);
+    $this->nftHandler->handle($transaction);
 
     $nft->shouldHaveReceived(
         'disposeOf',
@@ -196,13 +197,13 @@ it('can handle a swap operation with fees', function () {
 it('cannot handle a transaction because the operation is not supported', function () {
     $transaction = Transaction::factory()->transfer()->make();
 
-    expect(fn () => (new NftHandler($this->nftRepository))->handle($transaction))
+    expect(fn () => $this->nftHandler->handle($transaction))
         ->toThrow(NftHandlerException::class, NftHandlerException::unsupportedOperation($transaction)->getMessage());
 });
 
 it('cannot handle a transaction because none of the assets is a NFT', function () {
     $transaction = Transaction::factory()->swap()->make();
 
-    expect(fn () => (new NftHandler($this->nftRepository))->handle($transaction))
+    expect(fn () => $this->nftHandler->handle($transaction))
         ->toThrow(NftHandlerException::class, NftHandlerException::noNft($transaction)->getMessage());
 });

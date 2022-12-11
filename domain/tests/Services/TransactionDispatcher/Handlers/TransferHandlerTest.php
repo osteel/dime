@@ -11,6 +11,7 @@ use Domain\ValueObjects\Transaction;
 
 beforeEach(function () {
     $this->taxYearRepository = Mockery::mock(TaxYearRepository::class);
+    $this->transferHandler = new TransferHandler($this->taxYearRepository);
 });
 
 it('can handle a transfer operation', function () {
@@ -24,7 +25,7 @@ it('can handle a transfer operation', function () {
         ->withPlatformFee($platformFee = new FiatAmount('10', FiatCurrency::GBP))
         ->make();
 
-    (new TransferHandler($this->taxYearRepository))->handle($transaction);
+    $this->transferHandler->handle($transaction);
 
     $taxYear->shouldHaveReceived(
         'recordNonAttributableAllowableCost',
@@ -38,7 +39,7 @@ it('can handle a transfer operation', function () {
 });
 
 it('can handle a transfer operation with no fees', function () {
-    (new TransferHandler($this->taxYearRepository))->handle(Transaction::factory()->transfer()->make());
+    $this->transferHandler->handle(Transaction::factory()->transfer()->make());
 
     $this->taxYearRepository->shouldNotHaveReceived('get');
 });
@@ -46,6 +47,6 @@ it('can handle a transfer operation with no fees', function () {
 it('cannot handle a transaction because the operation is not transfer', function () {
     $transaction = Transaction::factory()->send()->make();
 
-    expect(fn () => (new TransferHandler($this->taxYearRepository))->handle($transaction))
+    expect(fn () => $this->transferHandler->handle($transaction))
         ->toThrow(TransferHandlerException::class, TransferHandlerException::notTransfer($transaction)->getMessage());
 });

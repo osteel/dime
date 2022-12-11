@@ -89,9 +89,29 @@ final class Transaction implements Stringable
         return $this->sentAssetIsNft || $this->receivedAssetIsNft;
     }
 
-    public function involvesSharePooling(): bool
+    public function fallsUnderSharePooling(): bool
     {
-        return ! $this->sentAssetIsNft || ! $this->receivedAssetIsNft;
+        return $this->sentAssetFallsUnderSharePooling() || $this->receivedAssetFallsUnderSharePooling();
+    }
+
+    public function sentAssetFallsUnderSharePooling(): bool
+    {
+        return ! is_null($this->sentAsset) && ! $this->sentAssetIsNft && ! $this->sentAssetIsFiat();
+    }
+
+    public function receivedAssetFallsUnderSharePooling(): bool
+    {
+        return ! is_null($this->receivedAsset) && ! $this->receivedAssetIsNft && ! $this->receivedAssetIsFiat();
+    }
+
+    public function sentAssetIsFiat(): bool
+    {
+        return $this->sentAsset ? FiatCurrency::tryFrom($this->sentAsset) !== null : false;
+    }
+
+    public function receivedAssetIsFiat(): bool
+    {
+        return $this->receivedAsset ? FiatCurrency::tryFrom($this->receivedAsset) !== null : false;
     }
 
     public function hasNetworkFee(): bool

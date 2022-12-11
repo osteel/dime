@@ -66,7 +66,7 @@ class TransactionDispatcher
 
     private function handleSharePooling(Transaction $transaction): self
     {
-        if (! $transaction->involvesSharePooling() || $transaction->isTransfer()) {
+        if (! $transaction->fallsUnderSharePooling() || $transaction->isTransfer()) {
             return $this;
         }
 

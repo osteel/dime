@@ -8,6 +8,7 @@ use Domain\ValueObjects\Transaction;
 
 beforeEach(function () {
     $this->transactionDispatcher = Mockery::spy(TransactionDispatcher::class);
+    $this->transactionProcessor = new TransactionProcessor($this->transactionDispatcher);
 });
 
 it('can parse a receive transaction and pass it on to the dispatcher', function () {
@@ -30,7 +31,7 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
         'Income' => 'TRUE',
     ];
 
-    (new TransactionProcessor($this->transactionDispatcher))->process($transaction);
+    $this->transactionProcessor->process($transaction);
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
@@ -68,7 +69,7 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
         'Income' => 'FALSE',
     ];
 
-    (new TransactionProcessor($this->transactionDispatcher))->process($transaction);
+    $this->transactionProcessor->process($transaction);
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
@@ -106,7 +107,7 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
         'Income' => 'FALSE',
     ];
 
-    (new TransactionProcessor($this->transactionDispatcher))->process($transaction);
+    $this->transactionProcessor->process($transaction);
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
@@ -145,7 +146,7 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
         'Income' => 'FALSE',
     ];
 
-    (new TransactionProcessor($this->transactionDispatcher))->process($transaction);
+    $this->transactionProcessor->process($transaction);
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
