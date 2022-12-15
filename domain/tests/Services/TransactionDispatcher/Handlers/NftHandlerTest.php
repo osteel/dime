@@ -231,7 +231,7 @@ it('can handle a swap operation with fees', function () {
     )->once();
 });
 
-it('can handle a swap operation with fees where the received asset is a NFT and the sent asset some fiat currency', function () {
+it('can handle a swap operation with fees where the received asset is a NFT and the sent asset is some fiat currency', function () {
     $nft = Mockery::spy(Nft::class);
 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
@@ -256,7 +256,7 @@ it('can handle a swap operation with fees where the received asset is a NFT and 
     )->once();
 });
 
-it('can handle a swap operation with fees where the sent asset is a NFT and the received asset some fiat currency', function () {
+it('can handle a swap operation with fees where the sent asset is a NFT and the received asset is some fiat currency', function () {
     $nft = Mockery::spy(Nft::class);
 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);

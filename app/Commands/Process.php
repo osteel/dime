@@ -13,7 +13,9 @@ class Process extends Command
      *
      * @var string
      */
-    protected $signature = 'process {spreadsheet : Absolute or relative path to the spreadsheet to process}';
+    protected $signature = 'process
+        {spreadsheet : Absolute or relative path to the spreadsheet to process}
+        {--test : Run the command in test mode}';
 
     /**
      * The description of the command.
@@ -29,7 +31,9 @@ class Process extends Command
      */
     public function handle(TransactionReader $transactionReader, TransactionProcessor $transactionProcessor)
     {
-        assert(is_string($spreadsheet = $this->argument('spreadsheet')));
+        $spreadsheet = $this->argument('spreadsheet');
+
+        assert(is_string($spreadsheet));
 
         if (! is_file($spreadsheet)) {
             $this->error(sprintf('No spreadsheet could be found at %s', $spreadsheet));
@@ -37,7 +41,9 @@ class Process extends Command
             return self::INVALID;
         }
 
-        $this->call('migrate:fresh');
+        if (! $this->option('test')) {
+            $this->callSilent('migrate:fresh');
+        }
 
         $bar = $this->output->createProgressBar(iterator_count($transactionReader->read($spreadsheet)));
 

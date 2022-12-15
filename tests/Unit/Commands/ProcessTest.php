@@ -29,7 +29,7 @@ it('can read a spreadsheet and pass the transactions to the transaction processo
     $this->transactionReader->shouldReceive('read')->with($path)->once()->andReturn(generator(['foo']));
     $this->transactionReader->shouldReceive('read')->with($path)->once()->andReturn(generator(['foo']));
 
-    $this->artisan('process', ['spreadsheet' => $path])
+    $this->artisan('process', ['spreadsheet' => $path, '--test' => true])
         ->assertExitCode(Command::SUCCESS);
 
     $this->transactionProcessor->shouldHaveReceived('process')->with(['foo'])->once();
