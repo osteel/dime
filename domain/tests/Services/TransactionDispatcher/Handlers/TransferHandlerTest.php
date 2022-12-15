@@ -18,6 +18,7 @@ it('can handle a transfer operation', function () {
     $taxYear = Mockery::spy(TaxYear::class);
 
     $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
+    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
     $transaction = Transaction::factory()
         ->transfer()

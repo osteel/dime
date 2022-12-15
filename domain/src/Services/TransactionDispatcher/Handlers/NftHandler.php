@@ -56,6 +56,8 @@ class NftHandler
             date: $transaction->date,
             proceeds: $transaction->marketValue->minus($this->splitFees($transaction)), // @phpstan-ignore-line
         ));
+
+        $this->nftRepository->save($nft);
     }
 
     private function handleAcquisition(Transaction $transaction): void
@@ -69,5 +71,7 @@ class NftHandler
             date: $transaction->date,
             costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
         ));
+
+        $this->nftRepository->save($nft);
     }
 }

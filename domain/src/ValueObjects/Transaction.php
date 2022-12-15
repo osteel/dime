@@ -114,6 +114,11 @@ final class Transaction implements Stringable
         return $this->receivedAsset ? FiatCurrency::tryFrom($this->receivedAsset) !== null : false;
     }
 
+    public function oneAssetIsFiat(): bool
+    {
+        return $this->sentAssetIsFiat() || $this->receivedAssetIsFiat();
+    }
+
     public function hasNetworkFee(): bool
     {
         return $this->networkFeeMarketValue?->isGreaterThan('0') ?? false;

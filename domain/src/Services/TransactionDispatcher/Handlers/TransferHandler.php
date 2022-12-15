@@ -43,6 +43,8 @@ class TransferHandler
                 amount: $transaction->platformFeeMarketValue,
             ));
         }
+
+        $this->taxYearRepository->save($taxYearAggregate);
     }
 
     /** @throws TransferHandlerException */

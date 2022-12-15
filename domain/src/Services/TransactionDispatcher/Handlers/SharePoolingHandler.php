@@ -59,6 +59,8 @@ class SharePoolingHandler
             quantity: $transaction->sentQuantity,
             proceeds: $transaction->marketValue->minus($this->splitFees($transaction)), // @phpstan-ignore-line
         ));
+
+        $this->sharePoolingRepository->save($sharePooling);
     }
 
     private function handleAcquisition(Transaction $transaction): void
@@ -73,5 +75,7 @@ class SharePoolingHandler
             quantity: $transaction->receivedQuantity,
             costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
         ));
+
+        $this->sharePoolingRepository->save($sharePooling);
     }
 }

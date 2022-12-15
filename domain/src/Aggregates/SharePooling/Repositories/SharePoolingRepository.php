@@ -10,4 +10,6 @@ use Domain\Aggregates\SharePooling\SharePoolingId;
 interface SharePoolingRepository
 {
     public function get(SharePoolingId $sharePoolingId): SharePooling;
+
+    public function save(SharePooling $sharePooling): void;
 }
