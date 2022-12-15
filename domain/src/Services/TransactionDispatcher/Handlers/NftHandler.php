@@ -6,6 +6,7 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\Nft\Actions\AcquireNft;
 use Domain\Aggregates\Nft\Actions\DisposeOfNft;
+use Domain\Aggregates\Nft\Actions\IncreaseNftCostBasis;
 use Domain\Aggregates\Nft\Repositories\NftRepository;
 use Domain\Aggregates\Nft\NftId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NftHandlerException;
@@ -67,10 +68,17 @@ class NftHandler
         $nftId = NftId::fromNftId($transaction->receivedAsset);
         $nft = $this->nftRepository->get($nftId);
 
-        $nft->acquire(new AcquireNft(
-            date: $transaction->date,
-            costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
-        ));
+        if ($nft->isAlreadyAcquired()) {
+            $nft->increaseCostBasis(new IncreaseNftCostBasis(
+                date: $transaction->date,
+                costBasisIncrease: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
+            ));
+        } else {
+            $nft->acquire(new AcquireNft(
+                date: $transaction->date,
+                costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
+            ));
+        }
 
         $this->nftRepository->save($nft);
     }

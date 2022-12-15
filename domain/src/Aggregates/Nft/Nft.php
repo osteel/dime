@@ -32,10 +32,15 @@ class Nft implements AggregateRoot
         $this->aggregateRootId = NftId::fromString($aggregateRootId->toString());
     }
 
+    public function isAlreadyAcquired(): bool
+    {
+        return ! is_null($this->costBasis);
+    }
+
     /** @throws NftException */
     public function acquire(AcquireNft $action): void
     {
-        if (! is_null($this->costBasis)) {
+        if ($this->isAlreadyAcquired()) {
             throw NftException::alreadyAcquired($this->aggregateRootId);
         }
 

@@ -3,6 +3,7 @@
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\Nft\Actions\AcquireNft;
 use Domain\Aggregates\Nft\Actions\DisposeOfNft;
+use Domain\Aggregates\Nft\Actions\IncreaseNftCostBasis;
 use Domain\Aggregates\Nft\Repositories\NftRepository;
 use Domain\Aggregates\Nft\Nft;
 use Domain\Enums\FiatCurrency;
@@ -170,6 +171,34 @@ it('can handle a swap operation where both assets are NFTs', function () {
         fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
             && $action->costBasis->isEqualTo($transaction->marketValue),
     )->once();
+});
+
+it('can handle a swap operation where both assets are NFTs and the received NFT is already acquired', function () {
+    $nft = Mockery::mock(Nft::class);
+
+    $this->nftRepository->shouldReceive('get')->twice()->andReturn($nft);
+    $this->nftRepository->shouldReceive('save')->twice()->with($nft);
+
+    $transaction = Transaction::factory()->swapNfts()->make([
+        'date' => LocalDate::parse('2015-10-21'),
+        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+    ]);
+
+    $nft->shouldReceive('isAlreadyAcquired')->andReturn(true)->once();
+
+    $nft->shouldReceive(
+        'disposeOf',
+        fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
+            && $action->proceeds->isEqualTo($transaction->marketValue),
+    )->once();
+
+    $nft->shouldReceive(
+        'increaseCostBasis',
+        fn (IncreaseNftCostBasis $action) => $action->date->isEqualTo($transaction->date)
+            && $action->costBasisIncrease->isEqualTo($transaction->marketValue),
+    )->once();
+
+    $this->nftHandler->handle($transaction);
 });
 
 it('can handle a swap operation with fees', function () {
