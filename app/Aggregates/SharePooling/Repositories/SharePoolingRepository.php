@@ -29,4 +29,9 @@ final class SharePoolingRepository extends EventSourcedAggregateRootRepository i
     {
         return $this->retrieve($sharePoolingId);
     }
+
+    public function save(SharePooling $sharePooling): void
+    {
+        $this->persist($sharePooling);
+    }
 }

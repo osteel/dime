@@ -63,8 +63,8 @@ it('can dispatch to the NFT handler', function (string $method, bool $sharePooli
         $this->sharePoolingHandler->shouldNotHaveReceived('handle');
     }
 })->with([
-    'send NFT' => ['sendNft', true],
-    'receive NFT' => ['receiveNft', true],
+    'send NFT' => ['sendNft', false],
+    'receive NFT' => ['receiveNft', false],
     'acquire NFT' => ['swapToNft', true],
     'dispose of NFT' => ['swapFromNft', true],
     'swap NFTs' => ['swapNfts', false],
@@ -95,8 +95,6 @@ it('can dispatch to the share pooling handler', function (string $method, bool $
     'receive' => ['receive', false],
     'swap' => ['swap', false],
     'income' => ['income', false],
-    'send NFT' => ['sendNft', true],
-    'receive NFT' => ['receiveNft', true],
     'acquire NFT' => ['swapToNft', true],
     'dispose of NFT' => ['swapFromNft', true],
 ]);

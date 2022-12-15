@@ -28,6 +28,8 @@ class IncomeHandler
 
         // @phpstan-ignore-next-line
         $taxYearAggregate->recordIncome(new RecordIncome(taxYear: $taxYear, amount: $transaction->marketValue));
+
+        $this->taxYearRepository->save($taxYearAggregate);
     }
 
     /** @throws IncomeHandlerException */

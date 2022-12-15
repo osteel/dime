@@ -6,8 +6,8 @@ namespace Domain\Enums;
 
 enum FiatCurrency: string
 {
-    case GBP = 'gbp';
-    case EUR = 'eur';
+    case GBP = 'GBP';
+    case EUR = 'EUR';
 
     public function name(): string
     {

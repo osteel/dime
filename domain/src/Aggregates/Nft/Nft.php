@@ -16,9 +16,13 @@ use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 
-/** @property NftId $aggregateRootId */
+/**
+ * @implements AggregateRoot<NftId>
+ * @property NftId $aggregateRootId
+ */
 class Nft implements AggregateRoot
 {
+    /** @phpstan-use AggregateRootBehaviour<NftId> */
     use AggregateRootBehaviour;
 
     private ?FiatAmount $costBasis = null;
@@ -28,10 +32,15 @@ class Nft implements AggregateRoot
         $this->aggregateRootId = NftId::fromString($aggregateRootId->toString());
     }
 
+    public function isAlreadyAcquired(): bool
+    {
+        return ! is_null($this->costBasis);
+    }
+
     /** @throws NftException */
     public function acquire(AcquireNft $action): void
     {
-        if (! is_null($this->costBasis)) {
+        if ($this->isAlreadyAcquired()) {
             throw NftException::alreadyAcquired($this->aggregateRootId);
         }
 

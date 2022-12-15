@@ -19,6 +19,7 @@ trait AttributesFees
             $amount = $amount->plus($transaction->platformFeeMarketValue); // @phpstan-ignore-line
         }
 
-        return $transaction->isSwap() ? $amount->dividedBy('2') : $amount; // @phpstan-ignore-line
+        // @phpstan-ignore-next-line
+        return $transaction->isSwap() && ! $transaction->oneAssetIsFiat() ? $amount->dividedBy('2') : $amount;
     }
 }

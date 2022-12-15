@@ -119,6 +119,22 @@ class TransactionFactory extends PlainObjectFactory
         ]);
     }
 
+    public function swapToFiat(): static
+    {
+        return $this->swap()->state([
+            'receivedAsset' => FiatCurrency::GBP->value,
+            'receivedQuantity' => new Quantity('1000'),
+        ]);
+    }
+
+    public function swapFromFiat(): static
+    {
+        return $this->swap()->state([
+            'sentAsset' => FiatCurrency::GBP->value,
+            'sentQuantity' => new Quantity('1000'),
+        ]);
+    }
+
     public function swapNfts(): static
     {
         return $this->swapToNft()->swapFromNft();
@@ -128,6 +144,7 @@ class TransactionFactory extends PlainObjectFactory
     {
         return $this->state([
             'operation' => Operation::Transfer,
+            'marketValue' => null,
             'sentAsset' => 'BTC',
             'sentQuantity' => new Quantity('1'),
             'receivedAsset' => null,

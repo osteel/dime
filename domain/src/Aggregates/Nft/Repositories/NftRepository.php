@@ -10,4 +10,6 @@ use Domain\Aggregates\Nft\NftId;
 interface NftRepository
 {
     public function get(NftId $nftId): Nft;
+
+    public function save(Nft $nft): void;
 }

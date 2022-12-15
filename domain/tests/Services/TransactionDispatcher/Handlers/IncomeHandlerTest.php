@@ -11,16 +11,18 @@ use Domain\ValueObjects\Transaction;
 
 beforeEach(function () {
     $this->taxYearRepository = Mockery::mock(TaxYearRepository::class);
+    $this->incomeHandler = new IncomeHandler($this->taxYearRepository);
 });
 
 it('can handle an income transaction', function () {
     $taxYear = Mockery::spy(TaxYear::class);
 
     $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
+    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
     $transaction = Transaction::factory()->income()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
 
-    (new IncomeHandler($this->taxYearRepository))->handle($transaction);
+    $this->incomeHandler->handle($transaction);
 
     $taxYear->shouldHaveReceived(
         'recordIncome',
@@ -31,13 +33,13 @@ it('can handle an income transaction', function () {
 it('cannot handle a transaction because the operation is not receive', function () {
     $transaction = Transaction::factory()->send()->make();
 
-    expect(fn () => (new IncomeHandler($this->taxYearRepository))->handle($transaction))
+    expect(fn () => $this->incomeHandler->handle($transaction))
         ->toThrow(IncomeHandlerException::class, IncomeHandlerException::operationIsNotReceive($transaction)->getMessage());
 });
 
 it('cannot handle a transaction because it is not income', function () {
     $transaction = Transaction::factory()->receive()->make();
 
-    expect(fn () => (new IncomeHandler($this->taxYearRepository))->handle($transaction))
+    expect(fn () => $this->incomeHandler->handle($transaction))
         ->toThrow(IncomeHandlerException::class, IncomeHandlerException::notIncome($transaction)->getMessage());
 });

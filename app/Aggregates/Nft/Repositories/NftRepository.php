@@ -29,4 +29,9 @@ final class NftRepository extends EventSourcedAggregateRootRepository implements
     {
         return $this->retrieve($nftId);
     }
+
+    public function save(Nft $nft): void
+    {
+        $this->persist($nft);
+    }
 }

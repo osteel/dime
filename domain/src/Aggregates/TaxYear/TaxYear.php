@@ -23,9 +23,13 @@ use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 
-/** @property TaxYearId $aggregateRootId */
+/**
+ * @implements AggregateRoot<TaxYearId>
+ * @property TaxYearId $aggregateRootId
+ */
 class TaxYear implements AggregateRoot
 {
+    /** @phpstan-use AggregateRootBehaviour<TaxYearId> */
     use AggregateRootBehaviour;
 
     private ?FiatCurrency $currency = null;
