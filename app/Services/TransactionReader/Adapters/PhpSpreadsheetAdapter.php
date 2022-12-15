@@ -18,7 +18,8 @@ class PhpSpreadsheetAdapter implements TransactionReader
         $headers = [];
 
         foreach ($worksheet->current()->getCellIterator() as $cell) {
-            $headers[] = $cell->getValue();
+            assert(is_string($header = $cell->getValue()));
+            $headers[] = $header;
         }
 
         $worksheet->next();
@@ -30,7 +31,8 @@ class PhpSpreadsheetAdapter implements TransactionReader
                 $values[] = $cell->getValue();
             }
 
-            yield array_combine($headers, array_map(fn (?string $value) => is_null($value) ? '' : $value, $values));
+            // @phpstan-ignore-next-line
+            yield array_combine($headers, array_map(fn (?string $value) => $value ?? '', $values));
 
             $worksheet->next();
         }

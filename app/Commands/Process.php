@@ -29,21 +29,21 @@ class Process extends Command
      */
     public function handle(TransactionReader $transactionReader, TransactionProcessor $transactionProcessor)
     {
-        if (! is_file($spreadheet = $this->argument('spreadsheet'))) {
-            $this->error(sprintf('No spreadsheet could be found at %s', $spreadheet));
+        assert(is_string($spreadsheet = $this->argument('spreadsheet')));
+
+        if (! is_file($spreadsheet)) {
+            $this->error(sprintf('No spreadsheet could be found at %s', $spreadsheet));
 
             return self::INVALID;
         }
 
-        //$transactions = $transactionReader->read($spreadheet);
-        //$this->withProgressBar($transactions, fn (array $transaction) => $transactionProcessor->process($transaction);
+        $this->call('migrate:fresh');
 
-        $bar = $this->output->createProgressBar(iterator_count($transactionReader->read($spreadheet)));
+        $bar = $this->output->createProgressBar(iterator_count($transactionReader->read($spreadsheet)));
 
         $bar->start();
 
-        foreach ($transactionReader->read($spreadheet) as $transaction) {
-            print_r($transaction);
+        foreach ($transactionReader->read($spreadsheet) as $transaction) {
             $transactionProcessor->process($transaction);
 
             $bar->advance();
