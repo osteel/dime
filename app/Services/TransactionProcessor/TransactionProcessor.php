@@ -129,7 +129,7 @@ class TransactionProcessor
 
     private function toFiatAmount(string $value): ?FiatAmount
     {
-        return empty($value) ? null : new FiatAmount($value, FiatCurrency::GBP);
+        return strlen($value) === 0 ? null : new FiatAmount($value, FiatCurrency::GBP);
     }
 
     private function toDate(string $value): LocalDate
