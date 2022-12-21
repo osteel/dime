@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Domain\Aggregates\SharePooling\Services\QuantityAdjuster;
 
 use Domain\Aggregates\SharePooling\Services\QuantityAdjuster\Exceptions\QuantityAdjusterException;
+use Domain\Aggregates\SharePooling\ValueObjects\Exceptions\SharePoolingTokenAcquisitionException;
 use Domain\Aggregates\SharePooling\ValueObjects\QuantityBreakdown;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenAcquisitions;
@@ -22,7 +23,13 @@ final class QuantityAdjuster
         SharePoolingTransactions $transactions,
     ): void {
         foreach (self::getAcquisitions($disposal->sameDayQuantityBreakdown, $transactions) as $acquisition) {
-            $acquisition->decreaseSameDayQuantity($disposal->sameDayQuantityBreakdown->quantityMatchedWith($acquisition));
+            try {
+                $acquisition->decreaseSameDayQuantity($disposal->sameDayQuantityBreakdown->quantityMatchedWith($acquisition));
+            } catch (SharePoolingTokenAcquisitionException) {
+                // @TODO When re-acquiring within 30 days an asset that was disposed of on the same day it was acquired,
+                // decreasing the same-day quantity of the concerned acquisitions fails, because at the time the latter
+                // were recorded within the SharePoolingTokenAcquired events that had no same-day quantity yet
+            }
         }
 
         foreach (self::getAcquisitions($disposal->thirtyDayQuantityBreakdown, $transactions) as $acquisition) {
