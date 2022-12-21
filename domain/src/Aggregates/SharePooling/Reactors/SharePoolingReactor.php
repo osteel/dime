@@ -25,7 +25,7 @@ final class SharePoolingReactor extends EventConsumer
     public function handleSharePoolingTokenDisposedOf(SharePoolingTokenDisposedOf $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYear = TaxYearNormaliser::fromYear($disposal->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($disposal->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
@@ -49,7 +49,7 @@ final class SharePoolingReactor extends EventConsumer
     public function handleSharePoolingTokenDisposalReverted(SharePoolingTokenDisposalReverted $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYear = TaxYearNormaliser::fromYear($disposal->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($disposal->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 

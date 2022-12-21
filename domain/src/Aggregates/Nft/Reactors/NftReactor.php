@@ -21,7 +21,7 @@ final class NftReactor extends EventConsumer
 
     public function handleNftDisposedOf(NftDisposedOf $event, Message $message): void
     {
-        $taxYear = TaxYearNormaliser::fromYear($event->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($event->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 

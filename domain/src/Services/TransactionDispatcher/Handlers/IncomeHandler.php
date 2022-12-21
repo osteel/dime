@@ -22,7 +22,7 @@ class IncomeHandler
     {
         $this->validate($transaction);
 
-        $taxYear = TaxYearNormaliser::fromYear($transaction->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($transaction->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
