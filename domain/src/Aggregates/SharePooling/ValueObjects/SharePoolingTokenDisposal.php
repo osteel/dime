@@ -78,7 +78,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
         return $this->thirtyDayQuantityBreakdown->quantityMatchedWith($acquisition);
     }
 
-    /** @return array<string, string|array<string, string|array<string>>> */
+    /** @return array<string, string|int|bool|null|array<string, string|array<string>>> */
     public function toPayload(): array
     {
         return [
