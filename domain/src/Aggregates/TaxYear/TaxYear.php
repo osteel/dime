@@ -54,6 +54,7 @@ class TaxYear implements AggregateRoot
 
         $this->recordThat(new CapitalGainRecorded(
             taxYear: $action->taxYear,
+            date: $action->date,
             amount: $action->amount,
         ));
     }
@@ -80,6 +81,7 @@ class TaxYear implements AggregateRoot
 
         $this->recordThat(new CapitalGainReverted(
             taxYear: $action->taxYear,
+            date: $action->date,
             amount: $action->amount,
         ));
     }
@@ -103,6 +105,7 @@ class TaxYear implements AggregateRoot
 
         $this->recordThat(new CapitalLossRecorded(
             taxYear: $action->taxYear,
+            date: $action->date,
             amount: $action->amount,
         ));
     }
@@ -130,6 +133,7 @@ class TaxYear implements AggregateRoot
 
         $this->recordThat(new CapitalLossReverted(
             taxYear: $action->taxYear,
+            date: $action->date,
             amount: $action->amount,
         ));
     }
@@ -153,6 +157,7 @@ class TaxYear implements AggregateRoot
 
         $this->recordThat(new IncomeRecorded(
             taxYear: $action->taxYear,
+            date: $action->date,
             amount: $action->amount,
         ));
     }
@@ -175,6 +180,7 @@ class TaxYear implements AggregateRoot
 
         $this->recordThat(new NonAttributableAllowableCostRecorded(
             taxYear: $action->taxYear,
+            date: $action->date,
             amount: $action->amount,
         ));
     }

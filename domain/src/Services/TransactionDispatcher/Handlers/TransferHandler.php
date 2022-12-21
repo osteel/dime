@@ -33,6 +33,7 @@ class TransferHandler
         if ($transaction->networkFeeMarketValue?->isGreaterThan('0')) {
             $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
                 taxYear: $taxYear,
+                date: $transaction->date,
                 amount: $transaction->networkFeeMarketValue,
             ));
         }
@@ -40,6 +41,7 @@ class TransferHandler
         if ($transaction->platformFeeMarketValue?->isGreaterThan('0')) {
             $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
                 taxYear: $taxYear,
+                date: $transaction->date,
                 amount: $transaction->platformFeeMarketValue,
             ));
         }

@@ -32,11 +32,13 @@ final class SharePoolingReactor extends EventConsumer
         if ($disposal->proceeds->isGreaterThan($disposal->costBasis)) {
             $taxYearAggregate->recordCapitalGain(new RecordCapitalGain(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->proceeds->minus($disposal->costBasis),
             ));
         } else {
             $taxYearAggregate->recordCapitalLoss(new RecordCapitalLoss(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->costBasis->minus($disposal->proceeds),
             ));
         }
@@ -54,11 +56,13 @@ final class SharePoolingReactor extends EventConsumer
         if ($disposal->proceeds->isGreaterThan($disposal->costBasis)) {
             $taxYearAggregate->revertCapitalGain(new RevertCapitalGain(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->proceeds->minus($disposal->costBasis),
             ));
         } else {
             $taxYearAggregate->revertCapitalLoss(new RevertCapitalLoss(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->costBasis->minus($disposal->proceeds),
             ));
         }
