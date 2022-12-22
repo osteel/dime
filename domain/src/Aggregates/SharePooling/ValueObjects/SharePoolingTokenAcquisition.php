@@ -62,11 +62,9 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction impleme
     /** Increase the same-day quantity and adjust the 30-day quantity accordingly. */
     public function increaseSameDayQuantity(Quantity $quantity): self
     {
-        //print_r('INCREASE SAME-DAY QUANTITY: '.$quantity->__toString().' (Position: '.$this->position.' | ID: '.spl_object_id($this).')' . "\n");
         // Adjust same-day quantity
         $quantityToAdd = Quantity::minimum($quantity, $this->availableSameDayQuantity());
         $this->sameDayQuantity = $this->sameDayQuantity->plus($quantityToAdd);
-        //print_r($this->sameDayQuantity);
 
         // Adjust 30-day quantity
         $quantityToDeduct = Quantity::minimum($quantityToAdd, $this->thirtyDayQuantity);
