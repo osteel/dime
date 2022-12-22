@@ -6,12 +6,21 @@ namespace App\Services\TransactionReader\Adapters;
 
 use App\Services\TransactionReader\TransactionReader;
 use Generator;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class PhpSpreadsheetAdapter implements TransactionReader
 {
     public function read(string $path): Generator
     {
+        $stringValueBinder = (new StringValueBinder())->setNumericConversion(false)
+            ->setBooleanConversion(false)
+            ->setNullConversion(false)
+            ->setFormulaConversion(false);
+
+        Cell::setValueBinder($stringValueBinder);
+
         $spreadsheet = IOFactory::load($path);
         $worksheet = $spreadsheet->getActiveSheet()->getRowIterator();
 

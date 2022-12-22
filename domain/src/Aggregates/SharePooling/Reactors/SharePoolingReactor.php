@@ -25,18 +25,20 @@ final class SharePoolingReactor extends EventConsumer
     public function handleSharePoolingTokenDisposedOf(SharePoolingTokenDisposedOf $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYear = TaxYearNormaliser::fromYear($disposal->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($disposal->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
         if ($disposal->proceeds->isGreaterThan($disposal->costBasis)) {
             $taxYearAggregate->recordCapitalGain(new RecordCapitalGain(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->proceeds->minus($disposal->costBasis),
             ));
         } else {
             $taxYearAggregate->recordCapitalLoss(new RecordCapitalLoss(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->costBasis->minus($disposal->proceeds),
             ));
         }
@@ -47,18 +49,20 @@ final class SharePoolingReactor extends EventConsumer
     public function handleSharePoolingTokenDisposalReverted(SharePoolingTokenDisposalReverted $event, Message $message): void
     {
         $disposal = $event->sharePoolingTokenDisposal;
-        $taxYear = TaxYearNormaliser::fromYear($disposal->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($disposal->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
         if ($disposal->proceeds->isGreaterThan($disposal->costBasis)) {
             $taxYearAggregate->revertCapitalGain(new RevertCapitalGain(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->proceeds->minus($disposal->costBasis),
             ));
         } else {
             $taxYearAggregate->revertCapitalLoss(new RevertCapitalLoss(
                 taxYear: $taxYear,
+                date: $disposal->date,
                 amount: $disposal->costBasis->minus($disposal->proceeds),
             ));
         }

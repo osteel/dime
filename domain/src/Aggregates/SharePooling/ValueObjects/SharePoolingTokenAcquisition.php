@@ -105,7 +105,7 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction impleme
         return $this;
     }
 
-    /** @return array<string, string|array<string, string>> */
+    /** @return array<string, string|int|null|array<string, string>> */
     public function toPayload(): array
     {
         return [
@@ -114,19 +114,20 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction impleme
             'cost_basis' => $this->costBasis->toPayload(),
             'same_day_quantity' => $this->sameDayQuantity->__toString(),
             'thirty_day_quantity' => $this->thirtyDayQuantity->__toString(),
+            'position' => $this->position,
         ];
     }
 
     /** @param array<string, string|array<string, string>> $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(
+        return (new static(
             LocalDate::parse($payload['date']), // @phpstan-ignore-line
             new Quantity($payload['quantity']), // @phpstan-ignore-line
             FiatAmount::fromPayload($payload['cost_basis']), // @phpstan-ignore-line
             new Quantity($payload['same_day_quantity']), // @phpstan-ignore-line
             new Quantity($payload['thirty_day_quantity']), // @phpstan-ignore-line
-        );
+        ))->setPosition((int) $payload['position']);
     }
 
     public function __toString(): string

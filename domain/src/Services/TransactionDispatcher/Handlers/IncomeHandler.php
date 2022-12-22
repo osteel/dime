@@ -22,12 +22,15 @@ class IncomeHandler
     {
         $this->validate($transaction);
 
-        $taxYear = TaxYearNormaliser::fromYear($transaction->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($transaction->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
-        // @phpstan-ignore-next-line
-        $taxYearAggregate->recordIncome(new RecordIncome(taxYear: $taxYear, amount: $transaction->marketValue));
+        $taxYearAggregate->recordIncome(new RecordIncome(
+            taxYear: $taxYear,
+            date: $transaction->date,
+            amount: $transaction->marketValue, // @phpstan-ignore-line
+        ));
 
         $this->taxYearRepository->save($taxYearAggregate);
     }

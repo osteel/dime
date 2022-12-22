@@ -26,13 +26,14 @@ class TransferHandler
             return;
         }
 
-        $taxYear = TaxYearNormaliser::fromYear($transaction->date->getYear());
+        $taxYear = TaxYearNormaliser::fromDate($transaction->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
         if ($transaction->networkFeeMarketValue?->isGreaterThan('0')) {
             $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
                 taxYear: $taxYear,
+                date: $transaction->date,
                 amount: $transaction->networkFeeMarketValue,
             ));
         }
@@ -40,6 +41,7 @@ class TransferHandler
         if ($transaction->platformFeeMarketValue?->isGreaterThan('0')) {
             $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
                 taxYear: $taxYear,
+                date: $transaction->date,
                 amount: $transaction->platformFeeMarketValue,
             ));
         }

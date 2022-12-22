@@ -1,12 +1,13 @@
 <?php
 
-use Domain\Enums\FiatCurrency;
+use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\Events\CapitalGainRecorded;
 use Domain\Aggregates\TaxYear\Events\CapitalGainReverted;
 use Domain\Aggregates\TaxYear\Events\CapitalLossRecorded;
 use Domain\Aggregates\TaxYear\Events\CapitalLossReverted;
 use Domain\Aggregates\TaxYear\Events\IncomeRecorded;
 use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostRecorded;
+use Domain\Enums\FiatCurrency;
 use Domain\Tests\Aggregates\TaxYear\Projectors\TaxYearSummaryProjectorTestCase;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRootId;
@@ -18,6 +19,7 @@ uses(TaxYearSummaryProjectorTestCase::class);
 it('can handle a capital gain', function () {
     $capitalGainRecorded = new CapitalGainRecorded(
         taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
@@ -36,6 +38,7 @@ it('can handle a capital gain', function () {
 it('can handle a capital gain reversion', function () {
     $capitalGainReverted = new CapitalGainReverted(
         taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
@@ -54,6 +57,7 @@ it('can handle a capital gain reversion', function () {
 it('can handle a capital loss', function () {
     $capitalLossRecorded = new CapitalLossRecorded(
         taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
@@ -72,6 +76,7 @@ it('can handle a capital loss', function () {
 it('can handle a capital loss reversion', function () {
     $capitalLossReverted = new CapitalLossReverted(
         taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
@@ -90,6 +95,7 @@ it('can handle a capital loss reversion', function () {
 it('can handle some income', function () {
     $incomeRecorded = new IncomeRecorded(
         taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 
@@ -108,6 +114,7 @@ it('can handle some income', function () {
 it('can handle a non-attributable allowable cost', function () {
     $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
         taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
     );
 

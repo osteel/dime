@@ -169,8 +169,7 @@ final class Transaction implements Stringable
         $this->haveAMarketValue($error)
             ->haveASentAsset($error)
             ->haveASentQuantity($error)
-            ->haveAReceivedAsset($error)
-            ->haveAReceivedQuantity($error);
+            ->haveAReceivedAsset($error);
 
         $this->sentAsset !== $this->receivedAsset
             || throw TransactionException::invalidData(sprintf($error, 'have different assets'), $this);

@@ -78,7 +78,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
         return $this->thirtyDayQuantityBreakdown->quantityMatchedWith($acquisition);
     }
 
-    /** @return array<string, string|array<string, string|array<string>>> */
+    /** @return array<string, string|int|bool|null|array<string, string|array<string>>> */
     public function toPayload(): array
     {
         return [
@@ -88,20 +88,23 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
             'proceeds' => $this->proceeds->toPayload(),
             'same_day_quantity_breakdown' => $this->sameDayQuantityBreakdown->toPayload(),
             'thirty_day_quantity_breakdown' => $this->thirtyDayQuantityBreakdown->toPayload(),
+            'processed' => $this->processed,
+            'position' => $this->position,
         ];
     }
 
     /** @param array<string, string|array<string, string|array<string>>> $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(
+        return (new static(
             LocalDate::parse($payload['date']), // @phpstan-ignore-line
             new Quantity($payload['quantity']), // @phpstan-ignore-line
             FiatAmount::fromPayload($payload['cost_basis']), // @phpstan-ignore-line
             FiatAmount::fromPayload($payload['proceeds']), // @phpstan-ignore-line
             QuantityBreakdown::fromPayload($payload['same_day_quantity_breakdown']), // @phpstan-ignore-line
             QuantityBreakdown::fromPayload($payload['thirty_day_quantity_breakdown']), // @phpstan-ignore-line
-        );
+            (bool) $payload['processed'],
+        ))->setPosition((int) $payload['position']);
     }
 
     public function __toString(): string
