@@ -6,35 +6,36 @@ namespace Domain\Aggregates\TaxYear\Events;
 
 use Brick\DateTime\LocalDate;
 use Domain\ValueObjects\FiatAmount;
-use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-abstract class TaxYearEvent implements SerializablePayload
+abstract class CapitalEvent extends TaxYearEvent
 {
-    public function __construct(
+    final public function __construct(
         public readonly string $taxYear,
         public readonly LocalDate $date,
         public readonly FiatAmount $amount,
+        public readonly FiatAmount $costBasis,
+        public readonly FiatAmount $proceeds,
     ) {
     }
 
     /** @return array<string, string|array<string, string>> */
     public function toPayload(): array
     {
-        return [
-            'tax_year' => $this->taxYear,
-            'date' => $this->date->__toString(),
-            'amount' => $this->amount->toPayload(),
-        ];
+        return array_merge(parent::toPayload(), [
+            'cost_basis' => $this->costBasis->toPayload(),
+            'proceeds' => $this->proceeds->toPayload(),
+        ]);
     }
 
     /** @param array<string, string|array<string, string>> $payload */
     public static function fromPayload(array $payload): static
     {
-        // @phpstan-ignore-next-line
         return new static(
-            $payload['tax_year'],
+            $payload['tax_year'], // @phpstan-ignore-line
             LocalDate::parse($payload['date']), // @phpstan-ignore-line
             FiatAmount::fromPayload($payload['amount']), // @phpstan-ignore-line
+            FiatAmount::fromPayload($payload['cost_basis']), // @phpstan-ignore-line
+            FiatAmount::fromPayload($payload['proceeds']), // @phpstan-ignore-line
         );
     }
 }

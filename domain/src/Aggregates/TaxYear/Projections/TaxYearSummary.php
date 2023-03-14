@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $tax_year
  * @property FiatCurrency $currency
  * @property FiatAmount $capital_gain
+ * @property FiatAmount $capital_cost_basis
+ * @property FiatAmount $capital_proceeds
  * @property FiatAmount $income
  * @property FiatAmount $non_attributable_allowable_costs
  * @method static self firstOrNew($attributes = [], $values = [])
@@ -54,6 +56,38 @@ final class TaxYearSummary extends Model
     }
 
     /** @throws FiatAmountException */
+    public function increaseCapitalCostBasis(FiatAmount $amount): self
+    {
+        $this->capital_cost_basis = $this->capital_cost_basis->plus($amount);
+
+        return $this;
+    }
+
+    /** @throws FiatAmountException */
+    public function decreaseCapitalCostBasis(FiatAmount $amount): self
+    {
+        $this->capital_cost_basis = $this->capital_cost_basis->minus($amount);
+
+        return $this;
+    }
+
+    /** @throws FiatAmountException */
+    public function increaseCapitalProceeds(FiatAmount $amount): self
+    {
+        $this->capital_proceeds = $this->capital_proceeds->plus($amount);
+
+        return $this;
+    }
+
+    /** @throws FiatAmountException */
+    public function decreaseCapitalProceeds(FiatAmount $amount): self
+    {
+        $this->capital_proceeds = $this->capital_proceeds->minus($amount);
+
+        return $this;
+    }
+
+    /** @throws FiatAmountException */
     public function increaseIncome(FiatAmount $amount): self
     {
         $this->income = $this->income->plus($amount);
@@ -86,6 +120,22 @@ final class TaxYearSummary extends Model
     }
 
     protected function capitalGain(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),
+            set: fn (FiatAmount $value) => $value->amount,
+        );
+    }
+
+    protected function capitalCostBasis(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),
+            set: fn (FiatAmount $value) => $value->amount,
+        );
+    }
+
+    protected function capitalProceeds(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),

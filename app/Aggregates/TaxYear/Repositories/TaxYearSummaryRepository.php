@@ -11,31 +11,59 @@ use Domain\ValueObjects\FiatAmount;
 
 class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
 {
-    public function recordCapitalGain(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): void
-    {
+    public function recordCapitalGain(
+        TaxYearId $taxYearId,
+        string $taxYear,
+        FiatAmount $amount,
+        FiatAmount $costBasis,
+        FiatAmount $proceeds,
+    ): void {
         $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
             ->increaseCapitalGain($amount)
+            ->increaseCapitalCostBasis($costBasis)
+            ->increaseCapitalProceeds($proceeds)
             ->save();
     }
 
-    public function revertCapitalGain(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): void
-    {
+    public function revertCapitalGain(
+        TaxYearId $taxYearId,
+        string $taxYear,
+        FiatAmount $amount,
+        FiatAmount $costBasis,
+        FiatAmount $proceeds,
+    ): void {
         $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
             ->decreaseCapitalGain($amount)
+            ->decreaseCapitalCostBasis($costBasis)
+            ->decreaseCapitalProceeds($proceeds)
             ->save();
     }
 
-    public function recordCapitalLoss(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): void
-    {
+    public function recordCapitalLoss(
+        TaxYearId $taxYearId,
+        string $taxYear,
+        FiatAmount $amount,
+        FiatAmount $costBasis,
+        FiatAmount $proceeds,
+    ): void {
         $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
             ->decreaseCapitalGain($amount)
+            ->increaseCapitalCostBasis($costBasis)
+            ->increaseCapitalProceeds($proceeds)
             ->save();
     }
 
-    public function revertCapitalLoss(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): void
-    {
+    public function revertCapitalLoss(
+        TaxYearId $taxYearId,
+        string $taxYear,
+        FiatAmount $amount,
+        FiatAmount $costBasis,
+        FiatAmount $proceeds,
+    ): void {
         $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
             ->increaseCapitalGain($amount)
+            ->decreaseCapitalCostBasis($costBasis)
+            ->decreaseCapitalProceeds($proceeds)
             ->save();
     }
 
@@ -56,8 +84,8 @@ class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
     private function fetchTaxYearSummary(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): TaxYearSummary
     {
         return TaxYearSummary::firstOrNew(
-            ['tax_year_id' => $taxYearId->toString()],
-            ['tax_year' => $taxYear, 'currency' => $amount->currency],
+            ['tax_year_id' => $taxYearId->toString(), 'currency' => $amount->currency],
+            ['tax_year' => $taxYear],
         );
     }
 }
