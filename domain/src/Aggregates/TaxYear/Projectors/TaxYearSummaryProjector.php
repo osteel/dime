@@ -29,6 +29,8 @@ final class TaxYearSummaryProjector extends EventConsumer
             $this->getTaxYearId($message),
             $event->taxYear,
             $event->amount,
+            $event->costBasis,
+            $event->proceeds,
         );
     }
 
@@ -39,6 +41,8 @@ final class TaxYearSummaryProjector extends EventConsumer
             $this->getTaxYearId($message),
             $event->taxYear,
             $event->amount,
+            $event->costBasis,
+            $event->proceeds,
         );
     }
 
@@ -49,6 +53,8 @@ final class TaxYearSummaryProjector extends EventConsumer
             $this->getTaxYearId($message),
             $event->taxYear,
             $event->amount,
+            $event->costBasis,
+            $event->proceeds,
         );
     }
 
@@ -59,6 +65,8 @@ final class TaxYearSummaryProjector extends EventConsumer
             $this->getTaxYearId($message),
             $event->taxYear,
             $event->amount,
+            $event->costBasis,
+            $event->proceeds,
         );
     }
 

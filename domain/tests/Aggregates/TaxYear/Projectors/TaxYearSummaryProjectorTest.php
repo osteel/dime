@@ -21,16 +21,20 @@ it('can handle a capital gain', function () {
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
+        costBasis: new FiatAmount('50', FiatCurrency::GBP),
+        proceeds: new FiatAmount('150', FiatCurrency::GBP),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalGainRecorded))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordCapitalGain')
-            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalGainRecorded) {
+            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) use ($capitalGainRecorded) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
-                    && $amount === $capitalGainRecorded->amount;
+                    && $amount === $capitalGainRecorded->amount
+                    && $costBasis === $capitalGainRecorded->costBasis
+                    && $proceeds === $capitalGainRecorded->proceeds;
             })
             ->once());
 });
@@ -40,16 +44,20 @@ it('can handle a capital gain reversion', function () {
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
+        costBasis: new FiatAmount('50', FiatCurrency::GBP),
+        proceeds: new FiatAmount('150', FiatCurrency::GBP),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalGainReverted))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('revertCapitalGain')
-            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalGainReverted) {
+            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) use ($capitalGainReverted) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
-                    && $amount === $capitalGainReverted->amount;
+                    && $amount === $capitalGainReverted->amount
+                    && $costBasis === $capitalGainReverted->costBasis
+                    && $proceeds === $capitalGainReverted->proceeds;
             })
             ->once());
 });
@@ -59,16 +67,20 @@ it('can handle a capital loss', function () {
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
+        costBasis: new FiatAmount('50', FiatCurrency::GBP),
+        proceeds: new FiatAmount('150', FiatCurrency::GBP),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalLossRecorded))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordCapitalLoss')
-            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalLossRecorded) {
+            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) use ($capitalLossRecorded) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
-                    && $amount === $capitalLossRecorded->amount;
+                    && $amount === $capitalLossRecorded->amount
+                    && $costBasis === $capitalLossRecorded->costBasis
+                    && $proceeds === $capitalLossRecorded->proceeds;
             })
             ->once());
 });
@@ -78,16 +90,20 @@ it('can handle a capital loss reversion', function () {
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         amount: new FiatAmount('100', FiatCurrency::GBP),
+        costBasis: new FiatAmount('50', FiatCurrency::GBP),
+        proceeds: new FiatAmount('150', FiatCurrency::GBP),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($capitalLossReverted))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('revertCapitalLoss')
-            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) use ($capitalLossReverted) {
+            ->withArgs(function (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) use ($capitalLossReverted) {
                 return $taxYearId->toString() === $this->aggregateRootId->toString()
                     && $taxYear === $this->taxYear
-                    && $amount === $capitalLossReverted->amount;
+                    && $amount === $capitalLossReverted->amount
+                    && $costBasis === $capitalLossReverted->costBasis
+                    && $proceeds === $capitalLossReverted->proceeds;
             })
             ->once());
 });

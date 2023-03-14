@@ -17,6 +17,8 @@ return new class () extends Migration {
             $table->string('tax_year', 9);
             $table->string('currency', 3);
             $table->string('capital_gain')->default('0');
+            $table->string('capital_cost_basis')->default('0');
+            $table->string('capital_proceeds')->default('0');
             $table->string('income')->default('0');
             $table->string('non_attributable_allowable_costs')->default('0');
         });

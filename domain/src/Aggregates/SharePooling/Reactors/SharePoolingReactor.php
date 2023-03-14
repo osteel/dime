@@ -34,12 +34,16 @@ final class SharePoolingReactor extends EventConsumer
                 taxYear: $taxYear,
                 date: $disposal->date,
                 amount: $disposal->proceeds->minus($disposal->costBasis),
+                costBasis: $disposal->costBasis,
+                proceeds: $disposal->proceeds,
             ));
         } else {
             $taxYearAggregate->recordCapitalLoss(new RecordCapitalLoss(
                 taxYear: $taxYear,
                 date: $disposal->date,
                 amount: $disposal->costBasis->minus($disposal->proceeds),
+                costBasis: $disposal->costBasis,
+                proceeds: $disposal->proceeds,
             ));
         }
 
@@ -58,12 +62,16 @@ final class SharePoolingReactor extends EventConsumer
                 taxYear: $taxYear,
                 date: $disposal->date,
                 amount: $disposal->proceeds->minus($disposal->costBasis),
+                costBasis: $disposal->costBasis,
+                proceeds: $disposal->proceeds,
             ));
         } else {
             $taxYearAggregate->revertCapitalLoss(new RevertCapitalLoss(
                 taxYear: $taxYear,
                 date: $disposal->date,
                 amount: $disposal->costBasis->minus($disposal->proceeds),
+                costBasis: $disposal->costBasis,
+                proceeds: $disposal->proceeds,
             ));
         }
 

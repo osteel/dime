@@ -56,6 +56,8 @@ class TaxYear implements AggregateRoot
             taxYear: $action->taxYear,
             date: $action->date,
             amount: $action->amount,
+            costBasis: $action->costBasis,
+            proceeds: $action->proceeds,
         ));
     }
 
@@ -83,6 +85,8 @@ class TaxYear implements AggregateRoot
             taxYear: $action->taxYear,
             date: $action->date,
             amount: $action->amount,
+            costBasis: $action->costBasis,
+            proceeds: $action->proceeds,
         ));
     }
 
@@ -107,6 +111,8 @@ class TaxYear implements AggregateRoot
             taxYear: $action->taxYear,
             date: $action->date,
             amount: $action->amount,
+            costBasis: $action->costBasis,
+            proceeds: $action->proceeds,
         ));
     }
 
@@ -135,6 +141,8 @@ class TaxYear implements AggregateRoot
             taxYear: $action->taxYear,
             date: $action->date,
             amount: $action->amount,
+            costBasis: $action->costBasis,
+            proceeds: $action->proceeds,
         ));
     }
 

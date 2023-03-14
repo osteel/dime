@@ -30,12 +30,16 @@ final class NftReactor extends EventConsumer
                 taxYear: $taxYear,
                 date: $event->date,
                 amount: $event->proceeds->minus($event->costBasis),
+                costBasis: $event->costBasis,
+                proceeds: $event->proceeds,
             ));
         } else {
             $taxYearAggregate->recordCapitalLoss(new RecordCapitalLoss(
                 taxYear: $taxYear,
                 date: $event->date,
                 amount: $event->costBasis->minus($event->proceeds),
+                costBasis: $event->costBasis,
+                proceeds: $event->proceeds,
             ));
         }
 
