@@ -7,11 +7,11 @@ namespace Domain\Aggregates\Nft\Actions;
 use Brick\DateTime\LocalDate;
 use Domain\ValueObjects\FiatAmount;
 
-final class AcquireNft
+final readonly class AcquireNft
 {
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly FiatAmount $costBasis,
+        public LocalDate $date,
+        public FiatAmount $costBasis,
     ) {
     }
 }

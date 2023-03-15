@@ -18,7 +18,7 @@ use EventSauce\EventSourcing\Message;
 
 final class TaxYearSummaryProjector extends EventConsumer
 {
-    public function __construct(private TaxYearSummaryRepository $taxYearSummaryRepository)
+    public function __construct(private readonly TaxYearSummaryRepository $taxYearSummaryRepository)
     {
     }
 

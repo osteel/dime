@@ -8,11 +8,11 @@ use Brick\DateTime\LocalDate;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class NftAcquired implements SerializablePayload
+final readonly class NftAcquired implements SerializablePayload
 {
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly FiatAmount $costBasis,
+        public LocalDate $date,
+        public FiatAmount $costBasis,
     ) {
     }
 

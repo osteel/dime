@@ -10,11 +10,11 @@ use Domain\ValueObjects\Exceptions\FiatAmountException;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 use Stringable;
 
-final class FiatAmount implements SerializablePayload, Stringable
+final readonly class FiatAmount implements SerializablePayload, Stringable
 {
     public function __construct(
-        public readonly string $amount,
-        public readonly FiatCurrency $currency,
+        public string $amount,
+        public FiatCurrency $currency,
     ) {
     }
 

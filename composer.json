@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "ext-bcmath": "*",
         "brick/date-time": "^0.4.1",
         "eventsauce/eventsauce": "^3.0",
@@ -37,7 +37,8 @@
         "mockery/mockery": "^1.4.4",
         "pestphp/pest": "^1.21.3",
         "pestphp/pest-plugin-mock": "^1.0",
-        "phpstan/phpstan": "^1.8"
+        "phpstan/phpstan": "^1.8",
+        "rector/rector": "^0.15.0"
     },
     "autoload": {
         "psr-4": {
@@ -63,6 +64,7 @@
     },
     "scripts": {
         "pint": "pint",
+        "rector": "rector process --dry-run",
         "stan": "phpstan",
         "test": "pest"
     },

@@ -13,7 +13,7 @@ use Domain\ValueObjects\Transaction;
 
 class TransferHandler
 {
-    public function __construct(private TaxYearRepository $taxYearRepository)
+    public function __construct(private readonly TaxYearRepository $taxYearRepository)
     {
     }
 

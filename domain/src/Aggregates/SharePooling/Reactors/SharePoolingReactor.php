@@ -18,7 +18,7 @@ use EventSauce\EventSourcing\Message;
 
 final class SharePoolingReactor extends EventConsumer
 {
-    public function __construct(private TaxYearRepository $taxYearRepository)
+    public function __construct(private readonly TaxYearRepository $taxYearRepository)
     {
     }
 

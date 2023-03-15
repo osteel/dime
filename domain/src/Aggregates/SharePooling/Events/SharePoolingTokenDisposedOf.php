@@ -7,10 +7,10 @@ namespace Domain\Aggregates\SharePooling\Events;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class SharePoolingTokenDisposedOf implements SerializablePayload
+final readonly class SharePoolingTokenDisposedOf implements SerializablePayload
 {
     public function __construct(
-        public readonly SharePoolingTokenDisposal $sharePoolingTokenDisposal,
+        public SharePoolingTokenDisposal $sharePoolingTokenDisposal,
     ) {
     }
 

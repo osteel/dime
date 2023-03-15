@@ -16,7 +16,7 @@ class SharePoolingHandler
 {
     use AttributesFees;
 
-    public function __construct(private SharePoolingRepository $sharePoolingRepository)
+    public function __construct(private readonly SharePoolingRepository $sharePoolingRepository)
     {
     }
 
