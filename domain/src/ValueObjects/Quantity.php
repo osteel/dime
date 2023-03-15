@@ -7,9 +7,9 @@ namespace Domain\ValueObjects;
 use Domain\Services\Math\Math;
 use Stringable;
 
-final class Quantity implements Stringable
+final readonly class Quantity implements Stringable
 {
-    public function __construct(public readonly string $quantity)
+    public function __construct(public string $quantity)
     {
     }
 

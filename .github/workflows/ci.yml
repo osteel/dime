@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Check out
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
@@ -67,7 +67,7 @@ jobs:
       fail-fast: false
       matrix:
         php-version:
-          - "8.1"
+          - "8.2"
         dependency-versions:
           - "lowest"
           - "highest"

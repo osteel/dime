@@ -8,12 +8,12 @@ use Brick\DateTime\LocalDate;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
-final class AcquireSharePoolingToken
+final readonly class AcquireSharePoolingToken
 {
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly Quantity $quantity,
-        public readonly FiatAmount $costBasis,
+        public LocalDate $date,
+        public Quantity $quantity,
+        public FiatAmount $costBasis,
     ) {
     }
 }

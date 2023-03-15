@@ -17,7 +17,7 @@ class NftHandler
 {
     use AttributesFees;
 
-    public function __construct(private NftRepository $nftRepository)
+    public function __construct(private readonly NftRepository $nftRepository)
     {
     }
 

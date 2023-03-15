@@ -34,7 +34,7 @@ class SharePooling implements AggregateRoot
     use AggregateRootBehaviour;
 
     private ?FiatCurrency $fiatCurrency = null;
-    private SharePoolingTransactions $transactions;
+    private readonly SharePoolingTransactions $transactions;
 
     private function __construct(AggregateRootId $aggregateRootId)
     {

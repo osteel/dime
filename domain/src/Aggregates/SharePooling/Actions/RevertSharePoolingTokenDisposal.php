@@ -6,10 +6,10 @@ namespace Domain\Aggregates\SharePooling\Actions;
 
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 
-final class RevertSharePoolingTokenDisposal
+final readonly class RevertSharePoolingTokenDisposal
 {
     public function __construct(
-        public readonly SharePoolingTokenDisposal $sharePoolingTokenDisposal,
+        public SharePoolingTokenDisposal $sharePoolingTokenDisposal,
     ) {
     }
 }
