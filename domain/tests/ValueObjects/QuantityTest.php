@@ -4,14 +4,15 @@ use Domain\ValueObjects\Exceptions\QuantityException;
 use Domain\ValueObjects\Quantity;
 
 it('cannot instantiate a quantity', function (string $quantity) {
-    new Quantity($quantity);
+    expect(fn () => new Quantity($quantity))
+        ->toThrow(QuantityException::class, QuantityException::invalidQuantity($quantity)->getMessage());
 })->with([
     'not a number' => 'foo',
     'mixed number and string 1' => '12345foo',
     'mixed number and string 2' => 'foo12345',
     'invalid format' => '.01234',
     'invalid sign' => '~1234',
-])->throws(QuantityException::class);
+]);
 
 it('can instantiate a quantity', function (string $quantity) {
     expect((new Quantity($quantity))->quantity)->toBe($quantity);

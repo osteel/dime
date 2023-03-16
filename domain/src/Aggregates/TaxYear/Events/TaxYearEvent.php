@@ -17,7 +17,7 @@ abstract class TaxYearEvent implements SerializablePayload
     ) {
     }
 
-    /** @return array<string, string|array<string, string>> */
+    /** @return array<string,string|array<string,string>> */
     public function toPayload(): array
     {
         return [
@@ -27,7 +27,7 @@ abstract class TaxYearEvent implements SerializablePayload
         ];
     }
 
-    /** @param array<string, string|array<string, string>> $payload */
+    /** @param array<string,string|array<string,string>> $payload */
     public static function fromPayload(array $payload): static
     {
         // @phpstan-ignore-next-line

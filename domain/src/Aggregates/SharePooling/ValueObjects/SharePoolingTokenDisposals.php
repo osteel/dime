@@ -13,7 +13,7 @@ use Traversable;
 /** @implements IteratorAggregate<int, SharePoolingTokenDisposal> */
 final class SharePoolingTokenDisposals implements IteratorAggregate
 {
-    /** @param array<int, SharePoolingTokenDisposal> $disposals */
+    /** @param array<int,SharePoolingTokenDisposal> $disposals */
     private function __construct(private array $disposals = [])
     {
     }

@@ -48,7 +48,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
         return (new SharePoolingTokenDisposal(
             date: $this->date,
             quantity: $this->quantity,
-            costBasis: $this->costBasis->nilAmount(),
+            costBasis: $this->costBasis->zero(),
             proceeds: $this->proceeds,
             sameDayQuantityBreakdown: new QuantityBreakdown(),
             thirtyDayQuantityBreakdown: new QuantityBreakdown(),
@@ -78,7 +78,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
         return $this->thirtyDayQuantityBreakdown->quantityMatchedWith($acquisition);
     }
 
-    /** @return array<string, string|int|bool|null|array<string, string|array<string>>> */
+    /** @return array<string,string|int|bool|null|array<string,string|array<string>>> */
     public function toPayload(): array
     {
         return [
@@ -93,7 +93,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
         ];
     }
 
-    /** @param array<string, string|array<string, string|array<string>>> $payload */
+    /** @param array<string,string|array<string,string|array<string>>> $payload */
     public static function fromPayload(array $payload): static
     {
         return (new static(

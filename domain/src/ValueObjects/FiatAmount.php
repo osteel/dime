@@ -5,87 +5,109 @@ declare(strict_types=1);
 namespace Domain\ValueObjects;
 
 use Domain\Enums\FiatCurrency;
-use Domain\Services\Math\Math;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
+use Domain\ValueObjects\Exceptions\QuantityException;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 use Stringable;
 
 final readonly class FiatAmount implements SerializablePayload, Stringable
 {
+    public Quantity $quantity;
+
+    /** @throws QuantityException */
     public function __construct(
-        public string $amount,
+        Quantity|string $quantity,
         public FiatCurrency $currency,
     ) {
+        $this->quantity = $quantity instanceof Quantity ? $quantity : new Quantity($quantity);
     }
 
-    public function nilAmount(): FiatAmount
+    public function zero(): FiatAmount
     {
-        return new self('0', $this->currency);
+        return new self(Quantity::zero(), $this->currency);
+    }
+
+    public function isPositive(): bool
+    {
+        return $this->quantity->isPositive();
+    }
+
+    public function isNegative(): bool
+    {
+        return $this->quantity->isNegative();
+    }
+
+    public function isZero(): bool
+    {
+        return $this->quantity->isZero();
     }
 
     public function isEqualTo(FiatAmount | Quantity | string $amount): bool
     {
-        return Math::eq($this->amount, $this->extractValue($amount));
+        return $this->quantity->isEqualTo($this->toQuantity($amount));
     }
 
     public function isGreaterThan(FiatAmount | Quantity | string $amount): bool
     {
-        return Math::gt($this->amount, $this->extractValue($amount));
+        return $this->quantity->isGreaterThan($this->toQuantity($amount));
     }
 
     public function isGreaterThanOrEqualTo(FiatAmount | Quantity | string $amount): bool
     {
-        return Math::gte($this->amount, $this->extractValue($amount));
+        return $this->quantity->isGreaterThanOrEqualTo($this->toQuantity($amount));
     }
 
     public function isLessThan(FiatAmount | Quantity | string $amount): bool
     {
-        return Math::lt($this->amount, $this->extractValue($amount));
+        return $this->quantity->isLessThan($this->toQuantity($amount));
     }
 
     public function isLessThanOrEqualTo(FiatAmount | Quantity | string $amount): bool
     {
-        return Math::lte($this->amount, $this->extractValue($amount));
+        return $this->quantity->isLessThanOrEqualTo($this->toQuantity($amount));
     }
 
     /** @throws FiatAmountException */
     public function plus(FiatAmount | Quantity | string $operand): FiatAmount
     {
-        return new FiatAmount(Math::add($this->amount, $this->extractValue($operand)), $this->currency);
+        return new FiatAmount($this->quantity->plus($this->toQuantity($operand)), $this->currency);
     }
 
     /** @throws FiatAmountException */
     public function minus(FiatAmount | Quantity | string $operand): FiatAmount
     {
-        return new FiatAmount(Math::sub($this->amount, $this->extractValue($operand)), $this->currency);
+        return new FiatAmount($this->quantity->minus($this->toQuantity($operand)), $this->currency);
     }
 
     /** @throws FiatAmountException */
     public function multipliedBy(FiatAmount | Quantity | string $multiplier): FiatAmount
     {
-        return new FiatAmount(Math::mul($this->amount, $this->extractValue($multiplier)), $this->currency);
+        return new FiatAmount($this->quantity->multipliedBy($this->toQuantity($multiplier)), $this->currency);
     }
 
     /** @throws FiatAmountException */
     public function dividedBy(FiatAmount | Quantity | string $divisor): FiatAmount
     {
-        return new FiatAmount(Math::div($this->amount, $this->extractValue($divisor)), $this->currency);
+        return new FiatAmount($this->quantity->dividedBy($this->toQuantity($divisor)), $this->currency);
     }
 
-    /** @throws FiatAmountException */
-    private function extractValue(FiatAmount | Quantity | string $term): string
+    /**
+     * @throws FiatAmountException
+     * @throws QuantityException
+     */
+    private function toQuantity(FiatAmount | Quantity | string $term): Quantity
     {
-        if (is_string($term)) {
+        if ($term instanceof Quantity) {
             return $term;
         }
 
-        if ($term instanceof Quantity) {
-            return $term->quantity;
+        if (is_string($term)) {
+            return new Quantity($term);
         }
 
         $this->assertCurrenciesMatch($this, $term);
 
-        return $term->amount;
+        return $term->quantity;
     }
 
     /** @throws FiatAmountException */
@@ -98,26 +120,26 @@ final readonly class FiatAmount implements SerializablePayload, Stringable
         }
     }
 
-    /** @return array<string, string> */
+    /** @return array<string,string> */
     public function toPayload(): array
     {
         return [
-            'amount' => $this->amount,
+            'quantity' => (string) $this->quantity,
             'currency' => $this->currency->value,
         ];
     }
 
-    /** @param array<string, string> $payload */
+    /** @param array<string,string> $payload */
     public static function fromPayload(array $payload): static
     {
         return new self(
-            amount: $payload['amount'],
+            quantity: new Quantity($payload['quantity']),
             currency: FiatCurrency::from($payload['currency']),
         );
     }
 
     public function __toString(): string
     {
-        return sprintf('%s%s', $this->currency->symbol(), $this->amount);
+        return sprintf('%s%s', $this->currency->symbol(), (string) $this->quantity);
     }
 }

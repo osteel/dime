@@ -120,7 +120,7 @@ class TaxYear implements AggregateRoot
     {
         $this->currency ??= $event->amount->currency;
         $this->capitalGainOrLoss = $this->capitalGainOrLoss?->minus($event->amount)
-            ?? $event->amount->nilAmount()->minus($event->amount);
+            ?? $event->amount->zero()->minus($event->amount);
     }
 
     public function revertCapitalLoss(RevertCapitalLoss $action): void
