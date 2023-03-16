@@ -4,3 +4,10 @@ parameters:
 	paths:
 		- app
 		- domain/src
+
+	checkMissingCallableSignature: true
+
+	type_coverage:
+		return_type: 98
+		param_type: 98
+		property_type: 100
