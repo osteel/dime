@@ -26,10 +26,8 @@ class Process extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
-    public function handle(TransactionReader $transactionReader, TransactionProcessor $transactionProcessor)
+    public function handle(TransactionReader $transactionReader, TransactionProcessor $transactionProcessor): int
     {
         $spreadsheet = $this->argument('spreadsheet');
 

@@ -8,6 +8,7 @@ parameters:
 	checkMissingCallableSignature: true
 
 	type_coverage:
-		return_type: 98
-		param_type: 98
+		return_type: 100
+		param_type: 100
 		property_type: 100
+		print_suggestions: true

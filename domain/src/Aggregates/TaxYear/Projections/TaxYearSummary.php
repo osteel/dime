@@ -107,7 +107,7 @@ final class TaxYearSummary extends Model
     {
         return Attribute::make(
             get: fn (string $value) => TaxYearId::fromString($value),
-            set: fn ($value) => $value instanceof TaxYearId ? $value->toString() : $value,
+            set: fn (mixed $value) => $value instanceof TaxYearId ? $value->toString() : $value,
         );
     }
 
@@ -122,7 +122,7 @@ final class TaxYearSummary extends Model
     protected function capitalGain(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),
+            get: fn (mixed $value) => new FiatAmount($value ?? '0', $this->currency),
             set: fn (FiatAmount $value) => $value->amount,
         );
     }
@@ -130,7 +130,7 @@ final class TaxYearSummary extends Model
     protected function capitalCostBasis(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),
+            get: fn (mixed $value) => new FiatAmount($value ?? '0', $this->currency),
             set: fn (FiatAmount $value) => $value->amount,
         );
     }
@@ -138,7 +138,7 @@ final class TaxYearSummary extends Model
     protected function capitalProceeds(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),
+            get: fn (mixed $value) => new FiatAmount($value ?? '0', $this->currency),
             set: fn (FiatAmount $value) => $value->amount,
         );
     }
@@ -146,7 +146,7 @@ final class TaxYearSummary extends Model
     protected function income(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),
+            get: fn (mixed $value) => new FiatAmount($value ?? '0', $this->currency),
             set: fn (FiatAmount $value) => $value->amount,
         );
     }
@@ -154,7 +154,7 @@ final class TaxYearSummary extends Model
     protected function nonAttributableAllowableCosts(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => new FiatAmount($value ?? '0', $this->currency),
+            get: fn (mixed $value) => new FiatAmount($value ?? '0', $this->currency),
             set: fn (FiatAmount $value) => $value->amount,
         );
     }
