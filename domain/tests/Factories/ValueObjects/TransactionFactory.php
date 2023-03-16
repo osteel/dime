@@ -174,7 +174,7 @@ class TransactionFactory extends PlainObjectFactory
     {
         return $this->state([
             'networkFeeCurrency' => $marketValue?->currency->value ?? FiatCurrency::GBP->value,
-            'networkFeeQuantity' => new Quantity($marketValue?->amount ?? '10'),
+            'networkFeeQuantity' => $marketValue?->quantity ?? new Quantity('10'),
             'networkFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
         ]);
     }
@@ -192,7 +192,7 @@ class TransactionFactory extends PlainObjectFactory
     {
         return $this->state([
             'platformFeeCurrency' => $marketValue?->currency->value ?? FiatCurrency::GBP->value,
-            'platformFeeQuantity' => new Quantity($marketValue?->amount ?? '10'),
+            'platformFeeQuantity' => $marketValue?->quantity ?? new Quantity('10'),
             'platformFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
         ]);
     }

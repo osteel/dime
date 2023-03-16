@@ -55,7 +55,7 @@ final class DisposalProcessor
     ): FiatAmount {
         assert($transactions->first() !== null);
 
-        $costBasis = $transactions->first()->costBasis->nilAmount();
+        $costBasis = $transactions->first()->costBasis->zero();
 
         return self::processSameDayAcquisitions(
             $transactions,

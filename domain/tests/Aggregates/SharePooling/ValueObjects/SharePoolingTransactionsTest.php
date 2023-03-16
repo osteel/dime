@@ -26,7 +26,7 @@ it('can make a collection of one transaction', function () {
 });
 
 it('can make a collection of transactions', function () {
-    /** @var array<int, SharePoolingTransaction> */
+    /** @var list<SharePoolingTransaction> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make(),
         SharePoolingTokenDisposal::factory()->make(),
@@ -40,7 +40,7 @@ it('can make a collection of transactions', function () {
 });
 
 it('can return the first transaction of a collection', function () {
-    /** @var array<int, SharePoolingTransaction> */
+    /** @var list<SharePoolingTransaction> */
     $items = [
         $first = SharePoolingTokenAcquisition::factory()->make(),
         SharePoolingTokenDisposal::factory()->make(),
@@ -53,7 +53,7 @@ it('can return the first transaction of a collection', function () {
 });
 
 it('can return a transaction at a position from the collection', function () {
-    /** @var array<int, SharePoolingTransaction> */
+    /** @var list<SharePoolingTransaction> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make(),
         $second = SharePoolingTokenDisposal::factory()->make(),
@@ -75,7 +75,7 @@ it('can add a transaction to a collection of transactions', function () {
 });
 
 it('can return the processed transactions from the collection', function () {
-    /** @var array<int, SharePoolingTransaction> */
+    /** @var list<SharePoolingTransaction> */
     $items = [
         $processed1 = SharePoolingTokenAcquisition::factory()->make(),
         SharePoolingTokenDisposal::factory()->unprocessed()->make(),

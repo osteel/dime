@@ -12,7 +12,7 @@ final class QuantityBreakdown implements SerializablePayload
 {
     private Quantity $quantity;
 
-    /** @param array<int, Quantity> $breakdown */
+    /** @param array<int,Quantity> $breakdown */
     public function __construct(private array $breakdown = [])
     {
         $this->quantity = array_reduce(
@@ -69,7 +69,7 @@ final class QuantityBreakdown implements SerializablePayload
         return array_keys($this->breakdown);
     }
 
-    /** @return array<string, array<string>> */
+    /** @return array<string,array<string>> */
     public function toPayload(): array
     {
         return [
@@ -77,7 +77,7 @@ final class QuantityBreakdown implements SerializablePayload
         ];
     }
 
-    /** @param array<string, array<string>> $payload */
+    /** @param array<string,array<string>> $payload */
     public static function fromPayload(array $payload): static
     {
         return new self(

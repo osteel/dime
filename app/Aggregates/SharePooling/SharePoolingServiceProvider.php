@@ -25,10 +25,8 @@ class SharePoolingServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         // @phpstan-ignore-next-line
         $classNameInflector = new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map'));

@@ -14,7 +14,7 @@ use Traversable;
 /** @implements IteratorAggregate<int, SharePoolingTokenAcquisition> */
 final class SharePoolingTokenAcquisitions implements IteratorAggregate
 {
-    /** @param array<int, SharePoolingTokenAcquisition> $acquisitions */
+    /** @param array<int,SharePoolingTokenAcquisition> $acquisitions */
     private function __construct(private array $acquisitions = [])
     {
     }
@@ -76,7 +76,7 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         return array_reduce(
             $this->acquisitions,
             fn (FiatAmount $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->costBasis),
-            $this->acquisitions[0]->costBasis->nilAmount(),
+            $this->acquisitions[0]->costBasis->zero(),
         );
     }
 
@@ -106,13 +106,13 @@ final class SharePoolingTokenAcquisitions implements IteratorAggregate
         );
 
         if (empty($section104PoolAcquisitions)) {
-            $this->acquisitions[0]->costBasis->nilAmount();
+            $this->acquisitions[0]->costBasis->zero();
         }
 
         return array_reduce(
             $section104PoolAcquisitions,
             fn (FiatAmount $total, SharePoolingTokenAcquisition $acquisition) => $total->plus($acquisition->section104PoolCostBasis()),
-            $this->acquisitions[0]->costBasis->nilAmount(),
+            $this->acquisitions[0]->costBasis->zero(),
         );
     }
 

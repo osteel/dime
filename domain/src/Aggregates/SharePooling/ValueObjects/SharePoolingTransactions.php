@@ -14,7 +14,7 @@ use Traversable;
 /** @implements IteratorAggregate<int, SharePoolingTransaction> */
 final class SharePoolingTransactions implements IteratorAggregate
 {
-    /** @param array<int, SharePoolingTransaction> $transactions */
+    /** @param array<int,SharePoolingTransaction> $transactions */
     private function __construct(private array $transactions = [])
     {
     }

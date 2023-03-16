@@ -14,13 +14,13 @@ final readonly class SharePoolingTokenDisposedOf implements SerializablePayload
     ) {
     }
 
-    /** @return array<string, array<string, string|int|bool|null|array<string, string|array<string>>>> */
+    /** @return array<string,array<string,string|int|bool|null|array<string,string|array<string>>>> */
     public function toPayload(): array
     {
         return ['share_pooling_token_disposal' => $this->sharePoolingTokenDisposal->toPayload()];
     }
 
-    /** @param array<string, array<string, string|int|bool|null|array<string, string|array<string>>>> $payload */
+    /** @param array<string,array<string,string|int|bool|null|array<string,string|array<string>>>> $payload */
     public static function fromPayload(array $payload): static
     {
         // @phpstan-ignore-next-line

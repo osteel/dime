@@ -18,7 +18,7 @@ abstract class CapitalEvent extends TaxYearEvent
     ) {
     }
 
-    /** @return array<string, string|array<string, string>> */
+    /** @return array<string,string|array<string,string>> */
     public function toPayload(): array
     {
         return array_merge(parent::toPayload(), [
@@ -27,7 +27,7 @@ abstract class CapitalEvent extends TaxYearEvent
         ]);
     }
 
-    /** @param array<string, string|array<string, string>> $payload */
+    /** @param array<string,string|array<string,string>> $payload */
     public static function fromPayload(array $payload): static
     {
         return new static(

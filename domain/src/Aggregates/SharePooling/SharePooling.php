@@ -140,7 +140,7 @@ class SharePooling implements AggregateRoot
         $this->transactions->add($disposal = (new SharePoolingTokenDisposal(
             date: $action->date,
             quantity: $action->quantity,
-            costBasis: $action->proceeds->nilAmount(),
+            costBasis: $action->proceeds->zero(),
             proceeds: $action->proceeds,
             sameDayQuantityBreakdown: new QuantityBreakdown(),
             thirtyDayQuantityBreakdown: new QuantityBreakdown(),

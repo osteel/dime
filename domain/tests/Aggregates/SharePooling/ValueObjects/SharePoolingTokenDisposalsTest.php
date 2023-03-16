@@ -24,7 +24,7 @@ it('can make a collection of one disposal', function () {
 });
 
 it('can make a collection of disposals', function () {
-    /** @var array<int, SharePoolingTokenDisposal> */
+    /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make(),
         SharePoolingTokenDisposal::factory()->make(),
@@ -47,7 +47,7 @@ it('can add a disposal to a collection of disposals', function () {
 });
 
 it('can reverse a collection of disposals', function () {
-    /** @var array<int, SharePoolingTokenDisposal> */
+    /** @var list<SharePoolingTokenDisposal> */
     $items = [
         $disposal1 = SharePoolingTokenDisposal::factory()->make(),
         $disposal2 = SharePoolingTokenDisposal::factory()->make(),
@@ -63,7 +63,7 @@ it('can reverse a collection of disposals', function () {
 });
 
 it('can return the unprocessed disposals from a collection of disposals', function () {
-    /** @var array<int, SharePoolingTokenDisposal> */
+    /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make(),
         $unprocessed1 = SharePoolingTokenDisposal::factory()->unprocessed()->make(),
@@ -79,7 +79,7 @@ it('can return the unprocessed disposals from a collection of disposals', functi
 });
 
 it('can return the disposals with available same-day quantity from a collection of disposals', function () {
-    /** @var array<int, SharePoolingTokenDisposal> */
+    /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
@@ -113,7 +113,7 @@ it('can return the disposals with available same-day quantity from a collection 
 });
 
 it('can return the available same-day quantity from a collection of disposals', function () {
-    /** @var array<int, SharePoolingTokenDisposal> */
+    /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
@@ -144,7 +144,7 @@ it('can return the available same-day quantity from a collection of disposals', 
 });
 
 it('can return the acquisitions with available 30-day quantity from a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenDisposal> */
+    /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),

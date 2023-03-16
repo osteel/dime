@@ -105,7 +105,7 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction impleme
         return $this;
     }
 
-    /** @return array<string, string|int|null|array<string, string>> */
+    /** @return array<string,string|int|null|array<string,string>> */
     public function toPayload(): array
     {
         return [
@@ -118,7 +118,7 @@ final class SharePoolingTokenAcquisition extends SharePoolingTransaction impleme
         ];
     }
 
-    /** @param array<string, string|array<string, string>> $payload */
+    /** @param array<string,string|array<string,string>> $payload */
     public static function fromPayload(array $payload): static
     {
         return (new static(

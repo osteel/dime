@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Domain\ValueObjects;
 
 use Domain\Services\Math\Math;
+use Domain\ValueObjects\Exceptions\QuantityException;
 use Stringable;
 
 final readonly class Quantity implements Stringable
 {
+    /** @throws QuantityException */
     public function __construct(public string $quantity)
     {
+        if (preg_match('/^[+-]?\d+(\.\d+)?$/', $quantity) !== 1) {
+            throw QuantityException::invalidQuantity($quantity);
+        }
     }
 
     public static function zero(): Quantity
@@ -33,59 +38,79 @@ final readonly class Quantity implements Stringable
         return new Quantity($this->quantity);
     }
 
+    public function isPositive(): bool
+    {
+        return Math::gte($this->quantity, '0');
+    }
+
+    public function isNegative(): bool
+    {
+        return Math::lt($this->quantity, '0');
+    }
+
     public function isZero(): bool
     {
         return Math::eq($this->quantity, '0');
     }
 
+    /** @throws QuantityException */
     public function isEqualTo(Quantity | string $quantity): bool
     {
-        return Math::eq($this->quantity, $this->extractValue($quantity));
+        return Math::eq($this->quantity, $this->toQuantity($quantity)->quantity);
     }
 
+    /** @throws QuantityException */
     public function isGreaterThan(Quantity | string $quantity): bool
     {
-        return Math::gt($this->quantity, $this->extractValue($quantity));
+        return Math::gt($this->quantity, $this->toQuantity($quantity)->quantity);
     }
 
+    /** @throws QuantityException */
     public function isGreaterThanOrEqualTo(Quantity | string $quantity): bool
     {
-        return Math::gte($this->quantity, $this->extractValue($quantity));
+        return Math::gte($this->quantity, $this->toQuantity($quantity)->quantity);
     }
 
+    /** @throws QuantityException */
     public function isLessThan(Quantity | string $quantity): bool
     {
-        return Math::lt($this->quantity, $this->extractValue($quantity));
+        return Math::lt($this->quantity, $this->toQuantity($quantity)->quantity);
     }
 
+    /** @throws QuantityException */
     public function isLessThanOrEqualTo(Quantity | string $quantity): bool
     {
-        return Math::lte($this->quantity, $this->extractValue($quantity));
+        return Math::lte($this->quantity, $this->toQuantity($quantity)->quantity);
     }
 
+    /** @throws QuantityException */
     public function plus(Quantity | string $quantity): Quantity
     {
-        return new Quantity(Math::add($this->quantity, $this->extractValue($quantity)));
+        return new Quantity(Math::add($this->quantity, $this->toQuantity($quantity)->quantity));
     }
 
+    /** @throws QuantityException */
     public function minus(Quantity | string $quantity): Quantity
     {
-        return new Quantity(Math::sub($this->quantity, $this->extractValue($quantity)));
+        return new Quantity(Math::sub($this->quantity, $this->toQuantity($quantity)->quantity));
     }
 
+    /** @throws QuantityException */
     public function multipliedBy(Quantity | string $quantity): Quantity
     {
-        return new Quantity(Math::mul($this->quantity, $this->extractValue($quantity)));
+        return new Quantity(Math::mul($this->quantity, $this->toQuantity($quantity)->quantity));
     }
 
+    /** @throws QuantityException */
     public function dividedBy(Quantity | string $quantity): Quantity
     {
-        return new Quantity(Math::div($this->quantity, $this->extractValue($quantity)));
+        return new Quantity(Math::div($this->quantity, $this->toQuantity($quantity)->quantity));
     }
 
-    private function extractValue(Quantity | string $quantity): string
+    /** @throws QuantityException */
+    private function toQuantity(Quantity | string $quantity): Quantity
     {
-        return $quantity instanceof Quantity ? $quantity->quantity : $quantity;
+        return $quantity instanceof Quantity ? $quantity : new self($quantity);
     }
 
     public function __toString(): string

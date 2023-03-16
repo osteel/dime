@@ -23,7 +23,7 @@ it('can make a collection of one acquisition', function () {
 });
 
 it('can make a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make(),
         SharePoolingTokenAcquisition::factory()->make(),
@@ -103,7 +103,7 @@ it('can return the average cost basis per unit of a collection of acquisitions',
 ]);
 
 it('can return the section 104 pool quantity of a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make([
             'quantity' => new Quantity('100'),
@@ -132,7 +132,7 @@ it('can return the section 104 pool quantity of a collection of acquisitions', f
 });
 
 it('can return the section 104 pool cost basis of a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
@@ -165,7 +165,7 @@ it('can return the section 104 pool cost basis of a collection of acquisitions',
 });
 
 it('can return the average section 104 pool cost basis per unit of a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
@@ -198,7 +198,7 @@ it('can return the average section 104 pool cost basis per unit of a collection 
 });
 
 it('can return the acquisitions with available same-day quantity from a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
@@ -232,7 +232,7 @@ it('can return the acquisitions with available same-day quantity from a collecti
 });
 
 it('can return the available same-day quantity from a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
@@ -263,7 +263,7 @@ it('can return the available same-day quantity from a collection of acquisitions
 });
 
 it('can return the acquisitions with available 30-day quantity from a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
@@ -296,7 +296,7 @@ it('can return the acquisitions with available 30-day quantity from a collection
 });
 
 it('can return the acquisitions with 30-day quantity from a collection of acquisitions', function () {
-    /** @var array<int, SharePoolingTokenAcquisition> */
+    /** @var list<SharePoolingTokenAcquisition> */
     $items = [
         SharePoolingTokenAcquisition::factory()->make([
             'costBasis' => new FiatAmount('100', FiatCurrency::GBP),

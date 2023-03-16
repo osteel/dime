@@ -13,7 +13,7 @@ trait AttributesFees
     {
         $amount = $transaction->hasNetworkFee()
             ? $transaction->networkFeeMarketValue
-            : $transaction->marketValue->nilAmount(); // @phpstan-ignore-line
+            : $transaction->marketValue->zero(); // @phpstan-ignore-line
 
         if ($transaction->hasPlatformFee()) {
             $amount = $amount->plus($transaction->platformFeeMarketValue); // @phpstan-ignore-line
