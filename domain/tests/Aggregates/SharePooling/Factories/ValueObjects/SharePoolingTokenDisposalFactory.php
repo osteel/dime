@@ -3,7 +3,6 @@
 namespace Domain\Tests\Aggregates\SharePooling\Factories\ValueObjects;
 
 use Brick\DateTime\LocalDate;
-use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\SharePooling\ValueObjects\QuantityBreakdown;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposal;
@@ -27,8 +26,8 @@ class SharePoolingTokenDisposalFactory extends PlainObjectFactory
         return [
             'date' => LocalDate::parse('2015-10-21'),
             'quantity' => new Quantity('100'),
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
-            'proceeds' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
+            'proceeds' => FiatAmount::GBP('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown(),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
             'processed' => true,

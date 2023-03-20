@@ -1,6 +1,5 @@
 <?php
 
-use Domain\Enums\FiatCurrency;
 use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
 use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
@@ -193,8 +192,8 @@ it('does not dispatch the fees to the share pooling handler when they are zero',
     /** @var Transaction */
     $transaction = Transaction::factory()
         ->$method()
-        ->withNetworkFee(new FiatAmount('0', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('0', FiatCurrency::GBP))
+        ->withNetworkFee(FiatAmount::GBP('0'))
+        ->withPlatformFee(FiatAmount::GBP('0'))
         ->make();
 
     $this->transactionDispatcher->dispatch($transaction);

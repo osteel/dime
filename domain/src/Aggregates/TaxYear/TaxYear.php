@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace Domain\Aggregates\TaxYear;
 
 use Domain\Enums\FiatCurrency;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalLoss;
-use Domain\Aggregates\TaxYear\Actions\RecordIncome;
-use Domain\Aggregates\TaxYear\Actions\RecordNonAttributableAllowableCost;
-use Domain\Aggregates\TaxYear\Actions\RevertCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RevertCapitalLoss;
-use Domain\Aggregates\TaxYear\Events\CapitalGainRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalGainReverted;
-use Domain\Aggregates\TaxYear\Events\CapitalLossRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalLossReverted;
-use Domain\Aggregates\TaxYear\Events\IncomeRecorded;
-use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostRecorded;
+use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
+use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
+use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
+use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
+use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
+use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\Exceptions\TaxYearException;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
@@ -33,7 +29,7 @@ class TaxYear implements AggregateRoot
     use AggregateRootBehaviour;
 
     private ?FiatCurrency $currency = null;
-    private ?FiatAmount $capitalGainOrLoss = null;
+    private ?FiatAmount $capitalGain = null;
     private ?FiatAmount $income = null;
     private ?FiatAmount $nonAttributableAllowableCosts = null;
 
@@ -42,160 +38,106 @@ class TaxYear implements AggregateRoot
         $this->aggregateRootId = TaxYearId::fromString($aggregateRootId->toString());
     }
 
-    public function recordCapitalGain(RecordCapitalGain $action): void
+    public function updateCapitalGain(UpdateCapitalGain $action): void
     {
-        if ($this->currency && $this->currency !== $action->amount->currency) {
-            throw TaxYearException::cannotRecordCapitalGainForDifferentCurrency(
+        if ($this->currencyMismatch($action->capitalGain->currency())) {
+            throw TaxYearException::cannotUpdateCapitalGainFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency,
-                to: $action->amount->currency,
+                from: $this->currency, // @phpstan-ignore-line
+                to: $action->capitalGain->currency(),
             );
         }
 
-        $this->recordThat(new CapitalGainRecorded(
+        $this->recordThat(new CapitalGainUpdated(
             taxYear: $action->taxYear,
             date: $action->date,
-            amount: $action->amount,
-            costBasis: $action->costBasis,
-            proceeds: $action->proceeds,
+            capitalGain: $action->capitalGain,
         ));
     }
 
-    public function applyCapitalGainRecorded(CapitalGainRecorded $event): void
+    public function applyCapitalGainUpdated(CapitalGainUpdated $event): void
     {
-        $this->currency ??= $event->amount->currency;
-        $this->capitalGainOrLoss = $this->capitalGainOrLoss?->plus($event->amount) ?? $event->amount;
+        $this->currency ??= $event->capitalGain->currency();
+        $this->capitalGain = $this->capitalGain?->plus($event->capitalGain->difference) ?? $event->capitalGain->difference;
     }
 
-    public function revertCapitalGain(RevertCapitalGain $action): void
+    public function revertCapitalGainUpdate(RevertCapitalGainUpdate $action): void
     {
-        if (is_null($this->capitalGainOrLoss)) {
-            throw TaxYearException::cannotRevertCapitalGainBeforeCapitalGainIsRecorded(taxYearId: $this->aggregateRootId);
+        if (is_null($this->capitalGain)) {
+            throw TaxYearException::cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(taxYearId: $this->aggregateRootId);
         }
 
-        if ($this->currency && $this->currency !== $action->amount->currency) {
-            throw TaxYearException::cannotRevertCapitalGainFromDifferentCurrency(
+        if ($this->currencyMismatch($action->capitalGain->currency())) {
+            throw TaxYearException::cannotRevertCapitalGainUpdateFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency,
-                to: $action->amount->currency,
+                from: $this->currency, // @phpstan-ignore-line
+                to: $action->capitalGain->currency(),
             );
         }
 
-        $this->recordThat(new CapitalGainReverted(
+        $this->recordThat(new CapitalGainUpdateReverted(
             taxYear: $action->taxYear,
             date: $action->date,
-            amount: $action->amount,
-            costBasis: $action->costBasis,
-            proceeds: $action->proceeds,
+            capitalGain: $action->capitalGain,
         ));
     }
 
-    public function applyCapitalGainReverted(CapitalGainReverted $event): void
+    public function applyCapitalGainUpdateReverted(CapitalGainUpdateReverted $event): void
     {
-        assert(! is_null($this->capitalGainOrLoss));
+        assert(! is_null($this->capitalGain));
 
-        $this->capitalGainOrLoss = $this->capitalGainOrLoss->minus($event->amount);
+        $this->capitalGain = $this->capitalGain->minus($event->capitalGain->difference);
     }
 
-    public function recordCapitalLoss(RecordCapitalLoss $action): void
+    public function updateIncome(UpdateIncome $action): void
     {
-        if ($this->currency && $this->currency !== $action->amount->currency) {
-            throw TaxYearException::cannotRecordCapitalLossForDifferentCurrency(
+        if ($this->currencyMismatch($action->income->currency)) {
+            throw TaxYearException::cannotUpdateIncomeFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency,
-                to: $action->amount->currency,
+                from: $this->currency, // @phpstan-ignore-line
+                to: $action->income->currency,
             );
         }
 
-        $this->recordThat(new CapitalLossRecorded(
+        $this->recordThat(new IncomeUpdated(
             taxYear: $action->taxYear,
             date: $action->date,
-            amount: $action->amount,
-            costBasis: $action->costBasis,
-            proceeds: $action->proceeds,
+            income: $action->income,
         ));
     }
 
-    public function applyCapitalLossRecorded(CapitalLossRecorded $event): void
+    public function applyIncomeUpdated(IncomeUpdated $event): void
     {
-        $this->currency ??= $event->amount->currency;
-        $this->capitalGainOrLoss = $this->capitalGainOrLoss?->minus($event->amount)
-            ?? $event->amount->zero()->minus($event->amount);
+        $this->currency ??= $event->income->currency;
+        $this->income = $this->income?->plus($event->income) ?? $event->income;
     }
 
-    public function revertCapitalLoss(RevertCapitalLoss $action): void
+    public function updateNonAttributableAllowableCost(UpdateNonAttributableAllowableCost $action): void
     {
-        if (is_null($this->capitalGainOrLoss)) {
-            throw TaxYearException::cannotRevertCapitalLossBeforeCapitalLossIsRecorded(taxYearId: $this->aggregateRootId);
-        }
-
-        if ($this->currency && $this->currency !== $action->amount->currency) {
-            throw TaxYearException::cannotRevertCapitalLossFromDifferentCurrency(
+        if ($this->currencyMismatch($action->nonAttributableAllowableCost->currency)) {
+            throw TaxYearException::cannotUpdateNonAttributableAllowableCostFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency,
-                to: $action->amount->currency,
+                from: $this->currency, // @phpstan-ignore-line
+                to: $action->nonAttributableAllowableCost->currency,
             );
         }
 
-        $this->recordThat(new CapitalLossReverted(
+        $this->recordThat(new NonAttributableAllowableCostUpdated(
             taxYear: $action->taxYear,
             date: $action->date,
-            amount: $action->amount,
-            costBasis: $action->costBasis,
-            proceeds: $action->proceeds,
+            nonAttributableAllowableCost: $action->nonAttributableAllowableCost,
         ));
     }
 
-    public function applyCapitalLossReverted(CapitalLossReverted $event): void
+    public function applyNonAttributableAllowableCostUpdated(NonAttributableAllowableCostUpdated $event): void
     {
-        assert(! is_null($this->capitalGainOrLoss));
-
-        $this->capitalGainOrLoss = $this->capitalGainOrLoss->plus($event->amount);
+        $this->currency ??= $event->nonAttributableAllowableCost->currency;
+        $this->nonAttributableAllowableCosts = $this->nonAttributableAllowableCosts?->plus($event->nonAttributableAllowableCost)
+            ?? $event->nonAttributableAllowableCost;
     }
 
-    public function recordIncome(RecordIncome $action): void
+    private function currencyMismatch(FiatCurrency $incoming): bool
     {
-        if ($this->currency && $this->currency !== $action->amount->currency) {
-            throw TaxYearException::cannotRecordIncomeFromDifferentCurrency(
-                taxYearId: $this->aggregateRootId,
-                from: $this->currency,
-                to: $action->amount->currency,
-            );
-        }
-
-        $this->recordThat(new IncomeRecorded(
-            taxYear: $action->taxYear,
-            date: $action->date,
-            amount: $action->amount,
-        ));
-    }
-
-    public function applyIncomeRecorded(IncomeRecorded $event): void
-    {
-        $this->currency ??= $event->amount->currency;
-        $this->income = $this->income?->plus($event->amount) ?? $event->amount;
-    }
-
-    public function recordNonAttributableAllowableCost(RecordNonAttributableAllowableCost $action): void
-    {
-        if ($this->currency && $this->currency !== $action->amount->currency) {
-            throw TaxYearException::cannotRecordNonAttributableAllowableCostFromDifferentCurrency(
-                taxYearId: $this->aggregateRootId,
-                from: $this->currency,
-                to: $action->amount->currency,
-            );
-        }
-
-        $this->recordThat(new NonAttributableAllowableCostRecorded(
-            taxYear: $action->taxYear,
-            date: $action->date,
-            amount: $action->amount,
-        ));
-    }
-
-    public function applyNonAttributableAllowableCostRecorded(NonAttributableAllowableCostRecorded $event): void
-    {
-        $this->currency ??= $event->amount->currency;
-        $this->nonAttributableAllowableCosts = $this->nonAttributableAllowableCosts?->plus($event->amount) ?? $event->amount;
+        return $this->currency && $this->currency !== $incoming;
     }
 }

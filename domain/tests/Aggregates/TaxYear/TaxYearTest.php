@@ -1,19 +1,16 @@
 <?php
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalLoss;
-use Domain\Aggregates\TaxYear\Actions\RecordIncome;
-use Domain\Aggregates\TaxYear\Actions\RecordNonAttributableAllowableCost;
-use Domain\Aggregates\TaxYear\Actions\RevertCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RevertCapitalLoss;
-use Domain\Aggregates\TaxYear\Events\CapitalGainRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalGainReverted;
-use Domain\Aggregates\TaxYear\Events\CapitalLossRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalLossReverted;
-use Domain\Aggregates\TaxYear\Events\IncomeRecorded;
-use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostRecorded;
+use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
+use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
+use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
+use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
+use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
+use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\Exceptions\TaxYearException;
+use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Enums\FiatCurrency;
 use Domain\Tests\Aggregates\TaxYear\TaxYearTestCase;
 use Domain\ValueObjects\FiatAmount;
@@ -21,346 +18,203 @@ use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 
 uses(TaxYearTestCase::class);
 
-it('can record a capital gain', function () {
-    $recordCapitalGain = new RecordCapitalGain(
+it('can update the capital gain', function (string $costBasis, string $proceeds) {
+    $updateCapitalGain = new UpdateCapitalGain(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
     );
 
-    $capitalGainRecorded = new CapitalGainRecorded(
+    $capitalGainUpdated = new CapitalGainUpdated(
         taxYear: $this->taxYear,
-        date: $recordCapitalGain->date,
-        amount: $recordCapitalGain->amount,
-        costBasis: $recordCapitalGain->costBasis,
-        proceeds: $recordCapitalGain->proceeds,
+        date: $updateCapitalGain->date,
+        capitalGain: $updateCapitalGain->capitalGain,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->when($recordCapitalGain)
-        ->then($capitalGainRecorded);
-});
+    $this->when($updateCapitalGain)
+        ->then($capitalGainUpdated);
+})->with([
+    'gain' => ['50', '150'],
+    'loss' => ['150', '50'],
+]);
 
-it('cannot record a capital gain because the currency is different', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(
+it('cannot update the capital gain because the currency is different', function () {
+    $capitalGainUpdated = new CapitalGainUpdated(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(FiatAmount::GBP('50'), FiatAmount::GBP('150')),
     );
 
-    $recordCapitalGain = new RecordCapitalGain(
+    $updateCapitalGain = new UpdateCapitalGain(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(new FiatAmount('50', FiatCurrency::EUR), new FiatAmount('150', FiatCurrency::EUR)),
     );
 
-    $cannotRecordCapitalGain = TaxYearException::cannotRecordCapitalGainForDifferentCurrency(
+    $cannotUpdateCapitalGain = TaxYearException::cannotUpdateCapitalGainFromDifferentCurrency(
         taxYearId: $this->aggregateRootId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($capitalGainRecorded)
-        ->when($recordCapitalGain)
-        ->expectToFail($cannotRecordCapitalGain);
+    $this->given($capitalGainUpdated)
+        ->when($updateCapitalGain)
+        ->expectToFail($cannotUpdateCapitalGain);
 });
 
-it('can revert a capital gain', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(
+it('can revert a capital gain update', function (string $costBasis, string $proceeds) {
+    $capitalGainUpdated = new CapitalGainUpdated(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
     );
 
-    $revertCapitalGain = new RevertCapitalGain(
+    $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
     );
 
-    $capitalGainReverted = new CapitalGainReverted(
+    $capitalGainReverted = new CapitalGainUpdateReverted(
         taxYear: $this->taxYear,
-        date: $revertCapitalGain->date,
-        amount: $revertCapitalGain->amount,
-        costBasis: $revertCapitalGain->costBasis,
-        proceeds: $revertCapitalGain->proceeds,
+        date: $revertCapitalGainUpdate->date,
+        capitalGain: $revertCapitalGainUpdate->capitalGain,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($capitalGainRecorded)
-        ->when($revertCapitalGain)
+    $this->given($capitalGainUpdated)
+        ->when($revertCapitalGainUpdate)
         ->then($capitalGainReverted);
-});
+})->with([
+    'gain' => ['50', '150'],
+    'loss' => ['150', '50'],
+]);
 
-it('cannot revert a capital gain before a capital gain was recorded', function () {
-    $revertCapitalGain = new RevertCapitalGain(
+it('cannot revert a capital gain update before the capital gain was updated', function () {
+    $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(FiatAmount::GBP('50'), FiatAmount::GBP('150')),
     );
 
-    $cannotRevertCapitalGain = TaxYearException::cannotRevertCapitalGainBeforeCapitalGainIsRecorded(
+    $cannotRevertCapitalGain = TaxYearException::cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(
         taxYearId: $this->aggregateRootId,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->when($revertCapitalGain)
+    $this->when($revertCapitalGainUpdate)
         ->expectToFail($cannotRevertCapitalGain);
 });
 
-it('cannot revert a capital gain because the currency is different', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(
+it('cannot revert a capital gain update because the currency is different', function () {
+    $capitalGainUpdated = new CapitalGainUpdated(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(FiatAmount::GBP('50'), FiatAmount::GBP('150')),
     );
 
-    $revertCapitalGain = new RevertCapitalGain(
+    $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(new FiatAmount('50', FiatCurrency::EUR), new FiatAmount('150', FiatCurrency::EUR)),
     );
 
-    $cannotRevertCapitalGain = TaxYearException::cannotRevertCapitalGainFromDifferentCurrency(
+    $cannotRevertCapitalGainUpdate = TaxYearException::cannotRevertCapitalGainUpdateFromDifferentCurrency(
         taxYearId: $this->aggregateRootId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($capitalGainRecorded)
-        ->when($revertCapitalGain)
-        ->expectToFail($cannotRevertCapitalGain);
+    $this->given($capitalGainUpdated)
+        ->when($revertCapitalGainUpdate)
+        ->expectToFail($cannotRevertCapitalGainUpdate);
 });
 
-it('can record a capital loss', function () {
-    $recordCapitalLoss = new RecordCapitalLoss(
+it('can update the income', function () {
+    $updateIncome = new UpdateIncome(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        income: FiatAmount::GBP('100'),
     );
 
-    $capitalLossRecorded = new CapitalLossRecorded(
+    $incomeUpdated = new IncomeUpdated(
         taxYear: $this->taxYear,
-        date: $recordCapitalLoss->date,
-        amount: $recordCapitalLoss->amount,
-        costBasis: $recordCapitalLoss->costBasis,
-        proceeds: $recordCapitalLoss->proceeds,
+        date: $updateIncome->date,
+        income: $updateIncome->income,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->when($recordCapitalLoss)
-        ->then($capitalLossRecorded);
+    $this->when($updateIncome)
+        ->then($incomeUpdated);
 });
 
-it('cannot record a capital loss because the currency is different', function () {
-    $capitalLossRecorded = new CapitalLossRecorded(
+it('cannot update the income because the currency is different', function () {
+    $incomeUpdated = new IncomeUpdated(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        income: FiatAmount::GBP('100'),
     );
 
-    $recordCapitalLoss = new RecordCapitalLoss(
+    $updateIncome = new UpdateIncome(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        income: new FiatAmount('100', FiatCurrency::EUR),
     );
 
-    $cannotRecordCapitalLoss = TaxYearException::cannotRecordCapitalLossForDifferentCurrency(
+    $cannotUpdateIncome = TaxYearException::cannotUpdateIncomeFromDifferentCurrency(
         taxYearId: $this->aggregateRootId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($capitalLossRecorded)
-        ->when($recordCapitalLoss)
-        ->expectToFail($cannotRecordCapitalLoss);
+    $this->given($incomeUpdated)
+        ->when($updateIncome)
+        ->expectToFail($cannotUpdateIncome);
 });
 
-it('can revert a capital loss', function () {
-    $capitalLossRecorded = new CapitalLossRecorded(
+it('can update the non-attributable allowable cost', function () {
+    $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        nonAttributableAllowableCost: FiatAmount::GBP('100'),
     );
 
-    $revertCapitalLoss = new RevertCapitalLoss(
+    $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
         taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
-    );
-
-    $capitalLossReverted = new CapitalLossReverted(
-        taxYear: $this->taxYear,
-        date: $revertCapitalLoss->date,
-        amount: $revertCapitalLoss->amount,
-        costBasis: $revertCapitalLoss->costBasis,
-        proceeds: $revertCapitalLoss->proceeds,
+        date: $updateNonAttributableAllowableCost->date,
+        nonAttributableAllowableCost: $updateNonAttributableAllowableCost->nonAttributableAllowableCost,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($capitalLossRecorded)
-        ->when($revertCapitalLoss)
-        ->then($capitalLossReverted);
+    $this->when($updateNonAttributableAllowableCost)
+        ->then($nonAttributableAllowableCostUpdated);
 });
 
-it('cannot revert a capital loss before a capital loss was recorded', function () {
-    $revertCapitalLoss = new RevertCapitalLoss(
+it('cannot update the non-attributable allowable cost because the currency is different', function () {
+    $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        nonAttributableAllowableCost: FiatAmount::GBP('100'),
     );
 
-    $cannotRevertCapitalLoss = TaxYearException::cannotRevertCapitalLossBeforeCapitalLossIsRecorded(
-        taxYearId: $this->aggregateRootId,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->when($revertCapitalLoss)
-        ->expectToFail($cannotRevertCapitalLoss);
-});
-
-it('cannot revert a capital loss because the currency is different', function () {
-    $capitalLossRecorded = new CapitalLossRecorded(
+    $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        nonAttributableAllowableCost: new FiatAmount('100', FiatCurrency::EUR),
     );
 
-    $revertCapitalLoss = new RevertCapitalLoss(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
-    );
-
-    $cannotRevertCapitalLoss = TaxYearException::cannotRevertCapitalLossFromDifferentCurrency(
+    $cannotUpdateNonAttributableAllowableCost = TaxYearException::cannotUpdateNonAttributableAllowableCostFromDifferentCurrency(
         taxYearId: $this->aggregateRootId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($capitalLossRecorded)
-        ->when($revertCapitalLoss)
-        ->expectToFail($cannotRevertCapitalLoss);
-});
-
-it('can record some income', function () {
-    $recordIncome = new RecordIncome(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-    );
-
-    $incomeRecorded = new IncomeRecorded(
-        taxYear: $this->taxYear,
-        date: $recordIncome->date,
-        amount: $recordIncome->amount,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->when($recordIncome)
-        ->then($incomeRecorded);
-});
-
-it('cannot record some income because the currency is different', function () {
-    $incomeRecorded = new IncomeRecorded(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-    );
-
-    $recordIncome = new RecordIncome(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-    );
-
-    $cannotRecordIncome = TaxYearException::cannotRecordIncomeFromDifferentCurrency(
-        taxYearId: $this->aggregateRootId,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($incomeRecorded)
-        ->when($recordIncome)
-        ->expectToFail($cannotRecordIncome);
-});
-
-it('can record a non-attributable allowable cost', function () {
-    $recordNonAttributableAllowableCost = new RecordNonAttributableAllowableCost(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-    );
-
-    $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
-        taxYear: $this->taxYear,
-        date: $recordNonAttributableAllowableCost->date,
-        amount: $recordNonAttributableAllowableCost->amount,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->when($recordNonAttributableAllowableCost)
-        ->then($nonAttributableAllowableCostRecorded);
-});
-
-it('cannot record a non-attributable allowable cost because the currency is different', function () {
-    $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-    );
-
-    $recordNonAttributableAllowableCost = new RecordNonAttributableAllowableCost(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::EUR),
-    );
-
-    $cannotRecordNonAttributableAllowableCost = TaxYearException::cannotRecordNonAttributableAllowableCostFromDifferentCurrency(
-        taxYearId: $this->aggregateRootId,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($nonAttributableAllowableCostRecorded)
-        ->when($recordNonAttributableAllowableCost)
-        ->expectToFail($cannotRecordNonAttributableAllowableCost);
+    $this->given($nonAttributableAllowableCostUpdated)
+        ->when($updateNonAttributableAllowableCost)
+        ->expectToFail($cannotUpdateNonAttributableAllowableCost);
 });

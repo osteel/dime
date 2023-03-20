@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Domain\Aggregates\Nft\Reactors;
 
 use Domain\Aggregates\Nft\Events\NftDisposedOf;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalLoss;
+use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use EventSauce\EventSourcing\EventConsumption\EventConsumer;
 use EventSauce\EventSourcing\Message;
 
@@ -25,23 +25,11 @@ final class NftReactor extends EventConsumer
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
-        if ($event->proceeds->isGreaterThan($event->costBasis)) {
-            $taxYearAggregate->recordCapitalGain(new RecordCapitalGain(
-                taxYear: $taxYear,
-                date: $event->date,
-                amount: $event->proceeds->minus($event->costBasis),
-                costBasis: $event->costBasis,
-                proceeds: $event->proceeds,
-            ));
-        } else {
-            $taxYearAggregate->recordCapitalLoss(new RecordCapitalLoss(
-                taxYear: $taxYear,
-                date: $event->date,
-                amount: $event->costBasis->minus($event->proceeds),
-                costBasis: $event->costBasis,
-                proceeds: $event->proceeds,
-            ));
-        }
+        $taxYearAggregate->updateCapitalGain(new UpdateCapitalGain(
+            taxYear: $taxYear,
+            date: $event->date,
+            capitalGain: new CapitalGain($event->costBasis, $event->proceeds),
+        ));
 
         $this->taxYearRepository->save($taxYearAggregate);
     }

@@ -12,12 +12,10 @@ use Domain\Aggregates\SharePooling\Events\SharePoolingTokenDisposalReverted;
 use Domain\Aggregates\SharePooling\Events\SharePoolingTokenDisposedOf;
 use Domain\Aggregates\SharePooling\SharePooling;
 use Domain\Aggregates\SharePooling\SharePoolingId;
-use Domain\Aggregates\TaxYear\Events\CapitalGainRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalGainReverted;
-use Domain\Aggregates\TaxYear\Events\CapitalLossRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalLossReverted;
-use Domain\Aggregates\TaxYear\Events\IncomeRecorded;
-use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostRecorded;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
+use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
+use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\Aggregates\TaxYear\TaxYearId;
 
@@ -35,11 +33,9 @@ return [
         SharePoolingTokenDisposedOf::class => 'share_pooling.share_pooling_disposed_of',
         TaxYear::class => 'tax_year.tax_year',
         TaxYearId::class => 'tax_year.tax_year_id',
-        CapitalGainRecorded::class => 'tax_year.capital_gain_recorded',
-        CapitalGainReverted::class => 'tax_year.capital_gain_reverted',
-        CapitalLossRecorded::class => 'tax_year.capital_loss_recorded',
-        CapitalLossReverted::class => 'tax_year.capital_loss_reverted',
-        IncomeRecorded::class => 'tax_year.income_recorded',
-        NonAttributableAllowableCostRecorded::class => 'tax_year.non_attributable_allowable_cost_recorded',
+        CapitalGainUpdated::class => 'tax_year.capital_gain_updated',
+        CapitalGainUpdateReverted::class => 'tax_year.capital_gain_update_reverted',
+        IncomeUpdated::class => 'tax_year.income_updated',
+        NonAttributableAllowableCostUpdated::class => 'tax_year.non_attributable_allowable_cost_updated',
     ],
 ];

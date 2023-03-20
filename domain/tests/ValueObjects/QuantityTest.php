@@ -56,6 +56,13 @@ it('can copy a quantity', function (string $quantity) {
     expect($quantity2)->not->toBe($quantity1);
 })->with(['1', '-1']);
 
+it('can return the opposite of a quantity', function (string $from, string $to) {
+    expect((new Quantity($from))->opposite()->quantity)->toBe($to);
+})->with([
+    'positive' => ['1', '-1'],
+    'negative' => ['-1', '1'],
+]);
+
 it('can tell whether a quantity is positive', function (string $quantity, bool $result) {
     expect((new Quantity($quantity))->isPositive())->toBe($result);
 })->with([

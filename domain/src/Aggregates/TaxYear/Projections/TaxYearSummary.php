@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\TaxYear\Projections;
 
+use Domain\Aggregates\TaxYear\Projections\Exceptions\TaxYearSummaryException;
 use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -15,9 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property TaxYearId $tax_year_id
  * @property string $tax_year
  * @property FiatCurrency $currency
- * @property FiatAmount $capital_gain
- * @property FiatAmount $capital_cost_basis
- * @property FiatAmount $capital_proceeds
+ * @property CapitalGain $capital_gain
  * @property FiatAmount $income
  * @property FiatAmount $non_attributable_allowable_costs
  * @method static self firstOrNew($attributes = [], $values = [])
@@ -40,55 +40,18 @@ final class TaxYearSummary extends Model
     protected static $unguarded = true;
 
     /** @throws FiatAmountException */
-    public function increaseCapitalGain(FiatAmount $amount): self
+    public function updateCapitalGain(CapitalGain $capitalGain): self
     {
-        $this->capital_gain = $this->capital_gain->plus($amount);
+        $this->capital_gain = new CapitalGain(
+            costBasis: $this->capital_gain->costBasis->plus($capitalGain->costBasis),
+            proceeds: $this->capital_gain->proceeds->plus($capitalGain->proceeds),
+        );
 
         return $this;
     }
 
     /** @throws FiatAmountException */
-    public function decreaseCapitalGain(FiatAmount $amount): self
-    {
-        $this->capital_gain = $this->capital_gain->minus($amount);
-
-        return $this;
-    }
-
-    /** @throws FiatAmountException */
-    public function increaseCapitalCostBasis(FiatAmount $amount): self
-    {
-        $this->capital_cost_basis = $this->capital_cost_basis->plus($amount);
-
-        return $this;
-    }
-
-    /** @throws FiatAmountException */
-    public function decreaseCapitalCostBasis(FiatAmount $amount): self
-    {
-        $this->capital_cost_basis = $this->capital_cost_basis->minus($amount);
-
-        return $this;
-    }
-
-    /** @throws FiatAmountException */
-    public function increaseCapitalProceeds(FiatAmount $amount): self
-    {
-        $this->capital_proceeds = $this->capital_proceeds->plus($amount);
-
-        return $this;
-    }
-
-    /** @throws FiatAmountException */
-    public function decreaseCapitalProceeds(FiatAmount $amount): self
-    {
-        $this->capital_proceeds = $this->capital_proceeds->minus($amount);
-
-        return $this;
-    }
-
-    /** @throws FiatAmountException */
-    public function increaseIncome(FiatAmount $amount): self
+    public function updateIncome(FiatAmount $amount): self
     {
         $this->income = $this->income->plus($amount);
 
@@ -96,7 +59,7 @@ final class TaxYearSummary extends Model
     }
 
     /** @throws FiatAmountException */
-    public function increaseNonAttributableAllowableCosts(FiatAmount $amount): self
+    public function updateNonAttributableAllowableCosts(FiatAmount $amount): self
     {
         $this->non_attributable_allowable_costs = $this->non_attributable_allowable_costs->plus($amount);
 
@@ -119,27 +82,23 @@ final class TaxYearSummary extends Model
         );
     }
 
+    /** @throws TaxYearSummaryException */
     protected function capitalGain(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => new FiatAmount($value ?? '0', $this->currency),
-            set: fn (FiatAmount $value) => (string) $value->quantity,
-        );
-    }
+            get: function (?string $value) {
+                $values = is_null($value) ? [] : json_decode($value, true);
 
-    protected function capitalCostBasis(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => new FiatAmount($value ?? '0', $this->currency),
-            set: fn (FiatAmount $value) => (string) $value->quantity,
-        );
-    }
+                if (! is_array($values)) {
+                    throw TaxYearSummaryException::invalidCapitalGainValues($value);
+                }
 
-    protected function capitalProceeds(): Attribute
-    {
-        return Attribute::make(
-            get: fn (?string $value) => new FiatAmount($value ?? '0', $this->currency),
-            set: fn (FiatAmount $value) => (string) $value->quantity,
+                return new CapitalGain(
+                    costBasis: new FiatAmount($values['cost_basis'] ?? '0', $this->currency),
+                    proceeds: new FiatAmount($values['proceeds'] ?? '0', $this->currency),
+                );
+            },
+            set: fn (CapitalGain $value) => json_encode($value),
         );
     }
 

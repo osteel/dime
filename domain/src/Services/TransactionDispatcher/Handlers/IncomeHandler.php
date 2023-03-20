@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Services\TransactionDispatcher\Handlers;
 
-use Domain\Aggregates\TaxYear\Actions\RecordIncome;
+use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
@@ -26,10 +26,10 @@ class IncomeHandler
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
-        $taxYearAggregate->recordIncome(new RecordIncome(
+        $taxYearAggregate->updateIncome(new UpdateIncome(
             taxYear: $taxYear,
             date: $transaction->date,
-            amount: $transaction->marketValue, // @phpstan-ignore-line
+            income: $transaction->marketValue, // @phpstan-ignore-line
         ));
 
         $this->taxYearRepository->save($taxYearAggregate);

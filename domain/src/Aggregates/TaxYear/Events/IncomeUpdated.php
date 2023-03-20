@@ -8,33 +8,32 @@ use Brick\DateTime\LocalDate;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-abstract class TaxYearEvent implements SerializablePayload
+final class IncomeUpdated implements SerializablePayload
 {
     public function __construct(
         public readonly string $taxYear,
         public readonly LocalDate $date,
-        public readonly FiatAmount $amount,
+        public readonly FiatAmount $income,
     ) {
     }
 
-    /** @return array<string,string|array<string,string>> */
+    /** @return array{tax_year:string,date:string,income:array{quantity:string,currency:string}} */
     public function toPayload(): array
     {
         return [
             'tax_year' => $this->taxYear,
             'date' => $this->date->__toString(),
-            'amount' => $this->amount->toPayload(),
+            'income' => $this->income->toPayload(),
         ];
     }
 
-    /** @param array<string,string|array<string,string>> $payload */
+    /** @param array{tax_year:string,date:string,income:array{quantity:string,currency:string}} $payload */
     public static function fromPayload(array $payload): static
     {
-        // @phpstan-ignore-next-line
-        return new static(
+        return new self(
             $payload['tax_year'],
-            LocalDate::parse($payload['date']), // @phpstan-ignore-line
-            FiatAmount::fromPayload($payload['amount']), // @phpstan-ignore-line
+            LocalDate::parse($payload['date']),
+            FiatAmount::fromPayload($payload['income']),
         );
     }
 }

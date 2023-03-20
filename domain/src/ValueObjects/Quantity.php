@@ -38,6 +38,13 @@ final readonly class Quantity implements Stringable
         return new Quantity($this->quantity);
     }
 
+    public function opposite(): Quantity
+    {
+        $newQuantity = str_starts_with($this->quantity, '-') ? ltrim($this->quantity, '-') : '-' . $this->quantity;
+
+        return new Quantity($newQuantity);
+    }
+
     public function isPositive(): bool
     {
         return Math::gte($this->quantity, '0');

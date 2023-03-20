@@ -15,94 +15,60 @@ final class TaxYearException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function cannotRecordCapitalGainForDifferentCurrency(
+    public static function cannotUpdateCapitalGainFromDifferentCurrency(
         TaxYearId $taxYearId,
         FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Cannot record capital gain for tax year %s because the currencies don\'t match (from %s to %s)',
+            'Cannot update capital gain for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
             $from->name(),
             $to->name(),
         ));
     }
 
-    public static function cannotRevertCapitalGainBeforeCapitalGainIsRecorded(TaxYearId $taxYearId): self
+    public static function cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(TaxYearId $taxYearId): self
     {
         return new self(sprintf(
-            'Cannot revert capital gain for tax year %s because no capital gain or loss was recorded yet',
+            'Cannot revert capital gain update for tax year %s because the capital gain has not been updated yet',
             $taxYearId->toString(),
         ));
     }
 
-    public static function cannotRevertCapitalGainFromDifferentCurrency(
+    public static function cannotRevertCapitalGainUpdateFromDifferentCurrency(
         TaxYearId $taxYearId,
         FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Cannot revert capital gain for tax year %s because the currencies don\'t match (from %s to %s)',
+            'Cannot revert capital gain update for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
             $from->name(),
             $to->name(),
         ));
     }
 
-    public static function cannotRecordCapitalLossForDifferentCurrency(
+    public static function cannotUpdateIncomeFromDifferentCurrency(
         TaxYearId $taxYearId,
         FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Cannot record capital loss for tax year %s because the currencies don\'t match (from %s to %s)',
+            'Cannot update the income for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
             $from->name(),
             $to->name(),
         ));
     }
 
-    public static function cannotRevertCapitalLossBeforeCapitalLossIsRecorded(TaxYearId $taxYearId): self
-    {
-        return new self(sprintf(
-            'Cannot revert capital loss for tax year %s because no capital gain or loss was recorded yet',
-            $taxYearId->toString(),
-        ));
-    }
-
-    public static function cannotRevertCapitalLossFromDifferentCurrency(
+    public static function cannotUpdateNonAttributableAllowableCostFromDifferentCurrency(
         TaxYearId $taxYearId,
         FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Cannot revert capital loss for tax year %s because the currencies don\'t match (from %s to %s)',
-            $taxYearId->toString(),
-            $from->name(),
-            $to->name(),
-        ));
-    }
-
-    public static function cannotRecordIncomeFromDifferentCurrency(
-        TaxYearId $taxYearId,
-        FiatCurrency $from,
-        FiatCurrency $to
-    ): self {
-        return new self(sprintf(
-            'Cannot record some income for tax year %s because the currencies don\'t match (from %s to %s)',
-            $taxYearId->toString(),
-            $from->name(),
-            $to->name(),
-        ));
-    }
-
-    public static function cannotRecordNonAttributableAllowableCostFromDifferentCurrency(
-        TaxYearId $taxYearId,
-        FiatCurrency $from,
-        FiatCurrency $to
-    ): self {
-        return new self(sprintf(
-            'Cannot record a non-attributable allowable cost for tax year %s because the currencies don\'t match (from %s to %s)',
+            'Cannot update the non-attributable allowable cost for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
             $from->name(),
             $to->name(),

@@ -1,6 +1,5 @@
 <?php
 
-use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\SharePooling\ValueObjects\QuantityBreakdown;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposals;
@@ -82,22 +81,22 @@ it('can return the disposals with available same-day quantity from a collection 
     /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('100')]),
         ]),
         $disposal1 = SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('10'), new Quantity('10')]),
         ]),
         $disposal2 = SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('90')]),
         ]),
         $disposal3 = SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
@@ -116,22 +115,22 @@ it('can return the available same-day quantity from a collection of disposals', 
     /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('100')]),
         ]),
         SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('10')]),
         ]),
         SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('80'), new Quantity('10')]),
         ]),
         SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('40'), new Quantity('10')]),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
@@ -147,22 +146,22 @@ it('can return the acquisitions with available 30-day quantity from a collection
     /** @var list<SharePoolingTokenDisposal> */
     $items = [
         SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('90'), new Quantity('10')]),
         ]),
         $disposal1 = SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('10')]),
         ]),
         $disposal2 = SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('90')]),
         ]),
         SharePoolingTokenDisposal::factory()->make([
-            'costBasis' => new FiatAmount('100', FiatCurrency::GBP),
+            'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
             'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
             'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('40'), new Quantity('10')]),

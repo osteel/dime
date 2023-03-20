@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Services\TransactionDispatcher\Handlers;
 
-use Domain\Aggregates\TaxYear\Actions\RecordNonAttributableAllowableCost;
+use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
@@ -31,18 +31,18 @@ class TransferHandler
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
         if ($transaction->networkFeeMarketValue?->isGreaterThan('0')) {
-            $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
+            $taxYearAggregate->updateNonAttributableAllowableCost(new UpdateNonAttributableAllowableCost(
                 taxYear: $taxYear,
                 date: $transaction->date,
-                amount: $transaction->networkFeeMarketValue,
+                nonAttributableAllowableCost: $transaction->networkFeeMarketValue,
             ));
         }
 
         if ($transaction->platformFeeMarketValue?->isGreaterThan('0')) {
-            $taxYearAggregate->recordNonAttributableAllowableCost(new RecordNonAttributableAllowableCost(
+            $taxYearAggregate->updateNonAttributableAllowableCost(new UpdateNonAttributableAllowableCost(
                 taxYear: $taxYear,
                 date: $transaction->date,
-                amount: $transaction->platformFeeMarketValue,
+                nonAttributableAllowableCost: $transaction->platformFeeMarketValue,
             ));
         }
 

@@ -2,12 +2,10 @@
 
 namespace Domain\Tests\Aggregates\TaxYear;
 
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalLoss;
-use Domain\Aggregates\TaxYear\Actions\RecordIncome;
-use Domain\Aggregates\TaxYear\Actions\RecordNonAttributableAllowableCost;
-use Domain\Aggregates\TaxYear\Actions\RevertCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RevertCapitalLoss;
+use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
+use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
+use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
+use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
 use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Tests\AggregateRootTestCase;
@@ -32,12 +30,10 @@ abstract class TaxYearTestCase extends AggregateRootTestCase
         $taxYear = $this->repository->retrieve($this->aggregateRootId);
 
         match ($action::class) {
-            RecordCapitalGain::class => $taxYear->recordCapitalGain($action),
-            RevertCapitalGain::class => $taxYear->revertCapitalGain($action),
-            RecordCapitalLoss::class => $taxYear->recordCapitalLoss($action),
-            RevertCapitalLoss::class => $taxYear->revertCapitalLoss($action),
-            RecordIncome::class => $taxYear->recordIncome($action),
-            RecordNonAttributableAllowableCost::class => $taxYear->recordNonAttributableAllowableCost($action),
+            UpdateCapitalGain::class => $taxYear->updateCapitalGain($action),
+            RevertCapitalGainUpdate::class => $taxYear->revertCapitalGainUpdate($action),
+            UpdateIncome::class => $taxYear->updateIncome($action),
+            UpdateNonAttributableAllowableCost::class => $taxYear->updateNonAttributableAllowableCost($action),
         };
 
         $this->repository->persist($taxYear);

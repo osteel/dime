@@ -16,9 +16,7 @@ return new class () extends Migration {
             $table->uuid('tax_year_id')->primary();
             $table->string('tax_year', 9);
             $table->string('currency', 3);
-            $table->string('capital_gain')->default('0');
-            $table->string('capital_cost_basis')->default('0');
-            $table->string('capital_proceeds')->default('0');
+            $table->json('capital_gain')->default('{"cost_basis":"0","proceeds":"0","difference":"0"}');
             $table->string('income')->default('0');
             $table->string('non_attributable_allowable_costs')->default('0');
         });
