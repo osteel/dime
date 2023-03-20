@@ -85,6 +85,18 @@ final class Math
     }
 
     /**
+     * Round the number to the specified number of decimal places.
+     *
+     * @throws MathException
+     */
+    public static function rnd(string $number, int $precision = null): string
+    {
+        $operand = bcpow('10', self::add((string) $precision, '1'));
+
+        return bcdiv(bcadd(bcmul($number, $operand, 0), self::lt($number, '0') ? '-5' : '5'), $operand, $precision);
+    }
+
+    /**
      * Whether the terms are equal.
      *
      * @throws MathException

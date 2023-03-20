@@ -187,3 +187,15 @@ it('can divide a quantity by another one', function (string $quantity1, string $
     'scenario 3' => ['-2', '2', '-1'],
     'scenario 4' => ['-1', '-1', '1'],
 ]);
+
+it('can round a quantity', function (string $quantity, int $precision, string $result) {
+    expect((new Quantity($quantity))->round($precision)->quantity)->toBe($result);
+})->with([
+    'scenario 1' => ['1', 0, '1'],
+    'scenario 2' => ['1', 1, '1.0'],
+    'scenario 3' => ['1.24', 1, '1.2'],
+    'scenario 4' => ['1.26', 1, '1.3'],
+    'scenario 5' => ['1.25', 1, '1.3'],
+    'scenario 6' => ['1.25', 3, '1.250'],
+    'scenario 7' => ['-1.11111', 4, '-1.1111'],
+]);

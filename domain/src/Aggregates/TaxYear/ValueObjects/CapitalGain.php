@@ -47,7 +47,7 @@ final readonly class CapitalGain implements JsonSerializable, SerializablePayloa
         return $this->difference->currency;
     }
 
-    /** @return array{cost_basis:string,proceeds:string} */
+    /** @return array{cost_basis:string,proceeds:string,difference:string} */
     public function jsonSerialize(): array
     {
         return [

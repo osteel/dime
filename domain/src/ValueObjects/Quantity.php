@@ -115,6 +115,12 @@ final readonly class Quantity implements Stringable
     }
 
     /** @throws QuantityException */
+    public function round(int $precision): Quantity
+    {
+        return new Quantity(Math::rnd($this->quantity, $precision));
+    }
+
+    /** @throws QuantityException */
     private function toQuantity(Quantity | string $quantity): Quantity
     {
         return $quantity instanceof Quantity ? $quantity : new self($quantity);
