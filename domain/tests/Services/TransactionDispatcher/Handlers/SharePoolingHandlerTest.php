@@ -4,7 +4,6 @@ use Domain\Aggregates\SharePooling\Actions\AcquireSharePoolingToken;
 use Domain\Aggregates\SharePooling\Actions\DisposeOfSharePoolingToken;
 use Domain\Aggregates\SharePooling\Repositories\SharePoolingRepository;
 use Domain\Aggregates\SharePooling\SharePooling;
-use Domain\Enums\FiatCurrency;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\SharePoolingHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\ValueObjects\FiatAmount;
@@ -21,7 +20,7 @@ it('can handle a receive operation', function () {
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Transaction::factory()->receive()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->receive()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -39,15 +38,15 @@ it('can handle a receive operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->receive()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
-        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
     $sharePooling->shouldHaveReceived(
         'acquire',
-        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(new FiatAmount('60', FiatCurrency::GBP)),
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
 });
 
@@ -57,7 +56,7 @@ it('can handle a send operation', function () {
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Transaction::factory()->send()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->send()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -75,15 +74,15 @@ it('can handle a send operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->send()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
-        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
     $sharePooling->shouldHaveReceived(
         'disposeOf',
-        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(new FiatAmount('40', FiatCurrency::GBP)),
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();
 });
 
@@ -93,7 +92,7 @@ it('can handle a swap operation where the received asset is not a NFT', function
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Transaction::factory()->swapFromNft()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swapFromNft()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -109,7 +108,7 @@ it('can handle a swap operation where the sent asset is not a NFT', function () 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Transaction::factory()->swapToNft()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swapToNft()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -125,7 +124,7 @@ it('can handle a swap operation where neither asset is a NFT', function () {
     $this->sharePoolingRepository->shouldReceive('get')->twice()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->twice()->with($sharePooling);
 
-    $transaction = Transaction::factory()->swap()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swap()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -146,7 +145,7 @@ it('can handle a swap operation where the received asset is some fiat currency',
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Transaction::factory()->swapToFiat()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swapToFiat()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -164,7 +163,7 @@ it('can handle a swap operation where the sent asset is some fiat currency', fun
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Transaction::factory()->swapFromFiat()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->swapFromFiat()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -184,20 +183,20 @@ it('can handle a swap operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->swap()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
-        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
     $sharePooling->shouldHaveReceived(
         'disposeOf',
-        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(new FiatAmount('45', FiatCurrency::GBP)),
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(FiatAmount::GBP('45')),
     )->once();
 
     $sharePooling->shouldHaveReceived(
         'acquire',
-        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(new FiatAmount('55', FiatCurrency::GBP)),
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(FiatAmount::GBP('55')),
     )->once();
 });
 
@@ -209,15 +208,15 @@ it('can handle a swap operation with fees where the received asset is some fiat 
 
     $transaction = Transaction::factory()
         ->swapToFiat()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
-        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
     $sharePooling->shouldHaveReceived(
         'disposeOf',
-        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(new FiatAmount('40', FiatCurrency::GBP)),
+        fn (DisposeOfSharePoolingToken $action) => $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();
 
     $sharePooling->shouldNotHaveReceived('acquire');
@@ -231,15 +230,15 @@ it('can handle a swap operation with fees where the sent asset is some fiat curr
 
     $transaction = Transaction::factory()
         ->swapFromFiat()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
-        ->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
     $sharePooling->shouldHaveReceived(
         'acquire',
-        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(new FiatAmount('60', FiatCurrency::GBP)),
+        fn (AcquireSharePoolingToken $action) => $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
 
     $sharePooling->shouldNotHaveReceived('disposeOf');

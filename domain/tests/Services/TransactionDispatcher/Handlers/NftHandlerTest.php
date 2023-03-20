@@ -6,7 +6,6 @@ use Domain\Aggregates\Nft\Actions\DisposeOfNft;
 use Domain\Aggregates\Nft\Actions\IncreaseNftCostBasis;
 use Domain\Aggregates\Nft\Repositories\NftRepository;
 use Domain\Aggregates\Nft\Nft;
-use Domain\Enums\FiatCurrency;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NftHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
 use Domain\ValueObjects\FiatAmount;
@@ -26,7 +25,7 @@ it('can handle a receive operation', function () {
     /** @var Transaction */
     $transaction = Transaction::factory()->receiveNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => FiatAmount::GBP('50'),
     ]);
 
     $this->nftHandler->handle($transaction);
@@ -47,11 +46,11 @@ it('can handle a receive operation with fees', function () {
     /** @var Transaction */
     $transaction = Transaction::factory()
         ->receiveNft()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
-            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+            'marketValue' => FiatAmount::GBP('50'),
         ]);
 
     $this->nftHandler->handle($transaction);
@@ -59,7 +58,7 @@ it('can handle a receive operation with fees', function () {
     $nft->shouldHaveReceived(
         'acquire',
         fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->costBasis->isEqualTo(new FiatAmount('60', FiatCurrency::GBP)),
+            && $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
 });
 
@@ -71,7 +70,7 @@ it('can handle a send operation', function () {
 
     $transaction = Transaction::factory()->sendNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => FiatAmount::GBP('50'),
     ]);
 
     $this->nftHandler->handle($transaction);
@@ -91,11 +90,11 @@ it('can handle a send operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->sendNft()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
-            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+            'marketValue' => FiatAmount::GBP('50'),
         ]);
 
     $this->nftHandler->handle($transaction);
@@ -103,7 +102,7 @@ it('can handle a send operation with fees', function () {
     $nft->shouldHaveReceived(
         'disposeOf',
         fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->proceeds->isEqualTo(new FiatAmount('40', FiatCurrency::GBP)),
+            && $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();
 });
 
@@ -115,7 +114,7 @@ it('can handle a swap operation where the received asset is a NFT', function () 
 
     $transaction = Transaction::factory()->swapToNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => FiatAmount::GBP('50'),
     ]);
 
     $this->nftHandler->handle($transaction);
@@ -135,7 +134,7 @@ it('can handle a swap operation where the sent asset is a NFT', function () {
 
     $transaction = Transaction::factory()->swapFromNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => FiatAmount::GBP('50'),
     ]);
 
     $this->nftHandler->handle($transaction);
@@ -155,7 +154,7 @@ it('can handle a swap operation where both assets are NFTs', function () {
 
     $transaction = Transaction::factory()->swapNfts()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => FiatAmount::GBP('50'),
     ]);
 
     $this->nftHandler->handle($transaction);
@@ -181,7 +180,7 @@ it('can handle a swap operation where both assets are NFTs and the received NFT 
 
     $transaction = Transaction::factory()->swapNfts()->make([
         'date' => LocalDate::parse('2015-10-21'),
-        'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+        'marketValue' => FiatAmount::GBP('50'),
     ]);
 
     $nft->shouldReceive('isAlreadyAcquired')->andReturn(true)->once();
@@ -209,11 +208,11 @@ it('can handle a swap operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->swapNfts()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
-            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+            'marketValue' => FiatAmount::GBP('50'),
         ]);
 
     $this->nftHandler->handle($transaction);
@@ -221,13 +220,13 @@ it('can handle a swap operation with fees', function () {
     $nft->shouldHaveReceived(
         'disposeOf',
         fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->proceeds->isEqualTo(new FiatAmount('45', FiatCurrency::GBP)),
+            && $action->proceeds->isEqualTo(FiatAmount::GBP('45')),
     )->once();
 
     $nft->shouldHaveReceived(
         'acquire',
         fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->costBasis->isEqualTo(new FiatAmount('55', FiatCurrency::GBP)),
+            && $action->costBasis->isEqualTo(FiatAmount::GBP('55')),
     )->once();
 });
 
@@ -240,11 +239,11 @@ it('can handle a swap operation with fees where the received asset is a NFT and 
     $transaction = Transaction::factory()
         ->swapToNft()
         ->swapFromFiat()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
-            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+            'marketValue' => FiatAmount::GBP('50'),
         ]);
 
     $this->nftHandler->handle($transaction);
@@ -252,7 +251,7 @@ it('can handle a swap operation with fees where the received asset is a NFT and 
     $nft->shouldHaveReceived(
         'acquire',
         fn (AcquireNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->costBasis->isEqualTo(new FiatAmount('60', FiatCurrency::GBP)),
+            && $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
 });
 
@@ -265,11 +264,11 @@ it('can handle a swap operation with fees where the sent asset is a NFT and the 
     $transaction = Transaction::factory()
         ->swapFromNft()
         ->swapToFiat()
-        ->withNetworkFee(new FiatAmount('4', FiatCurrency::GBP))
-        ->withPlatformFee(new FiatAmount('6', FiatCurrency::GBP))
+        ->withNetworkFee(FiatAmount::GBP('4'))
+        ->withPlatformFee(FiatAmount::GBP('6'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
-            'marketValue' => new FiatAmount('50', FiatCurrency::GBP),
+            'marketValue' => FiatAmount::GBP('50'),
         ]);
 
     $this->nftHandler->handle($transaction);
@@ -277,7 +276,7 @@ it('can handle a swap operation with fees where the sent asset is a NFT and the 
     $nft->shouldHaveReceived(
         'disposeOf',
         fn (DisposeOfNft $action) => $action->date->isEqualTo($transaction->date)
-            && $action->proceeds->isEqualTo(new FiatAmount('40', FiatCurrency::GBP)),
+            && $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();
 });
 

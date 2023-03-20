@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\TaxYear\Projectors;
 
-use Domain\Aggregates\TaxYear\Events\CapitalGainRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalGainReverted;
-use Domain\Aggregates\TaxYear\Events\CapitalLossRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalLossReverted;
-use Domain\Aggregates\TaxYear\Events\IncomeRecorded;
-use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostRecorded;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
+use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
+use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\Projectors\Exceptions\TaxYearSummaryProjectionException;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
 use Domain\Aggregates\TaxYear\TaxYearId;
@@ -23,72 +21,44 @@ final class TaxYearSummaryProjector extends EventConsumer
     }
 
     /** @throws TaxYearSummaryProjectionException */
-    public function handleCapitalGainRecorded(CapitalGainRecorded $event, Message $message): void
+    public function handleCapitalGainUpdated(CapitalGainUpdated $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->recordCapitalGain(
+        $this->taxYearSummaryRepository->updateCapitalGain(
             $this->getTaxYearId($message),
             $event->taxYear,
-            $event->amount,
-            $event->costBasis,
-            $event->proceeds,
+            $event->capitalGain,
         );
     }
 
     /** @throws TaxYearSummaryProjectionException */
-    public function handleCapitalGainReverted(CapitalGainReverted $event, Message $message): void
+    public function handleCapitalGainUpdateReverted(CapitalGainUpdateReverted $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->revertCapitalGain(
+        $this->taxYearSummaryRepository->updateCapitalGain(
             $this->getTaxYearId($message),
             $event->taxYear,
-            $event->amount,
-            $event->costBasis,
-            $event->proceeds,
+            $event->capitalGain->opposite(),
         );
     }
 
     /** @throws TaxYearSummaryProjectionException */
-    public function handleCapitalLossRecorded(CapitalLossRecorded $event, Message $message): void
+    public function handleIncomeUpdated(IncomeUpdated $event, Message $message): void
     {
-        $this->taxYearSummaryRepository->recordCapitalLoss(
+        $this->taxYearSummaryRepository->updateIncome(
             $this->getTaxYearId($message),
             $event->taxYear,
-            $event->amount,
-            $event->costBasis,
-            $event->proceeds,
+            $event->income,
         );
     }
 
     /** @throws TaxYearSummaryProjectionException */
-    public function handleCapitalLossReverted(CapitalLossReverted $event, Message $message): void
-    {
-        $this->taxYearSummaryRepository->revertCapitalLoss(
-            $this->getTaxYearId($message),
-            $event->taxYear,
-            $event->amount,
-            $event->costBasis,
-            $event->proceeds,
-        );
-    }
-
-    /** @throws TaxYearSummaryProjectionException */
-    public function handleIncomeRecorded(IncomeRecorded $event, Message $message): void
-    {
-        $this->taxYearSummaryRepository->recordIncome(
-            $this->getTaxYearId($message),
-            $event->taxYear,
-            $event->amount,
-        );
-    }
-
-    /** @throws TaxYearSummaryProjectionException */
-    public function handleNonAttributableAllowableCostRecorded(
-        NonAttributableAllowableCostRecorded $event,
+    public function handleNonAttributableAllowableCostUpdated(
+        NonAttributableAllowableCostUpdated $event,
         Message $message,
     ): void {
-        $this->taxYearSummaryRepository->recordNonAttributableAllowableCost(
+        $this->taxYearSummaryRepository->updateNonAttributableAllowableCost(
             $this->getTaxYearId($message),
             $event->taxYear,
-            $event->amount,
+            $event->nonAttributableAllowableCost,
         );
     }
 

@@ -26,7 +26,7 @@ class TransactionFactory extends PlainObjectFactory
         return [
             'date' => LocalDate::parse('2015-10-21'),
             'operation' => Operation::Receive,
-            'marketValue' => new FiatAmount('100', FiatCurrency::GBP),
+            'marketValue' => FiatAmount::GBP('100'),
             'isIncome' => false,
             'sentAsset' => null,
             'sentQuantity' => Quantity::zero(),
@@ -166,7 +166,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->state([
             'networkFeeCurrency' => 'BTC',
             'networkFeeQuantity' => new Quantity('0.0001'),
-            'networkFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
+            'networkFeeMarketValue' => $marketValue ?? FiatAmount::GBP('10'),
         ]);
     }
 
@@ -175,7 +175,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->state([
             'networkFeeCurrency' => $marketValue?->currency->value ?? FiatCurrency::GBP->value,
             'networkFeeQuantity' => $marketValue?->quantity ?? new Quantity('10'),
-            'networkFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
+            'networkFeeMarketValue' => $marketValue ?? FiatAmount::GBP('10'),
         ]);
     }
 
@@ -184,7 +184,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->state([
             'platformFeeCurrency' => 'BTC',
             'platformFeeQuantity' => new Quantity('0.0001'),
-            'platformFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
+            'platformFeeMarketValue' => $marketValue ?? FiatAmount::GBP('10'),
         ]);
     }
 
@@ -193,7 +193,7 @@ class TransactionFactory extends PlainObjectFactory
         return $this->state([
             'platformFeeCurrency' => $marketValue?->currency->value ?? FiatCurrency::GBP->value,
             'platformFeeQuantity' => $marketValue?->quantity ?? new Quantity('10'),
-            'platformFeeMarketValue' => $marketValue ?? new FiatAmount('10', FiatCurrency::GBP),
+            'platformFeeMarketValue' => $marketValue ?? FiatAmount::GBP('10'),
         ]);
     }
 }

@@ -38,6 +38,13 @@ final readonly class Quantity implements Stringable
         return new Quantity($this->quantity);
     }
 
+    public function opposite(): Quantity
+    {
+        $newQuantity = str_starts_with($this->quantity, '-') ? ltrim($this->quantity, '-') : '-' . $this->quantity;
+
+        return new Quantity($newQuantity);
+    }
+
     public function isPositive(): bool
     {
         return Math::gte($this->quantity, '0');
@@ -105,6 +112,12 @@ final readonly class Quantity implements Stringable
     public function dividedBy(Quantity | string $quantity): Quantity
     {
         return new Quantity(Math::div($this->quantity, $this->toQuantity($quantity)->quantity));
+    }
+
+    /** @throws QuantityException */
+    public function round(int $precision): Quantity
+    {
+        return new Quantity(Math::rnd($this->quantity, $precision));
     }
 
     /** @throws QuantityException */

@@ -1,9 +1,8 @@
 <?php
 
-use Domain\Aggregates\TaxYear\Actions\RecordNonAttributableAllowableCost;
+use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\TaxYear;
-use Domain\Enums\FiatCurrency;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\ValueObjects\FiatAmount;
@@ -22,20 +21,20 @@ it('can handle a transfer operation', function () {
 
     $transaction = Transaction::factory()
         ->transfer()
-        ->withNetworkFee($networkFee = new FiatAmount('5', FiatCurrency::GBP))
-        ->withPlatformFee($platformFee = new FiatAmount('10', FiatCurrency::GBP))
+        ->withNetworkFee($networkFee = FiatAmount::GBP('5'))
+        ->withPlatformFee($platformFee = FiatAmount::GBP('10'))
         ->make();
 
     $this->transferHandler->handle($transaction);
 
     $taxYear->shouldHaveReceived(
-        'recordNonAttributableAllowableCost',
-        fn (RecordNonAttributableAllowableCost $action) => $action->amount->isEqualTo($networkFee),
+        'updateNonAttributableAllowableCost',
+        fn (UpdateNonAttributableAllowableCost $action) => $action->nonAttributableAllowableCost->isEqualTo($networkFee),
     )->once();
 
     $taxYear->shouldHaveReceived(
-        'recordNonAttributableAllowableCost',
-        fn (RecordNonAttributableAllowableCost $action) => $action->amount->isEqualTo($platformFee),
+        'updateNonAttributableAllowableCost',
+        fn (UpdateNonAttributableAllowableCost $action) => $action->nonAttributableAllowableCost->isEqualTo($platformFee),
     )->once();
 });
 

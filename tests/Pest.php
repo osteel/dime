@@ -12,6 +12,7 @@
 */
 
 uses(Tests\TestCase::class)->in('Unit');
+uses(Tests\Feature\TestCase::class)->in('Feature');
 
 /*
 |--------------------------------------------------------------------------

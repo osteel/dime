@@ -7,84 +7,37 @@ namespace App\Aggregates\TaxYear\Repositories;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository as TaxYearSummaryRepositoryInterface;
 use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
+use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
 
 class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
 {
-    public function recordCapitalGain(
-        TaxYearId $taxYearId,
-        string $taxYear,
-        FiatAmount $amount,
-        FiatAmount $costBasis,
-        FiatAmount $proceeds,
-    ): void {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
-            ->increaseCapitalGain($amount)
-            ->increaseCapitalCostBasis($costBasis)
-            ->increaseCapitalProceeds($proceeds)
-            ->save();
-    }
-
-    public function revertCapitalGain(
-        TaxYearId $taxYearId,
-        string $taxYear,
-        FiatAmount $amount,
-        FiatAmount $costBasis,
-        FiatAmount $proceeds,
-    ): void {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
-            ->decreaseCapitalGain($amount)
-            ->decreaseCapitalCostBasis($costBasis)
-            ->decreaseCapitalProceeds($proceeds)
-            ->save();
-    }
-
-    public function recordCapitalLoss(
-        TaxYearId $taxYearId,
-        string $taxYear,
-        FiatAmount $amount,
-        FiatAmount $costBasis,
-        FiatAmount $proceeds,
-    ): void {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
-            ->decreaseCapitalGain($amount)
-            ->increaseCapitalCostBasis($costBasis)
-            ->increaseCapitalProceeds($proceeds)
-            ->save();
-    }
-
-    public function revertCapitalLoss(
-        TaxYearId $taxYearId,
-        string $taxYear,
-        FiatAmount $amount,
-        FiatAmount $costBasis,
-        FiatAmount $proceeds,
-    ): void {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
-            ->increaseCapitalGain($amount)
-            ->decreaseCapitalCostBasis($costBasis)
-            ->decreaseCapitalProceeds($proceeds)
-            ->save();
-    }
-
-    public function recordIncome(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): void
+    public function updateCapitalGain(TaxYearId $taxYearId, string $taxYear, CapitalGain $capitalGain): void
     {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
-            ->increaseIncome($amount)
+        $this->fetchTaxYearSummary($taxYearId, $taxYear, $capitalGain->currency())
+            ->updateCapitalGain($capitalGain)
             ->save();
     }
 
-    public function recordNonAttributableAllowableCost(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): void
+    public function updateIncome(TaxYearId $taxYearId, string $taxYear, FiatAmount $income): void
     {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $amount)
-            ->increaseNonAttributableAllowableCosts($amount)
+        $this->fetchTaxYearSummary($taxYearId, $taxYear, $income->currency)
+            ->updateIncome($income)
             ->save();
     }
 
-    private function fetchTaxYearSummary(TaxYearId $taxYearId, string $taxYear, FiatAmount $amount): TaxYearSummary
+    public function updateNonAttributableAllowableCost(TaxYearId $taxYearId, string $taxYear, FiatAmount $nonAttributableAllowableCost): void
+    {
+        $this->fetchTaxYearSummary($taxYearId, $taxYear, $nonAttributableAllowableCost->currency)
+            ->updateNonAttributableAllowableCost($nonAttributableAllowableCost)
+            ->save();
+    }
+
+    private function fetchTaxYearSummary(TaxYearId $taxYearId, string $taxYear, FiatCurrency $currency): TaxYearSummary
     {
         return TaxYearSummary::firstOrNew(
-            ['tax_year_id' => $taxYearId->toString(), 'currency' => $amount->currency],
+            ['tax_year_id' => $taxYearId->toString(), 'currency' => $currency],
             ['tax_year' => $taxYear],
         );
     }

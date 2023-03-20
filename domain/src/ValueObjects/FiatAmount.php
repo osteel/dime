@@ -22,9 +22,19 @@ final readonly class FiatAmount implements SerializablePayload, Stringable
         $this->quantity = $quantity instanceof Quantity ? $quantity : new Quantity($quantity);
     }
 
+    public static function GBP(Quantity | string $quantity): self
+    {
+        return new self($quantity, FiatCurrency::GBP);
+    }
+
     public function zero(): FiatAmount
     {
         return new self(Quantity::zero(), $this->currency);
+    }
+
+    public function opposite(): FiatAmount
+    {
+        return new self($this->quantity->opposite(), $this->currency);
     }
 
     public function isPositive(): bool
@@ -120,7 +130,7 @@ final readonly class FiatAmount implements SerializablePayload, Stringable
         }
     }
 
-    /** @return array<string,string> */
+    /** @return array{quantity:string,currency:string} */
     public function toPayload(): array
     {
         return [
@@ -129,7 +139,7 @@ final readonly class FiatAmount implements SerializablePayload, Stringable
         ];
     }
 
-    /** @param array<string,string> $payload */
+    /** @param array{quantity:string,currency:string} $payload */
     public static function fromPayload(array $payload): static
     {
         return new self(

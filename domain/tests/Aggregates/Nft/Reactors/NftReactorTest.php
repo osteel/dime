@@ -1,10 +1,8 @@
 <?php
 
 use Brick\DateTime\LocalDate;
-use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\Nft\Events\NftDisposedOf;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalGain;
-use Domain\Aggregates\TaxYear\Actions\RecordCapitalLoss;
+use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\Tests\Aggregates\Nft\Reactors\NftReactorTestCase;
 use Domain\ValueObjects\FiatAmount;
@@ -20,16 +18,16 @@ it('can handle a capital gain', function () {
 
     $nftDisposedOf = new NftDisposedOf(
         date: LocalDate::parse('2015-10-21'),
-        costBasis: new FiatAmount('100', FiatCurrency::GBP),
-        proceeds: new FiatAmount('101', FiatCurrency::GBP),
+        costBasis: FiatAmount::GBP('100'),
+        proceeds: FiatAmount::GBP('101'),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($nftDisposedOf))
         ->then(fn () => $taxYearSpy->shouldHaveReceived(
-            'recordCapitalGain',
-            fn (RecordCapitalGain $action) => $action->amount->isEqualTo('1'),
+            'updateCapitalGain',
+            fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('1'),
         )->once());
 });
 
@@ -40,15 +38,15 @@ it('can handle a capital loss', function () {
 
     $nftDisposedOf = new NftDisposedOf(
         date: LocalDate::parse('2015-10-21'),
-        costBasis: new FiatAmount('100', FiatCurrency::GBP),
-        proceeds: new FiatAmount('99', FiatCurrency::GBP),
+        costBasis: FiatAmount::GBP('100'),
+        proceeds: FiatAmount::GBP('99'),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($nftDisposedOf))
         ->then(fn () => $taxYearSpy->shouldHaveReceived(
-            'recordCapitalLoss',
-            fn (RecordCapitalLoss $action) => $action->amount->isEqualTo('1'),
+            'updateCapitalGain',
+            fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('-1'),
         )->once());
 });

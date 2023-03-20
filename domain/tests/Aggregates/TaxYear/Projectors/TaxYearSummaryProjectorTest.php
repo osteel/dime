@@ -1,135 +1,92 @@
 <?php
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\TaxYear\Events\CapitalGainRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalGainReverted;
-use Domain\Aggregates\TaxYear\Events\CapitalLossRecorded;
-use Domain\Aggregates\TaxYear\Events\CapitalLossReverted;
-use Domain\Aggregates\TaxYear\Events\IncomeRecorded;
-use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostRecorded;
-use Domain\Enums\FiatCurrency;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
+use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
+use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
+use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
+use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Tests\Aggregates\TaxYear\Projectors\TaxYearSummaryProjectorTestCase;
 use Domain\ValueObjects\FiatAmount;
+use Domain\ValueObjects\Quantity;
 use EventSauce\EventSourcing\AggregateRootId;
 use EventSauce\EventSourcing\Message;
 use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 
 uses(TaxYearSummaryProjectorTestCase::class);
 
-it('can handle a capital gain', function () {
-    $capitalGainRecorded = new CapitalGainRecorded(
+it('can handle a capital gain update', function (string $costBasis, string $proceeds, string $capitalGainDifference) {
+    $capitalGainUpdated = new CapitalGainUpdated(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
-        ->when(new Message($capitalGainRecorded))
-        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordCapitalGain')
-            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) => $taxYearId->toString() === $this->aggregateRootId->toString()
+        ->when(new Message($capitalGainUpdated))
+        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateCapitalGain')
+            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, CapitalGain $capitalGain) => $taxYearId->toString() === $this->aggregateRootId->toString()
                 && $taxYear === $this->taxYear
-                && $amount === $capitalGainRecorded->amount
-                && $costBasis === $capitalGainRecorded->costBasis
-                && $proceeds === $capitalGainRecorded->proceeds)
+                && $capitalGain->isEqualTo($capitalGainUpdated->capitalGain)
+                && (string) $capitalGain->difference->quantity === $capitalGainDifference)
+            ->once());
+})->with([
+    'gain' => ['50', '150', '100'],
+    'loss' => ['150', '50', '-100'],
+]);
+
+it('can handle a capital gain update reversion', function (string $costBasis, string $proceeds, string $capitalGainDifference) {
+    $capitalGainUpdateReverted = new CapitalGainUpdateReverted(
+        taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
+        capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
+    );
+
+    /** @var MessageConsumerTestCase $this */
+    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
+        ->when(new Message($capitalGainUpdateReverted))
+        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateCapitalGain')
+            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, CapitalGain $capitalGain) => $taxYearId->toString() === $this->aggregateRootId->toString()
+                && $taxYear === $this->taxYear
+                && $capitalGain->isEqualTo($capitalGainUpdateReverted->capitalGain->opposite())
+                && (string) $capitalGain->difference->quantity === (string) (new Quantity($capitalGainDifference))->opposite())
+            ->once());
+})->with([
+    'gain' => ['50', '150', '100'],
+    'loss' => ['150', '50', '-100'],
+]);
+
+it('can handle an income update', function () {
+    $incomeUpdated = new IncomeUpdated(
+        taxYear: $this->taxYear,
+        date: LocalDate::parse('2015-10-21'),
+        income: FiatAmount::GBP('100'),
+    );
+
+    /** @var MessageConsumerTestCase $this */
+    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
+        ->when(new Message($incomeUpdated))
+        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateIncome')
+            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $income) => $taxYearId->toString() === $this->aggregateRootId->toString()
+                && $taxYear === $this->taxYear
+                && $income === $incomeUpdated->income)
             ->once());
 });
 
-it('can handle a capital gain reversion', function () {
-    $capitalGainReverted = new CapitalGainReverted(
+it('can handle a non-attributable allowable cost update', function () {
+    $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
         taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
+        nonAttributableAllowableCost: FiatAmount::GBP('100'),
     );
 
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
-        ->when(new Message($capitalGainReverted))
-        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('revertCapitalGain')
-            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) => $taxYearId->toString() === $this->aggregateRootId->toString()
+        ->when(new Message($nonAttributableAllowableCostUpdated))
+        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateNonAttributableAllowableCost')
+            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $nonAttributableAllowableCost) => $taxYearId->toString() === $this->aggregateRootId->toString()
                 && $taxYear === $this->taxYear
-                && $amount === $capitalGainReverted->amount
-                && $costBasis === $capitalGainReverted->costBasis
-                && $proceeds === $capitalGainReverted->proceeds)
-            ->once());
-});
-
-it('can handle a capital loss', function () {
-    $capitalLossRecorded = new CapitalLossRecorded(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
-    );
-
-    /** @var MessageConsumerTestCase $this */
-    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
-        ->when(new Message($capitalLossRecorded))
-        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordCapitalLoss')
-            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $taxYear === $this->taxYear
-                && $amount === $capitalLossRecorded->amount
-                && $costBasis === $capitalLossRecorded->costBasis
-                && $proceeds === $capitalLossRecorded->proceeds)
-            ->once());
-});
-
-it('can handle a capital loss reversion', function () {
-    $capitalLossReverted = new CapitalLossReverted(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-        costBasis: new FiatAmount('50', FiatCurrency::GBP),
-        proceeds: new FiatAmount('150', FiatCurrency::GBP),
-    );
-
-    /** @var MessageConsumerTestCase $this */
-    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
-        ->when(new Message($capitalLossReverted))
-        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('revertCapitalLoss')
-            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount, FiatAmount $costBasis, FiatAmount $proceeds) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $taxYear === $this->taxYear
-                && $amount === $capitalLossReverted->amount
-                && $costBasis === $capitalLossReverted->costBasis
-                && $proceeds === $capitalLossReverted->proceeds)
-            ->once());
-});
-
-it('can handle some income', function () {
-    $incomeRecorded = new IncomeRecorded(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-    );
-
-    /** @var MessageConsumerTestCase $this */
-    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
-        ->when(new Message($incomeRecorded))
-        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordIncome')
-            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $taxYear === $this->taxYear
-                && $amount === $incomeRecorded->amount)
-            ->once());
-});
-
-it('can handle a non-attributable allowable cost', function () {
-    $nonAttributableAllowableCostRecorded = new NonAttributableAllowableCostRecorded(
-        taxYear: $this->taxYear,
-        date: LocalDate::parse('2015-10-21'),
-        amount: new FiatAmount('100', FiatCurrency::GBP),
-    );
-
-    /** @var MessageConsumerTestCase $this */
-    $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
-        ->when(new Message($nonAttributableAllowableCostRecorded))
-        ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('recordNonAttributableAllowableCost')
-            ->withArgs(fn (AggregateRootId $taxYearId, string $taxYear, FiatAmount $amount) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $taxYear === $this->taxYear
-                && $amount === $nonAttributableAllowableCostRecorded->amount)
+                && $nonAttributableAllowableCost === $nonAttributableAllowableCostUpdated->nonAttributableAllowableCost)
             ->once());
 });

@@ -1,9 +1,8 @@
 <?php
 
-use Domain\Aggregates\TaxYear\Actions\RecordIncome;
+use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\TaxYear;
-use Domain\Enums\FiatCurrency;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\IncomeHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
 use Domain\ValueObjects\FiatAmount;
@@ -20,13 +19,13 @@ it('can handle an income transaction', function () {
     $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
     $this->taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
-    $transaction = Transaction::factory()->income()->make(['marketValue' => new FiatAmount('50', FiatCurrency::GBP)]);
+    $transaction = Transaction::factory()->income()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->incomeHandler->handle($transaction);
 
     $taxYear->shouldHaveReceived(
-        'recordIncome',
-        fn (RecordIncome $action) => $action->amount->isEqualTo($transaction->marketValue),
+        'updateIncome',
+        fn (UpdateIncome $action) => $action->income->isEqualTo($transaction->marketValue),
     )->once();
 });
 
