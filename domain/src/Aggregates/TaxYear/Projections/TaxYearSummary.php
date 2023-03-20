@@ -8,9 +8,11 @@ use Domain\Aggregates\TaxYear\Projections\Exceptions\TaxYearSummaryException;
 use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
+use Domain\Tests\Aggregates\TaxYear\Factories\Projections\TaxYearSummaryFactory;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -19,11 +21,13 @@ use Illuminate\Database\Eloquent\Model;
  * @property FiatCurrency $currency
  * @property CapitalGain $capital_gain
  * @property FiatAmount $income
- * @property FiatAmount $non_attributable_allowable_costs
+ * @property FiatAmount $non_attributable_allowable_cost
  * @method static self firstOrNew($attributes = [], $values = [])
  */
 final class TaxYearSummary extends Model
 {
+    use HasFactory;
+
     /** The primary key for the model. */
     protected $primaryKey = 'tax_year_id';
 
@@ -38,6 +42,11 @@ final class TaxYearSummary extends Model
 
     /** Indicates if all mass assignment is enabled. */
     protected static $unguarded = true;
+
+    protected static function newFactory(): TaxYearSummaryFactory
+    {
+        return TaxYearSummaryFactory::new();
+    }
 
     /** @throws FiatAmountException */
     public function updateCapitalGain(CapitalGain $capitalGain): self
@@ -59,9 +68,9 @@ final class TaxYearSummary extends Model
     }
 
     /** @throws FiatAmountException */
-    public function updateNonAttributableAllowableCosts(FiatAmount $amount): self
+    public function updateNonAttributableAllowableCost(FiatAmount $amount): self
     {
-        $this->non_attributable_allowable_costs = $this->non_attributable_allowable_costs->plus($amount);
+        $this->non_attributable_allowable_cost = $this->non_attributable_allowable_cost->plus($amount);
 
         return $this;
     }
@@ -110,7 +119,7 @@ final class TaxYearSummary extends Model
         );
     }
 
-    protected function nonAttributableAllowableCosts(): Attribute
+    protected function nonAttributableAllowableCost(): Attribute
     {
         return Attribute::make(
             get: fn (?string $value) => new FiatAmount($value ?? '0', $this->currency),

@@ -30,7 +30,7 @@ class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
     public function updateNonAttributableAllowableCost(TaxYearId $taxYearId, string $taxYear, FiatAmount $nonAttributableAllowableCost): void
     {
         $this->fetchTaxYearSummary($taxYearId, $taxYear, $nonAttributableAllowableCost->currency)
-            ->updateNonAttributableAllowableCosts($nonAttributableAllowableCost)
+            ->updateNonAttributableAllowableCost($nonAttributableAllowableCost)
             ->save();
     }
 

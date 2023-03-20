@@ -31,7 +31,7 @@ class TaxYear implements AggregateRoot
     private ?FiatCurrency $currency = null;
     private ?FiatAmount $capitalGain = null;
     private ?FiatAmount $income = null;
-    private ?FiatAmount $nonAttributableAllowableCosts = null;
+    private ?FiatAmount $nonAttributableAllowableCost = null;
 
     private function __construct(AggregateRootId $aggregateRootId)
     {
@@ -132,7 +132,7 @@ class TaxYear implements AggregateRoot
     public function applyNonAttributableAllowableCostUpdated(NonAttributableAllowableCostUpdated $event): void
     {
         $this->currency ??= $event->nonAttributableAllowableCost->currency;
-        $this->nonAttributableAllowableCosts = $this->nonAttributableAllowableCosts?->plus($event->nonAttributableAllowableCost)
+        $this->nonAttributableAllowableCost = $this->nonAttributableAllowableCost?->plus($event->nonAttributableAllowableCost)
             ?? $event->nonAttributableAllowableCost;
     }
 

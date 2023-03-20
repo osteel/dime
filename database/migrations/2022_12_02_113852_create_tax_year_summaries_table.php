@@ -18,7 +18,7 @@ return new class () extends Migration {
             $table->string('currency', 3);
             $table->json('capital_gain')->default('{"cost_basis":"0","proceeds":"0","difference":"0"}');
             $table->string('income')->default('0');
-            $table->string('non_attributable_allowable_costs')->default('0');
+            $table->string('non_attributable_allowable_cost')->default('0');
         });
     }
 
