@@ -8,6 +8,6 @@ use Generator;
 
 interface TransactionReader
 {
-    /** @return Generator<array<string, string>> */
+    /** @return Generator<array<string,string>> */
     public function read(string $path): Generator;
 }

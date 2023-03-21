@@ -20,7 +20,7 @@ class TransactionProcessor
     {
     }
 
-    /** @param array<string, string> $rawTransaction */
+    /** @param array<string,string> $rawTransaction */
     public function process(array $rawTransaction): void
     {
         match ($this->toOperation($rawTransaction['Operation'])) {
@@ -31,7 +31,7 @@ class TransactionProcessor
         };
     }
 
-    /** @param array<string, string> $rawTransaction */
+    /** @param array<string,string> $rawTransaction */
     private function processReceive(array $rawTransaction): void
     {
         $transaction = new Transaction(
@@ -42,18 +42,15 @@ class TransactionProcessor
             receivedAsset: $this->toAsset($rawTransaction['Received asset']),
             receivedQuantity: $this->toQuantity($rawTransaction['Received quantity']),
             receivedAssetIsNft: $this->toBoolean($rawTransaction['Received asset is NFT']),
-            networkFeeCurrency: $this->toAsset($rawTransaction['Network fee currency']),
-            networkFeeQuantity: $this->toQuantity($rawTransaction['Network fee quantity']),
-            networkFeeMarketValue: $this->toFiatAmount($rawTransaction['Network fee market value']),
-            platformFeeCurrency: $this->toAsset($rawTransaction['Platform fee currency']),
-            platformFeeQuantity: $this->toQuantity($rawTransaction['Platform fee quantity']),
-            platformFeeMarketValue: $this->toFiatAmount($rawTransaction['Platform fee market value']),
+            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
+            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
+            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
         );
 
         $this->transactionDispatcher->dispatch($transaction);
     }
 
-    /** @param array<string, string> $rawTransaction */
+    /** @param array<string,string> $rawTransaction */
     private function processSend(array $rawTransaction): void
     {
         $transaction = new Transaction(
@@ -64,18 +61,15 @@ class TransactionProcessor
             sentAsset: $this->toAsset($rawTransaction['Sent asset']),
             sentQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
             sentAssetIsNft: $this->toBoolean($rawTransaction['Sent asset is NFT']),
-            networkFeeCurrency: $this->toAsset($rawTransaction['Network fee currency']),
-            networkFeeQuantity: $this->toQuantity($rawTransaction['Network fee quantity']),
-            networkFeeMarketValue: $this->toFiatAmount($rawTransaction['Network fee market value']),
-            platformFeeCurrency: $this->toAsset($rawTransaction['Platform fee currency']),
-            platformFeeQuantity: $this->toQuantity($rawTransaction['Platform fee quantity']),
-            platformFeeMarketValue: $this->toFiatAmount($rawTransaction['Platform fee market value']),
+            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
+            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
+            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
         );
 
         $this->transactionDispatcher->dispatch($transaction);
     }
 
-    /** @param array<string, string> $rawTransaction */
+    /** @param array<string,string> $rawTransaction */
     private function processSwap(array $rawTransaction): void
     {
         $transaction = new Transaction(
@@ -89,18 +83,15 @@ class TransactionProcessor
             receivedAsset: $this->toAsset($rawTransaction['Received asset']),
             receivedQuantity: $this->toQuantity($rawTransaction['Received quantity']),
             receivedAssetIsNft: $this->toBoolean($rawTransaction['Received asset is NFT']),
-            networkFeeCurrency: $this->toAsset($rawTransaction['Network fee currency']),
-            networkFeeQuantity: $this->toQuantity($rawTransaction['Network fee quantity']),
-            networkFeeMarketValue: $this->toFiatAmount($rawTransaction['Network fee market value']),
-            platformFeeCurrency: $this->toAsset($rawTransaction['Platform fee currency']),
-            platformFeeQuantity: $this->toQuantity($rawTransaction['Platform fee quantity']),
-            platformFeeMarketValue: $this->toFiatAmount($rawTransaction['Platform fee market value']),
+            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
+            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
+            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
         );
 
         $this->transactionDispatcher->dispatch($transaction);
     }
 
-    /** @param array<string, string> $rawTransaction */
+    /** @param array<string,string> $rawTransaction */
     private function processTransfer(array $rawTransaction): void
     {
         $transaction = new Transaction(
@@ -111,12 +102,9 @@ class TransactionProcessor
             sentAsset: $this->toAsset($rawTransaction['Sent asset']),
             sentQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
             sentAssetIsNft: $this->toBoolean($rawTransaction['Sent asset is NFT']),
-            networkFeeCurrency: $this->toAsset($rawTransaction['Network fee currency']),
-            networkFeeQuantity: $this->toQuantity($rawTransaction['Network fee quantity']),
-            networkFeeMarketValue: $this->toFiatAmount($rawTransaction['Network fee market value']),
-            platformFeeCurrency: $this->toAsset($rawTransaction['Platform fee currency']),
-            platformFeeQuantity: $this->toQuantity($rawTransaction['Platform fee quantity']),
-            platformFeeMarketValue: $this->toFiatAmount($rawTransaction['Platform fee market value']),
+            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
+            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
+            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
         );
 
         $this->transactionDispatcher->dispatch($transaction);

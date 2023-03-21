@@ -27,8 +27,7 @@ class TransactionDispatcher
             ->handleTransfer($transaction)
             ->handleNft($transaction)
             ->handleSharePooling($transaction)
-            ->handleNetworkFee($transaction)
-            ->handlePlatformFee($transaction);
+            ->handleFee($transaction);
     }
 
     private function handleIncome(Transaction $transaction): self
@@ -75,35 +74,18 @@ class TransactionDispatcher
         return $this;
     }
 
-    private function handleNetworkFee(Transaction $transaction): self
+    private function handleFee(Transaction $transaction): self
     {
-        if (! $transaction->hasNetworkFee() || $transaction->networkFeeIsFiat()) {
+        if (! $transaction->hasFee() || $transaction->feeIsFiat()) {
             return $this;
         }
 
         $this->sharePoolingHandler->handle(new Transaction(
             date: $transaction->date,
             operation: Operation::Send,
-            marketValue: $transaction->networkFeeMarketValue,
-            sentAsset: $transaction->networkFeeCurrency,
-            sentQuantity: $transaction->networkFeeQuantity,
-        ));
-
-        return $this;
-    }
-
-    private function handlePlatformFee(Transaction $transaction): self
-    {
-        if (! $transaction->hasPlatformFee() || $transaction->platformFeeIsFiat()) {
-            return $this;
-        }
-
-        $this->sharePoolingHandler->handle(new Transaction(
-            date: $transaction->date,
-            operation: Operation::Send,
-            marketValue: $transaction->platformFeeMarketValue,
-            sentAsset: $transaction->platformFeeCurrency,
-            sentQuantity: $transaction->platformFeeQuantity,
+            marketValue: $transaction->feeMarketValue,
+            sentAsset: $transaction->feeCurrency,
+            sentQuantity: $transaction->feeQuantity,
         ));
 
         return $this;

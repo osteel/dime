@@ -13,42 +13,37 @@ use Domain\ValueObjects\Exceptions\TransactionException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stringable;
 
-final class Transaction implements Stringable
+final readonly class Transaction implements Stringable
 {
     use HasFactory;
 
-    public readonly ?string $sentAsset;
-    public readonly Quantity $sentQuantity;
-    public readonly ?string $receivedAsset;
-    public readonly Quantity $receivedQuantity;
-    public readonly Quantity $networkFeeQuantity;
-    public readonly Quantity $platformFeeQuantity;
+    public ?string $sentAsset;
+    public Quantity $sentQuantity;
+    public ?string $receivedAsset;
+    public Quantity $receivedQuantity;
+    public Quantity $feeQuantity;
 
     /** @throws TransactionException */
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly Operation $operation,
-        public readonly ?FiatAmount $marketValue = null,
-        public readonly bool $isIncome = false,
+        public LocalDate $date,
+        public Operation $operation,
+        public ?FiatAmount $marketValue = null,
+        public bool $isIncome = false,
         ?string $sentAsset = null,
         ?Quantity $sentQuantity = null,
-        public readonly bool $sentAssetIsNft = false,
+        public bool $sentAssetIsNft = false,
         ?string $receivedAsset = null,
         ?Quantity $receivedQuantity = null,
-        public readonly bool $receivedAssetIsNft = false,
-        public readonly ?string $networkFeeCurrency = null,
-        ?Quantity $networkFeeQuantity = null,
-        public readonly ?FiatAmount $networkFeeMarketValue = null,
-        public readonly ?string $platformFeeCurrency = null,
-        ?Quantity $platformFeeQuantity = null,
-        public readonly ?FiatAmount $platformFeeMarketValue = null,
+        public bool $receivedAssetIsNft = false,
+        public ?string $feeCurrency = null,
+        ?Quantity $feeQuantity = null,
+        public ?FiatAmount $feeMarketValue = null,
     ) {
         $this->sentAsset = $sentAssetIsNft ? $sentAsset : AssetSymbolNormaliser::normalise($sentAsset);
         $this->sentQuantity = $sentQuantity ?? Quantity::zero();
         $this->receivedAsset = $receivedAssetIsNft ? $receivedAsset : AssetSymbolNormaliser::normalise($receivedAsset);
         $this->receivedQuantity = $receivedQuantity ?? Quantity::zero();
-        $this->networkFeeQuantity = $networkFeeQuantity ?? Quantity::zero();
-        $this->platformFeeQuantity = $platformFeeQuantity ?? Quantity::zero();
+        $this->feeQuantity = $feeQuantity ?? Quantity::zero();
 
         match ($operation) {
             Operation::Receive => $this->validateReceive(),
@@ -119,24 +114,14 @@ final class Transaction implements Stringable
         return $this->sentAssetIsFiat() || $this->receivedAssetIsFiat();
     }
 
-    public function hasNetworkFee(): bool
+    public function hasFee(): bool
     {
-        return $this->networkFeeMarketValue?->isGreaterThan('0') ?? false;
+        return $this->feeMarketValue?->isGreaterThan('0') ?? false;
     }
 
-    public function networkFeeIsFiat(): bool
+    public function feeIsFiat(): bool
     {
-        return $this->networkFeeCurrency ? FiatCurrency::tryFrom($this->networkFeeCurrency) !== null : false;
-    }
-
-    public function hasPlatformFee(): bool
-    {
-        return $this->platformFeeMarketValue?->isGreaterThan('0') ?? false;
-    }
-
-    public function platformFeeIsFiat(): bool
-    {
-        return $this->platformFeeCurrency ? FiatCurrency::tryFrom(strtoupper($this->platformFeeCurrency)) !== null : false;
+        return $this->feeCurrency ? FiatCurrency::tryFrom($this->feeCurrency) !== null : false;
     }
 
     /** @throws TransactionException */
@@ -253,7 +238,7 @@ final class Transaction implements Stringable
     public function __toString(): string
     {
         return sprintf(
-            '%s | %s | income: %s | cost basis: %s | sent: %s | quantity: %s | NFT: %s | received: %s | quantity: %s | NFT: %s | Tx fee: %s | quantity: %s | Cex fee: %s | quantity: %s',
+            '%s | %s | income: %s | cost basis: %s | sent: %s | quantity: %s | NFT: %s | received: %s | quantity: %s | NFT: %s | Fee: %s | quantity: %s',
             $this->date->__toString(),
             $this->operation->value,
             $this->isIncome ? 'yes' : 'no',
@@ -264,10 +249,8 @@ final class Transaction implements Stringable
             $this->receivedAsset,
             $this->receivedQuantity->__toString(),
             $this->receivedAssetIsNft ? 'yes' : 'no',
-            $this->networkFeeCurrency,
-            $this->networkFeeQuantity->__toString(),
-            $this->platformFeeCurrency,
-            $this->platformFeeQuantity->__toString(),
+            $this->feeCurrency,
+            $this->feeQuantity->__toString(),
         );
     }
 }

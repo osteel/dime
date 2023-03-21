@@ -30,7 +30,7 @@ it('can handle a receive operation', function () {
     )->once();
 });
 
-it('can handle a receive operation with fees', function () {
+it('can handle a receive operation with a fee', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
@@ -38,8 +38,7 @@ it('can handle a receive operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->receive()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
@@ -66,7 +65,7 @@ it('can handle a send operation', function () {
     )->once();
 });
 
-it('can handle a send operation with fees', function () {
+it('can handle a send operation with a fee', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
@@ -74,8 +73,7 @@ it('can handle a send operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->send()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
@@ -175,7 +173,7 @@ it('can handle a swap operation where the sent asset is some fiat currency', fun
     $sharePooling->shouldNotHaveReceived('disposeOf');
 });
 
-it('can handle a swap operation with fees', function () {
+it('can handle a swap operation with a fee', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->twice()->andReturn($sharePooling);
@@ -183,8 +181,7 @@ it('can handle a swap operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->swap()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
@@ -200,7 +197,7 @@ it('can handle a swap operation with fees', function () {
     )->once();
 });
 
-it('can handle a swap operation with fees where the received asset is some fiat currency', function () {
+it('can handle a swap operation with a fee where the received asset is some fiat currency', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
@@ -208,8 +205,7 @@ it('can handle a swap operation with fees where the received asset is some fiat 
 
     $transaction = Transaction::factory()
         ->swapToFiat()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
@@ -222,7 +218,7 @@ it('can handle a swap operation with fees where the received asset is some fiat 
     $sharePooling->shouldNotHaveReceived('acquire');
 });
 
-it('can handle a swap operation with fees where the sent asset is some fiat currency', function () {
+it('can handle a swap operation with a fee where the sent asset is some fiat currency', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
@@ -230,8 +226,7 @@ it('can handle a swap operation with fees where the sent asset is some fiat curr
 
     $transaction = Transaction::factory()
         ->swapFromFiat()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
