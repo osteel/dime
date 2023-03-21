@@ -78,7 +78,7 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
         return $this->thirtyDayQuantityBreakdown->quantityMatchedWith($acquisition);
     }
 
-    /** @return array<string,string|int|bool|null|array<string,string|array<string>>> */
+    /** @return array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_breakdown:array{breakdown:array<int,string>},thirty_day_quantity_breakdown:array{breakdown:array<int,string>},processed:bool,position:int|null} */
     public function toPayload(): array
     {
         return [
@@ -93,16 +93,16 @@ final class SharePoolingTokenDisposal extends SharePoolingTransaction implements
         ];
     }
 
-    /** @param array<string,string|array<string,string|array<string>>> $payload */
+    /** @param array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_breakdown:array{breakdown:array<int,string>},thirty_day_quantity_breakdown:array{breakdown:array<int,string>},processed:bool,position:int} $payload */
     public static function fromPayload(array $payload): static
     {
         return (new static(
-            LocalDate::parse($payload['date']), // @phpstan-ignore-line
-            new Quantity($payload['quantity']), // @phpstan-ignore-line
-            FiatAmount::fromPayload($payload['cost_basis']), // @phpstan-ignore-line
-            FiatAmount::fromPayload($payload['proceeds']), // @phpstan-ignore-line
-            QuantityBreakdown::fromPayload($payload['same_day_quantity_breakdown']), // @phpstan-ignore-line
-            QuantityBreakdown::fromPayload($payload['thirty_day_quantity_breakdown']), // @phpstan-ignore-line
+            LocalDate::parse($payload['date']),
+            new Quantity($payload['quantity']),
+            FiatAmount::fromPayload($payload['cost_basis']),
+            FiatAmount::fromPayload($payload['proceeds']),
+            QuantityBreakdown::fromPayload($payload['same_day_quantity_breakdown']),
+            QuantityBreakdown::fromPayload($payload['thirty_day_quantity_breakdown']),
             (bool) $payload['processed'],
         ))->setPosition((int) $payload['position']);
     }

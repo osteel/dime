@@ -11,7 +11,7 @@ use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
 use Traversable;
 
-/** @implements IteratorAggregate<int, SharePoolingTransaction> */
+/** @implements IteratorAggregate<int,SharePoolingTransaction> */
 final class SharePoolingTransactions implements IteratorAggregate
 {
     /** @param array<int,SharePoolingTransaction> $transactions */

@@ -16,7 +16,7 @@ final readonly class NftAcquired implements SerializablePayload
     ) {
     }
 
-    /** @return array<string,string|array<string,string>> */
+    /** @return array{date:string,cost_basis:array{quantity:string,currency:string}} */
     public function toPayload(): array
     {
         return [
@@ -25,12 +25,12 @@ final readonly class NftAcquired implements SerializablePayload
         ];
     }
 
-    /** @param array<string,string|array<string,string>> $payload */
+    /** @param array{date:string,cost_basis:array{quantity:string,currency:string}} $payload */
     public static function fromPayload(array $payload): static
     {
         return new static(
-            LocalDate::parse($payload['date']), // @phpstan-ignore-line
-            FiatAmount::fromPayload($payload['cost_basis']), // @phpstan-ignore-line
+            LocalDate::parse($payload['date']),
+            FiatAmount::fromPayload($payload['cost_basis']),
         );
     }
 }

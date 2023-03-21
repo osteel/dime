@@ -17,13 +17,13 @@ final class TaxYearException extends RuntimeException
 
     public static function cannotUpdateCapitalGainFromDifferentCurrency(
         TaxYearId $taxYearId,
-        FiatCurrency $from,
+        ?FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
             'Cannot update capital gain for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
-            $from->name(),
+            $from?->name() ?? 'undefined',
             $to->name(),
         ));
     }
@@ -38,39 +38,39 @@ final class TaxYearException extends RuntimeException
 
     public static function cannotRevertCapitalGainUpdateFromDifferentCurrency(
         TaxYearId $taxYearId,
-        FiatCurrency $from,
+        ?FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
             'Cannot revert capital gain update for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
-            $from->name(),
+            $from?->name() ?? 'undefined',
             $to->name(),
         ));
     }
 
     public static function cannotUpdateIncomeFromDifferentCurrency(
         TaxYearId $taxYearId,
-        FiatCurrency $from,
+        ?FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
             'Cannot update the income for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
-            $from->name(),
+            $from?->name() ?? 'undefined',
             $to->name(),
         ));
     }
 
     public static function cannotUpdateNonAttributableAllowableCostFromDifferentCurrency(
         TaxYearId $taxYearId,
-        FiatCurrency $from,
+        ?FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
             'Cannot update the non-attributable allowable cost for tax year %s because the currencies don\'t match (from %s to %s)',
             $taxYearId->toString(),
-            $from->name(),
+            $from?->name() ?? 'undefined',
             $to->name(),
         ));
     }
