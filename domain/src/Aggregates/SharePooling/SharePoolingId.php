@@ -14,7 +14,6 @@ final class SharePoolingId extends AggregateRootId
 
     public static function fromSymbol(string $symbol): static
     {
-        // @phpstan-ignore-next-line
-        return self::fromString(Uuid::uuid5(self::NAMESPACE, AssetSymbolNormaliser::normalise($symbol))->toString());
+        return self::fromString(Uuid::uuid5(self::NAMESPACE, (string) AssetSymbolNormaliser::normalise($symbol))->toString());
     }
 }

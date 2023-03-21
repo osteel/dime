@@ -43,7 +43,7 @@ class TaxYear implements AggregateRoot
         if ($this->currencyMismatch($action->capitalGain->currency())) {
             throw TaxYearException::cannotUpdateCapitalGainFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency, // @phpstan-ignore-line
+                from: $this->currency,
                 to: $action->capitalGain->currency(),
             );
         }
@@ -70,7 +70,7 @@ class TaxYear implements AggregateRoot
         if ($this->currencyMismatch($action->capitalGain->currency())) {
             throw TaxYearException::cannotRevertCapitalGainUpdateFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency, // @phpstan-ignore-line
+                from: $this->currency,
                 to: $action->capitalGain->currency(),
             );
         }
@@ -94,7 +94,7 @@ class TaxYear implements AggregateRoot
         if ($this->currencyMismatch($action->income->currency)) {
             throw TaxYearException::cannotUpdateIncomeFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency, // @phpstan-ignore-line
+                from: $this->currency,
                 to: $action->income->currency,
             );
         }
@@ -117,7 +117,7 @@ class TaxYear implements AggregateRoot
         if ($this->currencyMismatch($action->nonAttributableAllowableCost->currency)) {
             throw TaxYearException::cannotUpdateNonAttributableAllowableCostFromDifferentCurrency(
                 taxYearId: $this->aggregateRootId,
-                from: $this->currency, // @phpstan-ignore-line
+                from: $this->currency,
                 to: $action->nonAttributableAllowableCost->currency,
             );
         }

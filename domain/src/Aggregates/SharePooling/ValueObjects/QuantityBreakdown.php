@@ -69,7 +69,7 @@ final class QuantityBreakdown implements SerializablePayload
         return array_keys($this->breakdown);
     }
 
-    /** @return array<string,array<string>> */
+    /** @return array{breakdown:array<int,string>} */
     public function toPayload(): array
     {
         return [
@@ -77,7 +77,7 @@ final class QuantityBreakdown implements SerializablePayload
         ];
     }
 
-    /** @param array<string,array<string>> $payload */
+    /** @param array{breakdown:array<int,string>} $payload */
     public static function fromPayload(array $payload): static
     {
         return new self(

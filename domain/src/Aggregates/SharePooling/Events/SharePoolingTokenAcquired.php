@@ -14,13 +14,13 @@ final readonly class SharePoolingTokenAcquired implements SerializablePayload
     ) {
     }
 
-    /** @return array<string,array<string,string|int|null|array<string,string>>> */
+    /** @return array{share_pooling_token_acquisition:array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string,position:int|null}} */
     public function toPayload(): array
     {
         return ['share_pooling_token_acquisition' => $this->sharePoolingTokenAcquisition->toPayload()];
     }
 
-    /** @param array<string,array<string,string|array<string,string>>> $payload */
+    /** @param array{share_pooling_token_acquisition:array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string,position:int}} $payload */
     public static function fromPayload(array $payload): static
     {
         return new static(SharePoolingTokenAcquisition::fromPayload($payload['share_pooling_token_acquisition']));
