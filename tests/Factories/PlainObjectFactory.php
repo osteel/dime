@@ -14,7 +14,7 @@ abstract class PlainObjectFactory extends Factory
     /**
      * {@inheritDoc}
      *
-     * @param  array<string, mixed>  $attributes
+     * @param  array<string,mixed>  $attributes
      * @return object|TModel
      */
     public function newModel(array $attributes = [])

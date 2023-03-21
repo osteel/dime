@@ -11,13 +11,8 @@ trait AttributesFees
 {
     private function splitFees(Transaction $transaction): FiatAmount
     {
-        $amount = $transaction->hasNetworkFee()
-            ? $transaction->networkFeeMarketValue
-            : $transaction->marketValue->zero(); // @phpstan-ignore-line
-
-        if ($transaction->hasPlatformFee()) {
-            $amount = $amount->plus($transaction->platformFeeMarketValue); // @phpstan-ignore-line
-        }
+        // @phpstan-ignore-next-line
+        $amount = $transaction->hasFee() ? $transaction->feeMarketValue : $transaction->marketValue->zero();
 
         // @phpstan-ignore-next-line
         return $transaction->isSwap() && ! $transaction->oneAssetIsFiat() ? $amount->dividedBy('2') : $amount;

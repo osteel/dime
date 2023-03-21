@@ -22,12 +22,9 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
         'Received asset' => 'BTC',
         'Received quantity' => '1',
         'Received asset is NFT' => 'FALSE',
-        'Network fee currency' => '',
-        'Network fee quantity' => '',
-        'Network fee market value' => '',
-        'Platform fee currency' => 'GBP',
-        'Platform fee quantity' => '20',
-        'Platform fee market value' => '20',
+        'Fee currency' => 'GBP',
+        'Fee quantity' => '20',
+        'Fee market value' => '20',
         'Income' => 'TRUE',
     ];
 
@@ -41,10 +38,9 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
             && $transaction->receivedAsset === 'BTC'
             && $transaction->receivedQuantity->isEqualTo('1')
             && $transaction->receivedAssetIsNft === false
-            && is_null($transaction->networkFeeCurrency)
-            && $transaction->platformFeeCurrency === 'GBP'
-            && $transaction->platformFeeIsFiat()
-            && $transaction->platformFeeQuantity->isEqualTo('20')
+            && $transaction->feeCurrency === 'GBP'
+            && $transaction->feeIsFiat()
+            && $transaction->feeQuantity->isEqualTo('20')
             && $transaction->isIncome === true,
     )->once();
 });
@@ -60,12 +56,9 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
         'Received asset' => '',
         'Received quantity' => '',
         'Received asset is NFT' => 'FALSE',
-        'Network fee currency' => 'BTC',
-        'Network fee quantity' => '0.001',
-        'Network fee market value' => '10',
-        'Platform fee currency' => '',
-        'Platform fee quantity' => '',
-        'Platform fee market value' => '',
+        'Fee currency' => 'BTC',
+        'Fee quantity' => '0.001',
+        'Fee market value' => '10',
         'Income' => 'FALSE',
     ];
 
@@ -79,10 +72,9 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
             && $transaction->sentAsset === 'BTC'
             && $transaction->sentQuantity->isEqualTo('1')
             && $transaction->sentAssetIsNft === false
-            && $transaction->networkFeeCurrency === 'BTC'
-            && $transaction->networkFeeIsFiat() === false
-            && $transaction->networkFeeQuantity->isEqualTo('0.001')
-            && is_null($transaction->platformFeeCurrency)
+            && $transaction->feeCurrency === 'BTC'
+            && $transaction->feeIsFiat() === false
+            && $transaction->feeQuantity->isEqualTo('0.001')
             && $transaction->isIncome === false,
     )->once();
 });
@@ -98,12 +90,9 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
         'Received asset' => 'BTC',
         'Received quantity' => '1',
         'Received asset is NFT' => 'FALSE',
-        'Network fee currency' => '',
-        'Network fee quantity' => '',
-        'Network fee market value' => '',
-        'Platform fee currency' => '',
-        'Platform fee quantity' => '',
-        'Platform fee market value' => '',
+        'Fee currency' => '',
+        'Fee quantity' => '',
+        'Fee market value' => '',
         'Income' => 'FALSE',
     ];
 
@@ -120,8 +109,7 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
             && $transaction->receivedAsset === 'BTC'
             && $transaction->receivedQuantity->isEqualTo('1')
             && $transaction->receivedAssetIsNft === false
-            && is_null($transaction->networkFeeCurrency)
-            && is_null($transaction->platformFeeCurrency)
+            && is_null($transaction->feeCurrency)
             && $transaction->isIncome === false,
     )->once();
 });
@@ -137,12 +125,9 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
         'Received asset' => '',
         'Received quantity' => '',
         'Received asset is NFT' => 'FALSE',
-        'Network fee currency' => '',
-        'Network fee quantity' => '',
-        'Network fee market value' => '',
-        'Platform fee currency' => '',
-        'Platform fee quantity' => '',
-        'Platform fee market value' => '',
+        'Fee currency' => '',
+        'Fee quantity' => '',
+        'Fee market value' => '',
         'Income' => 'FALSE',
     ];
 
@@ -156,8 +141,7 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
             && $transaction->sentAsset === '0X123456789'
             && $transaction->sentQuantity->isEqualTo('1')
             && $transaction->sentAssetIsNft === true
-            && is_null($transaction->networkFeeCurrency)
-            && is_null($transaction->platformFeeCurrency)
+            && is_null($transaction->feeCurrency)
             && $transaction->isIncome === false,
     )->once();
 });

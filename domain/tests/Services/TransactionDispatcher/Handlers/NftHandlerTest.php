@@ -37,7 +37,7 @@ it('can handle a receive operation', function () {
     )->once();
 });
 
-it('can handle a receive operation with fees', function () {
+it('can handle a receive operation with a fee', function () {
     $nft = Mockery::spy(Nft::class);
 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
@@ -46,8 +46,7 @@ it('can handle a receive operation with fees', function () {
     /** @var Transaction */
     $transaction = Transaction::factory()
         ->receiveNft()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
             'marketValue' => FiatAmount::GBP('50'),
@@ -82,7 +81,7 @@ it('can handle a send operation', function () {
     )->once();
 });
 
-it('can handle a send operation with fees', function () {
+it('can handle a send operation with a fee', function () {
     $nft = Mockery::spy(Nft::class);
 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
@@ -90,8 +89,7 @@ it('can handle a send operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->sendNft()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
             'marketValue' => FiatAmount::GBP('50'),
@@ -200,7 +198,7 @@ it('can handle a swap operation where both assets are NFTs and the received NFT 
     $this->nftHandler->handle($transaction);
 });
 
-it('can handle a swap operation with fees', function () {
+it('can handle a swap operation with a fee', function () {
     $nft = Mockery::spy(Nft::class);
 
     $this->nftRepository->shouldReceive('get')->twice()->andReturn($nft);
@@ -208,8 +206,7 @@ it('can handle a swap operation with fees', function () {
 
     $transaction = Transaction::factory()
         ->swapNfts()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
             'marketValue' => FiatAmount::GBP('50'),
@@ -230,7 +227,7 @@ it('can handle a swap operation with fees', function () {
     )->once();
 });
 
-it('can handle a swap operation with fees where the received asset is a NFT and the sent asset is some fiat currency', function () {
+it('can handle a swap operation with a fee where the received asset is a NFT and the sent asset is some fiat currency', function () {
     $nft = Mockery::spy(Nft::class);
 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
@@ -239,8 +236,7 @@ it('can handle a swap operation with fees where the received asset is a NFT and 
     $transaction = Transaction::factory()
         ->swapToNft()
         ->swapFromFiat()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
             'marketValue' => FiatAmount::GBP('50'),
@@ -255,7 +251,7 @@ it('can handle a swap operation with fees where the received asset is a NFT and 
     )->once();
 });
 
-it('can handle a swap operation with fees where the sent asset is a NFT and the received asset is some fiat currency', function () {
+it('can handle a swap operation with a fee where the sent asset is a NFT and the received asset is some fiat currency', function () {
     $nft = Mockery::spy(Nft::class);
 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
@@ -264,8 +260,7 @@ it('can handle a swap operation with fees where the sent asset is a NFT and the 
     $transaction = Transaction::factory()
         ->swapFromNft()
         ->swapToFiat()
-        ->withNetworkFee(FiatAmount::GBP('4'))
-        ->withPlatformFee(FiatAmount::GBP('6'))
+        ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
             'marketValue' => FiatAmount::GBP('50'),
