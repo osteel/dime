@@ -9,7 +9,7 @@ use Domain\Enums\FiatCurrency;
 final readonly class Fee
 {
     public function __construct(
-        public FiatCurrency | AssetSymbol $currency,
+        public FiatCurrency | Asset $currency,
         public Quantity $quantity,
         public FiatAmount $marketValue,
     ) {
