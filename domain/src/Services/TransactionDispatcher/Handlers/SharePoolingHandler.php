@@ -51,7 +51,7 @@ class SharePoolingHandler
     {
         assert($transaction->sentAsset !== null);
 
-        $sharePoolingId = SharePoolingId::fromSymbol($transaction->sentAsset);
+        $sharePoolingId = SharePoolingId::fromAssetSymbol($transaction->sentAsset);
         $sharePooling = $this->sharePoolingRepository->get($sharePoolingId);
 
         $sharePooling->disposeOf(new DisposeOfSharePoolingToken(
@@ -67,7 +67,7 @@ class SharePoolingHandler
     {
         assert($transaction->receivedAsset !== null);
 
-        $sharePoolingId = SharePoolingId::fromSymbol($transaction->receivedAsset);
+        $sharePoolingId = SharePoolingId::fromAssetSymbol($transaction->receivedAsset);
         $sharePooling = $this->sharePoolingRepository->get($sharePoolingId);
 
         $sharePooling->acquire(new AcquireSharePoolingToken(
