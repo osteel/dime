@@ -10,6 +10,6 @@ final readonly class AssetSymbol
 
     public function __construct(string $symbol, bool $isNft = false)
     {
-        $this->value = $isNft ? $symbol : trim(strtoupper($symbol));
+        $this->value = trim($isNft ? $symbol : strtoupper($symbol));
     }
 }
