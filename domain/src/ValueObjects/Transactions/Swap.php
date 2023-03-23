@@ -10,9 +10,11 @@ use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Fee;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
+use Domain\ValueObjects\Transactions\Exceptions\SwapException;
 
 final readonly class Swap extends Transaction
 {
+    /** @throws SwapException */
     public function __construct(
         public LocalDate $date,
         public Asset $disposedOfAsset,
@@ -22,6 +24,7 @@ final readonly class Swap extends Transaction
         public FiatAmount $marketValue,
         public ?Fee $fee = null,
     ) {
+        ! $disposedOfAsset->isFiat() || ! $acquiredAsset->isFiat() || throw SwapException::bothSidesAreFiat($this);
     }
 
     protected static function newFactory(): SwapFactory
