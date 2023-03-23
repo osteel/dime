@@ -5,6 +5,7 @@ use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
+use Domain\Tests\Factories\ValueObjects\Transactions\TransactionFactory;
 use Domain\Tests\Factories\ValueObjects\Transactions\TransferFactory;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Transactions\Acquisition;
@@ -12,7 +13,6 @@ use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
 use Domain\ValueObjects\Transactions\Transaction;
 use Domain\ValueObjects\Transactions\Transfer;
-use Tests\Factories\PlainObjectFactory;
 
 beforeEach(function () {
     $this->incomeHandler = Mockery::spy(IncomeHandler::class);
@@ -53,7 +53,7 @@ it('can dispatch to the transfer handler', function (bool $isNft) {
     'NFT' => true,
 ]);
 
-it('can dispatch to the NFT handler', function (PlainObjectFactory $factory, string $method, bool $sharePoolingHandler) {
+it('can dispatch to the NFT handler', function (TransactionFactory $factory, string $method, bool $sharePoolingHandler) {
     $transaction = $factory->$method()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
@@ -75,7 +75,7 @@ it('can dispatch to the NFT handler', function (PlainObjectFactory $factory, str
     'swap NFTs' => [Swap::factory(), 'nfts', false],
 ]);
 
-it('can dispatch to the share pooling handler', function (PlainObjectFactory $factory, ?string $method, bool $nftHandler) {
+it('can dispatch to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $nftHandler) {
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->make();
 
     $this->transactionDispatcher->dispatch($transaction);
@@ -104,7 +104,7 @@ it('can dispatch to the share pooling handler', function (PlainObjectFactory $fa
     'swap from NFT' => [Swap::factory(), 'fromNft', true],
 ]);
 
-it('can dispatch the fee to the share pooling handler', function (PlainObjectFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('can dispatch the fee to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee()->make();
 
@@ -149,7 +149,7 @@ it('can dispatch the fee to the share pooling handler', function (PlainObjectFac
     'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is zero', function (PlainObjectFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('does not dispatch the fee to the share pooling handler when it is zero', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee(FiatAmount::GBP('0'))->make();
 
@@ -194,7 +194,7 @@ it('does not dispatch the fee to the share pooling handler when it is zero', fun
     'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is in fiat', function (PlainObjectFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('does not dispatch the fee to the share pooling handler when it is fiat', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFeeInFiat()->make();
 

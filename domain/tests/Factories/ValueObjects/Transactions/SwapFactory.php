@@ -45,6 +45,11 @@ class SwapFactory extends TransactionFactory
         ]);
     }
 
+    public function nfts(): static
+    {
+        return $this->fromNft()->toNft();
+    }
+
     public function toFiat(): static
     {
         return $this->state([
@@ -59,10 +64,5 @@ class SwapFactory extends TransactionFactory
             'disposedOfAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNft: false),
             'disposedOfQuantity' => new Quantity('1000'),
         ]);
-    }
-
-    public function nfts(): static
-    {
-        return $this->fromNft()->toNft();
     }
 }

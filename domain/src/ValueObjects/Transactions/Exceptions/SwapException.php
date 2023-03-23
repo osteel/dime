@@ -16,6 +16,6 @@ final class SwapException extends RuntimeException
 
     public static function bothSidesAreFiat(Swap $transaction): self
     {
-        return new self(sprintf('Both sides of a swap transaction cannot be in fiat: %s', (string) $transaction));
+        return new self(sprintf('Both sides of a swap transaction cannot be fiat: %s', (string) $transaction));
     }
 }
