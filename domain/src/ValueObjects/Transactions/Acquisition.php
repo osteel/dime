@@ -10,9 +10,11 @@ use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Fee;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
+use Domain\ValueObjects\Transactions\Exceptions\AcquisitionException;
 
 final readonly class Acquisition extends Transaction
 {
+    /** @throws AcquisitionException */
     public function __construct(
         public LocalDate $date,
         public Asset $asset,
@@ -21,6 +23,7 @@ final readonly class Acquisition extends Transaction
         public ?Fee $fee = null,
         public bool $isIncome = false,
     ) {
+        ! $asset->isFiat() || throw AcquisitionException::isFiat($this);
     }
 
     protected static function newFactory(): AcquisitionFactory

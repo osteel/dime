@@ -10,9 +10,11 @@ use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Fee;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
+use Domain\ValueObjects\Transactions\Exceptions\DisposalException;
 
 final readonly class Disposal extends Transaction
 {
+    /** @throws DisposalException */
     public function __construct(
         public LocalDate $date,
         public Asset $asset,
@@ -20,6 +22,7 @@ final readonly class Disposal extends Transaction
         public FiatAmount $marketValue,
         public ?Fee $fee = null,
     ) {
+        ! $asset->isFiat() || throw DisposalException::isFiat($this);
     }
 
     protected static function newFactory(): DisposalFactory
