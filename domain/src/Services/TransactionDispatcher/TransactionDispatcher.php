@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Domain\Services\TransactionDispatcher;
 
-use Domain\Enums\Operation;
 use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
 use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Asset;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
+use Domain\ValueObjects\Transactions\Transaction;
+use Domain\ValueObjects\Transactions\Transfer;
 
 class TransactionDispatcher
 {
@@ -32,44 +36,44 @@ class TransactionDispatcher
 
     private function handleIncome(Transaction $transaction): self
     {
-        if (! $transaction->isIncome) {
-            return $this;
+        if ($transaction instanceof Acquisition && $transaction->isIncome) {
+            $this->incomeHandler->handle($transaction);
         }
-
-        $this->incomeHandler->handle($transaction);
 
         return $this;
     }
 
     private function handleTransfer(Transaction $transaction): self
     {
-        if (! $transaction->isTransfer()) {
-            return $this;
+        if ($transaction instanceof Transfer) {
+            $this->transferHandler->handle($transaction);
         }
-
-        $this->transferHandler->handle($transaction);
 
         return $this;
     }
 
     private function handleNft(Transaction $transaction): self
     {
-        if (! $transaction->involvesNfts() || $transaction->isTransfer()) {
+        if (! $transaction instanceof Acquisition && ! $transaction instanceof Disposal && ! $transaction instanceof Swap) {
             return $this;
         }
 
-        $this->nftHandler->handle($transaction);
+        if ($transaction->hasNft()) {
+            $this->nftHandler->handle($transaction);
+        }
 
         return $this;
     }
 
     private function handleSharePooling(Transaction $transaction): self
     {
-        if (! $transaction->fallsUnderSharePooling() || $transaction->isTransfer()) {
+        if (! $transaction instanceof Acquisition && ! $transaction instanceof Disposal && ! $transaction instanceof Swap) {
             return $this;
         }
 
-        $this->sharePoolingHandler->handle($transaction);
+        if ($transaction->hasSharePoolingAsset()) {
+            $this->sharePoolingHandler->handle($transaction);
+        }
 
         return $this;
     }
@@ -80,12 +84,13 @@ class TransactionDispatcher
             return $this;
         }
 
-        $this->sharePoolingHandler->handle(new Transaction(
+        assert($transaction->fee?->currency instanceof Asset);
+
+        $this->sharePoolingHandler->handle(new Disposal(
             date: $transaction->date,
-            operation: Operation::Send,
-            marketValue: $transaction->feeMarketValue,
-            sentAsset: $transaction->feeCurrency,
-            sentQuantity: $transaction->feeQuantity,
+            asset: $transaction->fee->currency,
+            quantity: $transaction->fee->quantity,
+            marketValue: $transaction->fee->marketValue,
         ));
 
         return $this;

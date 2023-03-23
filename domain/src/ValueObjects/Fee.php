@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Domain\ValueObjects;
 
-use Domain\Enums\FiatCurrency;
+use Stringable;
 
-final readonly class Fee
+final readonly class Fee implements Stringable
 {
     public function __construct(
-        public FiatCurrency | Asset $currency,
+        public Asset $currency,
         public Quantity $quantity,
         public FiatAmount $marketValue,
     ) {
@@ -17,6 +17,11 @@ final readonly class Fee
 
     public function isFiat(): bool
     {
-        return $this->currency instanceof FiatCurrency;
+        return $this->currency->isFiat();
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s %s', (string) $this->currency, $this->quantity);
     }
 }

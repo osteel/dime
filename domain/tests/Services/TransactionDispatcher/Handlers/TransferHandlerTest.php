@@ -3,10 +3,9 @@
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\TaxYear;
-use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\ValueObjects\FiatAmount;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Transfer;
 
 beforeEach(function () {
     $this->taxYearRepository = Mockery::mock(TaxYearRepository::class);
@@ -19,10 +18,7 @@ it('can handle a transfer operation', function () {
     $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
     $this->taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
-    $transaction = Transaction::factory()
-        ->transfer()
-        ->withFee($fee = FiatAmount::GBP('10'))
-        ->make();
+    $transaction = Transfer::factory()->withFee($fee = FiatAmount::GBP('10'))->make();
 
     $this->transferHandler->handle($transaction);
 
@@ -33,14 +29,7 @@ it('can handle a transfer operation', function () {
 });
 
 it('can handle a transfer operation with no fee', function () {
-    $this->transferHandler->handle(Transaction::factory()->transfer()->make());
+    $this->transferHandler->handle(Transfer::factory()->make());
 
     $this->taxYearRepository->shouldNotHaveReceived('get');
-});
-
-it('cannot handle a transaction because the operation is not transfer', function () {
-    $transaction = Transaction::factory()->send()->make();
-
-    expect(fn () => $this->transferHandler->handle($transaction))
-        ->toThrow(TransferHandlerException::class, TransferHandlerException::notTransfer($transaction)->getMessage());
 });

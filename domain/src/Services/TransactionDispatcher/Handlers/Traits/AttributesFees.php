@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Domain\Services\TransactionDispatcher\Handlers\Traits;
 
 use Domain\ValueObjects\FiatAmount;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
 
 trait AttributesFees
 {
-    private function splitFees(Transaction $transaction): FiatAmount
+    private function splitFees(Acquisition | Disposal | Swap $transaction): FiatAmount
     {
-        // @phpstan-ignore-next-line
-        $amount = $transaction->hasFee() ? $transaction->feeMarketValue : $transaction->marketValue->zero();
+        $amount = $transaction->fee?->marketValue ?? $transaction->marketValue->zero();
 
-        // @phpstan-ignore-next-line
-        return $transaction->isSwap() && ! $transaction->oneAssetIsFiat() ? $amount->dividedBy('2') : $amount;
+        return $transaction instanceof Swap && ! $transaction->hasFiat() ? $amount->dividedBy('2') : $amount;
     }
 }

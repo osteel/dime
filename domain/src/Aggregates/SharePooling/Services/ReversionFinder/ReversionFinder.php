@@ -11,9 +11,7 @@ use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposals;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTransactions;
 use Domain\ValueObjects\Quantity;
 
-/**
- * This service identifies and returns the disposals that need to be reverted upon a new acquisition or disposal.
- */
+/** This service identifies and returns the disposals that need to be reverted upon a new acquisition or disposal. */
 final class ReversionFinder
 {
     public static function disposalsToRevertOnAcquisition(

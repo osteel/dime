@@ -10,9 +10,14 @@ use DateTime;
 use Domain\Enums\FiatCurrency;
 use Domain\Enums\Operation;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
+use Domain\ValueObjects\Asset;
+use Domain\ValueObjects\Fee;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
+use Domain\ValueObjects\Transactions\Transfer;
 
 class TransactionProcessor
 {
@@ -23,91 +28,64 @@ class TransactionProcessor
     /** @param array<string,string> $rawTransaction */
     public function process(array $rawTransaction): void
     {
-        match ($this->toOperation($rawTransaction['Operation'])) {
+        $transaction = match ($this->toOperation($rawTransaction['Operation'])) {
             Operation::Receive => $this->processReceive($rawTransaction),
             Operation::Send => $this->processSend($rawTransaction),
             Operation::Swap => $this->processSwap($rawTransaction),
             Operation::Transfer => $this->processTransfer($rawTransaction),
         };
-    }
-
-    /** @param array<string,string> $rawTransaction */
-    private function processReceive(array $rawTransaction): void
-    {
-        $transaction = new Transaction(
-            date: $this->toDate($rawTransaction['Date']),
-            operation: Operation::Receive,
-            marketValue: $this->toFiatAmount($rawTransaction['Market value']),
-            isIncome: $this->toBoolean($rawTransaction['Income']),
-            receivedAsset: $this->toAsset($rawTransaction['Received asset']),
-            receivedQuantity: $this->toQuantity($rawTransaction['Received quantity']),
-            receivedAssetIsNft: $this->toBoolean($rawTransaction['Received asset is NFT']),
-            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
-            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
-            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
-        );
 
         $this->transactionDispatcher->dispatch($transaction);
     }
 
     /** @param array<string,string> $rawTransaction */
-    private function processSend(array $rawTransaction): void
+    private function processReceive(array $rawTransaction): Acquisition
     {
-        $transaction = new Transaction(
+        return new Acquisition(
             date: $this->toDate($rawTransaction['Date']),
-            operation: Operation::Send,
+            asset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is NFT']),
+            quantity: $this->toQuantity($rawTransaction['Received quantity']),
             marketValue: $this->toFiatAmount($rawTransaction['Market value']),
+            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
             isIncome: $this->toBoolean($rawTransaction['Income']),
-            sentAsset: $this->toAsset($rawTransaction['Sent asset']),
-            sentQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
-            sentAssetIsNft: $this->toBoolean($rawTransaction['Sent asset is NFT']),
-            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
-            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
-            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
         );
-
-        $this->transactionDispatcher->dispatch($transaction);
     }
 
     /** @param array<string,string> $rawTransaction */
-    private function processSwap(array $rawTransaction): void
+    private function processSend(array $rawTransaction): Disposal
     {
-        $transaction = new Transaction(
+        return new Disposal(
             date: $this->toDate($rawTransaction['Date']),
-            operation: Operation::Swap,
+            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is NFT']),
+            quantity: $this->toQuantity($rawTransaction['Sent quantity']),
             marketValue: $this->toFiatAmount($rawTransaction['Market value']),
-            isIncome: $this->toBoolean($rawTransaction['Income']),
-            sentAsset: $this->toAsset($rawTransaction['Sent asset']),
-            sentQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
-            sentAssetIsNft: $this->toBoolean($rawTransaction['Sent asset is NFT']),
-            receivedAsset: $this->toAsset($rawTransaction['Received asset']),
-            receivedQuantity: $this->toQuantity($rawTransaction['Received quantity']),
-            receivedAssetIsNft: $this->toBoolean($rawTransaction['Received asset is NFT']),
-            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
-            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
-            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
+            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
         );
-
-        $this->transactionDispatcher->dispatch($transaction);
     }
 
     /** @param array<string,string> $rawTransaction */
-    private function processTransfer(array $rawTransaction): void
+    private function processSwap(array $rawTransaction): Swap
     {
-        $transaction = new Transaction(
+        return new Swap(
             date: $this->toDate($rawTransaction['Date']),
-            operation: Operation::Transfer,
+            disposedOfAsset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is NFT']),
+            disposedOfQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
+            acquiredAsset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is NFT']),
+            acquiredQuantity: $this->toQuantity($rawTransaction['Received quantity']),
             marketValue: $this->toFiatAmount($rawTransaction['Market value']),
-            isIncome: $this->toBoolean($rawTransaction['Income']),
-            sentAsset: $this->toAsset($rawTransaction['Sent asset']),
-            sentQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
-            sentAssetIsNft: $this->toBoolean($rawTransaction['Sent asset is NFT']),
-            feeCurrency: $this->toAsset($rawTransaction['Fee currency']),
-            feeQuantity: $this->toQuantity($rawTransaction['Fee quantity']),
-            feeMarketValue: $this->toFiatAmount($rawTransaction['Fee market value']),
+            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
         );
+    }
 
-        $this->transactionDispatcher->dispatch($transaction);
+    /** @param array<string,string> $rawTransaction */
+    private function processTransfer(array $rawTransaction): Transfer
+    {
+        return new Transfer(
+            date: $this->toDate($rawTransaction['Date']),
+            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is NFT']),
+            quantity: $this->toQuantity($rawTransaction['Sent quantity']),
+            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
+        );
     }
 
     private function toOperation(string $value): Operation
@@ -115,11 +93,15 @@ class TransactionProcessor
         return Operation::from($value);
     }
 
-    private function toFiatAmount(string $value): ?FiatAmount
+    /** @throws TransactionProcessorException */
+    private function toFiatAmount(string $value): FiatAmount
     {
-        return strlen($value) === 0 ? null : new FiatAmount($value, FiatCurrency::GBP);
+        return strlen($value) === 0
+            ? throw TransactionProcessorException::invalidAmount($value)
+            : new FiatAmount($value, FiatCurrency::GBP);
     }
 
+    /** @throws TransactionProcessorException */
     private function toDate(string $value): LocalDate
     {
         $date = DateTime::createFromFormat('d/m/Y', $value);
@@ -142,9 +124,21 @@ class TransactionProcessor
         return false;
     }
 
-    private function toAsset(string $value): ?string
+    /** @throws TransactionProcessorException */
+    private function toAsset(string $symbol, string $isNft = ''): Asset
     {
-        return empty($value) ? null : strtoupper(trim($value));
+        return empty($symbol)
+            ? throw TransactionProcessorException::invalidAsset($symbol)
+            : new Asset($symbol, $this->toBoolean($isNft));
+    }
+
+    private function toFee(string $symbol, string $quantity, string $marketValue): ?Fee
+    {
+        return empty($symbol) ? null : new Fee(
+            currency: $this->toAsset($symbol),
+            quantity: $this->toQuantity($quantity),
+            marketValue: $this->toFiatAmount($marketValue),
+        );
     }
 
     private function toQuantity(string $value): Quantity

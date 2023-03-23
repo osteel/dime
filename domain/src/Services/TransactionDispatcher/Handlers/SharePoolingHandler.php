@@ -10,7 +10,11 @@ use Domain\Aggregates\SharePooling\Repositories\SharePoolingRepository;
 use Domain\Aggregates\SharePooling\SharePoolingId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\SharePoolingHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Asset;
+use Domain\ValueObjects\Quantity;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
 
 class SharePoolingHandler
 {
@@ -21,59 +25,54 @@ class SharePoolingHandler
     }
 
     /** @throws SharePoolingHandlerException */
-    public function handle(Transaction $transaction): void
+    public function handle(Acquisition | Disposal | Swap $transaction): void
     {
-        $this->validate($transaction);
+        $transaction->hasSharePoolingAsset() || throw SharePoolingHandlerException::noSharePoolingAsset($transaction);
 
-        if ($transaction->sentAssetFallsUnderSharePooling()) {
-            $this->handleDisposal($transaction);
+        if ($transaction instanceof Acquisition) {
+            $this->handleAcquisition($transaction, $transaction->asset, $transaction->quantity);
+
+            return;
         }
 
-        if ($transaction->receivedAssetFallsUnderSharePooling()) {
-            $this->handleAcquisition($transaction);
+        if ($transaction instanceof Disposal) {
+            $this->handleDisposal($transaction, $transaction->asset, $transaction->quantity);
+
+            return;
+        }
+
+        if ($transaction->acquiredAssetIsSharePoolingAsset()) {
+            $this->handleAcquisition($transaction, $transaction->acquiredAsset, $transaction->acquiredQuantity);
+        }
+
+        if ($transaction->disposedOfAssetIsSharePoolingAsset()) {
+            $this->handleDisposal($transaction, $transaction->disposedOfAsset, $transaction->disposedOfQuantity);
         }
     }
 
-    /** @throws SharePoolingHandlerException */
-    private function validate(Transaction $transaction): void
+    private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
     {
-        $transaction->isReceive()
-            || $transaction->isSend()
-            || $transaction->isSwap()
-            || throw SharePoolingHandlerException::unsupportedOperation($transaction);
-
-        $transaction->receivedAssetIsNft
-            && $transaction->sentAssetIsNft
-            && throw SharePoolingHandlerException::bothNfts($transaction);
-    }
-
-    private function handleDisposal(Transaction $transaction): void
-    {
-        assert($transaction->sentAsset !== null);
-
-        $sharePoolingId = SharePoolingId::fromAssetSymbol($transaction->sentAsset);
+        $sharePoolingId = SharePoolingId::fromAsset($asset);
         $sharePooling = $this->sharePoolingRepository->get($sharePoolingId);
 
         $sharePooling->disposeOf(new DisposeOfSharePoolingToken(
             date: $transaction->date,
-            quantity: $transaction->sentQuantity,
-            proceeds: $transaction->marketValue->minus($this->splitFees($transaction)), // @phpstan-ignore-line
+            quantity: $quantity,
+            proceeds: $transaction->marketValue->minus($this->splitFees($transaction)),
         ));
 
         $this->sharePoolingRepository->save($sharePooling);
     }
 
-    private function handleAcquisition(Transaction $transaction): void
+    private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
     {
-        assert($transaction->receivedAsset !== null);
-
-        $sharePoolingId = SharePoolingId::fromAssetSymbol($transaction->receivedAsset);
+        $sharePoolingId = SharePoolingId::fromAsset($asset);
         $sharePooling = $this->sharePoolingRepository->get($sharePoolingId);
 
         $sharePooling->acquire(new AcquireSharePoolingToken(
             date: $transaction->date,
-            quantity: $transaction->receivedQuantity,
-            costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
+            quantity: $quantity,
+            costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),
         ));
 
         $this->sharePoolingRepository->save($sharePooling);

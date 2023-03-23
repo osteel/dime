@@ -23,9 +23,7 @@ use LaravelZero\Framework\Application;
 
 class SharePoolingServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    /** Register any application services. */
     public function register(): void
     {
         // @phpstan-ignore-next-line

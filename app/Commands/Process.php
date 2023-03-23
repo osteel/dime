@@ -24,9 +24,7 @@ class Process extends Command
      */
     protected $description = 'Process a spreadsheet of transactions';
 
-    /**
-     * Execute the console command.
-     */
+    /** Execute the console command. */
     public function handle(TransactionReader $transactionReader, TransactionProcessor $transactionProcessor): int
     {
         $spreadsheet = $this->argument('spreadsheet');

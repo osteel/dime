@@ -9,7 +9,7 @@ use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Transfer;
 
 class TransferHandler
 {
@@ -18,11 +18,9 @@ class TransferHandler
     }
 
     /** @throws TransferHandlerException */
-    public function handle(Transaction $transaction): void
+    public function handle(Transfer $transaction): void
     {
-        $this->validate($transaction);
-
-        if (! $transaction->hasFee()) {
+        if (is_null($transaction->fee)) {
             return;
         }
 
@@ -33,15 +31,9 @@ class TransferHandler
         $taxYearAggregate->updateNonAttributableAllowableCost(new UpdateNonAttributableAllowableCost(
             taxYear: $taxYear,
             date: $transaction->date,
-            nonAttributableAllowableCost: $transaction->feeMarketValue, // @phpstan-ignore-line
+            nonAttributableAllowableCost: $transaction->fee->marketValue,
         ));
 
         $this->taxYearRepository->save($taxYearAggregate);
-    }
-
-    /** @throws TransferHandlerException */
-    private function validate(Transaction $transaction): void
-    {
-        $transaction->isTransfer() || throw TransferHandlerException::notTransfer($transaction);
     }
 }

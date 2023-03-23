@@ -10,6 +10,9 @@ use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NftHandlerExceptio
 use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
 
 beforeEach(function () {
     $this->nftRepository = Mockery::mock(NftRepository::class);
@@ -23,7 +26,7 @@ it('can handle a receive operation', function () {
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
     /** @var Transaction */
-    $transaction = Transaction::factory()->receiveNft()->make([
+    $transaction = Acquisition::factory()->nft()->make([
         'date' => LocalDate::parse('2015-10-21'),
         'marketValue' => FiatAmount::GBP('50'),
     ]);
@@ -44,8 +47,8 @@ it('can handle a receive operation with a fee', function () {
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
     /** @var Transaction */
-    $transaction = Transaction::factory()
-        ->receiveNft()
+    $transaction = Acquisition::factory()
+        ->nft()
         ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
@@ -67,7 +70,7 @@ it('can handle a send operation', function () {
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
-    $transaction = Transaction::factory()->sendNft()->make([
+    $transaction = Disposal::factory()->nft()->make([
         'date' => LocalDate::parse('2015-10-21'),
         'marketValue' => FiatAmount::GBP('50'),
     ]);
@@ -87,8 +90,8 @@ it('can handle a send operation with a fee', function () {
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
-    $transaction = Transaction::factory()
-        ->sendNft()
+    $transaction = Disposal::factory()
+        ->nft()
         ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
@@ -110,7 +113,7 @@ it('can handle a swap operation where the received asset is a NFT', function () 
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
-    $transaction = Transaction::factory()->swapToNft()->make([
+    $transaction = Swap::factory()->toNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
         'marketValue' => FiatAmount::GBP('50'),
     ]);
@@ -130,7 +133,7 @@ it('can handle a swap operation where the sent asset is a NFT', function () {
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
-    $transaction = Transaction::factory()->swapFromNft()->make([
+    $transaction = Swap::factory()->fromNft()->make([
         'date' => LocalDate::parse('2015-10-21'),
         'marketValue' => FiatAmount::GBP('50'),
     ]);
@@ -150,7 +153,7 @@ it('can handle a swap operation where both assets are NFTs', function () {
     $this->nftRepository->shouldReceive('get')->twice()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->twice()->with($nft);
 
-    $transaction = Transaction::factory()->swapNfts()->make([
+    $transaction = Swap::factory()->nfts()->make([
         'date' => LocalDate::parse('2015-10-21'),
         'marketValue' => FiatAmount::GBP('50'),
     ]);
@@ -176,7 +179,7 @@ it('can handle a swap operation where both assets are NFTs and the received NFT 
     $this->nftRepository->shouldReceive('get')->twice()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->twice()->with($nft);
 
-    $transaction = Transaction::factory()->swapNfts()->make([
+    $transaction = Swap::factory()->nfts()->make([
         'date' => LocalDate::parse('2015-10-21'),
         'marketValue' => FiatAmount::GBP('50'),
     ]);
@@ -204,8 +207,8 @@ it('can handle a swap operation with a fee', function () {
     $this->nftRepository->shouldReceive('get')->twice()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->twice()->with($nft);
 
-    $transaction = Transaction::factory()
-        ->swapNfts()
+    $transaction = Swap::factory()
+        ->nfts()
         ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
@@ -233,9 +236,9 @@ it('can handle a swap operation with a fee where the received asset is a NFT and
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
-    $transaction = Transaction::factory()
-        ->swapToNft()
-        ->swapFromFiat()
+    $transaction = Swap::factory()
+        ->toNft()
+        ->fromFiat()
         ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
@@ -257,9 +260,9 @@ it('can handle a swap operation with a fee where the sent asset is a NFT and the
     $this->nftRepository->shouldReceive('get')->once()->andReturn($nft);
     $this->nftRepository->shouldReceive('save')->once()->with($nft);
 
-    $transaction = Transaction::factory()
-        ->swapFromNft()
-        ->swapToFiat()
+    $transaction = Swap::factory()
+        ->fromNft()
+        ->toFiat()
         ->withFee(FiatAmount::GBP('10'))
         ->make([
             'date' => LocalDate::parse('2015-10-21'),
@@ -275,15 +278,8 @@ it('can handle a swap operation with a fee where the sent asset is a NFT and the
     )->once();
 });
 
-it('cannot handle a transaction because the operation is not supported', function () {
-    $transaction = Transaction::factory()->transfer()->make();
-
-    expect(fn () => $this->nftHandler->handle($transaction))
-        ->toThrow(NftHandlerException::class, NftHandlerException::unsupportedOperation($transaction)->getMessage());
-});
-
 it('cannot handle a transaction because none of the assets is a NFT', function () {
-    $transaction = Transaction::factory()->swap()->make();
+    $transaction = Swap::factory()->make();
 
     expect(fn () => $this->nftHandler->handle($transaction))
         ->toThrow(NftHandlerException::class, NftHandlerException::noNft($transaction)->getMessage());
