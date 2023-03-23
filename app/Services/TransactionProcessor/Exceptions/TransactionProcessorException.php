@@ -17,4 +17,14 @@ final class TransactionProcessorException extends RuntimeException
     {
         return new self(sprintf('Could not parse date from value %s', $value));
     }
+
+    public static function invalidAsset(string $value): self
+    {
+        return new self(sprintf('Invalid asset value %s', $value));
+    }
+
+    public static function invalidAmount(string $value): self
+    {
+        return new self(sprintf('Invalid amount value %s', $value));
+    }
 }

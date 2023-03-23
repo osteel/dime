@@ -5,8 +5,14 @@ use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
+use Domain\Tests\Factories\ValueObjects\Transactions\TransactionFactory;
+use Domain\Tests\Factories\ValueObjects\Transactions\TransferFactory;
 use Domain\ValueObjects\FiatAmount;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
+use Domain\ValueObjects\Transactions\Transaction;
+use Domain\ValueObjects\Transactions\Transfer;
 
 beforeEach(function () {
     $this->incomeHandler = Mockery::spy(IncomeHandler::class);
@@ -23,7 +29,7 @@ beforeEach(function () {
 });
 
 it('can dispatch to the income handler', function () {
-    $transaction = Transaction::factory()->income()->make();
+    $transaction = Acquisition::factory()->income()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -33,8 +39,8 @@ it('can dispatch to the income handler', function () {
     $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
 });
 
-it('can dispatch to the transfer handler', function (string $method) {
-    $transaction = Transaction::factory()->$method()->make();
+it('can dispatch to the transfer handler', function (bool $isNft) {
+    $transaction = Transfer::factory()->when($isNft, fn ($factory) => $factory->nft())->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -43,12 +49,12 @@ it('can dispatch to the transfer handler', function (string $method) {
     $this->nftHandler->shouldNotHaveReceived('handle');
     $this->sharePoolingHandler->shouldNotHaveReceived('handle');
 })->with([
-    'transfer' => ['transfer'],
-    'transfer NFT' => ['transferNft'],
+    'share pooling asset' => false,
+    'NFT' => true,
 ]);
 
-it('can dispatch to the NFT handler', function (string $method, bool $sharePoolingHandler) {
-    $transaction = Transaction::factory()->$method()->make();
+it('can dispatch to the NFT handler', function (TransactionFactory $factory, string $method, bool $sharePoolingHandler) {
+    $transaction = $factory->$method()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -62,15 +68,15 @@ it('can dispatch to the NFT handler', function (string $method, bool $sharePooli
         $this->sharePoolingHandler->shouldNotHaveReceived('handle');
     }
 })->with([
-    'send NFT' => ['sendNft', false],
-    'receive NFT' => ['receiveNft', false],
-    'acquire NFT' => ['swapToNft', true],
-    'dispose of NFT' => ['swapFromNft', true],
-    'swap NFTs' => ['swapNfts', false],
+    'dispose of NFT' => [Disposal::factory(), 'nft', false],
+    'acquire NFT' => [Acquisition::factory(), 'nft', false],
+    'swap to NFT' => [Swap::factory(), 'toNft', true],
+    'swap from NFT' => [Swap::factory(), 'fromNft', true],
+    'swap NFTs' => [Swap::factory(), 'nfts', false],
 ]);
 
-it('can dispatch to the share pooling handler', function (string $method, bool $nftHandler) {
-    $transaction = Transaction::factory()->$method()->make();
+it('can dispatch to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $nftHandler) {
+    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -90,17 +96,17 @@ it('can dispatch to the share pooling handler', function (string $method, bool $
 
     $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
 })->with([
-    'send' => ['send', false],
-    'receive' => ['receive', false],
-    'swap' => ['swap', false],
-    'income' => ['income', false],
-    'acquire NFT' => ['swapToNft', true],
-    'dispose of NFT' => ['swapFromNft', true],
+    'dispose of' => [Disposal::factory(), null, false],
+    'acquire' => [Acquisition::factory(), null, false],
+    'swap' => [Swap::factory(), null, false],
+    'income' => [Acquisition::factory(), 'income', false],
+    'swap to NFT' => [Swap::factory(), 'toNft', true],
+    'swap from NFT' => [Swap::factory(), 'fromNft', true],
 ]);
 
-it('can dispatch the fee to the share pooling handler', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('can dispatch the fee to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
-    $transaction = Transaction::factory()->$method()->withFee()->make();
+    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -110,7 +116,7 @@ it('can dispatch the fee to the share pooling handler', function (string $method
         $this->incomeHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($method === 'transfer') {
+    if ($factory instanceof TransferFactory) {
         $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->transferHandler->shouldNotHaveReceived('handle');
@@ -128,24 +134,24 @@ it('can dispatch the fee to the share pooling handler', function (string $method
 
     $this->sharePoolingHandler->shouldHaveReceived(
         'handle',
-        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
-            && $feeTransaction->marketValue->isEqualTo($transaction->feeMarketValue),
+        fn (Transaction $feeTransaction) => $feeTransaction instanceof Disposal
+            && $feeTransaction->marketValue->isEqualTo($transaction->fee->marketValue),
     )->once();
 })->with([
-    'send' => ['send', true, false],
-    'receive' => ['receive', true, false],
-    'swap' => ['swap', true, false],
-    'income' => ['income', true, false],
-    'transfer' => ['transfer', false, false],
-    'send NFT' => ['sendNft', false, true],
-    'receive NFT' => ['receiveNft', false, true],
-    'acquire NFT' => ['swapToNft', false, true],
-    'dispose of NFT' => ['swapFromNft', false, true],
+    'dispose of' => [Disposal::factory(), null, true, false],
+    'acquire' => [Acquisition::factory(), null, true, false],
+    'swap' => [Swap::factory(), null, true, false],
+    'income' => [Acquisition::factory(), 'income', true, false],
+    'transfer' => [Transfer::factory(), null, false, false],
+    'dispose of NFT' => [Disposal::factory(), 'nft', false, true],
+    'acquire NFT' => [Acquisition::factory(), 'nft', false, true],
+    'swap to NFT' => [Swap::factory(), 'toNft', false, true],
+    'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is zero', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('does not dispatch the fee to the share pooling handler when it is zero', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
-    $transaction = Transaction::factory()->$method()->withFee(FiatAmount::GBP('0'))->make();
+    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee(FiatAmount::GBP('0'))->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -155,7 +161,7 @@ it('does not dispatch the fee to the share pooling handler when it is zero', fun
         $this->incomeHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($method === 'transfer') {
+    if ($factory instanceof TransferFactory) {
         $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->transferHandler->shouldNotHaveReceived('handle');
@@ -173,24 +179,24 @@ it('does not dispatch the fee to the share pooling handler when it is zero', fun
 
     $this->sharePoolingHandler->shouldNotHaveReceived(
         'handle',
-        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
-            && $feeTransaction->marketValue->isEqualTo($transaction->feeMarketValue),
+        fn (Transaction $feeTransaction) => $feeTransaction instanceof Disposal
+            && $feeTransaction->marketValue->isEqualTo($transaction->fee->marketValue),
     );
 })->with([
-    'send' => ['send', true, false],
-    'receive' => ['receive', true, false],
-    'swap' => ['swap', true, false],
-    'income' => ['income', true, false],
-    'transfer' => ['transfer', false, false],
-    'send NFT' => ['sendNft', false, true],
-    'receive NFT' => ['receiveNft', false, true],
-    'acquire NFT' => ['swapToNft', false, true],
-    'dispose of NFT' => ['swapFromNft', false, true],
+    'dispose of' => [Disposal::factory(), null, true, false],
+    'acquire' => [Acquisition::factory(), null, true, false],
+    'swap' => [Swap::factory(), null, true, false],
+    'income' => [Acquisition::factory(), 'income', true, false],
+    'transfer' => [Transfer::factory(), null, false, false],
+    'dispose of NFT' => [Disposal::factory(), 'nft', false, true],
+    'acquire NFT' => [Acquisition::factory(), 'nft', false, true],
+    'swap to NFT' => [Swap::factory(), 'toNft', false, true],
+    'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is in fiat', function (string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('does not dispatch the fee to the share pooling handler when it is fiat', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
     /** @var Transaction */
-    $transaction = Transaction::factory()->$method()->withFeeInFiat()->make();
+    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFeeInFiat()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -200,7 +206,7 @@ it('does not dispatch the fee to the share pooling handler when it is in fiat', 
         $this->incomeHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($method === 'transfer') {
+    if ($factory instanceof TransferFactory) {
         $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
         $this->transferHandler->shouldNotHaveReceived('handle');
@@ -218,17 +224,17 @@ it('does not dispatch the fee to the share pooling handler when it is in fiat', 
 
     $this->sharePoolingHandler->shouldNotHaveReceived(
         'handle',
-        fn (Transaction $feeTransaction) => $feeTransaction->isSend()
-            && $feeTransaction->marketValue->isEqualTo($transaction->feeMarketValue),
+        fn (Transaction $feeTransaction) => $feeTransaction instanceof Disposal
+            && $feeTransaction->marketValue->isEqualTo($transaction->fee->marketValue),
     );
 })->with([
-    'send' => ['send', true, false],
-    'receive' => ['receive', true, false],
-    'swap' => ['swap', true, false],
-    'income' => ['income', true, false],
-    'transfer' => ['transfer', false, false],
-    'send NFT' => ['sendNft', false, true],
-    'receive NFT' => ['receiveNft', false, true],
-    'acquire NFT' => ['swapToNft', false, true],
-    'dispose of NFT' => ['swapFromNft', false, true],
+    'dispose of' => [Disposal::factory(), null, true, false],
+    'acquire' => [Acquisition::factory(), null, true, false],
+    'swap' => [Swap::factory(), null, true, false],
+    'income' => [Acquisition::factory(), 'income', true, false],
+    'transfer' => [Transfer::factory(), null, false, false],
+    'dispose of NFT' => [Disposal::factory(), 'nft', false, true],
+    'acquire NFT' => [Acquisition::factory(), 'nft', false, true],
+    'swap to NFT' => [Swap::factory(), 'toNft', false, true],
+    'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
 ]);

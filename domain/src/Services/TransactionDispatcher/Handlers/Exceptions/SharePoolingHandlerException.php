@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Services\TransactionDispatcher\Handlers\Exceptions;
 
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Transaction;
 use RuntimeException;
 
 final class SharePoolingHandlerException extends RuntimeException
@@ -14,13 +14,8 @@ final class SharePoolingHandlerException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function unsupportedOperation(Transaction $transaction): self
+    public static function noSharePoolingAsset(Transaction $transaction): self
     {
-        return new self(sprintf('Unsupported transaction operation: %s', $transaction->__toString()));
-    }
-
-    public static function bothNfts(Transaction $transaction): self
-    {
-        return new self(sprintf('Both assets are NFTs: %s', $transaction->__toString()));
+        return new self(sprintf('This transaction does not include a share pooling asset: %s', $transaction->__toString()));
     }
 }

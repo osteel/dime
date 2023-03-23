@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Services\TransactionDispatcher\Handlers\Exceptions;
 
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Transaction;
 use RuntimeException;
 
 final class TransferHandlerException extends RuntimeException

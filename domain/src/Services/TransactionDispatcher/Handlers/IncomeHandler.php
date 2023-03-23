@@ -9,7 +9,7 @@ use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\IncomeHandlerException;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Acquisition;
 
 class IncomeHandler
 {
@@ -18,9 +18,9 @@ class IncomeHandler
     }
 
     /** @throws IncomeHandlerException */
-    public function handle(Transaction $transaction): void
+    public function handle(Acquisition $transaction): void
     {
-        $this->validate($transaction);
+        $transaction->isIncome || throw IncomeHandlerException::notIncome($transaction);
 
         $taxYear = TaxYearNormaliser::fromDate($transaction->date);
         $taxYearId = TaxYearId::fromTaxYear($taxYear);
@@ -29,16 +29,9 @@ class IncomeHandler
         $taxYearAggregate->updateIncome(new UpdateIncome(
             taxYear: $taxYear,
             date: $transaction->date,
-            income: $transaction->marketValue, // @phpstan-ignore-line
+            income: $transaction->marketValue,
         ));
 
         $this->taxYearRepository->save($taxYearAggregate);
-    }
-
-    /** @throws IncomeHandlerException */
-    private function validate(Transaction $transaction): void
-    {
-        $transaction->isReceive() || throw IncomeHandlerException::operationIsNotReceive($transaction);
-        $transaction->isIncome || throw IncomeHandlerException::notIncome($transaction);
     }
 }

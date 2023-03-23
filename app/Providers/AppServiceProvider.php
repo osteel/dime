@@ -12,9 +12,7 @@ use LaravelZero\Framework\Application;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    /** Register any application services. */
     public function register(): void
     {
         $this->app->singleton(TransactionReader::class, fn (Application $app) => new PhpSpreadsheetAdapter());

@@ -11,7 +11,10 @@ use Domain\Aggregates\Nft\Repositories\NftRepository;
 use Domain\Aggregates\Nft\NftId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NftHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Asset;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
 
 class NftHandler
 {
@@ -22,61 +25,60 @@ class NftHandler
     }
 
     /** @throws NftHandlerException */
-    public function handle(Transaction $transaction): void
+    public function handle(Acquisition | Disposal | Swap $transaction): void
     {
-        $this->validate($transaction);
+        $transaction->hasNft() || throw NftHandlerException::noNft($transaction);
 
-        if ($transaction->sentAssetIsNft) {
-            $this->handleDisposal($transaction);
+        if ($transaction instanceof Acquisition && $transaction->asset->isNft) {
+            $this->handleAcquisition($transaction, $transaction->asset);
+
+            return;
         }
 
-        if ($transaction->receivedAssetIsNft) {
-            $this->handleAcquisition($transaction);
+        if ($transaction instanceof Disposal && $transaction->asset->isNft) {
+            $this->handleDisposal($transaction, $transaction->asset);
+
+            return;
+        }
+
+        assert($transaction instanceof Swap);
+
+        if ($transaction->acquiredAsset->isNft) {
+            $this->handleAcquisition($transaction, $transaction->acquiredAsset);
+        }
+
+        if ($transaction->disposedOfAsset->isNft) {
+            $this->handleDisposal($transaction, $transaction->disposedOfAsset);
         }
     }
 
-    /** @throws NftHandlerException */
-    private function validate(Transaction $transaction): void
+    private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset): void
     {
-        $transaction->isReceive()
-            || $transaction->isSend()
-            || $transaction->isSwap()
-            || throw NftHandlerException::unsupportedOperation($transaction);
-
-        $transaction->receivedAssetIsNft || $transaction->sentAssetIsNft || throw NftHandlerException::noNft($transaction);
-    }
-
-    private function handleDisposal(Transaction $transaction): void
-    {
-        assert($transaction->sentAsset !== null);
-
-        $nftId = NftId::fromNftId($transaction->sentAsset);
+        $nftId = NftId::fromNftId((string) $asset);
         $nft = $this->nftRepository->get($nftId);
 
         $nft->disposeOf(new DisposeOfNft(
             date: $transaction->date,
-            proceeds: $transaction->marketValue->minus($this->splitFees($transaction)), // @phpstan-ignore-line
+            proceeds: $transaction->marketValue->minus($this->splitFees($transaction)),
         ));
 
         $this->nftRepository->save($nft);
     }
 
-    private function handleAcquisition(Transaction $transaction): void
+    private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset): void
     {
-        assert($transaction->receivedAsset !== null);
-
-        $nftId = NftId::fromNftId($transaction->receivedAsset);
+        $nftId = NftId::fromNftId((string) $asset);
         $nft = $this->nftRepository->get($nftId);
 
         if ($nft->isAlreadyAcquired()) {
             $nft->increaseCostBasis(new IncreaseNftCostBasis(
                 date: $transaction->date,
-                costBasisIncrease: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
+                costBasisIncrease: $transaction->marketValue->plus($this->splitFees($transaction)),
             ));
         } else {
             $nft->acquire(new AcquireNft(
                 date: $transaction->date,
-                costBasis: $transaction->marketValue->plus($this->splitFees($transaction)), // @phpstan-ignore-line
+                costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),
             ));
         }
 

@@ -9,9 +9,7 @@ use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<TaxYearSummary>
- */
+/** @extends Factory<TaxYearSummary> */
 class TaxYearSummaryFactory extends Factory
 {
     /** @var string */

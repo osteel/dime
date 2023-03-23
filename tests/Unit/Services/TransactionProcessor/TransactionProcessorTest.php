@@ -4,7 +4,10 @@ use App\Services\TransactionProcessor\TransactionProcessor;
 use Domain\Enums\FiatCurrency;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
 use Domain\ValueObjects\FiatAmount;
-use Domain\ValueObjects\Transaction;
+use Domain\ValueObjects\Transactions\Acquisition;
+use Domain\ValueObjects\Transactions\Disposal;
+use Domain\ValueObjects\Transactions\Swap;
+use Domain\ValueObjects\Transactions\Transfer;
 
 beforeEach(function () {
     $this->transactionDispatcher = Mockery::spy(TransactionDispatcher::class);
@@ -32,15 +35,14 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
-        fn (Transaction $transaction) => $transaction->date->__toString() === '2015-10-21'
-            && $transaction->isReceive()
+        fn (Acquisition $transaction) => $transaction->date->__toString() === '2015-10-21'
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
-            && $transaction->receivedAsset === 'BTC'
-            && $transaction->receivedQuantity->isEqualTo('1')
-            && $transaction->receivedAssetIsNft === false
-            && $transaction->feeCurrency === 'GBP'
-            && $transaction->feeIsFiat()
-            && $transaction->feeQuantity->isEqualTo('20')
+            && $transaction->asset->symbol === 'BTC'
+            && $transaction->quantity->isEqualTo('1')
+            && $transaction->asset->isNft === false
+            && (string) $transaction->fee->currency === 'GBP'
+            && $transaction->fee->isFiat()
+            && $transaction->fee->quantity->isEqualTo('20')
             && $transaction->isIncome === true,
     )->once();
 });
@@ -66,16 +68,14 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
-        fn (Transaction $transaction) => $transaction->date->__toString() === '2015-10-21'
-            && $transaction->isSend()
+        fn (Disposal $transaction) => $transaction->date->__toString() === '2015-10-21'
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
-            && $transaction->sentAsset === 'BTC'
-            && $transaction->sentQuantity->isEqualTo('1')
-            && $transaction->sentAssetIsNft === false
-            && $transaction->feeCurrency === 'BTC'
-            && $transaction->feeIsFiat() === false
-            && $transaction->feeQuantity->isEqualTo('0.001')
-            && $transaction->isIncome === false,
+            && $transaction->asset->symbol === 'BTC'
+            && $transaction->quantity->isEqualTo('1')
+            && $transaction->asset->isNft === false
+            && (string) $transaction->fee->currency === 'BTC'
+            && $transaction->fee->isFiat() === false
+            && $transaction->fee->quantity->isEqualTo('0.001'),
     )->once();
 });
 
@@ -100,17 +100,15 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
-        fn (Transaction $transaction) => $transaction->date->__toString() === '2015-10-21'
-            && $transaction->isSwap()
+        fn (Swap $transaction) => $transaction->date->__toString() === '2015-10-21'
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
-            && $transaction->sentAsset === 'ETH'
-            && $transaction->sentQuantity->isEqualTo('5')
-            && $transaction->sentAssetIsNft === false
-            && $transaction->receivedAsset === 'BTC'
-            && $transaction->receivedQuantity->isEqualTo('1')
-            && $transaction->receivedAssetIsNft === false
-            && is_null($transaction->feeCurrency)
-            && $transaction->isIncome === false,
+            && $transaction->disposedOfAsset->symbol === 'ETH'
+            && $transaction->disposedOfQuantity->isEqualTo('5')
+            && $transaction->disposedOfAsset->isNft === false
+            && $transaction->acquiredAsset->symbol === 'BTC'
+            && $transaction->acquiredQuantity->isEqualTo('1')
+            && $transaction->acquiredAsset->isNft === false
+            && is_null($transaction->fee)
     )->once();
 });
 
@@ -118,7 +116,7 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
     $transaction = [
         'Date' => '21/10/2015',
         'Operation' => 'transfer',
-        'Market value' => '1000',
+        'Market value' => '',
         'Sent asset' => '0x123456789',
         'Sent quantity' => '1',
         'Sent asset is NFT' => 'TRUE',
@@ -135,13 +133,10 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
 
     $this->transactionDispatcher->shouldHaveReceived(
         'dispatch',
-        fn (Transaction $transaction) => $transaction->date->__toString() === '2015-10-21'
-            && $transaction->isTransfer()
-            && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
-            && $transaction->sentAsset === '0X123456789'
-            && $transaction->sentQuantity->isEqualTo('1')
-            && $transaction->sentAssetIsNft === true
-            && is_null($transaction->feeCurrency)
-            && $transaction->isIncome === false,
+        fn (Transfer $transaction) => $transaction->date->__toString() === '2015-10-21'
+            && $transaction->asset->symbol === '0x123456789'
+            && $transaction->quantity->isEqualTo('1')
+            && $transaction->asset->isNft === true
+            && is_null($transaction->fee),
     )->once();
 });
