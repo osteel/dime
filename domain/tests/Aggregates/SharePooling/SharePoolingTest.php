@@ -94,6 +94,33 @@ it('cannot acquire more of the same share pooling tokens because currencies don\
         ->expectToFail($cannotAcquireSharePoolingToken);
 });
 
+it('cannot acquire more of the same share pooling tokens because the transaction is older than the previous one', function () {
+    $someSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
+        sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
+            date: LocalDate::parse('2015-10-21'),
+            quantity: new Quantity('100'),
+            costBasis: FiatAmount::GBP('100'),
+        ),
+    );
+
+    $acquireMoreSharePoolingToken = new AcquireSharePoolingToken(
+        date: LocalDate::parse('2015-10-20'),
+        quantity: new Quantity('100'),
+        costBasis: FiatAmount::GBP('100'),
+    );
+
+    $cannotAcquireSharePoolingToken = SharePoolingException::olderThanPreviousTransaction(
+        sharePoolingId: $this->aggregateRootId,
+        action: $acquireMoreSharePoolingToken,
+        previousTransactionDate: $someSharePoolingTokenAcquired->sharePoolingTokenAcquisition->date,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($someSharePoolingTokenAcquired)
+        ->when($acquireMoreSharePoolingToken)
+        ->expectToFail($cannotAcquireSharePoolingToken);
+});
+
 it('can dispose of some share pooling tokens', function () {
     $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
@@ -145,6 +172,33 @@ it('cannot dispose of some share pooling tokens because currencies don\'t match'
         sharePoolingId: $this->aggregateRootId,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($sharePoolingTokenAcquired)
+        ->when($disposeOfSharePoolingToken)
+        ->expectToFail($cannotDisposeOfSharePoolingToken);
+});
+
+it('cannot dispose of some share pooling tokens because the transaction is older than the previous one', function () {
+    $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
+        sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
+            date: LocalDate::parse('2015-10-21'),
+            quantity: new Quantity('100'),
+            costBasis: FiatAmount::GBP('100'),
+        ),
+    );
+
+    $disposeOfSharePoolingToken = new DisposeOfSharePoolingToken(
+        date: LocalDate::parse('2015-10-20'),
+        quantity: new Quantity('100'),
+        proceeds: FiatAmount::GBP('100'),
+    );
+
+    $cannotDisposeOfSharePoolingToken = SharePoolingException::olderThanPreviousTransaction(
+        sharePoolingId: $this->aggregateRootId,
+        action: $disposeOfSharePoolingToken,
+        previousTransactionDate: $sharePoolingTokenAcquired->sharePoolingTokenAcquisition->date,
     );
 
     /** @var AggregateRootTestCase $this */
