@@ -85,6 +85,29 @@ it('cannot increase the cost basis of a NFT that has not been acquired', functio
         ->expectToFail($cannotIncreaseCostBasis);
 });
 
+it('cannot increase the cost basis of a NFT because the transaction is older than the previous one', function () {
+    $nftAcquired = new NftAcquired(
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+    );
+
+    $increaseNftCostBasis = new IncreaseNftCostBasis(
+        date: LocalDate::parse('2015-10-20'),
+        costBasisIncrease: FiatAmount::GBP('100'),
+    );
+
+    $cannotIncreaseCostBasis = NftException::olderThanPreviousTransaction(
+        $this->aggregateRootId,
+        $increaseNftCostBasis,
+        $nftAcquired->date,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($nftAcquired)
+        ->when($increaseNftCostBasis)
+        ->expectToFail($cannotIncreaseCostBasis);
+});
+
 it('cannot increase the cost basis of a NFT because the currency is different', function () {
     $nftAcquired = new NftAcquired(
         date: LocalDate::parse('2015-10-21'),
@@ -141,5 +164,28 @@ it('cannot dispose of a NFT that has not been acquired', function () {
 
     /** @var AggregateRootTestCase $this */
     $this->when($disposeOfNft)
+        ->expectToFail($cannotDisposeOf);
+});
+
+it('cannot dispose of a NFT because the transaction is older than the previous one', function () {
+    $nftAcquired = new NftAcquired(
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+    );
+
+    $disposeOfNft = new DisposeOfNft(
+        date: LocalDate::parse('2015-10-20'),
+        proceeds: FiatAmount::GBP('150'),
+    );
+
+    $cannotDisposeOf = NftException::olderThanPreviousTransaction(
+        $this->aggregateRootId,
+        $disposeOfNft,
+        $nftAcquired->date,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($nftAcquired)
+        ->when($disposeOfNft)
         ->expectToFail($cannotDisposeOf);
 });
