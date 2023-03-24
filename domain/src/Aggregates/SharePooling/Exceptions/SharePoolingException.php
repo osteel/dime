@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePooling\Exceptions;
 
-use Domain\Enums\FiatCurrency;
+use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePooling\SharePoolingId;
+use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\Quantity;
 use RuntimeException;
+use Stringable;
 
 final class SharePoolingException extends RuntimeException
 {
@@ -18,27 +20,40 @@ final class SharePoolingException extends RuntimeException
 
     public static function cannotAcquireFromDifferentCurrency(
         SharePoolingId $sharePoolingId,
-        FiatCurrency $from,
+        ?FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Cannot acquire more of section 104 pool %s tokens because the currencies don\'t match (from %s to %s)',
+            'Cannot acquire more %s tokens because the currencies don\'t match (from %s to %s)',
             $sharePoolingId->toString(),
-            $from->name(),
+            $from?->name() ?? 'undefined',
             $to->name(),
         ));
     }
 
     public static function cannotDisposeOfFromDifferentCurrency(
         SharePoolingId $sharePoolingId,
-        FiatCurrency $from,
+        ?FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Cannot dispose of section 104 pool %s tokens because the currencies don\'t match (from %s to %s)',
+            'Cannot dispose of %s tokens because the currencies don\'t match (from %s to %s)',
             $sharePoolingId->toString(),
-            $from->name(),
+            $from?->name() ?? 'undefined',
             $to->name(),
+        ));
+    }
+
+    public static function olderThanPreviousTransaction(
+        SharePoolingId $sharePoolingId,
+        Stringable $action,
+        LocalDate $previousTransactionDate,
+    ): self {
+        return new self(sprintf(
+            'This %s share pooling token transaction appears to be older than the previous one (%s): %s',
+            $sharePoolingId->toString(),
+            (string) $previousTransactionDate,
+            (string) $action,
         ));
     }
 
@@ -48,7 +63,7 @@ final class SharePoolingException extends RuntimeException
         Quantity $availableQuantity
     ): self {
         return new self(sprintf(
-            'Trying to dispose of %s section 104 pool %s tokens but only %s are available',
+            'Trying to dispose of %s %s tokens but only %s are available',
             $disposalQuantity,
             $sharePoolingId->toString(),
             $availableQuantity,

@@ -67,12 +67,9 @@ class Nft implements AggregateRoot
     {
         ! is_null($this->costBasis) || throw NftException::cannotIncreaseCostBasisBeforeAcquisition($this->aggregateRootId);
 
-        assert(! is_null($this->previousTransactionDate));
-
-        throw_if(
-            $this->isOlderThanPreviousTransaction($action),
-            NftException::olderThanPreviousTransaction($this->aggregateRootId, $action, $this->previousTransactionDate),
-        );
+        if ($this->previousTransactionDate && $this->isOlderThanPreviousTransaction($action)) {
+            throw NftException::olderThanPreviousTransaction($this->aggregateRootId, $action, $this->previousTransactionDate);
+        }
 
         if ($this->costBasis->currency !== $action->costBasisIncrease->currency) {
             throw NftException::cannotIncreaseCostBasisFromDifferentCurrency(
@@ -101,12 +98,9 @@ class Nft implements AggregateRoot
     {
         ! is_null($this->costBasis) || throw NftException::cannotDisposeOfBeforeAcquisition($this->aggregateRootId);
 
-        assert(! is_null($this->previousTransactionDate));
-
-        throw_if(
-            $this->isOlderThanPreviousTransaction($action),
-            NftException::olderThanPreviousTransaction($this->aggregateRootId, $action, $this->previousTransactionDate),
-        );
+        if ($this->previousTransactionDate && $this->isOlderThanPreviousTransaction($action)) {
+            throw NftException::olderThanPreviousTransaction($this->aggregateRootId, $action, $this->previousTransactionDate);
+        }
 
         $this->recordThat(new NftDisposedOf(
             date: $action->date,

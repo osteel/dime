@@ -38,6 +38,11 @@ class TaxYear implements AggregateRoot
         $this->aggregateRootId = TaxYearId::fromString($aggregateRootId->toString());
     }
 
+    private function currencyMismatch(FiatCurrency $incoming): bool
+    {
+        return $this->currency && $this->currency !== $incoming;
+    }
+
     public function updateCapitalGain(UpdateCapitalGain $action): void
     {
         if ($this->currencyMismatch($action->capitalGain->currency())) {
@@ -134,10 +139,5 @@ class TaxYear implements AggregateRoot
         $this->currency ??= $event->nonAttributableAllowableCost->currency;
         $this->nonAttributableAllowableCost = $this->nonAttributableAllowableCost?->plus($event->nonAttributableAllowableCost)
             ?? $event->nonAttributableAllowableCost;
-    }
-
-    private function currencyMismatch(FiatCurrency $incoming): bool
-    {
-        return $this->currency && $this->currency !== $incoming;
     }
 }

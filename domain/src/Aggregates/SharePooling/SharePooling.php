@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePooling;
 
-use Domain\Enums\FiatCurrency;
+use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePooling\Actions\AcquireSharePoolingToken;
+use Domain\Aggregates\SharePooling\Actions\Contracts\Timely;
 use Domain\Aggregates\SharePooling\Actions\DisposeOfSharePoolingToken;
 use Domain\Aggregates\SharePooling\Actions\RevertSharePoolingTokenDisposal;
 use Domain\Aggregates\SharePooling\Events\SharePoolingTokenAcquired;
@@ -20,6 +21,7 @@ use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenAcquisition;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposal;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTokenDisposals;
 use Domain\Aggregates\SharePooling\ValueObjects\SharePoolingTransactions;
+use Domain\Enums\FiatCurrency;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
@@ -34,6 +36,7 @@ class SharePooling implements AggregateRoot
     use AggregateRootBehaviour;
 
     private ?FiatCurrency $fiatCurrency = null;
+    private ?LocalDate $previousTransactionDate = null;
     private readonly SharePoolingTransactions $transactions;
 
     private function __construct(AggregateRootId $aggregateRootId)
@@ -42,14 +45,32 @@ class SharePooling implements AggregateRoot
         $this->transactions = SharePoolingTransactions::make();
     }
 
+    private function currencyMismatch(FiatCurrency $incoming): bool
+    {
+        return $this->fiatCurrency && $this->fiatCurrency !== $incoming;
+    }
+
+    private function isOlderThanPreviousTransaction(Timely $action): bool
+    {
+        return (bool) $this->previousTransactionDate?->isAfter($action->getDate());
+    }
+
     /** @throws SharePoolingException */
     public function acquire(AcquireSharePoolingToken $action): void
     {
-        if ($this->fiatCurrency && $this->fiatCurrency !== $action->costBasis->currency) {
+        if ($this->currencyMismatch($action->costBasis->currency)) {
             throw SharePoolingException::cannotAcquireFromDifferentCurrency(
                 sharePoolingId: $this->aggregateRootId,
                 from: $this->fiatCurrency,
                 to: $action->costBasis->currency,
+            );
+        }
+
+        if ($this->previousTransactionDate && $this->isOlderThanPreviousTransaction($action)) {
+            throw SharePoolingException::olderThanPreviousTransaction(
+                $this->aggregateRootId,
+                $action,
+                $this->previousTransactionDate,
             );
         }
 
@@ -75,6 +96,7 @@ class SharePooling implements AggregateRoot
     public function applySharePoolingTokenAcquired(SharePoolingTokenAcquired $event): void
     {
         $this->fiatCurrency ??= $event->sharePoolingTokenAcquisition->costBasis->currency;
+        $this->previousTransactionDate = $event->sharePoolingTokenAcquisition->date;
         $this->transactions->add($event->sharePoolingTokenAcquisition);
     }
 
@@ -99,11 +121,19 @@ class SharePooling implements AggregateRoot
     /** @throws SharePoolingException */
     public function disposeOf(DisposeOfSharePoolingToken $action): void
     {
-        if ($this->fiatCurrency && $this->fiatCurrency !== $action->proceeds->currency) {
+        if ($this->currencyMismatch($action->proceeds->currency)) {
             throw SharePoolingException::cannotDisposeOfFromDifferentCurrency(
                 sharePoolingId: $this->aggregateRootId,
                 from: $this->fiatCurrency,
                 to: $action->proceeds->currency,
+            );
+        }
+
+        if (! $action->isReplay() && $this->previousTransactionDate && $this->isOlderThanPreviousTransaction($action)) {
+            throw SharePoolingException::olderThanPreviousTransaction(
+                $this->aggregateRootId,
+                $action,
+                $this->previousTransactionDate,
             );
         }
 
@@ -154,6 +184,7 @@ class SharePooling implements AggregateRoot
 
     public function applySharePoolingTokenDisposedOf(SharePoolingTokenDisposedOf $event): void
     {
+        $this->previousTransactionDate = $event->sharePoolingTokenDisposal->date;
         $this->transactions->add($event->sharePoolingTokenDisposal);
     }
 
