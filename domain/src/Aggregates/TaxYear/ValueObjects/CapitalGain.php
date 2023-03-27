@@ -8,8 +8,9 @@ use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 use JsonSerializable;
+use Stringable;
 
-final readonly class CapitalGain implements JsonSerializable, SerializablePayload
+final readonly class CapitalGain implements JsonSerializable, SerializablePayload, Stringable
 {
     public FiatAmount $difference;
 
@@ -74,5 +75,10 @@ final readonly class CapitalGain implements JsonSerializable, SerializablePayloa
             costBasis: FiatAmount::fromPayload($payload['cost_basis']),
             proceeds: FiatAmount::fromPayload($payload['proceeds']),
         );
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('cost basis: %s, proceeds: %s', (string) $this->costBasis, (string) $this->proceeds);
     }
 }

@@ -20,7 +20,6 @@ uses(TaxYearTestCase::class);
 
 it('can update the capital gain', function (string $costBasis, string $proceeds) {
     $updateCapitalGain = new UpdateCapitalGain(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
     );
@@ -47,13 +46,13 @@ it('cannot update the capital gain because the currency is different', function 
     );
 
     $updateCapitalGain = new UpdateCapitalGain(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         capitalGain: new CapitalGain(new FiatAmount('50', FiatCurrency::EUR), new FiatAmount('150', FiatCurrency::EUR)),
     );
 
-    $cannotUpdateCapitalGain = TaxYearException::cannotUpdateCapitalGainFromDifferentCurrency(
+    $cannotUpdateCapitalGain = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
+        action: $updateCapitalGain,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
@@ -72,7 +71,6 @@ it('can revert a capital gain update', function (string $costBasis, string $proc
     );
 
     $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
     );
@@ -94,7 +92,6 @@ it('can revert a capital gain update', function (string $costBasis, string $proc
 
 it('cannot revert a capital gain update before the capital gain was updated', function () {
     $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         capitalGain: new CapitalGain(FiatAmount::GBP('50'), FiatAmount::GBP('150')),
     );
@@ -116,13 +113,13 @@ it('cannot revert a capital gain update because the currency is different', func
     );
 
     $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         capitalGain: new CapitalGain(new FiatAmount('50', FiatCurrency::EUR), new FiatAmount('150', FiatCurrency::EUR)),
     );
 
-    $cannotRevertCapitalGainUpdate = TaxYearException::cannotRevertCapitalGainUpdateFromDifferentCurrency(
+    $cannotRevertCapitalGainUpdate = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
+        action: $revertCapitalGainUpdate,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
@@ -135,7 +132,6 @@ it('cannot revert a capital gain update because the currency is different', func
 
 it('can update the income', function () {
     $updateIncome = new UpdateIncome(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         income: FiatAmount::GBP('100'),
     );
@@ -159,13 +155,13 @@ it('cannot update the income because the currency is different', function () {
     );
 
     $updateIncome = new UpdateIncome(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         income: new FiatAmount('100', FiatCurrency::EUR),
     );
 
-    $cannotUpdateIncome = TaxYearException::cannotUpdateIncomeFromDifferentCurrency(
+    $cannotUpdateIncome = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
+        action: $updateIncome,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );
@@ -178,7 +174,6 @@ it('cannot update the income because the currency is different', function () {
 
 it('can update the non-attributable allowable cost', function () {
     $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         nonAttributableAllowableCost: FiatAmount::GBP('100'),
     );
@@ -202,13 +197,13 @@ it('cannot update the non-attributable allowable cost because the currency is di
     );
 
     $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
-        taxYear: $this->taxYear,
         date: LocalDate::parse('2015-10-21'),
         nonAttributableAllowableCost: new FiatAmount('100', FiatCurrency::EUR),
     );
 
-    $cannotUpdateNonAttributableAllowableCost = TaxYearException::cannotUpdateNonAttributableAllowableCostFromDifferentCurrency(
+    $cannotUpdateNonAttributableAllowableCost = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
+        action: $updateNonAttributableAllowableCost,
         from: FiatCurrency::GBP,
         to: FiatCurrency::EUR,
     );

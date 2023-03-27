@@ -1,6 +1,7 @@
 <?php
 
 use App\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
+use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
@@ -8,8 +9,8 @@ use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
 
 beforeEach(function () {
-    $this->taxYear = '2021-2022';
-    $this->taxYearId = TaxYearId::fromTaxYear($this->taxYear);
+    $this->taxYear = '2015-2016';
+    $this->taxYearId = TaxYearId::fromDate(LocalDate::parse('2015-10-21'));
     $this->taxYearSummaryRepository = new TaxYearSummaryRepository();
 });
 
