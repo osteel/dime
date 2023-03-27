@@ -18,29 +18,18 @@ final class SharePoolingException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function cannotAcquireFromDifferentCurrency(
+    public static function currencyMismatch(
         SharePoolingId $sharePoolingId,
+        Stringable $action,
         ?FiatCurrency $from,
         FiatCurrency $to
     ): self {
         return new self(sprintf(
-            'Cannot acquire more %s tokens because the currencies don\'t match (from %s to %s)',
+            'Cannot process this %s share pooling token transaction because the currencies don\'t match (from %s to %s): %s',
             $sharePoolingId->toString(),
             $from?->name() ?? 'undefined',
             $to->name(),
-        ));
-    }
-
-    public static function cannotDisposeOfFromDifferentCurrency(
-        SharePoolingId $sharePoolingId,
-        ?FiatCurrency $from,
-        FiatCurrency $to
-    ): self {
-        return new self(sprintf(
-            'Cannot dispose of %s tokens because the currencies don\'t match (from %s to %s)',
-            $sharePoolingId->toString(),
-            $from?->name() ?? 'undefined',
-            $to->name(),
+            (string) $action,
         ));
     }
 
