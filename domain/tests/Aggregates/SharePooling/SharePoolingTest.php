@@ -67,7 +67,7 @@ it('can acquire more of the same share pooling tokens', function () {
         ->then($moreSharePoolingTokenAcquired);
 });
 
-it('cannot acquire more of the same share pooling tokens because currencies don\'t match', function () {
+it('cannot acquire more of the same share pooling tokens because the currencies don\'t match', function () {
     $someSharePoolingTokenAcquired = new SharePoolingTokenAcquired(
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),
@@ -154,7 +154,7 @@ it('can dispose of some share pooling tokens', function () {
         ->then($sharePoolingTokenDisposedOf);
 });
 
-it('cannot dispose of some share pooling tokens because currencies don\'t match', function () {
+it('cannot dispose of some share pooling tokens because the currencies don\'t match', function () {
     $sharePoolingTokenAcquired = new SharePoolingTokenAcquired(
         sharePoolingTokenAcquisition: new SharePoolingTokenAcquisition(
             date: LocalDate::parse('2015-10-21'),

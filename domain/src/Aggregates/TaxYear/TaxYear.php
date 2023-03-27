@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\TaxYear;
 
+use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
@@ -43,6 +44,7 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function updateCapitalGain(UpdateCapitalGain $action): void
     {
+        $this->checkTaxYear($action->date, $action);
         $this->checkCurrency($action->capitalGain->currency(), $action);
 
         $this->recordThat(new CapitalGainUpdated(
@@ -61,6 +63,8 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function revertCapitalGainUpdate(RevertCapitalGainUpdate $action): void
     {
+        $this->checkTaxYear($action->date, $action);
+
         if (is_null($this->capitalGain)) {
             throw TaxYearException::cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(taxYearId: $this->aggregateRootId);
         }
@@ -84,6 +88,7 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function updateIncome(UpdateIncome $action): void
     {
+        $this->checkTaxYear($action->date, $action);
         $this->checkCurrency($action->income->currency, $action);
 
         $this->recordThat(new IncomeUpdated(
@@ -102,6 +107,7 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function updateNonAttributableAllowableCost(UpdateNonAttributableAllowableCost $action): void
     {
+        $this->checkTaxYear($action->date, $action);
         $this->checkCurrency($action->nonAttributableAllowableCost->currency, $action);
 
         $this->recordThat(new NonAttributableAllowableCostUpdated(
@@ -116,6 +122,20 @@ class TaxYear implements AggregateRoot
         $this->currency ??= $event->nonAttributableAllowableCost->currency;
         $this->nonAttributableAllowableCost = $this->nonAttributableAllowableCost?->plus($event->nonAttributableAllowableCost)
             ?? $event->nonAttributableAllowableCost;
+    }
+
+    /** @throws TaxYearException */
+    private function checkTaxYear(LocalDate $date, Stringable $action): void
+    {
+        if (TaxYearId::fromDate($date)->toString() === (string) $this->aggregateRootId->toString()) {
+            return;
+        }
+
+        throw TaxYearException::taxYearMismatch(
+            taxYearId: $this->aggregateRootId,
+            action: $action,
+            incomingTaxYear: TaxYearNormaliser::fromDate($date),
+        );
     }
 
     /** @throws TaxYearException */

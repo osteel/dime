@@ -22,7 +22,7 @@ final class SharePoolingException extends RuntimeException
         SharePoolingId $sharePoolingId,
         Stringable $action,
         ?FiatCurrency $from,
-        FiatCurrency $to
+        FiatCurrency $to,
     ): self {
         return new self(sprintf(
             'Cannot process this %s share pooling token transaction because the currencies don\'t match (from %s to %s): %s',
@@ -49,7 +49,7 @@ final class SharePoolingException extends RuntimeException
     public static function insufficientQuantity(
         SharePoolingId $sharePoolingId,
         Quantity $disposalQuantity,
-        Quantity $availableQuantity
+        Quantity $availableQuantity,
     ): self {
         return new self(sprintf(
             'Trying to dispose of %s %s tokens but only %s are available',

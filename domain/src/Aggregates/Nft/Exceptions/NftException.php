@@ -46,7 +46,7 @@ final class NftException extends RuntimeException
     public static function cannotIncreaseCostBasisFromDifferentCurrency(
         NftId $nftId,
         FiatCurrency $from,
-        FiatCurrency $to
+        FiatCurrency $to,
     ): self {
         return new self(sprintf(
             'Cannot increase the cost basis of NFT %s because the currencies don\'t match (from %s to %s)',

@@ -209,9 +209,9 @@ class SharePooling implements AggregateRoot
         }
 
         throw SharePoolingException::olderThanPreviousTransaction(
-            $this->aggregateRootId,
-            $action,
-            $this->previousTransactionDate,
+            sharePoolingId: $this->aggregateRootId,
+            action: $action,
+            previousTransactionDate: $this->previousTransactionDate,
         );
     }
 }
