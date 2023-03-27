@@ -2,6 +2,7 @@
 
 namespace Domain\Tests\Aggregates\TaxYear;
 
+use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
@@ -17,7 +18,7 @@ abstract class TaxYearTestCase extends AggregateRootTestCase
 
     protected function newAggregateRootId(): AggregateRootId
     {
-        return TaxYearId::generate();
+        return TaxYearId::fromDate(LocalDate::parse('2015-10-21'));
     }
 
     protected function aggregateRootClassName(): string

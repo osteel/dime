@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\TaxYear\Exceptions;
 
-use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Enums\FiatCurrency;
 use RuntimeException;
+use Stringable;
 
 final class TaxYearException extends RuntimeException
 {
@@ -15,16 +16,31 @@ final class TaxYearException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function cannotUpdateCapitalGainFromDifferentCurrency(
+    public static function taxYearMismatch(
         TaxYearId $taxYearId,
-        ?FiatCurrency $from,
-        FiatCurrency $to
+        Stringable $action,
+        string $incomingTaxYear,
     ): self {
         return new self(sprintf(
-            'Cannot update capital gain for tax year %s because the currencies don\'t match (from %s to %s)',
+            'Cannot process this %s tax year action because incoming tax year %s doesn\'t match: %s',
+            $taxYearId->toString(),
+            $incomingTaxYear,
+            (string) $action,
+        ));
+    }
+
+    public static function currencyMismatch(
+        TaxYearId $taxYearId,
+        Stringable $action,
+        ?FiatCurrency $from,
+        FiatCurrency $to,
+    ): self {
+        return new self(sprintf(
+            'Cannot process this %s tax year action because the currencies don\'t match (from %s to %s): %s',
             $taxYearId->toString(),
             $from?->name() ?? 'undefined',
             $to->name(),
+            (string) $action,
         ));
     }
 
@@ -33,45 +49,6 @@ final class TaxYearException extends RuntimeException
         return new self(sprintf(
             'Cannot revert capital gain update for tax year %s because the capital gain has not been updated yet',
             $taxYearId->toString(),
-        ));
-    }
-
-    public static function cannotRevertCapitalGainUpdateFromDifferentCurrency(
-        TaxYearId $taxYearId,
-        ?FiatCurrency $from,
-        FiatCurrency $to
-    ): self {
-        return new self(sprintf(
-            'Cannot revert capital gain update for tax year %s because the currencies don\'t match (from %s to %s)',
-            $taxYearId->toString(),
-            $from?->name() ?? 'undefined',
-            $to->name(),
-        ));
-    }
-
-    public static function cannotUpdateIncomeFromDifferentCurrency(
-        TaxYearId $taxYearId,
-        ?FiatCurrency $from,
-        FiatCurrency $to
-    ): self {
-        return new self(sprintf(
-            'Cannot update the income for tax year %s because the currencies don\'t match (from %s to %s)',
-            $taxYearId->toString(),
-            $from?->name() ?? 'undefined',
-            $to->name(),
-        ));
-    }
-
-    public static function cannotUpdateNonAttributableAllowableCostFromDifferentCurrency(
-        TaxYearId $taxYearId,
-        ?FiatCurrency $from,
-        FiatCurrency $to
-    ): self {
-        return new self(sprintf(
-            'Cannot update the non-attributable allowable cost for tax year %s because the currencies don\'t match (from %s to %s)',
-            $taxYearId->toString(),
-            $from?->name() ?? 'undefined',
-            $to->name(),
         ));
     }
 }

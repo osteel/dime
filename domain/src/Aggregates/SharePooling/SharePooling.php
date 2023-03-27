@@ -25,6 +25,7 @@ use Domain\Enums\FiatCurrency;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
+use Stringable;
 
 /**
  * @implements AggregateRoot<SharePoolingId>
@@ -45,34 +46,11 @@ class SharePooling implements AggregateRoot
         $this->transactions = SharePoolingTransactions::make();
     }
 
-    private function currencyMismatch(FiatCurrency $incoming): bool
-    {
-        return $this->fiatCurrency && $this->fiatCurrency !== $incoming;
-    }
-
-    private function isOlderThanPreviousTransaction(Timely $action): bool
-    {
-        return (bool) $this->previousTransactionDate?->isAfter($action->getDate());
-    }
-
     /** @throws SharePoolingException */
     public function acquire(AcquireSharePoolingToken $action): void
     {
-        if ($this->currencyMismatch($action->costBasis->currency)) {
-            throw SharePoolingException::cannotAcquireFromDifferentCurrency(
-                sharePoolingId: $this->aggregateRootId,
-                from: $this->fiatCurrency,
-                to: $action->costBasis->currency,
-            );
-        }
-
-        if ($this->previousTransactionDate && $this->isOlderThanPreviousTransaction($action)) {
-            throw SharePoolingException::olderThanPreviousTransaction(
-                $this->aggregateRootId,
-                $action,
-                $this->previousTransactionDate,
-            );
-        }
+        $this->checkCurrency($action->costBasis->currency, $action);
+        $this->checkChronology($action);
 
         $disposalsToRevert = ReversionFinder::disposalsToRevertOnAcquisition(
             acquisition: $action,
@@ -121,20 +99,10 @@ class SharePooling implements AggregateRoot
     /** @throws SharePoolingException */
     public function disposeOf(DisposeOfSharePoolingToken $action): void
     {
-        if ($this->currencyMismatch($action->proceeds->currency)) {
-            throw SharePoolingException::cannotDisposeOfFromDifferentCurrency(
-                sharePoolingId: $this->aggregateRootId,
-                from: $this->fiatCurrency,
-                to: $action->proceeds->currency,
-            );
-        }
+        $this->checkCurrency($action->proceeds->currency, $action);
 
-        if (! $action->isReplay() && $this->previousTransactionDate && $this->isOlderThanPreviousTransaction($action)) {
-            throw SharePoolingException::olderThanPreviousTransaction(
-                $this->aggregateRootId,
-                $action,
-                $this->previousTransactionDate,
-            );
+        if (! $action->isReplay()) {
+            $this->checkChronology($action);
         }
 
         // We check the absolute available quantity up to and including the disposal's
@@ -216,5 +184,34 @@ class SharePooling implements AggregateRoot
                 position: $disposal->getPosition(),
             ));
         }
+    }
+
+    /** @throws SharePoolingException */
+    private function checkCurrency(FiatCurrency $incoming, Stringable $action): void
+    {
+        if (is_null($this->fiatCurrency) || $this->fiatCurrency === $incoming) {
+            return;
+        }
+
+        throw SharePoolingException::currencyMismatch(
+            sharePoolingId: $this->aggregateRootId,
+            action: $action,
+            from: $this->fiatCurrency,
+            to: $incoming,
+        );
+    }
+
+    /** @throws SharePoolingException */
+    private function checkChronology(Timely & Stringable $action): void
+    {
+        if (is_null($this->previousTransactionDate) || $action->getDate()->isAfterOrEqualTo($this->previousTransactionDate)) {
+            return;
+        }
+
+        throw SharePoolingException::olderThanPreviousTransaction(
+            sharePoolingId: $this->aggregateRootId,
+            action: $action,
+            previousTransactionDate: $this->previousTransactionDate,
+        );
     }
 }

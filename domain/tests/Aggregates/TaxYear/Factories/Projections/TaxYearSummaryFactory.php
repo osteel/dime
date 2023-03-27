@@ -2,6 +2,7 @@
 
 namespace Domain\Tests\Aggregates\TaxYear\Factories\Projections;
 
+use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
@@ -19,8 +20,8 @@ class TaxYearSummaryFactory extends Factory
     public function definition()
     {
         return [
-            'tax_year_id' => TaxYearId::fromTaxYear('2022-2023'),
-            'tax_year' => '2022-2023',
+            'tax_year_id' => TaxYearId::fromDate(LocalDate::parse('2015-10-21')),
+            'tax_year' => '2015-2016',
             'currency' => FiatCurrency::GBP,
             'capital_gain' => new CapitalGain(
                 costBasis: FiatAmount::GBP('100'),

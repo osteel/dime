@@ -6,7 +6,6 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
-use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\IncomeHandlerException;
 use Domain\ValueObjects\Transactions\Acquisition;
@@ -22,12 +21,10 @@ class IncomeHandler
     {
         $transaction->isIncome || throw IncomeHandlerException::notIncome($transaction);
 
-        $taxYear = TaxYearNormaliser::fromDate($transaction->date);
-        $taxYearId = TaxYearId::fromTaxYear($taxYear);
+        $taxYearId = TaxYearId::fromDate($transaction->date);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
         $taxYearAggregate->updateIncome(new UpdateIncome(
-            taxYear: $taxYear,
             date: $transaction->date,
             income: $transaction->marketValue,
         ));
