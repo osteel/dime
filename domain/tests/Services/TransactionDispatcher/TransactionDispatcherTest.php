@@ -2,7 +2,7 @@
 
 use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
 use Domain\Services\TransactionDispatcher\Handlers\NonFungibleAssetHandler;
-use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
+use Domain\Services\TransactionDispatcher\Handlers\SharePoolingAssetHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
 use Domain\Tests\Factories\ValueObjects\Transactions\TransactionFactory;
@@ -18,13 +18,13 @@ beforeEach(function () {
     $this->incomeHandler = Mockery::spy(IncomeHandler::class);
     $this->transferHandler = Mockery::spy(TransferHandler::class);
     $this->nonFungibleAssetHandler = Mockery::spy(NonFungibleAssetHandler::class);
-    $this->sharePoolingHandler = Mockery::spy(SharePoolingHandler::class);
+    $this->sharePoolingAssetHandler = Mockery::spy(SharePoolingAssetHandler::class);
 
     $this->transactionDispatcher = new TransactionDispatcher(
         $this->incomeHandler,
         $this->transferHandler,
         $this->nonFungibleAssetHandler,
-        $this->sharePoolingHandler,
+        $this->sharePoolingAssetHandler,
     );
 });
 
@@ -36,7 +36,7 @@ it('can dispatch to the income handler', function () {
     $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
     $this->transferHandler->shouldNotHaveReceived('handle');
     $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
-    $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    $this->sharePoolingAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
 });
 
 it('can dispatch to the transfer handler', function (bool $isNonFungibleAsset) {
@@ -47,13 +47,13 @@ it('can dispatch to the transfer handler', function (bool $isNonFungibleAsset) {
     $this->incomeHandler->shouldNotHaveReceived('handle');
     $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
     $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
-    $this->sharePoolingHandler->shouldNotHaveReceived('handle');
+    $this->sharePoolingAssetHandler->shouldNotHaveReceived('handle');
 })->with([
     'share pooling asset' => false,
     'non-fungible asset' => true,
 ]);
 
-it('can dispatch to the non-fungible asset handler', function (TransactionFactory $factory, string $method, bool $sharePoolingHandler) {
+it('can dispatch to the non-fungible asset handler', function (TransactionFactory $factory, string $method, bool $sharePoolingAssetHandler) {
     $transaction = $factory->$method()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
@@ -62,10 +62,10 @@ it('can dispatch to the non-fungible asset handler', function (TransactionFactor
     $this->transferHandler->shouldNotHaveReceived('handle');
     $this->nonFungibleAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
 
-    if ($sharePoolingHandler) {
-        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($sharePoolingAssetHandler) {
+        $this->sharePoolingAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
-        $this->sharePoolingHandler->shouldNotHaveReceived('handle');
+        $this->sharePoolingAssetHandler->shouldNotHaveReceived('handle');
     }
 })->with([
     'dispose of non-fungible asset' => [Disposal::factory(), 'nonFungibleAsset', false],
@@ -75,7 +75,7 @@ it('can dispatch to the non-fungible asset handler', function (TransactionFactor
     'swap non-fungible assets' => [Swap::factory(), 'nonFungibleAssets', false],
 ]);
 
-it('can dispatch to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $nonFungibleAssetHandler) {
+it('can dispatch to the share pooling asset handler', function (TransactionFactory $factory, ?string $method, bool $nonFungibleAssetHandler) {
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->make();
 
     $this->transactionDispatcher->dispatch($transaction);
@@ -94,7 +94,7 @@ it('can dispatch to the share pooling handler', function (TransactionFactory $fa
         $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
-    $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    $this->sharePoolingAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
 })->with([
     'dispose of' => [Disposal::factory(), null, false],
     'acquire' => [Acquisition::factory(), null, false],
@@ -104,7 +104,7 @@ it('can dispatch to the share pooling handler', function (TransactionFactory $fa
     'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', true],
 ]);
 
-it('can dispatch the fee to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nonFungibleAssetHandler) {
+it('can dispatch the fee to the share pooling asset handler', function (TransactionFactory $factory, ?string $method, bool $sharePoolingAssetHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee()->make();
 
@@ -128,11 +128,11 @@ it('can dispatch the fee to the share pooling handler', function (TransactionFac
         $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($sharePoolingHandler) {
-        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($sharePoolingAssetHandler) {
+        $this->sharePoolingAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     }
 
-    $this->sharePoolingHandler->shouldHaveReceived(
+    $this->sharePoolingAssetHandler->shouldHaveReceived(
         'handle',
         fn (Transaction $feeTransaction) => $feeTransaction instanceof Disposal
             && $feeTransaction->marketValue->isEqualTo($transaction->fee->marketValue),
@@ -149,7 +149,7 @@ it('can dispatch the fee to the share pooling handler', function (TransactionFac
     'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is zero', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nonFungibleAssetHandler) {
+it('does not dispatch the fee to the share pooling asset handler when it is zero', function (TransactionFactory $factory, ?string $method, bool $sharePoolingAssetHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee(FiatAmount::GBP('0'))->make();
 
@@ -173,11 +173,11 @@ it('does not dispatch the fee to the share pooling handler when it is zero', fun
         $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($sharePoolingHandler) {
-        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($sharePoolingAssetHandler) {
+        $this->sharePoolingAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     }
 
-    $this->sharePoolingHandler->shouldNotHaveReceived(
+    $this->sharePoolingAssetHandler->shouldNotHaveReceived(
         'handle',
         fn (Transaction $feeTransaction) => $feeTransaction instanceof Disposal
             && $feeTransaction->marketValue->isEqualTo($transaction->fee->marketValue),
@@ -194,7 +194,7 @@ it('does not dispatch the fee to the share pooling handler when it is zero', fun
     'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is fiat', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nonFungibleAssetHandler) {
+it('does not dispatch the fee to the share pooling asset handler when it is fiat', function (TransactionFactory $factory, ?string $method, bool $sharePoolingAssetHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFeeInFiat()->make();
 
@@ -218,11 +218,11 @@ it('does not dispatch the fee to the share pooling handler when it is fiat', fun
         $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($sharePoolingHandler) {
-        $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($sharePoolingAssetHandler) {
+        $this->sharePoolingAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     }
 
-    $this->sharePoolingHandler->shouldNotHaveReceived(
+    $this->sharePoolingAssetHandler->shouldNotHaveReceived(
         'handle',
         fn (Transaction $feeTransaction) => $feeTransaction instanceof Disposal
             && $feeTransaction->marketValue->isEqualTo($transaction->fee->marketValue),

@@ -1,0 +1,12 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Aggregates\SharePoolingAsset\Repositories;
+
+use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetMessageRepository as SharePoolingAssetMessageRepositoryInterface;
+use EventSauce\MessageRepository\IlluminateMessageRepository\IlluminateUuidV4MessageRepository;
+
+class SharePoolingAssetMessageRepository extends IlluminateUuidV4MessageRepository implements SharePoolingAssetMessageRepositoryInterface
+{
+}

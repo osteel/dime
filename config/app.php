@@ -71,7 +71,7 @@ return [
     'providers' => [
         App\Providers\AppServiceProvider::class,
         App\Aggregates\NonFungibleAsset\NonFungibleAssetServiceProvider::class,
-        App\Aggregates\SharePooling\SharePoolingServiceProvider::class,
+        App\Aggregates\SharePoolingAsset\SharePoolingAssetServiceProvider::class,
         App\Aggregates\TaxYear\TaxYearServiceProvider::class,
     ],
 
