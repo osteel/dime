@@ -21,10 +21,10 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
         'Market value' => '1000',
         'Sent asset' => '',
         'Sent quantity' => '',
-        'Sent asset is NFT' => 'FALSE',
+        'Sent asset is non-fungible' => 'FALSE',
         'Received asset' => 'BTC',
         'Received quantity' => '1',
-        'Received asset is NFT' => 'FALSE',
+        'Received asset is non-fungible' => 'FALSE',
         'Fee currency' => 'GBP',
         'Fee quantity' => '20',
         'Fee market value' => '20',
@@ -39,7 +39,7 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
             && $transaction->asset->symbol === 'BTC'
             && $transaction->quantity->isEqualTo('1')
-            && $transaction->asset->isNft === false
+            && $transaction->asset->isNonFungibleAsset === false
             && (string) $transaction->fee->currency === 'GBP'
             && $transaction->fee->isFiat()
             && $transaction->fee->quantity->isEqualTo('20')
@@ -54,10 +54,10 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
         'Market value' => '1000',
         'Sent asset' => 'BTC',
         'Sent quantity' => '1',
-        'Sent asset is NFT' => 'FALSE',
+        'Sent asset is non-fungible' => 'FALSE',
         'Received asset' => '',
         'Received quantity' => '',
-        'Received asset is NFT' => 'FALSE',
+        'Received asset is non-fungible' => 'FALSE',
         'Fee currency' => 'BTC',
         'Fee quantity' => '0.001',
         'Fee market value' => '10',
@@ -72,7 +72,7 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
             && $transaction->asset->symbol === 'BTC'
             && $transaction->quantity->isEqualTo('1')
-            && $transaction->asset->isNft === false
+            && $transaction->asset->isNonFungibleAsset === false
             && (string) $transaction->fee->currency === 'BTC'
             && $transaction->fee->isFiat() === false
             && $transaction->fee->quantity->isEqualTo('0.001'),
@@ -86,10 +86,10 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
         'Market value' => '1000',
         'Sent asset' => 'ETH',
         'Sent quantity' => '5',
-        'Sent asset is NFT' => 'FALSE',
+        'Sent asset is non-fungible' => 'FALSE',
         'Received asset' => 'BTC',
         'Received quantity' => '1',
-        'Received asset is NFT' => 'FALSE',
+        'Received asset is non-fungible' => 'FALSE',
         'Fee currency' => '',
         'Fee quantity' => '',
         'Fee market value' => '',
@@ -104,10 +104,10 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
             && $transaction->disposedOfAsset->symbol === 'ETH'
             && $transaction->disposedOfQuantity->isEqualTo('5')
-            && $transaction->disposedOfAsset->isNft === false
+            && $transaction->disposedOfAsset->isNonFungibleAsset === false
             && $transaction->acquiredAsset->symbol === 'BTC'
             && $transaction->acquiredQuantity->isEqualTo('1')
-            && $transaction->acquiredAsset->isNft === false
+            && $transaction->acquiredAsset->isNonFungibleAsset === false
             && is_null($transaction->fee)
     )->once();
 });
@@ -119,10 +119,10 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
         'Market value' => '',
         'Sent asset' => '0x123456789',
         'Sent quantity' => '1',
-        'Sent asset is NFT' => 'TRUE',
+        'Sent asset is non-fungible' => 'TRUE',
         'Received asset' => '',
         'Received quantity' => '',
-        'Received asset is NFT' => 'FALSE',
+        'Received asset is non-fungible' => 'FALSE',
         'Fee currency' => '',
         'Fee quantity' => '',
         'Fee market value' => '',
@@ -136,7 +136,7 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
         fn (Transfer $transaction) => $transaction->date->__toString() === '2015-10-21'
             && $transaction->asset->symbol === '0x123456789'
             && $transaction->quantity->isEqualTo('1')
-            && $transaction->asset->isNft === true
+            && $transaction->asset->isNonFungibleAsset === true
             && is_null($transaction->fee),
     )->once();
 });

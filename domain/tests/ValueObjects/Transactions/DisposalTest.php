@@ -10,11 +10,11 @@ it('cannot instantiate a disposal because the asset is fiat', function () {
         ->toThrow(DisposalException::class);
 });
 
-it('can tell whether the disposed of asset is a NFT', function () {
+it('can tell whether the disposed of asset is a non-fungible asset', function () {
     /** @var Disposal */
-    $transaction = Disposal::factory()->nft()->make();
+    $transaction = Disposal::factory()->nonFungibleAsset()->make();
 
-    expect($transaction->hasNft())->toBeTrue();
+    expect($transaction->hasNonFungibleAsset())->toBeTrue();
     expect($transaction->hasSharePoolingAsset())->toBeFalse();
 });
 
@@ -23,5 +23,5 @@ it('can tell whether the disposed of asset is a share pooling asset', function (
     $transaction = Disposal::factory()->make(['asset' => new Asset('BTC')]);
 
     expect($transaction->hasSharePoolingAsset())->toBeTrue();
-    expect($transaction->hasNft())->toBeFalse();
+    expect($transaction->hasNonFungibleAsset())->toBeFalse();
 });

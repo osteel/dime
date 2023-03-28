@@ -43,7 +43,7 @@ class TransactionProcessor
     {
         return new Acquisition(
             date: $this->toDate($rawTransaction['Date']),
-            asset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is NFT']),
+            asset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is non-fungible']),
             quantity: $this->toQuantity($rawTransaction['Received quantity']),
             marketValue: $this->toFiatAmount($rawTransaction['Market value']),
             fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
@@ -56,7 +56,7 @@ class TransactionProcessor
     {
         return new Disposal(
             date: $this->toDate($rawTransaction['Date']),
-            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is NFT']),
+            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is non-fungible']),
             quantity: $this->toQuantity($rawTransaction['Sent quantity']),
             marketValue: $this->toFiatAmount($rawTransaction['Market value']),
             fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
@@ -68,9 +68,9 @@ class TransactionProcessor
     {
         return new Swap(
             date: $this->toDate($rawTransaction['Date']),
-            disposedOfAsset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is NFT']),
+            disposedOfAsset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is non-fungible']),
             disposedOfQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
-            acquiredAsset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is NFT']),
+            acquiredAsset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is non-fungible']),
             acquiredQuantity: $this->toQuantity($rawTransaction['Received quantity']),
             marketValue: $this->toFiatAmount($rawTransaction['Market value']),
             fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
@@ -82,7 +82,7 @@ class TransactionProcessor
     {
         return new Transfer(
             date: $this->toDate($rawTransaction['Date']),
-            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is NFT']),
+            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is non-fungible']),
             quantity: $this->toQuantity($rawTransaction['Sent quantity']),
             fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
         );
@@ -125,11 +125,11 @@ class TransactionProcessor
     }
 
     /** @throws TransactionProcessorException */
-    private function toAsset(string $symbol, string $isNft = ''): Asset
+    private function toAsset(string $symbol, string $isNonFungibleAsset = ''): Asset
     {
         return empty($symbol)
             ? throw TransactionProcessorException::invalidAsset($symbol)
-            : new Asset($symbol, $this->toBoolean($isNft));
+            : new Asset($symbol, $this->toBoolean($isNonFungibleAsset));
     }
 
     private function toFee(string $symbol, string $quantity, string $marketValue): ?Fee

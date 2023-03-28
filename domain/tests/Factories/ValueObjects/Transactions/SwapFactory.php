@@ -20,40 +20,40 @@ class SwapFactory extends TransactionFactory
     {
         return [
             'date' => LocalDate::parse('2015-10-21'),
-            'disposedOfAsset' => new Asset(symbol: 'BTC', isNft: false),
+            'disposedOfAsset' => new Asset(symbol: 'BTC', isNonFungibleAsset: false),
             'disposedOfQuantity' => new Quantity('1'),
-            'acquiredAsset' => new Asset(symbol: 'ETH', isNft: false),
+            'acquiredAsset' => new Asset(symbol: 'ETH', isNonFungibleAsset: false),
             'acquiredQuantity' => new Quantity('10'),
             'marketValue' => FiatAmount::GBP('100'),
             'fee' => null,
         ];
     }
 
-    public function toNft(): static
+    public function toNonFungibleAsset(): static
     {
         return $this->state([
-            'acquiredAsset' => new Asset(symbol: md5(time()), isNft: true),
+            'acquiredAsset' => new Asset(symbol: md5(time()), isNonFungibleAsset: true),
             'acquiredQuantity' => new Quantity('1'),
         ]);
     }
 
-    public function fromNft(): static
+    public function fromNonFungibleAsset(): static
     {
         return $this->state([
-            'disposedOfAsset' => new Asset(symbol: md5(time()), isNft: true),
+            'disposedOfAsset' => new Asset(symbol: md5(time()), isNonFungibleAsset: true),
             'disposedOfQuantity' => new Quantity('1'),
         ]);
     }
 
-    public function nfts(): static
+    public function nonFungibleAssets(): static
     {
-        return $this->fromNft()->toNft();
+        return $this->fromNonFungibleAsset()->toNonFungibleAsset();
     }
 
     public function toFiat(): static
     {
         return $this->state([
-            'acquiredAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNft: false),
+            'acquiredAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNonFungibleAsset: false),
             'acquiredQuantity' => new Quantity('1000'),
         ]);
     }
@@ -61,7 +61,7 @@ class SwapFactory extends TransactionFactory
     public function fromFiat(): static
     {
         return $this->state([
-            'disposedOfAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNft: false),
+            'disposedOfAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNonFungibleAsset: false),
             'disposedOfQuantity' => new Quantity('1000'),
         ]);
     }

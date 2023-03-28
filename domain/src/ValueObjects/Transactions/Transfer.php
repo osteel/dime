@@ -25,23 +25,23 @@ final readonly class Transfer extends Transaction
         return TransferFactory::new();
     }
 
-    public function hasNft(): bool
+    public function hasNonFungibleAsset(): bool
     {
-        return $this->asset->isNft;
+        return $this->asset->isNonFungibleAsset;
     }
 
     public function hasSharePoolingAsset(): bool
     {
-        return ! $this->asset->isNft;
+        return ! $this->asset->isNonFungibleAsset;
     }
 
     public function __toString(): string
     {
         return sprintf(
-            '%s | transferred: %s | NFT: %s | quantity: %s | Fee: %s',
+            '%s | transferred: %s | non-fungible asset: %s | quantity: %s | Fee: %s',
             (string) $this->date,
             (string) $this->asset,
-            $this->asset->isNft ? 'yes' : 'no',
+            $this->asset->isNonFungibleAsset ? 'yes' : 'no',
             (string) $this->quantity,
             (string) $this->fee ?: 'N/A',
         );

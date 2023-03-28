@@ -32,19 +32,19 @@ final readonly class Swap extends Transaction
         return SwapFactory::new();
     }
 
-    public function hasNft(): bool
+    public function hasNonFungibleAsset(): bool
     {
-        return $this->disposedOfAsset->isNft || $this->acquiredAsset->isNft;
+        return $this->disposedOfAsset->isNonFungibleAsset || $this->acquiredAsset->isNonFungibleAsset;
     }
 
     public function disposedOfAssetIsSharePoolingAsset(): bool
     {
-        return ! $this->disposedOfAsset->isNft && ! $this->disposedOfAsset->isFiat();
+        return ! $this->disposedOfAsset->isNonFungibleAsset && ! $this->disposedOfAsset->isFiat();
     }
 
     public function acquiredAssetIsSharePoolingAsset(): bool
     {
-        return ! $this->acquiredAsset->isNft && ! $this->acquiredAsset->isFiat();
+        return ! $this->acquiredAsset->isNonFungibleAsset && ! $this->acquiredAsset->isFiat();
     }
 
     public function hasSharePoolingAsset(): bool
@@ -60,13 +60,13 @@ final readonly class Swap extends Transaction
     public function __toString(): string
     {
         return sprintf(
-            '%s | disposed of: %s | NFT: %s | quantity: %s | acquired: %s | NFT: %s | quantity: %s | cost basis: %s | Fee: %s',
+            '%s | disposed of: %s | non-fungible asset: %s | quantity: %s | acquired: %s | non-fungible asset: %s | quantity: %s | cost basis: %s | Fee: %s',
             (string) $this->date,
             (string) $this->disposedOfAsset,
-            $this->disposedOfAsset->isNft ? 'yes' : 'no',
+            $this->disposedOfAsset->isNonFungibleAsset ? 'yes' : 'no',
             $this->disposedOfQuantity->__toString(),
             (string) $this->acquiredAsset,
-            $this->acquiredAsset->isNft ? 'yes' : 'no',
+            $this->acquiredAsset->isNonFungibleAsset ? 'yes' : 'no',
             $this->acquiredQuantity->__toString(),
             (string) $this->marketValue ?: 'N/A',
             (string) $this->fee ?: 'N/A',

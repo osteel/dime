@@ -12,15 +12,15 @@ it('cannot instantiate a swap because both assets are fiat', function () {
         ->toThrow(SwapException::class);
 });
 
-it('can tell whether one of the assets is a NFT', function (?string $method, bool $result) {
+it('can tell whether one of the assets is a non-fungible asset', function (?string $method, bool $result) {
     /** @var Swap */
     $transaction = Swap::factory()->when($method, fn ($factory) => $factory->$method())->make();
 
-    expect($transaction->hasNft())->toBe($result);
+    expect($transaction->hasNonFungibleAsset())->toBe($result);
 })->with([
-    'disposed of asset' => ['fromNft', true],
-    'acquired asset' => ['toNft', true],
-    'both assets' => ['nfts', true],
+    'disposed of asset' => ['fromNonFungibleAsset', true],
+    'acquired asset' => ['toNonFungibleAsset', true],
+    'both assets' => ['nonFungibleAssets', true],
     'none' => [null, false],
 ]);
 
@@ -30,7 +30,7 @@ it('can tell whether the disposed of asset is a share pooling asset', function (
 
     expect($transaction->disposedOfAssetIsSharePoolingAsset())->toBe($result);
 })->with([
-    'nft' => ['fromNft', false],
+    'nonFungibleAsset' => ['fromNonFungibleAsset', false],
     'fiat' => ['fromFiat', false],
     'share pooling asset' => [null, true],
 ]);
@@ -41,7 +41,7 @@ it('can tell whether the acquired asset is a share pooling asset', function (?st
 
     expect($transaction->acquiredAssetIsSharePoolingAsset())->toBe($result);
 })->with([
-    'nft' => ['toNft', false],
+    'nonFungibleAsset' => ['toNonFungibleAsset', false],
     'fiat' => ['toFiat', false],
     'share pooling asset' => [null, true],
 ]);
