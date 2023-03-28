@@ -3,11 +3,11 @@
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Transactions\Transfer;
 
-it('can tell whether the transferred asset is a NFT', function () {
+it('can tell whether the transferred asset is a non-fungible asset', function () {
     /** @var Transfer */
-    $transaction = Transfer::factory()->nft()->make();
+    $transaction = Transfer::factory()->nonFungibleAsset()->make();
 
-    expect($transaction->hasNft())->toBeTrue();
+    expect($transaction->hasNonFungibleAsset())->toBeTrue();
     expect($transaction->hasSharePoolingAsset())->toBeFalse();
 });
 
@@ -16,5 +16,5 @@ it('can tell whether the transferred asset is a share pooling asset', function (
     $transaction = Transfer::factory()->make(['asset' => new Asset('BTC')]);
 
     expect($transaction->hasSharePoolingAsset())->toBeTrue();
-    expect($transaction->hasNft())->toBeFalse();
+    expect($transaction->hasNonFungibleAsset())->toBeFalse();
 });

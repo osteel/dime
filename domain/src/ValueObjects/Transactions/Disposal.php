@@ -30,23 +30,23 @@ final readonly class Disposal extends Transaction
         return DisposalFactory::new();
     }
 
-    public function hasNft(): bool
+    public function hasNonFungibleAsset(): bool
     {
-        return $this->asset->isNft;
+        return $this->asset->isNonFungibleAsset;
     }
 
     public function hasSharePoolingAsset(): bool
     {
-        return ! $this->asset->isNft;
+        return ! $this->asset->isNonFungibleAsset;
     }
 
     public function __toString(): string
     {
         return sprintf(
-            '%s | disposed of: %s | NFT: %s | quantity: %s | cost basis: %s | Fee: %s',
+            '%s | disposed of: %s | non-fungible asset: %s | quantity: %s | cost basis: %s | Fee: %s',
             (string) $this->date,
             (string) $this->asset,
-            $this->asset->isNft ? 'yes' : 'no',
+            $this->asset->isNonFungibleAsset ? 'yes' : 'no',
             (string) $this->quantity,
             (string) $this->marketValue ?: 'N/A',
             (string) $this->fee ?: 'N/A',

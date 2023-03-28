@@ -84,13 +84,13 @@ it('can handle a send operation with a fee', function () {
     )->once();
 });
 
-it('can handle a swap operation where the received asset is not a NFT', function () {
+it('can handle a swap operation where the received asset is not a non-fungible asset', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Swap::factory()->fromNft()->make(['marketValue' => FiatAmount::GBP('50')]);
+    $transaction = Swap::factory()->fromNonFungibleAsset()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -100,13 +100,13 @@ it('can handle a swap operation where the received asset is not a NFT', function
     )->once();
 });
 
-it('can handle a swap operation where the sent asset is not a NFT', function () {
+it('can handle a swap operation where the sent asset is not a non-fungible asset', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->once()->andReturn($sharePooling);
     $this->sharePoolingRepository->shouldReceive('save')->once()->with($sharePooling);
 
-    $transaction = Swap::factory()->toNft()->make(['marketValue' => FiatAmount::GBP('50')]);
+    $transaction = Swap::factory()->toNonFungibleAsset()->make(['marketValue' => FiatAmount::GBP('50')]);
 
     $this->sharePoolingHandler->handle($transaction);
 
@@ -116,7 +116,7 @@ it('can handle a swap operation where the sent asset is not a NFT', function () 
     )->once();
 });
 
-it('can handle a swap operation where neither asset is a NFT', function () {
+it('can handle a swap operation where neither asset is a non-fungible asset', function () {
     $sharePooling = Mockery::spy(SharePooling::class);
 
     $this->sharePoolingRepository->shouldReceive('get')->twice()->andReturn($sharePooling);
@@ -238,8 +238,8 @@ it('can handle a swap operation with a fee where the sent asset is some fiat cur
     $sharePooling->shouldNotHaveReceived('disposeOf');
 });
 
-it('cannot handle a transaction because one of the assets is a NFT', function () {
-    $transaction = Swap::factory()->nfts()->make();
+it('cannot handle a transaction because one of the assets is a non-fungible asset', function () {
+    $transaction = Swap::factory()->nonFungibleAssets()->make();
 
     expect(fn () => $this->sharePoolingHandler->handle($transaction))
         ->toThrow(SharePoolingHandlerException::class, SharePoolingHandlerException::noSharePoolingAsset($transaction)->getMessage());

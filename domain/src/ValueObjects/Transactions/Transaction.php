@@ -29,7 +29,7 @@ abstract readonly class Transaction implements Stringable
         return (bool) $this->fee?->isFiat();
     }
 
-    abstract public function hasNft(): bool;
+    abstract public function hasNonFungibleAsset(): bool;
 
     abstract public function hasSharePoolingAsset(): bool;
 }

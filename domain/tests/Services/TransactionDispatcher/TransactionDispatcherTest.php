@@ -1,7 +1,7 @@
 <?php
 
 use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
-use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
+use Domain\Services\TransactionDispatcher\Handlers\NonFungibleAssetHandler;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
@@ -17,13 +17,13 @@ use Domain\ValueObjects\Transactions\Transfer;
 beforeEach(function () {
     $this->incomeHandler = Mockery::spy(IncomeHandler::class);
     $this->transferHandler = Mockery::spy(TransferHandler::class);
-    $this->nftHandler = Mockery::spy(NftHandler::class);
+    $this->nonFungibleAssetHandler = Mockery::spy(NonFungibleAssetHandler::class);
     $this->sharePoolingHandler = Mockery::spy(SharePoolingHandler::class);
 
     $this->transactionDispatcher = new TransactionDispatcher(
         $this->incomeHandler,
         $this->transferHandler,
-        $this->nftHandler,
+        $this->nonFungibleAssetHandler,
         $this->sharePoolingHandler,
     );
 });
@@ -35,32 +35,32 @@ it('can dispatch to the income handler', function () {
 
     $this->incomeHandler->shouldHaveReceived('handle')->with($transaction)->once();
     $this->transferHandler->shouldNotHaveReceived('handle');
-    $this->nftHandler->shouldNotHaveReceived('handle');
+    $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
 });
 
-it('can dispatch to the transfer handler', function (bool $isNft) {
-    $transaction = Transfer::factory()->when($isNft, fn ($factory) => $factory->nft())->make();
+it('can dispatch to the transfer handler', function (bool $isNonFungibleAsset) {
+    $transaction = Transfer::factory()->when($isNonFungibleAsset, fn ($factory) => $factory->nonFungibleAsset())->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
     $this->incomeHandler->shouldNotHaveReceived('handle');
     $this->transferHandler->shouldHaveReceived('handle')->with($transaction)->once();
-    $this->nftHandler->shouldNotHaveReceived('handle');
+    $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     $this->sharePoolingHandler->shouldNotHaveReceived('handle');
 })->with([
     'share pooling asset' => false,
-    'NFT' => true,
+    'non-fungible asset' => true,
 ]);
 
-it('can dispatch to the NFT handler', function (TransactionFactory $factory, string $method, bool $sharePoolingHandler) {
+it('can dispatch to the non-fungible asset handler', function (TransactionFactory $factory, string $method, bool $sharePoolingHandler) {
     $transaction = $factory->$method()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
     $this->incomeHandler->shouldNotHaveReceived('handle');
     $this->transferHandler->shouldNotHaveReceived('handle');
-    $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    $this->nonFungibleAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
 
     if ($sharePoolingHandler) {
         $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
@@ -68,14 +68,14 @@ it('can dispatch to the NFT handler', function (TransactionFactory $factory, str
         $this->sharePoolingHandler->shouldNotHaveReceived('handle');
     }
 })->with([
-    'dispose of NFT' => [Disposal::factory(), 'nft', false],
-    'acquire NFT' => [Acquisition::factory(), 'nft', false],
-    'swap to NFT' => [Swap::factory(), 'toNft', true],
-    'swap from NFT' => [Swap::factory(), 'fromNft', true],
-    'swap NFTs' => [Swap::factory(), 'nfts', false],
+    'dispose of non-fungible asset' => [Disposal::factory(), 'nonFungibleAsset', false],
+    'acquire non-fungible asset' => [Acquisition::factory(), 'nonFungibleAsset', false],
+    'swap to non-fungible asset' => [Swap::factory(), 'toNonFungibleAsset', true],
+    'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', true],
+    'swap non-fungible assets' => [Swap::factory(), 'nonFungibleAssets', false],
 ]);
 
-it('can dispatch to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $nftHandler) {
+it('can dispatch to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $nonFungibleAssetHandler) {
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->make();
 
     $this->transactionDispatcher->dispatch($transaction);
@@ -88,10 +88,10 @@ it('can dispatch to the share pooling handler', function (TransactionFactory $fa
 
     $this->transferHandler->shouldNotHaveReceived('handle');
 
-    if ($nftHandler) {
-        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($nonFungibleAssetHandler) {
+        $this->nonFungibleAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
-        $this->nftHandler->shouldNotHaveReceived('handle');
+        $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
     $this->sharePoolingHandler->shouldHaveReceived('handle')->with($transaction)->once();
@@ -100,11 +100,11 @@ it('can dispatch to the share pooling handler', function (TransactionFactory $fa
     'acquire' => [Acquisition::factory(), null, false],
     'swap' => [Swap::factory(), null, false],
     'income' => [Acquisition::factory(), 'income', false],
-    'swap to NFT' => [Swap::factory(), 'toNft', true],
-    'swap from NFT' => [Swap::factory(), 'fromNft', true],
+    'swap to non-fungible asset' => [Swap::factory(), 'toNonFungibleAsset', true],
+    'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', true],
 ]);
 
-it('can dispatch the fee to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('can dispatch the fee to the share pooling handler', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee()->make();
 
@@ -122,10 +122,10 @@ it('can dispatch the fee to the share pooling handler', function (TransactionFac
         $this->transferHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($nftHandler) {
-        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($nonFungibleAssetHandler) {
+        $this->nonFungibleAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
-        $this->nftHandler->shouldNotHaveReceived('handle');
+        $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
     if ($sharePoolingHandler) {
@@ -143,13 +143,13 @@ it('can dispatch the fee to the share pooling handler', function (TransactionFac
     'swap' => [Swap::factory(), null, true, false],
     'income' => [Acquisition::factory(), 'income', true, false],
     'transfer' => [Transfer::factory(), null, false, false],
-    'dispose of NFT' => [Disposal::factory(), 'nft', false, true],
-    'acquire NFT' => [Acquisition::factory(), 'nft', false, true],
-    'swap to NFT' => [Swap::factory(), 'toNft', false, true],
-    'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
+    'dispose of non-fungible asset' => [Disposal::factory(), 'nonFungibleAsset', false, true],
+    'acquire non-fungible asset' => [Acquisition::factory(), 'nonFungibleAsset', false, true],
+    'swap to non-fungible asset' => [Swap::factory(), 'toNonFungibleAsset', false, true],
+    'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is zero', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('does not dispatch the fee to the share pooling handler when it is zero', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee(FiatAmount::GBP('0'))->make();
 
@@ -167,10 +167,10 @@ it('does not dispatch the fee to the share pooling handler when it is zero', fun
         $this->transferHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($nftHandler) {
-        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($nonFungibleAssetHandler) {
+        $this->nonFungibleAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
-        $this->nftHandler->shouldNotHaveReceived('handle');
+        $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
     if ($sharePoolingHandler) {
@@ -188,13 +188,13 @@ it('does not dispatch the fee to the share pooling handler when it is zero', fun
     'swap' => [Swap::factory(), null, true, false],
     'income' => [Acquisition::factory(), 'income', true, false],
     'transfer' => [Transfer::factory(), null, false, false],
-    'dispose of NFT' => [Disposal::factory(), 'nft', false, true],
-    'acquire NFT' => [Acquisition::factory(), 'nft', false, true],
-    'swap to NFT' => [Swap::factory(), 'toNft', false, true],
-    'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
+    'dispose of non-fungible asset' => [Disposal::factory(), 'nonFungibleAsset', false, true],
+    'acquire non-fungible asset' => [Acquisition::factory(), 'nonFungibleAsset', false, true],
+    'swap to non-fungible asset' => [Swap::factory(), 'toNonFungibleAsset', false, true],
+    'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', false, true],
 ]);
 
-it('does not dispatch the fee to the share pooling handler when it is fiat', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nftHandler) {
+it('does not dispatch the fee to the share pooling handler when it is fiat', function (TransactionFactory $factory, ?string $method, bool $sharePoolingHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
     $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFeeInFiat()->make();
 
@@ -212,10 +212,10 @@ it('does not dispatch the fee to the share pooling handler when it is fiat', fun
         $this->transferHandler->shouldNotHaveReceived('handle');
     }
 
-    if ($nftHandler) {
-        $this->nftHandler->shouldHaveReceived('handle')->with($transaction)->once();
+    if ($nonFungibleAssetHandler) {
+        $this->nonFungibleAssetHandler->shouldHaveReceived('handle')->with($transaction)->once();
     } else {
-        $this->nftHandler->shouldNotHaveReceived('handle');
+        $this->nonFungibleAssetHandler->shouldNotHaveReceived('handle');
     }
 
     if ($sharePoolingHandler) {
@@ -233,8 +233,8 @@ it('does not dispatch the fee to the share pooling handler when it is fiat', fun
     'swap' => [Swap::factory(), null, true, false],
     'income' => [Acquisition::factory(), 'income', true, false],
     'transfer' => [Transfer::factory(), null, false, false],
-    'dispose of NFT' => [Disposal::factory(), 'nft', false, true],
-    'acquire NFT' => [Acquisition::factory(), 'nft', false, true],
-    'swap to NFT' => [Swap::factory(), 'toNft', false, true],
-    'swap from NFT' => [Swap::factory(), 'fromNft', false, true],
+    'dispose of non-fungible asset' => [Disposal::factory(), 'nonFungibleAsset', false, true],
+    'acquire non-fungible asset' => [Acquisition::factory(), 'nonFungibleAsset', false, true],
+    'swap to non-fungible asset' => [Swap::factory(), 'toNonFungibleAsset', false, true],
+    'swap from non-fungible asset' => [Swap::factory(), 'fromNonFungibleAsset', false, true],
 ]);

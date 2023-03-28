@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Domain\Services\TransactionDispatcher;
 
 use Domain\Services\TransactionDispatcher\Handlers\IncomeHandler;
-use Domain\Services\TransactionDispatcher\Handlers\NftHandler;
+use Domain\Services\TransactionDispatcher\Handlers\NonFungibleAssetHandler;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingHandler;
 use Domain\Services\TransactionDispatcher\Handlers\TransferHandler;
 use Domain\ValueObjects\Asset;
@@ -20,7 +20,7 @@ class TransactionDispatcher
     public function __construct(
         private readonly IncomeHandler $incomeHandler,
         private readonly TransferHandler $transferHandler,
-        private readonly NftHandler $nftHandler,
+        private readonly NonFungibleAssetHandler $nonFungibleAssetHandler,
         private readonly SharePoolingHandler $sharePoolingHandler,
     ) {
     }
@@ -29,7 +29,7 @@ class TransactionDispatcher
     {
         $this->handleIncome($transaction)
             ->handleTransfer($transaction)
-            ->handleNft($transaction)
+            ->handleNonFungibleAsset($transaction)
             ->handleSharePooling($transaction)
             ->handleFee($transaction);
     }
@@ -52,14 +52,14 @@ class TransactionDispatcher
         return $this;
     }
 
-    private function handleNft(Transaction $transaction): self
+    private function handleNonFungibleAsset(Transaction $transaction): self
     {
         if (! $transaction instanceof Acquisition && ! $transaction instanceof Disposal && ! $transaction instanceof Swap) {
             return $this;
         }
 
-        if ($transaction->hasNft()) {
-            $this->nftHandler->handle($transaction);
+        if ($transaction->hasNonFungibleAsset()) {
+            $this->nonFungibleAssetHandler->handle($transaction);
         }
 
         return $this;

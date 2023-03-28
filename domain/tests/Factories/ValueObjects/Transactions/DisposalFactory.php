@@ -19,17 +19,17 @@ class DisposalFactory extends TransactionFactory
     {
         return [
             'date' => LocalDate::parse('2015-10-21'),
-            'asset' => new Asset(symbol: 'BTC', isNft: false),
+            'asset' => new Asset(symbol: 'BTC', isNonFungibleAsset: false),
             'quantity' => new Quantity('1'),
             'marketValue' => FiatAmount::GBP('100'),
             'fee' => null,
         ];
     }
 
-    public function nft(): static
+    public function nonFungibleAsset(): static
     {
         return $this->state([
-            'asset' => new Asset(symbol: md5(time()), isNft: true),
+            'asset' => new Asset(symbol: md5(time()), isNonFungibleAsset: true),
             'quantity' => new Quantity('1'),
         ]);
     }

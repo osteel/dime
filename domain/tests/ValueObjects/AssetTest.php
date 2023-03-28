@@ -3,8 +3,8 @@
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\Asset;
 
-it('cannot instantiate an asset', function (string $symbol, bool $isNft, string $result) {
-    expect((new Asset($symbol, $isNft))->symbol)->toBe($result);
+it('cannot instantiate an asset', function (string $symbol, bool $isNonFungibleAsset, string $result) {
+    expect((new Asset($symbol, $isNonFungibleAsset))->symbol)->toBe($result);
 })->with([
     'scenario 1' => ['FOO ', false, 'FOO'],
     'scenario 2' => [' FOO', true, 'FOO'],

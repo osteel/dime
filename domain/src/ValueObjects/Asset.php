@@ -11,9 +11,9 @@ final readonly class Asset implements Stringable
 {
     public string|FiatCurrency $symbol;
 
-    public function __construct(string $symbol, public bool $isNft = false)
+    public function __construct(string $symbol, public bool $isNonFungibleAsset = false)
     {
-        $symbol = trim($isNft ? $symbol : strtoupper($symbol));
+        $symbol = trim($isNonFungibleAsset ? $symbol : strtoupper($symbol));
 
         $this->symbol = FiatCurrency::tryFrom($symbol) ?? $symbol;
     }
