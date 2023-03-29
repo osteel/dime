@@ -7,7 +7,7 @@ use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
 use Domain\Aggregates\SharePoolingAsset\Exceptions\SharePoolingAssetException;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityBreakdown;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
 use Domain\Enums\FiatCurrency;
@@ -143,8 +143,8 @@ it('can dispose of a share pooling asset', function () {
             quantity: $disposeOfSharePoolingAsset->quantity,
             costBasis: FiatAmount::GBP('100'),
             proceeds: $disposeOfSharePoolingAsset->proceeds,
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ))->setPosition(1),
     );
 
@@ -342,8 +342,8 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('22'),
             proceeds: FiatAmount::GBP('40'),
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ),
     );
 
@@ -405,8 +405,8 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
             proceeds: FiatAmount::GBP('75'),
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ),
     );
 
@@ -439,7 +439,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
             ->withThirtyDayQuantity(new Quantity('25'), position: 2) // $acquireMoreSharePoolingAsset
             ->make([
                 'costBasis' => FiatAmount::GBP('45'),
-                'sameDayQuantityBreakdown' => new QuantityBreakdown(),
+                'sameDayQuantityAllocation' => new QuantityAllocation(),
             ])
             ->setPosition(1),
     );
@@ -487,8 +487,8 @@ it('can acquire a share pooling asset several times within 30 days of their disp
             quantity: new Quantity('25'),
             costBasis: FiatAmount::GBP('25'),
             proceeds: FiatAmount::GBP('50'),
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ),
     );
 
@@ -550,7 +550,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
             ->withThirtyDayQuantity(new Quantity('15'), position: 5) // $sharePoolingAssetAcquired4
             ->make([
                 'costBasis' => FiatAmount::GBP('40'),
-                'sameDayQuantityBreakdown' => new QuantityBreakdown(),
+                'sameDayQuantityAllocation' => new QuantityAllocation(),
             ])
             ->setPosition(3),
     );
@@ -690,7 +690,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
                     'quantity' => $disposeOfSharePoolingAsset3->quantity,
                     'costBasis' => FiatAmount::GBP('20'),
                     'proceeds' => $disposeOfSharePoolingAsset3->proceeds,
-                    'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
+                    'thirtyDayQuantityAllocation' => new QuantityAllocation(),
                 ])
         )->setPosition(6),
     );
@@ -731,8 +731,8 @@ it('can acquire a same-day share pooling asset several times on the same day as 
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
             proceeds: FiatAmount::GBP('75'),
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ),
     );
 
@@ -791,7 +791,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
             ->withSameDayQuantity(new Quantity('10'), position: 3) // $sharePoolingAssetAcquired3
             ->make([
                 'costBasis' => FiatAmount::GBP('59'),
-                'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
+                'thirtyDayQuantityAllocation' => new QuantityAllocation(),
             ])
             ->setPosition(1),
     );
@@ -825,8 +825,8 @@ it('can dispose of a same-day share pooling asset several times on the same day 
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
             proceeds: FiatAmount::GBP('75'),
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ),
     );
 

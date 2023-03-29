@@ -7,17 +7,17 @@ namespace Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransaction;
 use RuntimeException;
 
-final class QuantityBreakdownException extends RuntimeException
+final class QuantityAllocationException extends RuntimeException
 {
     private function __construct(string $message)
     {
         parent::__construct($message);
     }
 
-    public static function unassignableTransaction(SharePoolingAssetTransaction $transaction): self
+    public static function unprocessedTransaction(SharePoolingAssetTransaction $transaction): self
     {
         return new self(sprintf(
-            'Can only assign quantities to processed transactions. Transaction: %s',
+            'Can only allocate quantities to processed transactions. Transaction: %s',
             $transaction->__toString(),
         ));
     }
