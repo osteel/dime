@@ -16,7 +16,7 @@ use Domain\Aggregates\SharePoolingAsset\Exceptions\SharePoolingAssetException;
 use Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor\DisposalProcessor;
 use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\QuantityAdjuster;
 use Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder\ReversionFinder;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityBreakdown;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
@@ -140,8 +140,8 @@ class SharePoolingAsset implements AggregateRoot
             quantity: $action->quantity,
             costBasis: $action->proceeds->zero(),
             proceeds: $action->proceeds,
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
             processed: false,
         ))->setPosition($action->position));
 

@@ -3,7 +3,7 @@
 namespace Domain\Tests\Aggregates\SharePoolingAsset\Factories\ValueObjects;
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityBreakdown;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
 use Domain\ValueObjects\FiatAmount;
@@ -28,8 +28,8 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
             'quantity' => new Quantity('100'),
             'costBasis' => FiatAmount::GBP('100'),
             'proceeds' => FiatAmount::GBP('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown(),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
+            'sameDayQuantityAllocation' => new QuantityAllocation(),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation(),
             'processed' => true,
         ];
     }
@@ -41,8 +41,8 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
             'quantity' => $transaction->quantity,
             'costBasis' => $transaction->costBasis,
             'proceeds' => $transaction->proceeds,
-            'sameDayQuantityBreakdown' => $transaction->sameDayQuantityBreakdown->copy(),
-            'thirtyDayQuantityBreakdown' => $transaction->thirtyDayQuantityBreakdown->copy(),
+            'sameDayQuantityAllocation' => $transaction->sameDayQuantityAllocation->copy(),
+            'thirtyDayQuantityAllocation' => $transaction->thirtyDayQuantityAllocation->copy(),
         ]);
     }
 
@@ -54,8 +54,8 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
     public function revert(SharePoolingAssetDisposal $transaction): static
     {
         return $this->copyFrom($transaction)->state([
-            'sameDayQuantityBreakdown' => new QuantityBreakdown(),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown(),
+            'sameDayQuantityAllocation' => new QuantityAllocation(),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation(),
         ]);
     }
 
@@ -66,10 +66,10 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
 
     public function withSameDayQuantity(Quantity $quantity, int $position): static
     {
-        $sameDayQuantity = $this->getLatest('sameDayQuantityBreakdown') ?? new QuantityBreakdown();
+        $sameDayQuantity = $this->getLatest('sameDayQuantityAllocation') ?? new QuantityAllocation();
 
         return $this->state([
-            'sameDayQuantityBreakdown' => $sameDayQuantity->assignQuantity(
+            'sameDayQuantityAllocation' => $sameDayQuantity->allocateQuantity(
                 $quantity,
                 SharePoolingAssetAcquisition::factory()->make()->setPosition($position),
             ),
@@ -78,10 +78,10 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
 
     public function withThirtyDayQuantity(Quantity $quantity, int $position): static
     {
-        $thirtyDayQuantity = $this->getLatest('thirtyDayQuantityBreakdown') ?? new QuantityBreakdown();
+        $thirtyDayQuantity = $this->getLatest('thirtyDayQuantityAllocation') ?? new QuantityAllocation();
 
         return $this->state([
-            'thirtyDayQuantityBreakdown' => $thirtyDayQuantity->assignQuantity(
+            'thirtyDayQuantityAllocation' => $thirtyDayQuantity->allocateQuantity(
                 $quantity,
                 SharePoolingAssetAcquisition::factory()->make()->setPosition($position),
             ),

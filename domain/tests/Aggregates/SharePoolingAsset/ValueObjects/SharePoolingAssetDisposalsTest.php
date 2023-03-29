@@ -1,6 +1,6 @@
 <?php
 
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityBreakdown;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
 use Domain\ValueObjects\FiatAmount;
@@ -83,23 +83,23 @@ it('can return the disposals with available same-day quantity from a collection 
         SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('100')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('100')]),
         ]),
         $disposal1 = SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('10'), new Quantity('10')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('10'), new Quantity('10')]),
         ]),
         $disposal2 = SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('90')]),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation([new Quantity('90')]),
         ]),
         $disposal3 = SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('50')]),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation([new Quantity('50')]),
         ]),
     ];
 
@@ -117,23 +117,23 @@ it('can return the available same-day quantity from a collection of disposals', 
         SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('100')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('100')]),
         ]),
         SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('10')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('10')]),
         ]),
         SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('80'), new Quantity('10')]),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation([new Quantity('80'), new Quantity('10')]),
         ]),
         SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('40'), new Quantity('10')]),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('40'), new Quantity('10')]),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation([new Quantity('50')]),
         ]),
     ];
 
@@ -148,23 +148,23 @@ it('can return the acquisitions with available 30-day quantity from a collection
         SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('90'), new Quantity('10')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('90'), new Quantity('10')]),
         ]),
         $disposal1 = SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('10')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('10')]),
         ]),
         $disposal2 = SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('90')]),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation([new Quantity('90')]),
         ]),
         SharePoolingAssetDisposal::factory()->make([
             'costBasis' => FiatAmount::GBP('100'),
             'quantity' => new Quantity('100'),
-            'sameDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('50')]),
-            'thirtyDayQuantityBreakdown' => new QuantityBreakdown([new Quantity('40'), new Quantity('10')]),
+            'sameDayQuantityAllocation' => new QuantityAllocation([new Quantity('50')]),
+            'thirtyDayQuantityAllocation' => new QuantityAllocation([new Quantity('40'), new Quantity('10')]),
         ]),
     ];
 

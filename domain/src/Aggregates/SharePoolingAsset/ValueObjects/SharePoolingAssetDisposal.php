@@ -17,8 +17,8 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
         public readonly FiatAmount $proceeds,
-        public readonly QuantityBreakdown $sameDayQuantityBreakdown,
-        public readonly QuantityBreakdown $thirtyDayQuantityBreakdown,
+        public readonly QuantityAllocation $sameDayQuantityAllocation,
+        public readonly QuantityAllocation $thirtyDayQuantityAllocation,
         protected bool $processed = true,
     ) {
     }
@@ -36,8 +36,8 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
             $this->quantity,
             $this->costBasis,
             $this->proceeds,
-            $this->sameDayQuantityBreakdown->copy(),
-            $this->thirtyDayQuantityBreakdown->copy(),
+            $this->sameDayQuantityAllocation->copy(),
+            $this->thirtyDayQuantityAllocation->copy(),
             $this->processed,
         ))->setPosition($this->position);
     }
@@ -50,35 +50,35 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
             quantity: $this->quantity,
             costBasis: $this->costBasis->zero(),
             proceeds: $this->proceeds,
-            sameDayQuantityBreakdown: new QuantityBreakdown(),
-            thirtyDayQuantityBreakdown: new QuantityBreakdown(),
+            sameDayQuantityAllocation: new QuantityAllocation(),
+            thirtyDayQuantityAllocation: new QuantityAllocation(),
             processed: false,
         ))->setPosition($this->position);
     }
 
     public function sameDayQuantity(): Quantity
     {
-        return $this->sameDayQuantityBreakdown->quantity();
+        return $this->sameDayQuantityAllocation->quantity();
     }
 
     public function thirtyDayQuantity(): Quantity
     {
-        return $this->thirtyDayQuantityBreakdown->quantity();
+        return $this->thirtyDayQuantityAllocation->quantity();
     }
 
-    /** @throws \Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityBreakdownException */
+    /** @throws \Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityAllocationException */
     public function hasThirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): bool
     {
-        return $this->thirtyDayQuantityBreakdown->hasQuantityMatchedWith($acquisition);
+        return $this->thirtyDayQuantityAllocation->hasQuantityAllocatedTo($acquisition);
     }
 
-    /** @throws \Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityBreakdownException */
+    /** @throws \Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityAllocationException */
     public function thirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): Quantity
     {
-        return $this->thirtyDayQuantityBreakdown->quantityMatchedWith($acquisition);
+        return $this->thirtyDayQuantityAllocation->quantityAllocatedTo($acquisition);
     }
 
-    /** @return array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_breakdown:array{breakdown:array<int,string>},thirty_day_quantity_breakdown:array{breakdown:array<int,string>},processed:bool,position:int|null} */
+    /** @return array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<int,string>},thirty_day_quantity_allocation:array{allocation:array<int,string>},processed:bool,position:int|null} */
     public function toPayload(): array
     {
         return [
@@ -86,14 +86,14 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
             'quantity' => $this->quantity->__toString(),
             'cost_basis' => $this->costBasis->toPayload(),
             'proceeds' => $this->proceeds->toPayload(),
-            'same_day_quantity_breakdown' => $this->sameDayQuantityBreakdown->toPayload(),
-            'thirty_day_quantity_breakdown' => $this->thirtyDayQuantityBreakdown->toPayload(),
+            'same_day_quantity_allocation' => $this->sameDayQuantityAllocation->toPayload(),
+            'thirty_day_quantity_allocation' => $this->thirtyDayQuantityAllocation->toPayload(),
             'processed' => $this->processed,
             'position' => $this->position,
         ];
     }
 
-    /** @param array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_breakdown:array{breakdown:array<int,string>},thirty_day_quantity_breakdown:array{breakdown:array<int,string>},processed:bool,position:int} $payload */
+    /** @param array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<int,string>},thirty_day_quantity_allocation:array{allocation:array<int,string>},processed:bool,position:int} $payload */
     public static function fromPayload(array $payload): static
     {
         return (new static(
@@ -101,8 +101,8 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
             new Quantity($payload['quantity']),
             FiatAmount::fromPayload($payload['cost_basis']),
             FiatAmount::fromPayload($payload['proceeds']),
-            QuantityBreakdown::fromPayload($payload['same_day_quantity_breakdown']),
-            QuantityBreakdown::fromPayload($payload['thirty_day_quantity_breakdown']),
+            QuantityAllocation::fromPayload($payload['same_day_quantity_allocation']),
+            QuantityAllocation::fromPayload($payload['thirty_day_quantity_allocation']),
             (bool) $payload['processed'],
         ))->setPosition((int) $payload['position']);
     }

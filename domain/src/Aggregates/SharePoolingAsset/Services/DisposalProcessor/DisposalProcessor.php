@@ -6,7 +6,7 @@ namespace Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityBreakdown;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
 use Domain\ValueObjects\FiatAmount;
@@ -23,14 +23,14 @@ final class DisposalProcessor
         SharePoolingAssetTransactions $transactions,
         ?int $position,
     ): SharePoolingAssetDisposal {
-        $sameDayQuantityBreakdown = new QuantityBreakdown();
-        $thirtyDayQuantityBreakdown = new QuantityBreakdown();
+        $sameDayQuantityAllocation = new QuantityAllocation();
+        $thirtyDayQuantityAllocation = new QuantityAllocation();
 
         $costBasis = self::calculateCostBasis(
             transactions: $transactions,
             date: $disposal->date,
-            sameDayQuantityBreakdown: $sameDayQuantityBreakdown,
-            thirtyDayQuantityBreakdown: $thirtyDayQuantityBreakdown,
+            sameDayQuantityAllocation: $sameDayQuantityAllocation,
+            thirtyDayQuantityAllocation: $thirtyDayQuantityAllocation,
             remainingQuantity: $disposal->quantity,
         );
 
@@ -41,16 +41,16 @@ final class DisposalProcessor
             quantity: $disposal->quantity,
             costBasis: $costBasis,
             proceeds: $disposal->proceeds,
-            sameDayQuantityBreakdown: $sameDayQuantityBreakdown,
-            thirtyDayQuantityBreakdown: $thirtyDayQuantityBreakdown,
+            sameDayQuantityAllocation: $sameDayQuantityAllocation,
+            thirtyDayQuantityAllocation: $thirtyDayQuantityAllocation,
         ))->setPosition($position);
     }
 
     private static function calculateCostBasis(
         SharePoolingAssetTransactions $transactions,
         LocalDate $date,
-        QuantityBreakdown $sameDayQuantityBreakdown,
-        QuantityBreakdown $thirtyDayQuantityBreakdown,
+        QuantityAllocation $sameDayQuantityAllocation,
+        QuantityAllocation $thirtyDayQuantityAllocation,
         Quantity $remainingQuantity,
     ): FiatAmount {
         assert($transactions->first() !== null);
@@ -60,8 +60,8 @@ final class DisposalProcessor
         return self::processSameDayAcquisitions(
             $transactions,
             $date,
-            $sameDayQuantityBreakdown,
-            $thirtyDayQuantityBreakdown,
+            $sameDayQuantityAllocation,
+            $thirtyDayQuantityAllocation,
             $remainingQuantity,
             $costBasis,
         );
@@ -70,8 +70,8 @@ final class DisposalProcessor
     private static function processSameDayAcquisitions(
         SharePoolingAssetTransactions $transactions,
         LocalDate $date,
-        QuantityBreakdown $sameDayQuantityBreakdown,
-        QuantityBreakdown $thirtyDayQuantityBreakdown,
+        QuantityAllocation $sameDayQuantityAllocation,
+        QuantityAllocation $thirtyDayQuantityAllocation,
         Quantity $remainingQuantity,
         FiatAmount $costBasis,
     ): FiatAmount {
@@ -86,7 +86,7 @@ final class DisposalProcessor
             return self::processAcquisitionsWithinThirtyDays(
                 $transactions,
                 $date,
-                $thirtyDayQuantityBreakdown,
+                $thirtyDayQuantityAllocation,
                 $remainingQuantity,
                 $costBasis,
             );
@@ -107,10 +107,10 @@ final class DisposalProcessor
         // Deduct the applied quantity from the same-day acquisitions
         $remainder = $availableSameDayQuantity;
         foreach ($sameDayAcquisitions as $acquisition) {
-            $quantityToAssign = Quantity::minimum($remainder, $acquisition->availableSameDayQuantity());
-            $sameDayQuantityBreakdown->assignQuantity($quantityToAssign, $acquisition);
+            $quantityToAllocate = Quantity::minimum($remainder, $acquisition->availableSameDayQuantity());
+            $sameDayQuantityAllocation->allocateQuantity($quantityToAllocate, $acquisition);
             $acquisition->increaseSameDayQuantity($remainder);
-            $remainder =  $remainder->minus($quantityToAssign);
+            $remainder =  $remainder->minus($quantityToAllocate);
             if ($remainder->isZero()) {
                 break;
             }
@@ -121,7 +121,7 @@ final class DisposalProcessor
         return self::processAcquisitionsWithinThirtyDays(
             $transactions,
             $date,
-            $thirtyDayQuantityBreakdown,
+            $thirtyDayQuantityAllocation,
             $remainingQuantity,
             $costBasis,
         );
@@ -130,7 +130,7 @@ final class DisposalProcessor
     private static function processAcquisitionsWithinThirtyDays(
         SharePoolingAssetTransactions $transactions,
         LocalDate $date,
-        QuantityBreakdown $thirtyDayQuantityBreakdown,
+        QuantityAllocation $thirtyDayQuantityAllocation,
         Quantity $remainingQuantity,
         FiatAmount $costBasis,
     ): FiatAmount {
@@ -153,7 +153,7 @@ final class DisposalProcessor
 
             foreach ($sameDayDisposals as $disposal) {
                 $sameDayQuantityToApply = Quantity::minimum($disposal->availableSameDayQuantity(), $thirtyDayQuantityToApply);
-                $disposal->sameDayQuantityBreakdown->assignQuantity($sameDayQuantityToApply, $acquisition);
+                $disposal->sameDayQuantityAllocation->allocateQuantity($sameDayQuantityToApply, $acquisition);
                 $acquisition->increaseSameDayQuantity($sameDayQuantityToApply);
                 $thirtyDayQuantityToApply = $thirtyDayQuantityToApply->minus($sameDayQuantityToApply);
                 if ($thirtyDayQuantityToApply->isZero()) {
@@ -171,7 +171,7 @@ final class DisposalProcessor
                 ? $costBasis->plus($averageCostBasisPerUnit->multipliedBy($thirtyDayQuantityToApply))
                 : $costBasis;
 
-            $thirtyDayQuantityBreakdown->assignQuantity($thirtyDayQuantityToApply, $acquisition);
+            $thirtyDayQuantityAllocation->allocateQuantity($thirtyDayQuantityToApply, $acquisition);
             $acquisition->increaseThirtyDayQuantity($thirtyDayQuantityToApply);
             $remainingQuantity = $remainingQuantity->minus($thirtyDayQuantityToApply);
 
