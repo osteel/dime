@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
 
 use Brick\DateTime\LocalDate;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetDisposalException;
 use Domain\Tests\Aggregates\SharePoolingAsset\Factories\ValueObjects\SharePoolingAssetDisposalFactory;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
@@ -12,15 +13,25 @@ use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
 final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction implements SerializablePayload
 {
+    public readonly QuantityAllocation $sameDayQuantityAllocation;
+    public readonly QuantityAllocation $thirtyDayQuantityAllocation;
+
     public function __construct(
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
         public readonly FiatAmount $proceeds,
-        public readonly QuantityAllocation $sameDayQuantityAllocation,
-        public readonly QuantityAllocation $thirtyDayQuantityAllocation,
-        protected bool $processed = true,
+        QuantityAllocation $sameDayQuantityAllocation = null,
+        QuantityAllocation $thirtyDayQuantityAllocation = null,
+        protected readonly bool $processed = true,
     ) {
+        $this->sameDayQuantityAllocation = $sameDayQuantityAllocation ?? new QuantityAllocation();
+        $this->thirtyDayQuantityAllocation = $thirtyDayQuantityAllocation ?? new QuantityAllocation();
+
+        $allocatedQuantity = $this->sameDayQuantityAllocation->quantity()->plus($this->thirtyDayQuantityAllocation->quantity());
+
+        $this->quantity->isGreaterThanOrEqualTo($allocatedQuantity)
+            || throw SharePoolingAssetDisposalException::excessiveQuantityAllocated($this->quantity, $allocatedQuantity);
     }
 
     /** @return SharePoolingAssetDisposalFactory<static> */
@@ -29,29 +40,14 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         return SharePoolingAssetDisposalFactory::new();
     }
 
-    public function copy(): static
-    {
-        return (new self(
-            $this->date,
-            $this->quantity,
-            $this->costBasis,
-            $this->proceeds,
-            $this->sameDayQuantityAllocation->copy(),
-            $this->thirtyDayQuantityAllocation->copy(),
-            $this->processed,
-        ))->setPosition($this->position);
-    }
-
     /** Return a copy of the disposal with reset quantities and marked as unprocessed. */
     public function copyAsUnprocessed(): SharePoolingAssetDisposal
     {
-        return (new SharePoolingAssetDisposal(
+        return (new self(
             date: $this->date,
             quantity: $this->quantity,
             costBasis: $this->costBasis->zero(),
             proceeds: $this->proceeds,
-            sameDayQuantityAllocation: new QuantityAllocation(),
-            thirtyDayQuantityAllocation: new QuantityAllocation(),
             processed: false,
         ))->setPosition($this->position);
     }

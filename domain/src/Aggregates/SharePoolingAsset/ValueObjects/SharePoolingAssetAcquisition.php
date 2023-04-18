@@ -13,6 +13,7 @@ use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
 final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction implements SerializablePayload
 {
+    protected readonly bool $processed;
     private Quantity $sameDayQuantity;
     private Quantity $thirtyDayQuantity;
 
@@ -25,23 +26,13 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
     ) {
         $this->sameDayQuantity = $sameDayQuantity ?? Quantity::zero();
         $this->thirtyDayQuantity = $thirtyDayQuantity ?? Quantity::zero();
+        $this->processed = true;
     }
 
     /** @return SharePoolingAssetAcquisitionFactory<static> */
     protected static function newFactory(): SharePoolingAssetAcquisitionFactory
     {
         return SharePoolingAssetAcquisitionFactory::new();
-    }
-
-    public function copy(): static
-    {
-        return (new self(
-            $this->date,
-            $this->quantity,
-            $this->costBasis,
-            $this->sameDayQuantity,
-            $this->thirtyDayQuantity,
-        ))->setPosition($this->position);
     }
 
     public function sameDayQuantity(): Quantity

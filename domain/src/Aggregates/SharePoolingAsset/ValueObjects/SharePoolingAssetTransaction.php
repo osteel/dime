@@ -15,17 +15,15 @@ abstract class SharePoolingAssetTransaction implements Stringable
 {
     use HasFactory;
 
-    protected bool $processed;
     protected ?int $position = null;
 
     public function __construct(
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
+        protected readonly bool $processed = true,
     ) {
     }
-
-    abstract public function copy(): static;
 
     /** @throws SharePoolingAssetTransactionException */
     public function setPosition(?int $position = null): static
@@ -46,7 +44,7 @@ abstract class SharePoolingAssetTransaction implements Stringable
 
     public function isProcessed(): bool
     {
-        return $this instanceof SharePoolingAssetAcquisition ? true : $this->processed;
+        return $this->processed;
     }
 
     public function averageCostBasisPerUnit(): ?FiatAmount

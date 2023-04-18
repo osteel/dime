@@ -10,16 +10,9 @@ use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
 final class QuantityAllocation implements SerializablePayload
 {
-    private Quantity $quantity;
-
     /** @param array<int,Quantity> $allocation */
     public function __construct(private array $allocation = [])
     {
-        $this->quantity = array_reduce(
-            $allocation,
-            fn (Quantity $total, Quantity $quantity) => $total->plus($quantity),
-            Quantity::zero(),
-        );
     }
 
     public function copy(): QuantityAllocation
@@ -29,7 +22,11 @@ final class QuantityAllocation implements SerializablePayload
 
     public function quantity(): Quantity
     {
-        return $this->quantity;
+        return array_reduce(
+            $this->allocation,
+            fn (Quantity $total, Quantity $quantity) => $total->plus($quantity),
+            Quantity::zero(),
+        );
     }
 
     /** @throws QuantityAllocationException */
@@ -58,7 +55,6 @@ final class QuantityAllocation implements SerializablePayload
         $allocated = ($this->allocation[$acquisition->getPosition()] ?? Quantity::zero())->plus($quantity);
 
         $this->allocation[$acquisition->getPosition()] = $allocated;
-        $this->quantity = $this->quantity->plus($quantity);
 
         return $this;
     }

@@ -3,7 +3,6 @@
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
@@ -27,8 +26,6 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP($costBasis),
             proceeds: FiatAmount::GBP($proceeds),
-            sameDayQuantityAllocation: new QuantityAllocation(),
-            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ),
     );
 
@@ -55,8 +52,6 @@ it('can handle a capital gain update reversion', function (string $costBasis, st
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP($costBasis),
             proceeds: FiatAmount::GBP($proceeds),
-            sameDayQuantityAllocation: new QuantityAllocation(),
-            thirtyDayQuantityAllocation: new QuantityAllocation(),
         ),
     );
 
