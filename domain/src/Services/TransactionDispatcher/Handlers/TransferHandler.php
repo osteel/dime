@@ -6,7 +6,7 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
 use Domain\ValueObjects\Transactions\Transfer;
 

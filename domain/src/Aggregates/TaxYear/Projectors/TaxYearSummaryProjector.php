@@ -10,7 +10,7 @@ use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
 use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\Projectors\Exceptions\TaxYearSummaryProjectionException;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use EventSauce\EventSourcing\EventConsumption\EventConsumer;
 use EventSauce\EventSourcing\Message;
 

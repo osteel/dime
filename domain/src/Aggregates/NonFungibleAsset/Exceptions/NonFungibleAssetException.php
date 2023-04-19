@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Domain\Aggregates\NonFungibleAsset\Exceptions;
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\NonFungibleAsset\NonFungibleAssetId;
+use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Enums\FiatCurrency;
 use RuntimeException;
 use Stringable;

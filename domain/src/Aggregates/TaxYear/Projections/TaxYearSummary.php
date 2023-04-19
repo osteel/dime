@@ -6,7 +6,7 @@ namespace Domain\Aggregates\TaxYear\Projections;
 
 use Domain\Aggregates\TaxYear\Projections\Exceptions\TaxYearSummaryException;
 use Domain\Enums\FiatCurrency;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Tests\Aggregates\TaxYear\Factories\Projections\TaxYearSummaryFactory;
 use Domain\ValueObjects\Exceptions\FiatAmountException;

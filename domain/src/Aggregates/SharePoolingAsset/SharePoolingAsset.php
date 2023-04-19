@@ -19,6 +19,7 @@ use Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder\ReversionFinder
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
 use Domain\Enums\FiatCurrency;
 use EventSauce\EventSourcing\AggregateRoot;

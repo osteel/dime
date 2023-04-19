@@ -4,7 +4,7 @@ namespace Domain\Tests\Aggregates\TaxYear\Projectors;
 
 use Domain\Aggregates\TaxYear\Projectors\TaxYearSummaryProjector;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use EventSauce\EventSourcing\MessageConsumer;
 use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 use Mockery;

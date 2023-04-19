@@ -6,7 +6,7 @@ namespace App\Aggregates\TaxYear\Repositories;
 
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository as TaxYearRepositoryInterface;
 use Domain\Aggregates\TaxYear\TaxYear;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use EventSauce\EventSourcing\ClassNameInflector;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\MessageDecorator;

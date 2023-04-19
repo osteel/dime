@@ -3,8 +3,8 @@
 use App\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
-use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
 

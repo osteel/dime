@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain;
+namespace Domain\ValueObjects;
 
 use EventSauce\EventSourcing\AggregateRootId as AggregateRootIdInterface;
 use Ramsey\Uuid\Uuid;

@@ -8,7 +8,7 @@ use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
 use Domain\Aggregates\TaxYear\TaxYear;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Tests\AggregateRootTestCase;
 use EventSauce\EventSourcing\AggregateRootId;
 
