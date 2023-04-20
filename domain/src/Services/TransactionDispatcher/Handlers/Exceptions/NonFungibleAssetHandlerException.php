@@ -16,6 +16,6 @@ final class NonFungibleAssetHandlerException extends RuntimeException
 
     public static function noNonFungibleAsset(Transaction $transaction): self
     {
-        return new self(sprintf('Neither asset is a non-fungible asset: %s', $transaction->__toString()));
+        return new self(sprintf('Neither asset is a non-fungible asset: %s', (string) $transaction));
     }
 }

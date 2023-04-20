@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster;
 
+use Domain\Aggregates\SharePoolingAsset\Entities\Exceptions\SharePoolingAssetAcquisitionException;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisitions;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\Exceptions\QuantityAdjusterException;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetAcquisitionException;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisitions;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
 
 /**
  * This service restores the quantities from acquisitions that were
@@ -44,13 +44,13 @@ final class QuantityAdjuster
     ): SharePoolingAssetAcquisitions {
         $acquisitions = SharePoolingAssetAcquisitions::make();
 
-        foreach ($allocation->positions() as $position) {
-            if (is_null($acquisition = $transactions->get($position))) {
-                throw QuantityAdjusterException::transactionNotFound($position);
+        foreach ($allocation->transactionIds() as $transactionId) {
+            if (is_null($acquisition = $transactions->getForId($transactionId))) {
+                throw QuantityAdjusterException::transactionNotFound($transactionId);
             }
 
             if (! $acquisition instanceof SharePoolingAssetAcquisition) {
-                throw QuantityAdjusterException::notAnAcquisition($position);
+                throw QuantityAdjusterException::notAnAcquisition($transactionId);
             }
 
             $acquisitions->add($acquisition);

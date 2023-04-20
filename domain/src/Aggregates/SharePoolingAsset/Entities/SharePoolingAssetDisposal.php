@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
+namespace Domain\Aggregates\SharePoolingAsset\Entities;
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetDisposalException;
-use Domain\Tests\Aggregates\SharePoolingAsset\Factories\ValueObjects\SharePoolingAssetDisposalFactory;
+use Domain\Aggregates\SharePoolingAsset\Entities\Exceptions\SharePoolingAssetDisposalException;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
+use Domain\Tests\Aggregates\SharePoolingAsset\Factories\Entities\SharePoolingAssetDisposalFactory;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
@@ -17,14 +19,17 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     public readonly QuantityAllocation $thirtyDayQuantityAllocation;
 
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly Quantity $quantity,
-        public readonly FiatAmount $costBasis,
+        LocalDate $date,
+        Quantity $quantity,
+        FiatAmount $costBasis,
         public readonly FiatAmount $proceeds,
         QuantityAllocation $sameDayQuantityAllocation = null,
         QuantityAllocation $thirtyDayQuantityAllocation = null,
-        protected readonly bool $processed = true,
+        bool $processed = true,
+        ?SharePoolingAssetTransactionId $id = null,
     ) {
+        parent::__construct($date, $quantity, $costBasis, id: $id, processed: $processed);
+
         $this->sameDayQuantityAllocation = $sameDayQuantityAllocation ?? new QuantityAllocation();
         $this->thirtyDayQuantityAllocation = $thirtyDayQuantityAllocation ?? new QuantityAllocation();
 
@@ -43,13 +48,14 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     /** Return a copy of the disposal with reset quantities and marked as unprocessed. */
     public function copyAsUnprocessed(): SharePoolingAssetDisposal
     {
-        return (new self(
+        return new self(
+            id: $this->id,
             date: $this->date,
             quantity: $this->quantity,
             costBasis: $this->costBasis->zero(),
             proceeds: $this->proceeds,
             processed: false,
-        ))->setPosition($this->position);
+        );
     }
 
     public function sameDayQuantity(): Quantity
@@ -62,45 +68,44 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         return $this->thirtyDayQuantityAllocation->quantity();
     }
 
-    /** @throws \Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityAllocationException */
     public function hasThirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): bool
     {
         return $this->thirtyDayQuantityAllocation->hasQuantityAllocatedTo($acquisition);
     }
 
-    /** @throws \Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityAllocationException */
     public function thirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): Quantity
     {
         return $this->thirtyDayQuantityAllocation->quantityAllocatedTo($acquisition);
     }
 
-    /** @return array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<int,string>},thirty_day_quantity_allocation:array{allocation:array<int,string>},processed:bool,position:int|null} */
+    /** @return array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} */
     public function toPayload(): array
     {
         return [
-            'date' => $this->date->__toString(),
-            'quantity' => $this->quantity->__toString(),
+            'id' => (string) $this->id,
+            'date' => (string) $this->date,
+            'quantity' => (string) $this->quantity,
             'cost_basis' => $this->costBasis->toPayload(),
             'proceeds' => $this->proceeds->toPayload(),
             'same_day_quantity_allocation' => $this->sameDayQuantityAllocation->toPayload(),
             'thirty_day_quantity_allocation' => $this->thirtyDayQuantityAllocation->toPayload(),
             'processed' => $this->processed,
-            'position' => $this->position,
         ];
     }
 
-    /** @param array{date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<int,string>},thirty_day_quantity_allocation:array{allocation:array<int,string>},processed:bool,position:int} $payload */
+    /** @param array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} $payload */
     public static function fromPayload(array $payload): static
     {
-        return (new static(
-            LocalDate::parse($payload['date']),
-            new Quantity($payload['quantity']),
-            FiatAmount::fromPayload($payload['cost_basis']),
-            FiatAmount::fromPayload($payload['proceeds']),
-            QuantityAllocation::fromPayload($payload['same_day_quantity_allocation']),
-            QuantityAllocation::fromPayload($payload['thirty_day_quantity_allocation']),
-            (bool) $payload['processed'],
-        ))->setPosition((int) $payload['position']);
+        return new static(
+            id: SharePoolingAssetTransactionId::fromString($payload['id']),
+            date: LocalDate::parse($payload['date']),
+            quantity: new Quantity($payload['quantity']),
+            costBasis: FiatAmount::fromPayload($payload['cost_basis']),
+            proceeds: FiatAmount::fromPayload($payload['proceeds']),
+            sameDayQuantityAllocation: QuantityAllocation::fromPayload($payload['same_day_quantity_allocation']),
+            thirtyDayQuantityAllocation: QuantityAllocation::fromPayload($payload['thirty_day_quantity_allocation']),
+            processed: (bool) $payload['processed'],
+        );
     }
 
     public function __toString(): string

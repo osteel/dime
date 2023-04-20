@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
+namespace Domain\Aggregates\SharePoolingAsset\Entities;
 
 use ArrayIterator;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetTransactionException;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
@@ -30,6 +30,16 @@ final class SharePoolingAssetAcquisitions implements IteratorAggregate
         return new ArrayIterator($this->acquisitions);
     }
 
+    private function getIndexForId(SharePoolingAssetTransactionId $id): ?int
+    {
+        $index = array_search(
+            $id,
+            array_map(fn (SharePoolingAssetTransaction $acquisition) => $acquisition->id, $this->acquisitions),
+        );
+
+        return $index !== false ? $index : null;
+    }
+
     public function isEmpty(): bool
     {
         return empty($this->acquisitions);
@@ -43,16 +53,9 @@ final class SharePoolingAssetAcquisitions implements IteratorAggregate
     public function add(SharePoolingAssetAcquisition ...$acquisitions): self
     {
         foreach ($acquisitions as $acquisition) {
-            try {
-                $acquisition->setPosition($this->count());
-            } catch (SharePoolingAssetTransactionException) {
-            }
+            $index = $this->getIndexForId($acquisition->id) ?? $this->count();
 
-            $position = $acquisition->getPosition();
-
-            assert(! is_null($position));
-
-            $this->acquisitions[$position] = $acquisition;
+            $this->acquisitions[$index] = $acquisition;
         }
 
         return $this;

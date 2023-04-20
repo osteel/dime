@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions;
+namespace Domain\Aggregates\SharePoolingAsset\Entities\Exceptions;
 
 use Domain\ValueObjects\Quantity;
 use RuntimeException;

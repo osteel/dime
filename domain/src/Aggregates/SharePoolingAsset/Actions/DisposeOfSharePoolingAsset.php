@@ -6,6 +6,7 @@ namespace Domain\Aggregates\SharePoolingAsset\Actions;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\Timely;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Stringable;
@@ -16,13 +17,14 @@ final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely
         public LocalDate $date,
         public Quantity $quantity,
         public FiatAmount $proceeds,
-        public ?int $position = null,
+        // Only present whenever the disposal has been reverted and is now being replayed
+        public ?SharePoolingAssetTransactionId $id = null,
     ) {
     }
 
     public function isReplay(): bool
     {
-        return ! is_null($this->position);
+        return ! is_null($this->id);
     }
 
     public function getDate(): LocalDate

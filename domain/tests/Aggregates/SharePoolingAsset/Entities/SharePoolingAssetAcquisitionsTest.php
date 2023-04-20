@@ -1,7 +1,7 @@
 <?php
 
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisitions;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisitions;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
@@ -37,9 +37,12 @@ it('can make a collection of acquisitions', function () {
 
 it('can add an acquisition to a collection of acquisitions', function () {
     /** @var SharePoolingAssetAcquisition */
-    $acquisition = SharePoolingAssetAcquisition::factory()->make();
+    $acquisition1 = SharePoolingAssetAcquisition::factory()->make();
 
-    $acquisitions = SharePoolingAssetAcquisitions::make($acquisition)->add($acquisition);
+    /** @var SharePoolingAssetAcquisition */
+    $acquisition2 = SharePoolingAssetAcquisition::factory()->make();
+
+    $acquisitions = SharePoolingAssetAcquisitions::make($acquisition1)->add($acquisition2);
 
     expect($acquisitions->count())->toBeInt()->toBe(2);
 });

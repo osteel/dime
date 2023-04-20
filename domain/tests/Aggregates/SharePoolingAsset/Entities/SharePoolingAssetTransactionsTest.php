@@ -1,12 +1,12 @@
 <?php
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisitions;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransaction;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisitions;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposals;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransaction;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\ValueObjects\Quantity;
 
 it('can make an empty collection of transactions', function () {
@@ -67,9 +67,12 @@ it('can return a transaction at a position from the collection', function () {
 
 it('can add a transaction to a collection of transactions', function () {
     /** @var SharePoolingAssetDisposal */
-    $transaction = SharePoolingAssetDisposal::factory()->make();
+    $transaction1 = SharePoolingAssetDisposal::factory()->make();
 
-    $transactions = SharePoolingAssetTransactions::make($transaction)->add($transaction);
+    /** @var SharePoolingAssetAcquisition */
+    $transaction2 = SharePoolingAssetAcquisition::factory()->make();
+
+    $transactions = SharePoolingAssetTransactions::make($transaction1)->add($transaction2);
 
     expect($transactions->count())->toBeInt()->toBe(2);
 });
@@ -465,22 +468,22 @@ it('can return a collection of disposals that happened after a date (inclusive)'
 
 it('can return a collection of disposals with 30-day quantity matched with an acquisition', function () {
     /** @var SharePoolingAssetAcquisition */
-    $acquisition = SharePoolingAssetAcquisition::factory()->make([
+    $acquisition1 = SharePoolingAssetAcquisition::factory()->make([
         'date' => LocalDate::parse('2015-10-21'),
         'sameDayQuantity' => new Quantity('10'),
         'thirtyDayQuantity' => new Quantity('100'),
-    ])->setPosition(0);
+    ]);
 
     /** @var SharePoolingAssetTransactions */
     $transactions = SharePoolingAssetTransactions::make(
-        $acquisition,
-        $disposal1 = SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('30'), position: 0)->make(),
-        SharePoolingAssetDisposal::factory()->withSameDayQuantity(new Quantity('10'), position: 0)->make(),
-        SharePoolingAssetAcquisition::factory()->make(),
-        SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('20'), position: 3)->make(),
-        $disposal2 = SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('70'), position: 0)->make(),
+        $acquisition1,
+        $disposal1 = SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('30'), id: $acquisition1->id)->make(),
+        SharePoolingAssetDisposal::factory()->withSameDayQuantity(new Quantity('10'), id: $acquisition1->id)->make(),
+        $acquisition2 = SharePoolingAssetAcquisition::factory()->make(),
+        SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('20'), id: $acquisition2->id)->make(),
+        $disposal2 = SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('70'), id: $acquisition1->id)->make(),
         SharePoolingAssetDisposal::factory()->make(),
-    )->disposalsWithThirtyDayQuantityMatchedWith($acquisition);
+    )->disposalsWithThirtyDayQuantityMatchedWith($acquisition1);
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual(2);

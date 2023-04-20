@@ -7,8 +7,8 @@ namespace Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposals;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\ValueObjects\Quantity;
 
 /** This service identifies and returns the disposals that need to be reverted upon a new acquisition or disposal. */

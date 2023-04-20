@@ -22,7 +22,7 @@ final class CapitalGainUpdateReverted implements SerializablePayload
     {
         return [
             'tax_year' => $this->taxYear,
-            'date' => $this->date->__toString(),
+            'date' => (string) $this->date,
             'capital_gain' => $this->capitalGain->toPayload(),
         ];
     }

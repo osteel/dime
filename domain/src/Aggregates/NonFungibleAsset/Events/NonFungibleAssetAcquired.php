@@ -20,7 +20,7 @@ final readonly class NonFungibleAssetAcquired implements SerializablePayload
     public function toPayload(): array
     {
         return [
-            'date' => $this->date->__toString(),
+            'date' => (string) $this->date,
             'cost_basis' => $this->costBasis->toPayload(),
         ];
     }

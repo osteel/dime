@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
 
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityAllocationException;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\ValueObjects\Quantity;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
 final class QuantityAllocation implements SerializablePayload
 {
-    /** @param array<int,Quantity> $allocation */
+    /** @param array<string,Quantity> $allocation */
     public function __construct(private array $allocation = [])
     {
     }
@@ -29,51 +29,40 @@ final class QuantityAllocation implements SerializablePayload
         );
     }
 
-    /** @throws QuantityAllocationException */
     public function hasQuantityAllocatedTo(SharePoolingAssetAcquisition $acquisition): bool
     {
         return $this->quantityAllocatedTo($acquisition)->isGreaterThan('0');
     }
 
-    /** @throws QuantityAllocationException */
     public function quantityAllocatedTo(SharePoolingAssetAcquisition $acquisition): Quantity
     {
-        if (is_null($acquisition->getPosition())) {
-            throw QuantityAllocationException::unprocessedTransaction($acquisition);
-        }
-
-        return $this->allocation[$acquisition->getPosition()] ?? Quantity::zero();
+        return $this->allocation[(string) $acquisition->id] ?? Quantity::zero();
     }
 
-    /** @throws QuantityAllocationException */
     public function allocateQuantity(Quantity $quantity, SharePoolingAssetAcquisition $acquisition): self
     {
-        if (! $acquisition->isProcessed() || is_null($acquisition->getPosition())) {
-            throw QuantityAllocationException::unprocessedTransaction($acquisition);
-        }
+        $allocated = ($this->allocation[(string) $acquisition->id] ?? Quantity::zero())->plus($quantity);
 
-        $allocated = ($this->allocation[$acquisition->getPosition()] ?? Quantity::zero())->plus($quantity);
-
-        $this->allocation[$acquisition->getPosition()] = $allocated;
+        $this->allocation[(string) $acquisition->id] = $allocated;
 
         return $this;
     }
 
-    /** @return array<int> */
-    public function positions(): array
+    /** @return list<SharePoolingAssetTransactionId> */
+    public function transactionIds(): array
     {
-        return array_keys($this->allocation);
+        return array_map(fn (string $id) => SharePoolingAssetTransactionId::fromString($id), array_keys($this->allocation));
     }
 
-    /** @return array{allocation:array<int,string>} */
+    /** @return array{allocation:array<string,string>} */
     public function toPayload(): array
     {
         return [
-            'allocation' => array_map(fn (Quantity $quantity) => $quantity->__toString(), $this->allocation),
+            'allocation' => array_map(fn (Quantity $quantity) => (string) $quantity, $this->allocation),
         ];
     }
 
-    /** @param array{allocation:array<int,string>} $payload */
+    /** @param array{allocation:array<string,string>} $payload */
     public static function fromPayload(array $payload): static
     {
         return new self(

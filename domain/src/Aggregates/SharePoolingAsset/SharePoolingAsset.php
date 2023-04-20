@@ -9,6 +9,10 @@ use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\Timely;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\RevertSharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposals;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
@@ -16,11 +20,7 @@ use Domain\Aggregates\SharePoolingAsset\Exceptions\SharePoolingAssetException;
 use Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor\DisposalProcessor;
 use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\QuantityAdjuster;
 use Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder\ReversionFinder;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
 use Domain\Enums\FiatCurrency;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
@@ -49,8 +49,8 @@ class SharePoolingAsset implements AggregateRoot
     /** @throws SharePoolingAssetException */
     public function acquire(AcquireSharePoolingAsset $action): void
     {
-        $this->checkCurrency($action->costBasis->currency, $action);
-        $this->checkChronology($action);
+        $this->validateCurrency($action->costBasis->currency, $action);
+        $this->validateTimeline($action);
 
         $disposalsToRevert = ReversionFinder::disposalsToRevertOnAcquisition(
             acquisition: $action,
@@ -62,6 +62,7 @@ class SharePoolingAsset implements AggregateRoot
         // Record the new acquisition
         $this->recordThat(new SharePoolingAssetAcquired(
             sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+                id: $action->id, // Only ever present for testing purposes
                 date: $action->date,
                 quantity: $action->quantity,
                 costBasis: $action->costBasis,
@@ -99,10 +100,10 @@ class SharePoolingAsset implements AggregateRoot
     /** @throws SharePoolingAssetException */
     public function disposeOf(DisposeOfSharePoolingAsset $action): void
     {
-        $this->checkCurrency($action->proceeds->currency, $action);
+        $this->validateCurrency($action->proceeds->currency, $action);
 
         if (! $action->isReplay()) {
-            $this->checkChronology($action);
+            $this->validateTimeline($action);
         }
 
         // We check the absolute available quantity up to and including the disposal's
@@ -126,7 +127,7 @@ class SharePoolingAsset implements AggregateRoot
 
         // If there are no disposals to revert, process the current disposal normally
         if ($disposalsToRevert->isEmpty()) {
-            $this->recordDisposal($action, $action->position);
+            $this->recordDisposal($action);
 
             return;
         }
@@ -135,17 +136,18 @@ class SharePoolingAsset implements AggregateRoot
 
         // Add the current disposal to the transactions (as unprocessed) so previous disposals
         // don't try to match their 30-day quantity with the disposal's same-day acquisitions
-        $this->transactions->add($disposal = (new SharePoolingAssetDisposal(
+        $this->transactions->add(new SharePoolingAssetDisposal(
+            id: $action->id,
             date: $action->date,
             quantity: $action->quantity,
             costBasis: $action->proceeds->zero(),
             proceeds: $action->proceeds,
             processed: false,
-        ))->setPosition($action->position));
+        ));
 
         $this->replayDisposals($disposalsToRevert);
 
-        $this->recordDisposal($action, $disposal->getPosition());
+        $this->recordDisposal($action);
     }
 
     public function applySharePoolingAssetDisposedOf(SharePoolingAssetDisposedOf $event): void
@@ -154,12 +156,11 @@ class SharePoolingAsset implements AggregateRoot
         $this->transactions->add($event->sharePoolingAssetDisposal);
     }
 
-    private function recordDisposal(DisposeOfSharePoolingAsset $action, ?int $position): void
+    private function recordDisposal(DisposeOfSharePoolingAsset $action): void
     {
         $sharePoolingAssetDisposal = DisposalProcessor::process(
             disposal: $action,
             transactions: $this->transactions,
-            position: $position,
         );
 
         $this->recordThat(new SharePoolingAssetDisposedOf(sharePoolingAssetDisposal: $sharePoolingAssetDisposal));
@@ -176,16 +177,16 @@ class SharePoolingAsset implements AggregateRoot
     {
         foreach ($disposals as $disposal) {
             $this->disposeOf(new DisposeOfSharePoolingAsset(
+                id: $disposal->id,
                 date: $disposal->date,
                 quantity: $disposal->quantity,
                 proceeds: $disposal->proceeds,
-                position: $disposal->getPosition(),
             ));
         }
     }
 
     /** @throws SharePoolingAssetException */
-    private function checkCurrency(FiatCurrency $incoming, Stringable $action): void
+    private function validateCurrency(FiatCurrency $incoming, Stringable $action): void
     {
         if (is_null($this->fiatCurrency) || $this->fiatCurrency === $incoming) {
             return;
@@ -200,7 +201,7 @@ class SharePoolingAsset implements AggregateRoot
     }
 
     /** @throws SharePoolingAssetException */
-    private function checkChronology(Timely & Stringable $action): void
+    private function validateTimeline(Timely & Stringable $action): void
     {
         if (is_null($this->previousTransactionDate) || $action->getDate()->isAfterOrEqualTo($this->previousTransactionDate)) {
             return;

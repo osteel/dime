@@ -20,7 +20,7 @@ final readonly class NonFungibleAssetCostBasisIncreased implements SerializableP
     public function toPayload(): array
     {
         return [
-            'date' => $this->date->__toString(),
+            'date' => (string) $this->date,
             'cost_basis_increase' => $this->costBasisIncrease->toPayload(),
         ];
     }

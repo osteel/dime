@@ -1,11 +1,12 @@
 <?php
 
-namespace Domain\Tests\Aggregates\SharePoolingAsset\Factories\ValueObjects;
+namespace Domain\Tests\Aggregates\SharePoolingAsset\Factories\Entities;
 
 use Brick\DateTime\LocalDate;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetAcquisition;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Tests\Factories\PlainObjectFactory;
@@ -24,6 +25,7 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
     public function definition()
     {
         return [
+            'id' => SharePoolingAssetTransactionId::generate(),
             'date' => LocalDate::parse('2015-10-21'),
             'quantity' => new Quantity('100'),
             'costBasis' => FiatAmount::GBP('100'),
@@ -37,6 +39,7 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
     public function copyFrom(SharePoolingAssetDisposal $transaction): static
     {
         return $this->state([
+            'id' => $transaction->id,
             'date' => $transaction->date,
             'quantity' => $transaction->quantity,
             'costBasis' => $transaction->costBasis,
@@ -64,26 +67,26 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
         return $this->state(['processed' => false]);
     }
 
-    public function withSameDayQuantity(Quantity $quantity, int $position): static
+    public function withSameDayQuantity(Quantity $quantity, SharePoolingAssetTransactionId $id): static
     {
         $sameDayQuantity = $this->getLatest('sameDayQuantityAllocation') ?? new QuantityAllocation();
 
         return $this->state([
             'sameDayQuantityAllocation' => $sameDayQuantity->allocateQuantity(
                 $quantity,
-                SharePoolingAssetAcquisition::factory()->make()->setPosition($position),
+                SharePoolingAssetAcquisition::factory()->make(['id' => $id]),
             ),
         ]);
     }
 
-    public function withThirtyDayQuantity(Quantity $quantity, int $position): static
+    public function withThirtyDayQuantity(Quantity $quantity, SharePoolingAssetTransactionId $id): static
     {
         $thirtyDayQuantity = $this->getLatest('thirtyDayQuantityAllocation') ?? new QuantityAllocation();
 
         return $this->state([
             'thirtyDayQuantityAllocation' => $thirtyDayQuantity->allocateQuantity(
                 $quantity,
-                SharePoolingAssetAcquisition::factory()->make()->setPosition($position),
+                SharePoolingAssetAcquisition::factory()->make(['id' => $id]),
             ),
         ]);
     }

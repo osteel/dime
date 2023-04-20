@@ -16,6 +16,6 @@ final class TransferHandlerException extends RuntimeException
 
     public static function notTransfer(Transaction $transaction): self
     {
-        return new self(sprintf('The transaction is not a transfer operation: %s', $transaction->__toString()));
+        return new self(sprintf('The transaction is not a transfer operation: %s', (string) $transaction));
     }
 }

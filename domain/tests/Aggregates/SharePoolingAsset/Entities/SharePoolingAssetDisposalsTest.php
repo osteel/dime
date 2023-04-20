@@ -1,8 +1,8 @@
 <?php
 
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposals;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
@@ -38,9 +38,12 @@ it('can make a collection of disposals', function () {
 
 it('can add a disposal to a collection of disposals', function () {
     /** @var SharePoolingAssetDisposal */
-    $disposal = SharePoolingAssetDisposal::factory()->make();
+    $disposal1 = SharePoolingAssetDisposal::factory()->make();
 
-    $disposals = SharePoolingAssetDisposals::make($disposal)->add($disposal);
+    /** @var SharePoolingAssetDisposal */
+    $disposal2 = SharePoolingAssetDisposal::factory()->make();
+
+    $disposals = SharePoolingAssetDisposals::make($disposal1)->add($disposal2);
 
     expect($disposals->count())->toBeInt()->toBe(2);
 });
