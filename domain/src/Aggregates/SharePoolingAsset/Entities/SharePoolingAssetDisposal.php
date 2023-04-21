@@ -30,6 +30,9 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     ) {
         parent::__construct($date, $quantity, $costBasis, id: $id, processed: $processed);
 
+        $costBasis->currency === $proceeds->currency
+            || throw SharePoolingAssetDisposalException::currencyMismatch($costBasis->currency, $proceeds->currency);
+
         $this->sameDayQuantityAllocation = $sameDayQuantityAllocation ?? new QuantityAllocation();
         $this->thirtyDayQuantityAllocation = $thirtyDayQuantityAllocation ?? new QuantityAllocation();
 
@@ -45,7 +48,7 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         return SharePoolingAssetDisposalFactory::new();
     }
 
-    /** Return a copy of the disposal with reset quantities and marked as unprocessed. */
+    /** Return a copy of the disposal with a reset cost basis and marked as unprocessed. */
     public function copyAsUnprocessed(): SharePoolingAssetDisposal
     {
         return new self(
@@ -68,12 +71,12 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         return $this->thirtyDayQuantityAllocation->quantity();
     }
 
-    public function hasThirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): bool
+    public function hasThirtyDayQuantityAllocatedTo(SharePoolingAssetAcquisition $acquisition): bool
     {
         return $this->thirtyDayQuantityAllocation->hasQuantityAllocatedTo($acquisition);
     }
 
-    public function thirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): Quantity
+    public function thirtyDayQuantityAllocatedTo(SharePoolingAssetAcquisition $acquisition): Quantity
     {
         return $this->thirtyDayQuantityAllocation->quantityAllocatedTo($acquisition);
     }

@@ -108,7 +108,7 @@ final class ReversionFinder
             foreach ($disposalsWithMatchedThirtyDayQuantity as $disposal) {
                 $disposalsToRevert->add($disposal);
 
-                $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityMatchedWith($acquisition), $remainingQuantity);
+                $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityAllocatedTo($acquisition), $remainingQuantity);
                 $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
                 // Stop as soon as the disposal's quantity has fully been matched

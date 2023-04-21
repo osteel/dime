@@ -27,29 +27,9 @@ abstract class SharePoolingAssetTransaction implements Stringable
         $this->id = $id ?? SharePoolingAssetTransactionId::generate();
     }
 
-    public function averageCostBasisPerUnit(): ?FiatAmount
-    {
-        return $this->costBasis->dividedBy($this->quantity);
-    }
-
-    public function hasSameDayQuantity(): bool
-    {
-        return $this->sameDayQuantity()->isGreaterThan('0');
-    }
-
     abstract public function sameDayQuantity(): Quantity;
 
-    public function hasThirtyDayQuantity(): bool
-    {
-        return $this->thirtyDayQuantity()->isGreaterThan('0');
-    }
-
     abstract public function thirtyDayQuantity(): Quantity;
-
-    public function hasSection104PoolQuantity(): bool
-    {
-        return $this->section104PoolQuantity()->isGreaterThan('0');
-    }
 
     public function section104PoolQuantity(): Quantity
     {

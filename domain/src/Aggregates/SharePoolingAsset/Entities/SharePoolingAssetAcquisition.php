@@ -37,14 +37,29 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
         return SharePoolingAssetAcquisitionFactory::new();
     }
 
+    public function averageCostBasisPerUnit(): ?FiatAmount
+    {
+        return $this->costBasis->dividedBy($this->quantity);
+    }
+
     public function sameDayQuantity(): Quantity
     {
         return $this->sameDayQuantity;
     }
 
+    public function hasThirtyDayQuantity(): bool
+    {
+        return $this->thirtyDayQuantity()->isGreaterThan('0');
+    }
+
     public function thirtyDayQuantity(): Quantity
     {
         return $this->thirtyDayQuantity;
+    }
+
+    public function hasSection104PoolQuantity(): bool
+    {
+        return $this->section104PoolQuantity()->isGreaterThan('0');
     }
 
     public function section104PoolCostBasis(): FiatAmount

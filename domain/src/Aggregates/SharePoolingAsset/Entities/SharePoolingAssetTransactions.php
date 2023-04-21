@@ -269,7 +269,7 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingAssetTransaction $transaction) => $transaction instanceof SharePoolingAssetDisposal
-                && $transaction->hasThirtyDayQuantityMatchedWith($acquisition),
+                && $transaction->hasThirtyDayQuantityAllocatedTo($acquisition),
         );
 
         return SharePoolingAssetDisposals::make(...$transactions);
