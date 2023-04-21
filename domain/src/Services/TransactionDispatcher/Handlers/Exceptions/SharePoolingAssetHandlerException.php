@@ -16,6 +16,6 @@ final class SharePoolingAssetHandlerException extends RuntimeException
 
     public static function noSharePoolingAsset(Transaction $transaction): self
     {
-        return new self(sprintf('This transaction does not include a share pooling asset: %s', $transaction->__toString()));
+        return new self(sprintf('This transaction does not include a share pooling asset: %s', (string) $transaction));
     }
 }

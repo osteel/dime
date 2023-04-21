@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Domain\Aggregates\SharePoolingAsset\Exceptions;
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetId;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\Quantity;
 use RuntimeException;

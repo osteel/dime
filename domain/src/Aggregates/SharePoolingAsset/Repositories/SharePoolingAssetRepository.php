@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Domain\Aggregates\SharePoolingAsset\Repositories;
 
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetId;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 
 interface SharePoolingAssetRepository
 {

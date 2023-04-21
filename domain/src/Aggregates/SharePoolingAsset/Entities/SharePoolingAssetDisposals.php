@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
+namespace Domain\Aggregates\SharePoolingAsset\Entities;
 
 use ArrayIterator;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetTransactionException;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
 use Traversable;
@@ -29,6 +29,16 @@ final class SharePoolingAssetDisposals implements IteratorAggregate
         return new ArrayIterator($this->disposals);
     }
 
+    private function getIndexForId(SharePoolingAssetTransactionId $id): ?int
+    {
+        $index = array_search(
+            $id,
+            array_map(fn (SharePoolingAssetTransaction $disposal) => $disposal->id, $this->disposals),
+        );
+
+        return $index !== false ? $index : null;
+    }
+
     public function isEmpty(): bool
     {
         return empty($this->disposals);
@@ -42,16 +52,9 @@ final class SharePoolingAssetDisposals implements IteratorAggregate
     public function add(SharePoolingAssetDisposal ...$disposals): self
     {
         foreach ($disposals as $disposal) {
-            try {
-                $disposal->setPosition($this->count());
-            } catch (SharePoolingAssetTransactionException) {
-            }
+            $index = $this->getIndexForId($disposal->id) ?? $this->count();
 
-            $position = $disposal->getPosition();
-
-            assert(! is_null($position));
-
-            $this->disposals[$position] = $disposal;
+            $this->disposals[$index] = $disposal;
         }
 
         return $this;
@@ -66,7 +69,7 @@ final class SharePoolingAssetDisposals implements IteratorAggregate
     {
         $disposals = array_filter(
             $this->disposals,
-            fn (SharePoolingAssetDisposal $disposal) => ! $disposal->isProcessed(),
+            fn (SharePoolingAssetDisposal $disposal) => ! $disposal->processed,
         );
 
         return self::make(...$disposals);

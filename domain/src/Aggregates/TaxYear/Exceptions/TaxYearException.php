@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\TaxYear\Exceptions;
 
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use RuntimeException;
 use Stringable;

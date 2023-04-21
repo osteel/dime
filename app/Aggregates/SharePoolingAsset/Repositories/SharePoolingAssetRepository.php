@@ -6,7 +6,7 @@ namespace App\Aggregates\SharePoolingAsset\Repositories;
 
 use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetRepository as SharePoolingAssetRepositoryInterface;
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetId;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use EventSauce\EventSourcing\ClassNameInflector;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\MessageDecorator;

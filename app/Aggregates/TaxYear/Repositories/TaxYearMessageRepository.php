@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Aggregates\TaxYear\Repositories;
 
 use Domain\Aggregates\TaxYear\Repositories\TaxYearMessageRepository as TaxYearMessageRepositoryInterface;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use EventSauce\MessageRepository\IlluminateMessageRepository\IlluminateUuidV4MessageRepository;
 use Generator;
 

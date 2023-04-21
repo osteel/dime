@@ -8,7 +8,7 @@ use Domain\Aggregates\NonFungibleAsset\Actions\AcquireNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\DisposeOfNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\IncreaseNonFungibleAssetCostBasis;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
-use Domain\Aggregates\NonFungibleAsset\NonFungibleAssetId;
+use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NonFungibleAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
 use Domain\ValueObjects\Asset;

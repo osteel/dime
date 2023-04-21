@@ -6,18 +6,18 @@ use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetAcquired;
 use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetCostBasisIncreased;
 use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetDisposedOf;
 use Domain\Aggregates\NonFungibleAsset\NonFungibleAsset;
-use Domain\Aggregates\NonFungibleAsset\NonFungibleAssetId;
+use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetId;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
 use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
 use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
 use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\TaxYear;
-use Domain\Aggregates\TaxYear\TaxYearId;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 
 return [
     'class_map' => [

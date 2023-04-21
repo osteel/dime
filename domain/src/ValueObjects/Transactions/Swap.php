@@ -64,10 +64,10 @@ final readonly class Swap extends Transaction
             (string) $this->date,
             (string) $this->disposedOfAsset,
             $this->disposedOfAsset->isNonFungibleAsset ? 'yes' : 'no',
-            $this->disposedOfQuantity->__toString(),
+            (string) $this->disposedOfQuantity,
             (string) $this->acquiredAsset,
             $this->acquiredAsset->isNonFungibleAsset ? 'yes' : 'no',
-            $this->acquiredQuantity->__toString(),
+            (string) $this->acquiredQuantity,
             (string) $this->marketValue ?: 'N/A',
             (string) $this->fee ?: 'N/A',
         );

@@ -6,9 +6,9 @@ namespace Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
@@ -21,7 +21,6 @@ final class DisposalProcessor
     public static function process(
         DisposeOfSharePoolingAsset $disposal,
         SharePoolingAssetTransactions $transactions,
-        ?int $position,
     ): SharePoolingAssetDisposal {
         $sameDayQuantityAllocation = new QuantityAllocation();
         $thirtyDayQuantityAllocation = new QuantityAllocation();
@@ -34,16 +33,16 @@ final class DisposalProcessor
             remainingQuantity: $disposal->quantity,
         );
 
-        // Disposals being replayed already have a position, in which case we restore
-        // that position to make sure the disposal is inserted back where it should
-        return (new SharePoolingAssetDisposal(
+        // Disposals being replayed must keep the same ID so they are inserted back in the right place
+        return new SharePoolingAssetDisposal(
+            id: $disposal->id,
             date: $disposal->date,
             quantity: $disposal->quantity,
             costBasis: $costBasis,
             proceeds: $disposal->proceeds,
             sameDayQuantityAllocation: $sameDayQuantityAllocation,
             thirtyDayQuantityAllocation: $thirtyDayQuantityAllocation,
-        ))->setPosition($position);
+        );
     }
 
     private static function calculateCostBasis(

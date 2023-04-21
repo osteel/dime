@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset;
+namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
 
-use Domain\AggregateRootId;
+use Domain\ValueObjects\AggregateRootId;
 use Domain\ValueObjects\Asset;
 use Ramsey\Uuid\Uuid;
 

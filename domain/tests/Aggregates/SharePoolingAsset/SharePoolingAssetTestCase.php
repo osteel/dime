@@ -5,7 +5,7 @@ namespace Domain\Tests\Aggregates\SharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetId;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Tests\AggregateRootTestCase;
 use EventSauce\EventSourcing\AggregateRootId;
 

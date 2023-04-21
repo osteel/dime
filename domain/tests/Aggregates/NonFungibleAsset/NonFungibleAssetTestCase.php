@@ -6,7 +6,7 @@ use Domain\Aggregates\NonFungibleAsset\Actions\AcquireNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\DisposeOfNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\IncreaseNonFungibleAssetCostBasis;
 use Domain\Aggregates\NonFungibleAsset\NonFungibleAsset;
-use Domain\Aggregates\NonFungibleAsset\NonFungibleAssetId;
+use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Tests\AggregateRootTestCase;
 use EventSauce\EventSourcing\AggregateRootId;
 

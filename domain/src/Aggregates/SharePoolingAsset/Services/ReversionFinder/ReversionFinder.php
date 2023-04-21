@@ -7,8 +7,8 @@ namespace Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposals;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactions;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposals;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\ValueObjects\Quantity;
 
 /** This service identifies and returns the disposals that need to be reverted upon a new acquisition or disposal. */
@@ -108,7 +108,7 @@ final class ReversionFinder
             foreach ($disposalsWithMatchedThirtyDayQuantity as $disposal) {
                 $disposalsToRevert->add($disposal);
 
-                $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityMatchedWith($acquisition), $remainingQuantity);
+                $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityAllocatedTo($acquisition), $remainingQuantity);
                 $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
                 // Stop as soon as the disposal's quantity has fully been matched

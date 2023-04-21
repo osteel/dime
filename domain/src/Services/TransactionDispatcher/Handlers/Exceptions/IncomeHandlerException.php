@@ -16,6 +16,6 @@ final class IncomeHandlerException extends RuntimeException
 
     public static function notIncome(Transaction $transaction): self
     {
-        return new self(sprintf('The transaction is not flagged as income: %s', $transaction->__toString()));
+        return new self(sprintf('The transaction is not flagged as income: %s', (string) $transaction));
     }
 }

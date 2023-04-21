@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\NonFungibleAsset;
+namespace Domain\Aggregates\NonFungibleAsset\ValueObjects;
 
-use Domain\AggregateRootId;
+use Domain\ValueObjects\AggregateRootId;
 use Ramsey\Uuid\Uuid;
 
 final class NonFungibleAssetId extends AggregateRootId

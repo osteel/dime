@@ -6,8 +6,8 @@ namespace App\Aggregates\TaxYear\Repositories;
 
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository as TaxYearSummaryRepositoryInterface;
-use Domain\Aggregates\TaxYear\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
+use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\TaxYear;
+namespace Domain\Aggregates\TaxYear\ValueObjects;
 
 use Brick\DateTime\LocalDate;
-use Domain\AggregateRootId;
+use Domain\ValueObjects\AggregateRootId;
 use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Ramsey\Uuid\Uuid;
 

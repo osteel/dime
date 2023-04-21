@@ -22,7 +22,7 @@ final class IncomeUpdated implements SerializablePayload
     {
         return [
             'tax_year' => $this->taxYear,
-            'date' => $this->date->__toString(),
+            'date' => (string) $this->date,
             'income' => $this->income->toPayload(),
         ];
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePoolingAsset\Actions;
 
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetDisposal;
+use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 
 final readonly class RevertSharePoolingAssetDisposal
 {

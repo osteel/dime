@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
+namespace Domain\Aggregates\SharePoolingAsset\Entities;
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetTransactionException;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,48 +15,16 @@ abstract class SharePoolingAssetTransaction implements Stringable
 {
     use HasFactory;
 
-    protected bool $processed;
-    protected ?int $position = null;
+    public readonly SharePoolingAssetTransactionId $id;
 
     public function __construct(
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,
+        public readonly bool $processed = true,
+        ?SharePoolingAssetTransactionId $id = null,
     ) {
-    }
-
-    abstract public function copy(): static;
-
-    /** @throws SharePoolingAssetTransactionException */
-    public function setPosition(?int $position = null): static
-    {
-        if (! is_null($this->position)) {
-            throw SharePoolingAssetTransactionException::positionAlreadySet($this, $this->position);
-        }
-
-        $this->position = $position;
-
-        return $this;
-    }
-
-    public function getPosition(): ?int
-    {
-        return $this->position;
-    }
-
-    public function isProcessed(): bool
-    {
-        return $this instanceof SharePoolingAssetAcquisition ? true : $this->processed;
-    }
-
-    public function averageCostBasisPerUnit(): ?FiatAmount
-    {
-        return $this->costBasis->dividedBy($this->quantity);
-    }
-
-    public function hasSameDayQuantity(): bool
-    {
-        return $this->sameDayQuantity()->isGreaterThan('0');
+        $this->id = $id ?? SharePoolingAssetTransactionId::generate();
     }
 
     abstract public function sameDayQuantity(): Quantity;

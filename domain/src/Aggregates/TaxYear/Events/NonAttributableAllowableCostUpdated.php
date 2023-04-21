@@ -22,7 +22,7 @@ final class NonAttributableAllowableCostUpdated implements SerializablePayload
     {
         return [
             'tax_year' => $this->taxYear,
-            'date' => $this->date->__toString(),
+            'date' => (string) $this->date,
             'non_attributable_allowable_cost' => $this->nonAttributableAllowableCost->toPayload(),
         ];
     }

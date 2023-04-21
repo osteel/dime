@@ -13,6 +13,7 @@ use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetAcquired;
 use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetCostBasisIncreased;
 use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetDisposedOf;
 use Domain\Aggregates\NonFungibleAsset\Exceptions\NonFungibleAssetException;
+use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Aggregates\NonFungibleAsset\Repositories;
 
 use Domain\Aggregates\NonFungibleAsset\NonFungibleAsset;
-use Domain\Aggregates\NonFungibleAsset\NonFungibleAssetId;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository as NonFungibleAssetRepositoryInterface;
+use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use EventSauce\EventSourcing\ClassNameInflector;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
 use EventSauce\EventSourcing\MessageDecorator;

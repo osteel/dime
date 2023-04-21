@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
+namespace Domain\Aggregates\SharePoolingAsset\Entities;
 
 use ArrayIterator;
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetTransactionException;
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\ValueObjects\Quantity;
 use IteratorAggregate;
 use Traversable;
@@ -28,6 +28,16 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->transactions);
+    }
+
+    private function getIndexForId(SharePoolingAssetTransactionId $id): ?int
+    {
+        $index = array_search(
+            $id,
+            array_map(fn (SharePoolingAssetTransaction $transaction) => $transaction->id, $this->transactions),
+        );
+
+        return $index !== false ? $index : null;
     }
 
     private function collectionClassForType(?string $type = null): string
@@ -54,24 +64,24 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
         return $this->transactions[0] ?? null;
     }
 
-    public function get(int $position): ?SharePoolingAssetTransaction
+    public function get(int $index): ?SharePoolingAssetTransaction
     {
-        return $this->transactions[$position] ?? null;
+        return $this->transactions[$index] ?? null;
+    }
+
+    public function getForId(SharePoolingAssetTransactionId $id): ?SharePoolingAssetTransaction
+    {
+        $index = $this->getIndexForId($id);
+
+        return is_null($index) ? null : $this->get($index);
     }
 
     public function add(SharePoolingAssetTransaction ...$transactions): self
     {
         foreach ($transactions as $transaction) {
-            try {
-                $transaction->setPosition($this->count());
-            } catch (SharePoolingAssetTransactionException) {
-            }
+            $index = $this->getIndexForId($transaction->id) ?? $this->count();
 
-            $position = $transaction->getPosition();
-
-            assert(! is_null($position));
-
-            $this->transactions[$position] = $transaction;
+            $this->transactions[$index] = $transaction;
         }
 
         return $this;
@@ -81,7 +91,7 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
     {
         $transactions = array_filter(
             $this->transactions,
-            fn (SharePoolingAssetTransaction $transaction) => $transaction->isProcessed(),
+            fn (SharePoolingAssetTransaction $transaction) => $transaction->processed,
         );
 
         return self::make(...$transactions);
@@ -254,13 +264,12 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
         return $this->disposalsMadeAfter($date->minusDays(1));
     }
 
-    /** @throws \Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\QuantityAllocationException */
     public function disposalsWithThirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): SharePoolingAssetDisposals
     {
         $transactions = array_filter(
             $this->transactions,
             fn (SharePoolingAssetTransaction $transaction) => $transaction instanceof SharePoolingAssetDisposal
-                && $transaction->hasThirtyDayQuantityMatchedWith($acquisition),
+                && $transaction->hasThirtyDayQuantityAllocatedTo($acquisition),
         );
 
         return SharePoolingAssetDisposals::make(...$transactions);
