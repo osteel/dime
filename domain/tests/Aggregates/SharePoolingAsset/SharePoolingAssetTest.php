@@ -39,7 +39,6 @@ it('can acquire a share pooling asset', function () {
     /** @var AggregateRootTestCase $this */
     $this->when($acquireSharePoolingAsset)
         ->then($sharePoolingAssetAcquired);
-    //->then($this->expectEventToMatch(fn ($event) => assertSharePoolingAssetAcquired($sharePoolingAssetAcquired, $event)));
 });
 
 it('can acquire more of the same share pooling asset', function () {
@@ -71,7 +70,6 @@ it('can acquire more of the same share pooling asset', function () {
     $this->given($someSharePoolingAssetAcquired)
         ->when($acquireMoreSharePoolingAsset)
         ->then($moreSharePoolingAssetAcquired);
-    //->then($this->expectEventToMatch(fn ($event) => assertSharePoolingAssetAcquired($moreSharePoolingAssetAcquired, $event)));
 });
 
 it('cannot acquire more of the same share pooling asset because the currencies don\'t match', function () {
@@ -159,7 +157,6 @@ it('can dispose of a share pooling asset', function () {
     $this->given($sharePoolingAssetAcquired)
         ->when($disposeOfSharePoolingAsset)
         ->then($sharePoolingAssetDisposedOf);
-    //->then($this->expectEventToMatch(fn ($event) => assertSharePoolingAssetDisposedOf($sharePoolingAssetDisposedOf, $event)));
 });
 
 it('cannot dispose of a share pooling asset because the currencies don\'t match', function () {
@@ -282,7 +279,6 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     $this->given($someSharePoolingAssetsAcquired, $moreSharePoolingAssetsAcquired)
         ->when($disposeOfSharePoolingAsset)
         ->then($sharePoolingAssetDisposedOf);
-    //->then($this->expectEventToMatch(fn ($event) => assertSharePoolingAssetDisposedOf($sharePoolingAssetDisposedOf, $event)));
 });
 
 it('can dispose of a share pooling asset on the same day they were acquired', function () {
@@ -325,7 +321,6 @@ it('can dispose of a share pooling asset on the same day they were acquired', fu
     $this->given($someSharePoolingAssetsAcquired, $moreSharePoolingAssetsAcquired)
         ->when($disposeOfSharePoolingAsset)
         ->then($sharePoolingAssetDisposedOf);
-    //->then($this->expectEventToMatch(fn ($event) => assertSharePoolingAssetDisposedOf($sharePoolingAssetDisposedOf, $event)));
 });
 
 it('can use the average cost basis per unit of a section 104 pool to calculate the cost basis of a disposal on the same day as an acquisition', function () {
@@ -396,7 +391,6 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     )
         ->when($disposeOfMoreSharePoolingAsset)
         ->then($moreSharePoolingAssetDisposedOf);
-    //->then($this->expectEventToMatch(fn ($event) => assertSharePoolingAssetDisposedOf($moreSharePoolingAssetDisposedOf, $event)));
 });
 
 it('can acquire a share pooling asset within 30 days of their disposal', function () {

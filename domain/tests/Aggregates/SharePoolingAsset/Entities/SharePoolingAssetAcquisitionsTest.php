@@ -45,6 +45,11 @@ it('can add an acquisition to a collection of acquisitions', function () {
     $acquisitions = SharePoolingAssetAcquisitions::make($acquisition1)->add($acquisition2);
 
     expect($acquisitions->count())->toBeInt()->toBe(2);
+
+    // Adding the same transaction again should just replace it in the same spot
+    $acquisitions->add($acquisition2);
+
+    expect($acquisitions->count())->toBeInt()->toBe(2);
 });
 
 it('can return the total quantity of a collection of acquisitions', function (array $quantities, string $total) {

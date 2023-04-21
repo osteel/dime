@@ -46,6 +46,11 @@ it('can add a disposal to a collection of disposals', function () {
     $disposals = SharePoolingAssetDisposals::make($disposal1)->add($disposal2);
 
     expect($disposals->count())->toBeInt()->toBe(2);
+
+    // Adding the same transaction again should just replace it in the same spot
+    $disposals->add($disposal2);
+
+    expect($disposals->count())->toBeInt()->toBe(2);
 });
 
 it('can reverse a collection of disposals', function () {

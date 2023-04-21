@@ -52,7 +52,7 @@ it('can return the first transaction of a collection', function () {
     expect($transactions->first())->toBe($first);
 });
 
-it('can return a transaction at a position from the collection', function () {
+it('can return a transaction at an index from the collection', function () {
     /** @var list<SharePoolingAssetTransaction> */
     $items = [
         SharePoolingAssetAcquisition::factory()->make(),
@@ -75,6 +75,23 @@ it('can add a transaction to a collection of transactions', function () {
     $transactions = SharePoolingAssetTransactions::make($transaction1)->add($transaction2);
 
     expect($transactions->count())->toBeInt()->toBe(2);
+
+    // Adding the same transaction again should just replace it in the same spot
+    $transactions->add($transaction2);
+
+    expect($transactions->count())->toBeInt()->toBe(2);
+});
+
+it('can get a transaction from the collection by its ID', function () {
+    /** @var SharePoolingAssetDisposal */
+    $transaction1 = SharePoolingAssetDisposal::factory()->make();
+
+    /** @var SharePoolingAssetAcquisition */
+    $transaction2 = SharePoolingAssetAcquisition::factory()->make();
+
+    $transactions = SharePoolingAssetTransactions::make($transaction1)->add($transaction2);
+
+    expect($transactions->getForId($transaction2->id))->toBe($transaction2);
 });
 
 it('can return the processed transactions from the collection', function () {
