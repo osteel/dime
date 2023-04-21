@@ -26,6 +26,6 @@ final class SharePoolingAssetDisposalException extends RuntimeException
 
     public static function excessiveQuantityAllocated(Quantity $available, Quantity $allocated): self
     {
-        return new self(sprintf('The allocated quantity %s exceeds available quantity %s', $allocated, $available));
+        return new self(sprintf('The allocated quantity %s exceeds the available quantity %s', $allocated, $available));
     }
 }

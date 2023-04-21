@@ -466,10 +466,11 @@ it('can return a collection of disposals that happened after a date (inclusive)'
     'scenario 4' => ['2015-10-26', 0],
 ]);
 
-it('can return a collection of disposals with 30-day quantity matched with an acquisition', function () {
+it('can return a collection of disposals with 30-day quantity allocated to an acquisition', function () {
     /** @var SharePoolingAssetAcquisition */
     $acquisition1 = SharePoolingAssetAcquisition::factory()->make([
         'date' => LocalDate::parse('2015-10-21'),
+        'quantity' => new Quantity('110'),
         'sameDayQuantity' => new Quantity('10'),
         'thirtyDayQuantity' => new Quantity('100'),
     ]);

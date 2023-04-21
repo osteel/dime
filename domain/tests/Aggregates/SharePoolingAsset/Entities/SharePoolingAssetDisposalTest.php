@@ -78,7 +78,9 @@ it('can return the various quantities', function () {
     ]);
 
     expect((string) $disposal->sameDayQuantity())->toBe('30');
+    expect($disposal->hasThirtyDayQuantity())->toBeTrue();
     expect((string) $disposal->thirtyDayQuantity())->toBe('60');
+    expect($disposal->hasSection104PoolQuantity())->toBeTrue();
     expect((string) $disposal->section104PoolQuantity())->toBe('10');
     expect($disposal->hasAvailableSameDayQuantity())->toBeTrue();
     expect((string) $disposal->availableSameDayQuantity())->toBe('70');

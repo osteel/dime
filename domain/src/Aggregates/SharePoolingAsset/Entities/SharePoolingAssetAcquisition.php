@@ -29,6 +29,11 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
 
         $this->sameDayQuantity = $sameDayQuantity ?? Quantity::zero();
         $this->thirtyDayQuantity = $thirtyDayQuantity ?? Quantity::zero();
+
+        $allocatedQuantity = $this->sameDayQuantity->plus($this->thirtyDayQuantity);
+
+        $this->quantity->isGreaterThanOrEqualTo($allocatedQuantity)
+            || throw SharePoolingAssetAcquisitionException::excessiveQuantityAllocated($this->quantity, $allocatedQuantity);
     }
 
     /** @return SharePoolingAssetAcquisitionFactory<static> */
@@ -47,19 +52,9 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
         return $this->sameDayQuantity;
     }
 
-    public function hasThirtyDayQuantity(): bool
-    {
-        return $this->thirtyDayQuantity()->isGreaterThan('0');
-    }
-
     public function thirtyDayQuantity(): Quantity
     {
         return $this->thirtyDayQuantity;
-    }
-
-    public function hasSection104PoolQuantity(): bool
-    {
-        return $this->section104PoolQuantity()->isGreaterThan('0');
     }
 
     public function section104PoolCostBasis(): FiatAmount

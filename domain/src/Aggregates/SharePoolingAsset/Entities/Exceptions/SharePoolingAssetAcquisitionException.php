@@ -14,6 +14,11 @@ final class SharePoolingAssetAcquisitionException extends RuntimeException
         parent::__construct($message);
     }
 
+    public static function excessiveQuantityAllocated(Quantity $available, Quantity $allocated): self
+    {
+        return new self(sprintf('The allocated quantity %s exceeds the available quantity %s', $allocated, $available));
+    }
+
     public static function insufficientSameDayQuantity(Quantity $quantity, Quantity $sameDayQuantity): self
     {
         return new self(sprintf(
