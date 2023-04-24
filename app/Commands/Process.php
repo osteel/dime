@@ -2,7 +2,9 @@
 
 namespace App\Commands;
 
+use App\Services\TransactionProcessor\Exceptions\TransactionProcessorException;
 use App\Services\TransactionProcessor\TransactionProcessor;
+use App\Services\TransactionReader\Exceptions\TransactionReaderException;
 use App\Services\TransactionReader\TransactionReader;
 use LaravelZero\Framework\Commands\Command;
 
@@ -41,12 +43,24 @@ class Process extends Command
             $this->callSilent('migrate:fresh');
         }
 
-        $bar = $this->output->createProgressBar(iterator_count($transactionReader->read($spreadsheet)));
+        try {
+            $bar = $this->output->createProgressBar(iterator_count($transactionReader->read($spreadsheet)));
+        } catch (TransactionReaderException $exception) {
+            $this->error($exception->getMessage());
+
+            return self::INVALID;
+        }
 
         $bar->start();
 
         foreach ($transactionReader->read($spreadsheet) as $transaction) {
-            $transactionProcessor->process($transaction);
+            try {
+                $transactionProcessor->process($transaction);
+            } catch (TransactionProcessorException $exception) {
+                $this->error($exception->getMessage());
+
+                return self::INVALID;
+            }
 
             $bar->advance();
         }

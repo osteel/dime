@@ -25,10 +25,10 @@ class TransactionProcessor
     {
     }
 
-    /** @param array<string,string> $rawTransaction */
+    /** @param array{date:string,operation:string,market_value:string,sent_asset:string,sent_quantity:string,sent_asset_is_non_fungible:string,received_asset:string,received_quantity:string,received_asset_is_non_fungible:string,fee_currency:string,fee_quantity:string,fee_market_value:string,income:string} $rawTransaction */
     public function process(array $rawTransaction): void
     {
-        $transaction = match ($this->toOperation($rawTransaction['Operation'])) {
+        $transaction = match ($this->toOperation($rawTransaction['operation'])) {
             Operation::Receive => $this->processReceive($rawTransaction),
             Operation::Send => $this->processSend($rawTransaction),
             Operation::Swap => $this->processSwap($rawTransaction),
@@ -38,53 +38,53 @@ class TransactionProcessor
         $this->transactionDispatcher->dispatch($transaction);
     }
 
-    /** @param array<string,string> $rawTransaction */
+    /** @param array{date:string,operation:string,market_value:string,sent_asset:string,sent_quantity:string,sent_asset_is_non_fungible:string,received_asset:string,received_quantity:string,received_asset_is_non_fungible:string,fee_currency:string,fee_quantity:string,fee_market_value:string,income:string} $rawTransaction */
     private function processReceive(array $rawTransaction): Acquisition
     {
         return new Acquisition(
-            date: $this->toDate($rawTransaction['Date']),
-            asset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is non-fungible']),
-            quantity: $this->toQuantity($rawTransaction['Received quantity']),
-            marketValue: $this->toFiatAmount($rawTransaction['Market value']),
-            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
-            isIncome: $this->toBoolean($rawTransaction['Income']),
+            date: $this->toDate($rawTransaction['date']),
+            asset: $this->toAsset($rawTransaction['received_asset'], $rawTransaction['received_asset_is_non_fungible']),
+            quantity: $this->toQuantity($rawTransaction['received_quantity']),
+            marketValue: $this->toFiatAmount($rawTransaction['market_value']),
+            fee: $this->toFee($rawTransaction['fee_currency'], $rawTransaction['fee_quantity'], $rawTransaction['fee_market_value']),
+            isIncome: $this->toBoolean($rawTransaction['income']),
         );
     }
 
-    /** @param array<string,string> $rawTransaction */
+    /** @param array{date:string,operation:string,market_value:string,sent_asset:string,sent_quantity:string,sent_asset_is_non_fungible:string,received_asset:string,received_quantity:string,received_asset_is_non_fungible:string,fee_currency:string,fee_quantity:string,fee_market_value:string,income:string} $rawTransaction */
     private function processSend(array $rawTransaction): Disposal
     {
         return new Disposal(
-            date: $this->toDate($rawTransaction['Date']),
-            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is non-fungible']),
-            quantity: $this->toQuantity($rawTransaction['Sent quantity']),
-            marketValue: $this->toFiatAmount($rawTransaction['Market value']),
-            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
+            date: $this->toDate($rawTransaction['date']),
+            asset: $this->toAsset($rawTransaction['sent_asset'], $rawTransaction['sent_asset_is_non_fungible']),
+            quantity: $this->toQuantity($rawTransaction['sent_quantity']),
+            marketValue: $this->toFiatAmount($rawTransaction['market_value']),
+            fee: $this->toFee($rawTransaction['fee_currency'], $rawTransaction['fee_quantity'], $rawTransaction['fee_market_value']),
         );
     }
 
-    /** @param array<string,string> $rawTransaction */
+    /** @param array{date:string,operation:string,market_value:string,sent_asset:string,sent_quantity:string,sent_asset_is_non_fungible:string,received_asset:string,received_quantity:string,received_asset_is_non_fungible:string,fee_currency:string,fee_quantity:string,fee_market_value:string,income:string} $rawTransaction */
     private function processSwap(array $rawTransaction): Swap
     {
         return new Swap(
-            date: $this->toDate($rawTransaction['Date']),
-            disposedOfAsset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is non-fungible']),
-            disposedOfQuantity: $this->toQuantity($rawTransaction['Sent quantity']),
-            acquiredAsset: $this->toAsset($rawTransaction['Received asset'], $rawTransaction['Received asset is non-fungible']),
-            acquiredQuantity: $this->toQuantity($rawTransaction['Received quantity']),
-            marketValue: $this->toFiatAmount($rawTransaction['Market value']),
-            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
+            date: $this->toDate($rawTransaction['date']),
+            disposedOfAsset: $this->toAsset($rawTransaction['sent_asset'], $rawTransaction['sent_asset_is_non_fungible']),
+            disposedOfQuantity: $this->toQuantity($rawTransaction['sent_quantity']),
+            acquiredAsset: $this->toAsset($rawTransaction['received_asset'], $rawTransaction['received_asset_is_non_fungible']),
+            acquiredQuantity: $this->toQuantity($rawTransaction['received_quantity']),
+            marketValue: $this->toFiatAmount($rawTransaction['market_value']),
+            fee: $this->toFee($rawTransaction['fee_currency'], $rawTransaction['fee_quantity'], $rawTransaction['fee_market_value']),
         );
     }
 
-    /** @param array<string,string> $rawTransaction */
+    /** @param array{date:string,operation:string,market_value:string,sent_asset:string,sent_quantity:string,sent_asset_is_non_fungible:string,received_asset:string,received_quantity:string,received_asset_is_non_fungible:string,fee_currency:string,fee_quantity:string,fee_market_value:string,income:string} $rawTransaction */
     private function processTransfer(array $rawTransaction): Transfer
     {
         return new Transfer(
-            date: $this->toDate($rawTransaction['Date']),
-            asset: $this->toAsset($rawTransaction['Sent asset'], $rawTransaction['Sent asset is non-fungible']),
-            quantity: $this->toQuantity($rawTransaction['Sent quantity']),
-            fee: $this->toFee($rawTransaction['Fee currency'], $rawTransaction['Fee quantity'], $rawTransaction['Fee market value']),
+            date: $this->toDate($rawTransaction['date']),
+            asset: $this->toAsset($rawTransaction['sent_asset'], $rawTransaction['sent_asset_is_non_fungible']),
+            quantity: $this->toQuantity($rawTransaction['sent_quantity']),
+            fee: $this->toFee($rawTransaction['fee_currency'], $rawTransaction['fee_quantity'], $rawTransaction['fee_market_value']),
         );
     }
 
