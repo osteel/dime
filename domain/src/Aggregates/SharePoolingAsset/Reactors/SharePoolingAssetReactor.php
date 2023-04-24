@@ -22,7 +22,7 @@ final class SharePoolingAssetReactor extends EventConsumer
 
     public function handleSharePoolingAssetDisposedOf(SharePoolingAssetDisposedOf $event, Message $message): void
     {
-        $disposal = $event->sharePoolingAssetDisposal;
+        $disposal = $event->disposal;
         $taxYearId = TaxYearId::fromDate($disposal->date);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 
@@ -36,7 +36,7 @@ final class SharePoolingAssetReactor extends EventConsumer
 
     public function handleSharePoolingAssetDisposalReverted(SharePoolingAssetDisposalReverted $event, Message $message): void
     {
-        $disposal = $event->sharePoolingAssetDisposal;
+        $disposal = $event->disposal;
         $taxYearId = TaxYearId::fromDate($disposal->date);
         $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
 

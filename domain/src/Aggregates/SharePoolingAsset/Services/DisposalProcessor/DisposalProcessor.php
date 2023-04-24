@@ -35,7 +35,7 @@ final class DisposalProcessor
 
         // Disposals being replayed must keep the same ID so they are inserted back in the right place
         return new SharePoolingAssetDisposal(
-            id: $disposal->id,
+            id: $disposal->transactionId,
             date: $disposal->date,
             quantity: $disposal->quantity,
             costBasis: $costBasis,
@@ -78,7 +78,7 @@ final class DisposalProcessor
             return $costBasis;
         }
 
-        // Get same-day acquisitions with some quantity not matched with same-day disposals yet
+        // Get same-day acquisitions with some quantity not allocated to same-day disposals yet
         $sameDayAcquisitions = $transactions->acquisitionsMadeOn($date)->withAvailableSameDayQuantity();
 
         if ($sameDayAcquisitions->isEmpty()) {
@@ -93,13 +93,13 @@ final class DisposalProcessor
 
         // Get the same-day average cost basis per unit, of all acquisitions of that day (not
         // just the ones with available same-day quantity). We want the absolute value here,
-        // regardless of other types of matching, because same-day matching gets priority
+        // regardless of other types of allocation, because same-day allocation gets priority
         $sameDayAcquisitionsAverageCostBasisPerUnit = $transactions->acquisitionsMadeOn($date)->averageCostBasisPerUnit();
 
         assert($sameDayAcquisitionsAverageCostBasisPerUnit !== null);
 
         // Apply this average cost basis to the disposed of asset, up to the
-        // quantity acquired that day not yet matched with same-day disposals
+        // quantity acquired that day not yet allocated to same-day disposals
         $availableSameDayQuantity = Quantity::minimum($sameDayAcquisitions->availableSameDayQuantity(), $remainingQuantity);
         $costBasis = $costBasis->plus($sameDayAcquisitionsAverageCostBasisPerUnit->multipliedBy($availableSameDayQuantity));
 

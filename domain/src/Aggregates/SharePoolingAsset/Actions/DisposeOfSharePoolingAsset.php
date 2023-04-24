@@ -18,13 +18,13 @@ final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely
         public Quantity $quantity,
         public FiatAmount $proceeds,
         // Only present whenever the disposal has been reverted and is now being replayed
-        public ?SharePoolingAssetTransactionId $id = null,
+        public ?SharePoolingAssetTransactionId $transactionId = null,
     ) {
     }
 
     public function isReplay(): bool
     {
-        return ! is_null($this->id);
+        return ! is_null($this->transactionId);
     }
 
     public function getDate(): LocalDate

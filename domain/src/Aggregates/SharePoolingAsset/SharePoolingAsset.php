@@ -61,8 +61,8 @@ class SharePoolingAsset implements AggregateRoot
 
         // Record the new acquisition
         $this->recordThat(new SharePoolingAssetAcquired(
-            sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
-                id: $action->id, // Only ever present for testing purposes
+            acquisition: new SharePoolingAssetAcquisition(
+                id: $action->transactionId, // Only ever present for testing purposes
                 date: $action->date,
                 quantity: $action->quantity,
                 costBasis: $action->costBasis,
@@ -74,27 +74,9 @@ class SharePoolingAsset implements AggregateRoot
 
     public function applySharePoolingAssetAcquired(SharePoolingAssetAcquired $event): void
     {
-        $this->fiatCurrency ??= $event->sharePoolingAssetAcquisition->costBasis->currency;
-        $this->previousTransactionDate = $event->sharePoolingAssetAcquisition->date;
-        $this->transactions->add($event->sharePoolingAssetAcquisition);
-    }
-
-    private function revertDisposal(RevertSharePoolingAssetDisposal $action): void
-    {
-        // Restore quantities deducted from the acquisitions that the disposal was initially matched with
-        QuantityAdjuster::revertDisposal($action->sharePoolingAssetDisposal, $this->transactions);
-
-        $this->recordThat(new SharePoolingAssetDisposalReverted(
-            sharePoolingAssetDisposal: $action->sharePoolingAssetDisposal,
-        ));
-    }
-
-    public function applySharePoolingAssetDisposalReverted(SharePoolingAssetDisposalReverted $event): void
-    {
-        // Replace the disposal in the array with the same disposal, but with reset quantities. This
-        // way, when several disposals are being replayed, a disposal won't be matched with future
-        // acquisitions within the next 30 days if these acquisitions have disposals on the same day
-        $this->transactions->add($event->sharePoolingAssetDisposal->copyAsUnprocessed());
+        $this->fiatCurrency ??= $event->acquisition->costBasis->currency;
+        $this->previousTransactionDate = $event->acquisition->date;
+        $this->transactions->add($event->acquisition);
     }
 
     /** @throws SharePoolingAssetException */
@@ -137,7 +119,7 @@ class SharePoolingAsset implements AggregateRoot
         // Add the current disposal to the transactions (as unprocessed) so previous disposals
         // don't try to match their 30-day quantity with the disposal's same-day acquisitions
         $this->transactions->add(new SharePoolingAssetDisposal(
-            id: $action->id,
+            id: $action->transactionId,
             date: $action->date,
             quantity: $action->quantity,
             costBasis: $action->proceeds->zero(),
@@ -150,10 +132,16 @@ class SharePoolingAsset implements AggregateRoot
         $this->recordDisposal($action);
     }
 
-    public function applySharePoolingAssetDisposedOf(SharePoolingAssetDisposedOf $event): void
+    private function replayDisposals(SharePoolingAssetDisposals $disposals): void
     {
-        $this->previousTransactionDate = $event->sharePoolingAssetDisposal->date;
-        $this->transactions->add($event->sharePoolingAssetDisposal);
+        foreach ($disposals as $disposal) {
+            $this->disposeOf(new DisposeOfSharePoolingAsset(
+                transactionId: $disposal->id,
+                date: $disposal->date,
+                quantity: $disposal->quantity,
+                proceeds: $disposal->proceeds,
+            ));
+        }
     }
 
     private function recordDisposal(DisposeOfSharePoolingAsset $action): void
@@ -163,26 +151,38 @@ class SharePoolingAsset implements AggregateRoot
             transactions: $this->transactions,
         );
 
-        $this->recordThat(new SharePoolingAssetDisposedOf(sharePoolingAssetDisposal: $sharePoolingAssetDisposal));
+        $this->recordThat(new SharePoolingAssetDisposedOf(disposal: $sharePoolingAssetDisposal));
+    }
+
+    public function applySharePoolingAssetDisposedOf(SharePoolingAssetDisposedOf $event): void
+    {
+        $this->previousTransactionDate = $event->disposal->date;
+        $this->transactions->add($event->disposal);
     }
 
     private function revertDisposals(SharePoolingAssetDisposals $disposals): void
     {
         foreach ($disposals as $disposal) {
-            $this->revertDisposal(new RevertSharePoolingAssetDisposal(sharePoolingAssetDisposal: $disposal));
+            $this->revertDisposal(new RevertSharePoolingAssetDisposal(disposal: $disposal));
         }
     }
 
-    private function replayDisposals(SharePoolingAssetDisposals $disposals): void
+    private function revertDisposal(RevertSharePoolingAssetDisposal $action): void
     {
-        foreach ($disposals as $disposal) {
-            $this->disposeOf(new DisposeOfSharePoolingAsset(
-                id: $disposal->id,
-                date: $disposal->date,
-                quantity: $disposal->quantity,
-                proceeds: $disposal->proceeds,
-            ));
-        }
+        // Restore quantities deducted from the acquisitions whose quantities were allocated to the disposal
+        QuantityAdjuster::revertDisposal($action->disposal, $this->transactions);
+
+        $this->recordThat(new SharePoolingAssetDisposalReverted(
+            disposal: $action->disposal,
+        ));
+    }
+
+    public function applySharePoolingAssetDisposalReverted(SharePoolingAssetDisposalReverted $event): void
+    {
+        // Replace the disposal in the array with the same disposal, but with reset quantities. This
+        // way, when several disposals are being replayed, a disposal won't be matched with future
+        // acquisitions within the next 30 days if these acquisitions have disposals on the same day
+        $this->transactions->add($event->disposal->copyAsUnprocessed());
     }
 
     /** @throws SharePoolingAssetException */

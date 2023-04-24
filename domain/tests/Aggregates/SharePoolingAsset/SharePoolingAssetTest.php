@@ -20,16 +20,20 @@ use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 uses(SharePoolingAssetTestCase::class);
 
 it('can acquire a share pooling asset', function () {
+    // When
+
     $acquireSharePoolingAsset = new AcquireSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('100'),
     );
 
+    // Then
+
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
-            id: $acquireSharePoolingAsset->id,
+        acquisition: new SharePoolingAssetAcquisition(
+            id: $acquireSharePoolingAsset->transactionId,
             date: $acquireSharePoolingAsset->date,
             quantity: new Quantity('100'),
             costBasis: $acquireSharePoolingAsset->costBasis,
@@ -42,24 +46,30 @@ it('can acquire a share pooling asset', function () {
 });
 
 it('can acquire more of the same share pooling asset', function () {
+    // Given
+
     $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
         ),
     );
 
+    // When
+
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('300'),
     );
 
+    // Then
+
     $moreSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
-            id: $acquireMoreSharePoolingAsset->id,
+        acquisition: new SharePoolingAssetAcquisition(
+            id: $acquireMoreSharePoolingAsset->transactionId,
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('300'),
@@ -73,19 +83,25 @@ it('can acquire more of the same share pooling asset', function () {
 });
 
 it('cannot acquire more of the same share pooling asset because the currencies don\'t match', function () {
+    // Given
+
     $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
         ),
     );
 
+    // When
+
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: new FiatAmount('300', FiatCurrency::EUR),
     );
+
+    // Then
 
     $cannotAcquireSharePoolingAsset = SharePoolingAssetException::currencyMismatch(
         sharePoolingAssetId: $this->aggregateRootId,
@@ -101,13 +117,17 @@ it('cannot acquire more of the same share pooling asset because the currencies d
 });
 
 it('cannot acquire more of the same share pooling asset because the transaction is older than the previous one', function () {
+    // Given
+
     $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
         ),
     );
+
+    // When
 
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
         date: LocalDate::parse('2015-10-20'),
@@ -115,10 +135,12 @@ it('cannot acquire more of the same share pooling asset because the transaction 
         costBasis: FiatAmount::GBP('100'),
     );
 
+    // Then
+
     $cannotAcquireSharePoolingAsset = SharePoolingAssetException::olderThanPreviousTransaction(
         sharePoolingAssetId: $this->aggregateRootId,
         action: $acquireMoreSharePoolingAsset,
-        previousTransactionDate: $someSharePoolingAssetAcquired->sharePoolingAssetAcquisition->date,
+        previousTransactionDate: $someSharePoolingAssetAcquired->acquisition->date,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -128,24 +150,30 @@ it('cannot acquire more of the same share pooling asset because the transaction 
 });
 
 it('can dispose of a share pooling asset', function () {
+    // Given
+
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('200'),
         ),
     );
 
+    // When
+
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('50'),
         proceeds: FiatAmount::GBP('150'),
     );
 
+    // Then
+
     $sharePoolingAssetDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: new SharePoolingAssetDisposal(
-            id: $disposeOfSharePoolingAsset->id,
+        disposal: new SharePoolingAssetDisposal(
+            id: $disposeOfSharePoolingAsset->transactionId,
             date: $disposeOfSharePoolingAsset->date,
             quantity: $disposeOfSharePoolingAsset->quantity,
             costBasis: FiatAmount::GBP('100'),
@@ -160,19 +188,25 @@ it('can dispose of a share pooling asset', function () {
 });
 
 it('cannot dispose of a share pooling asset because the currencies don\'t match', function () {
+    // Given
+
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
         ),
     );
 
+    // When
+
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('100'),
         proceeds: new FiatAmount('100', FiatCurrency::EUR),
     );
+
+    // Then
 
     $cannotDisposeOfSharePoolingAsset = SharePoolingAssetException::currencyMismatch(
         sharePoolingAssetId: $this->aggregateRootId,
@@ -188,13 +222,17 @@ it('cannot dispose of a share pooling asset because the currencies don\'t match'
 });
 
 it('cannot dispose of a share pooling asset because the transaction is older than the previous one', function () {
+    // Given
+
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
         ),
     );
+
+    // When
 
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
         date: LocalDate::parse('2015-10-20'),
@@ -202,10 +240,12 @@ it('cannot dispose of a share pooling asset because the transaction is older tha
         proceeds: FiatAmount::GBP('100'),
     );
 
+    // Then
+
     $cannotDisposeOfSharePoolingAsset = SharePoolingAssetException::olderThanPreviousTransaction(
         sharePoolingAssetId: $this->aggregateRootId,
         action: $disposeOfSharePoolingAsset,
-        previousTransactionDate: $sharePoolingAssetAcquired->sharePoolingAssetAcquisition->date,
+        previousTransactionDate: $sharePoolingAssetAcquired->acquisition->date,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -215,19 +255,25 @@ it('cannot dispose of a share pooling asset because the transaction is older tha
 });
 
 it('cannot dispose of a share pooling asset because the quantity is too high', function () {
+    // Given
+
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
         ),
     );
 
+    // When
+
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('101'),
         proceeds: FiatAmount::GBP('100'),
     );
+
+    // Then
 
     $cannotDisposeOfSharePoolingAsset = SharePoolingAssetException::insufficientQuantity(
         sharePoolingAssetId: $this->aggregateRootId,
@@ -242,8 +288,10 @@ it('cannot dispose of a share pooling asset because the quantity is too high', f
 });
 
 it('can use the average cost basis per unit of a section 104 pool to calculate the cost basis of a disposal', function () {
+    // Given
+
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -251,23 +299,27 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     );
 
     $moreSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-23'),
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('65'),
         ),
     );
 
+    // When
+
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('20'),
         proceeds: FiatAmount::GBP('40'),
     );
 
+    // Then
+
     $sharePoolingAssetDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()->make([
-            'id' => $disposeOfSharePoolingAsset->id,
+        disposal: SharePoolingAssetDisposal::factory()->make([
+            'id' => $disposeOfSharePoolingAsset->transactionId,
             'date' => $disposeOfSharePoolingAsset->date,
             'quantity' => $disposeOfSharePoolingAsset->quantity,
             'costBasis' => FiatAmount::GBP('22'),
@@ -282,8 +334,10 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
 });
 
 it('can dispose of a share pooling asset on the same day they were acquired', function () {
+    // Given
+
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -291,25 +345,29 @@ it('can dispose of a share pooling asset on the same day they were acquired', fu
     );
 
     $moreSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-26'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('150'),
         ),
     );
 
+    // When
+
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-26'),
         quantity: new Quantity('150'),
         proceeds: FiatAmount::GBP('300'),
     );
 
+    // Then
+
     $sharePoolingAssetDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->withSameDayQuantity(new Quantity('100'), id: $moreSharePoolingAssetsAcquired->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->withSameDayQuantity(new Quantity('100'), id: $moreSharePoolingAssetsAcquired->acquisition->id)
             ->make([
-                'id' => $disposeOfSharePoolingAsset->id,
+                'id' => $disposeOfSharePoolingAsset->transactionId,
                 'date' => $disposeOfSharePoolingAsset->date,
                 'quantity' => $disposeOfSharePoolingAsset->quantity,
                 'costBasis' => FiatAmount::GBP('200'),
@@ -327,7 +385,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     // Given
 
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -335,7 +393,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     );
 
     $moreSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-23'),
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('65'),
@@ -343,7 +401,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     );
 
     $someSharePoolingAssetsDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: new SharePoolingAssetDisposal(
+        disposal: new SharePoolingAssetDisposal(
             date: LocalDate::parse('2015-10-25'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('22'),
@@ -352,7 +410,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     );
 
     $evenMoreSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-26'),
             quantity: new Quantity('30'),
             costBasis: FiatAmount::GBP('36'),
@@ -362,7 +420,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     // When
 
     $disposeOfMoreSharePoolingAsset = new DisposeOfSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-26'),
         quantity: new Quantity('60'),
         proceeds: FiatAmount::GBP('70'),
@@ -371,10 +429,10 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     // Then
 
     $moreSharePoolingAssetDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->withSameDayQuantity(new Quantity('30'), id: $evenMoreSharePoolingAssetsAcquired->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->withSameDayQuantity(new Quantity('30'), id: $evenMoreSharePoolingAssetsAcquired->acquisition->id)
             ->make([
-                'id' => $disposeOfMoreSharePoolingAsset->id,
+                'id' => $disposeOfMoreSharePoolingAsset->transactionId,
                 'date' => $disposeOfMoreSharePoolingAsset->date,
                 'quantity' => $disposeOfMoreSharePoolingAsset->quantity,
                 'costBasis' => FiatAmount::GBP('69'),
@@ -397,7 +455,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
     // Given
 
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -405,7 +463,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
     );
 
     $someSharePoolingAssetsDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: new SharePoolingAssetDisposal(
+        disposal: new SharePoolingAssetDisposal(
             date: LocalDate::parse('2015-10-26'),
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
@@ -416,7 +474,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
     // When
 
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('25'),
         costBasis: FiatAmount::GBP('20'),
@@ -425,12 +483,12 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
     // Then
 
     $sharePoolingAssetDisposalReverted = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $someSharePoolingAssetsDisposedOf->sharePoolingAssetDisposal,
+        disposal: $someSharePoolingAssetsDisposedOf->disposal,
     );
 
     $moreSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
-            id: $acquireMoreSharePoolingAsset->id,
+        acquisition: new SharePoolingAssetAcquisition(
+            id: $acquireMoreSharePoolingAsset->transactionId,
             date: $acquireMoreSharePoolingAsset->date,
             quantity: $acquireMoreSharePoolingAsset->quantity,
             costBasis: $acquireMoreSharePoolingAsset->costBasis,
@@ -439,9 +497,9 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
     );
 
     $correctedSharePoolingAssetsDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($someSharePoolingAssetsDisposedOf->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('25'), id: $acquireMoreSharePoolingAsset->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($someSharePoolingAssetsDisposedOf->disposal)
+            ->withThirtyDayQuantity(new Quantity('25'), id: $acquireMoreSharePoolingAsset->transactionId)
             ->make([
                 'costBasis' => FiatAmount::GBP('45'),
                 'sameDayQuantityAllocation' => new QuantityAllocation(),
@@ -458,7 +516,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     // Given
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -466,7 +524,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     );
 
     $sharePoolingAssetAcquired2 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('25'),
             costBasis: FiatAmount::GBP('50'),
@@ -475,8 +533,8 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     );
 
     $sharePoolingAssetDisposedOf1 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->withSameDayQuantity(new Quantity('25'), id: $sharePoolingAssetAcquired2->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->withSameDayQuantity(new Quantity('25'), id: $sharePoolingAssetAcquired2->acquisition->id)
             ->make([
                 'date' => LocalDate::parse('2015-10-22'),
                 'quantity' => new Quantity('50'),
@@ -485,7 +543,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     );
 
     $sharePoolingAssetDisposedOf2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: new SharePoolingAssetDisposal(
+        disposal: new SharePoolingAssetDisposal(
             date: LocalDate::parse('2015-10-25'),
             quantity: new Quantity('25'),
             costBasis: FiatAmount::GBP('25'),
@@ -494,7 +552,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     );
 
     $sharePoolingAssetAcquired3 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-28'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('60'),
@@ -503,20 +561,20 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     );
 
     $sharePoolingAssetDisposal1Reverted1 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf1->disposal,
     );
 
     $sharePoolingAssetDisposedOf1Corrected1 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf1->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired3->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf1->disposal)
+            ->withThirtyDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired3->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('115')]),
     );
 
     // When
 
     $acquireSharePoolingAsset4 = new AcquireSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('20'),
         costBasis: FiatAmount::GBP('40'),
@@ -525,16 +583,16 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     // Then
 
     $sharePoolingAssetDisposal1Reverted2 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf1Corrected1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf1Corrected1->disposal,
     );
 
     $sharePoolingAssetDisposal2Reverted = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf2->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf2->disposal,
     );
 
     $sharePoolingAssetAcquired4 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
-            id: $acquireSharePoolingAsset4->id,
+        acquisition: new SharePoolingAssetAcquisition(
+            id: $acquireSharePoolingAsset4->transactionId,
             date: $acquireSharePoolingAsset4->date,
             quantity: $acquireSharePoolingAsset4->quantity,
             costBasis: $acquireSharePoolingAsset4->costBasis,
@@ -543,16 +601,16 @@ it('can acquire a share pooling asset several times within 30 days of their disp
     );
 
     $sharePoolingAssetDisposedOf1Corrected2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf1Corrected1->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('5'), id: $sharePoolingAssetAcquired4->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf1Corrected1->disposal)
+            ->withThirtyDayQuantity(new Quantity('5'), id: $sharePoolingAssetAcquired4->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('120')]),
     );
 
     $sharePoolingAssetDisposedOf2Corrected = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf2->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('15'), id: $sharePoolingAssetAcquired4->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf2->disposal)
+            ->withThirtyDayQuantity(new Quantity('15'), id: $sharePoolingAssetAcquired4->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('40')]),
     );
 
@@ -580,7 +638,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     // Given
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -588,7 +646,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     );
 
     $sharePoolingAssetAcquired2 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('25'),
             costBasis: FiatAmount::GBP('50'),
@@ -597,8 +655,8 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     );
 
     $sharePoolingAssetDisposedOf1 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->withSameDayQuantity(new Quantity('25'), id: $sharePoolingAssetAcquired2->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->withSameDayQuantity(new Quantity('25'), id: $sharePoolingAssetAcquired2->acquisition->id)
             ->make([
                 'date' => LocalDate::parse('2015-10-22'),
                 'quantity' => new Quantity('50'),
@@ -607,7 +665,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     );
 
     $sharePoolingAssetDisposedOf2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
+        disposal: SharePoolingAssetDisposal::factory()
             ->make([
                 'date' => LocalDate::parse('2015-10-25'),
                 'quantity' => new Quantity('25'),
@@ -616,7 +674,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     );
 
     $sharePoolingAssetAcquired3 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-28'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('60'),
@@ -625,18 +683,18 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     );
 
     $sharePoolingAssetDisposal1Reverted1 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf1->disposal,
     );
 
     $sharePoolingAssetDisposedOf1Corrected1 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf1->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired3->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf1->disposal)
+            ->withThirtyDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired3->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('115')]),
     );
 
     $sharePoolingAssetAcquired4 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-29'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('40'),
@@ -645,35 +703,35 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     );
 
     $sharePoolingAssetDisposal1Reverted2 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf1Corrected1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf1Corrected1->disposal,
     );
 
     $sharePoolingAssetDisposal2Reverted1 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf2->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf2->disposal,
     );
 
     $sharePoolingAssetDisposedOf1Corrected2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf1Corrected1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf1Corrected1->disposal,
     );
 
     $sharePoolingAssetDisposedOf1Corrected2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf1Corrected1->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('5'), id: $sharePoolingAssetAcquired4->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf1Corrected1->disposal)
+            ->withThirtyDayQuantity(new Quantity('5'), id: $sharePoolingAssetAcquired4->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('120')]),
     );
 
     $sharePoolingAssetDisposedOf2Corrected1 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf2->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('15'), id: $sharePoolingAssetAcquired4->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf2->disposal)
+            ->withThirtyDayQuantity(new Quantity('15'), id: $sharePoolingAssetAcquired4->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('40')]),
     );
 
     // When
 
     $disposeOfSharePoolingAsset3 = new DisposeOfSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('10'),
         proceeds: FiatAmount::GBP('30'),
@@ -682,21 +740,21 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
     // Then
 
     $sharePoolingAssetDisposal2Reverted2 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf2Corrected1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf2Corrected1->disposal,
     );
 
     $sharePoolingAssetDisposedOf2Corrected2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->revert($sharePoolingAssetDisposedOf2->sharePoolingAssetDisposal)
-            ->withThirtyDayQuantity(new Quantity('5'), id: $sharePoolingAssetAcquired4->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->revert($sharePoolingAssetDisposedOf2->disposal)
+            ->withThirtyDayQuantity(new Quantity('5'), id: $sharePoolingAssetAcquired4->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('30')]),
     );
 
     $sharePoolingAssetDisposedOf3 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->withSameDayQuantity(new Quantity('10'), id: $sharePoolingAssetAcquired4->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->withSameDayQuantity(new Quantity('10'), id: $sharePoolingAssetAcquired4->acquisition->id)
             ->make([
-                'id' => $disposeOfSharePoolingAsset3->id,
+                'id' => $disposeOfSharePoolingAsset3->transactionId,
                 'date' => $disposeOfSharePoolingAsset3->date,
                 'quantity' => $disposeOfSharePoolingAsset3->quantity,
                 'costBasis' => FiatAmount::GBP('20'),
@@ -728,7 +786,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
     // Given
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -736,7 +794,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
     );
 
     $sharePoolingAssetDisposedOf = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: new SharePoolingAssetDisposal(
+        disposal: new SharePoolingAssetDisposal(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
@@ -745,11 +803,11 @@ it('can acquire a same-day share pooling asset several times on the same day as 
     );
 
     $sharePoolingAssetDisposalReverted = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf->disposal,
     );
 
     $sharePoolingAssetAcquired2 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('25'),
@@ -758,9 +816,9 @@ it('can acquire a same-day share pooling asset several times on the same day as 
     );
 
     $sharePoolingAssetDisposedOfCorrected = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->revert($sharePoolingAssetDisposedOf->sharePoolingAssetDisposal)
-            ->withSameDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired2->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->revert($sharePoolingAssetDisposedOf->disposal)
+            ->withSameDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired2->acquisition->id)
             ->make([
                 'date' => LocalDate::parse('2015-10-22'),
                 'quantity' => new Quantity('50'),
@@ -771,7 +829,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
     // When
 
     $acquireSharePoolingAsset3 = new AcquireSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('10'),
         costBasis: FiatAmount::GBP('14'),
@@ -780,12 +838,12 @@ it('can acquire a same-day share pooling asset several times on the same day as 
     // Then
 
     $sharePoolingAssetDisposalReverted2 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOfCorrected->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOfCorrected->disposal,
     );
 
     $sharePoolingAssetAcquired3 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
-            id: $acquireSharePoolingAsset3->id,
+        acquisition: new SharePoolingAssetAcquisition(
+            id: $acquireSharePoolingAsset3->transactionId,
             date: $acquireSharePoolingAsset3->date,
             quantity: $acquireSharePoolingAsset3->quantity,
             costBasis: $acquireSharePoolingAsset3->costBasis,
@@ -794,10 +852,10 @@ it('can acquire a same-day share pooling asset several times on the same day as 
     );
 
     $sharePoolingAssetsDisposedOfCorrected2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->revert($sharePoolingAssetDisposedOfCorrected->sharePoolingAssetDisposal)
-            ->withSameDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired2->sharePoolingAssetAcquisition->id)
-            ->withSameDayQuantity(new Quantity('10'), id: $sharePoolingAssetAcquired3->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->revert($sharePoolingAssetDisposedOfCorrected->disposal)
+            ->withSameDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired2->acquisition->id)
+            ->withSameDayQuantity(new Quantity('10'), id: $sharePoolingAssetAcquired3->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('59')]),
     );
 
@@ -817,7 +875,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
     // Given
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
@@ -825,7 +883,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
     );
 
     $sharePoolingAssetDisposedOf1 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: new SharePoolingAssetDisposal(
+        disposal: new SharePoolingAssetDisposal(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
@@ -834,11 +892,11 @@ it('can dispose of a same-day share pooling asset several times on the same day 
     );
 
     $sharePoolingAssetDisposalReverted1 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf1->disposal,
     );
 
     $sharePoolingAssetAcquired2 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('25'),
@@ -847,18 +905,18 @@ it('can dispose of a same-day share pooling asset several times on the same day 
     );
 
     $sharePoolingAssetDisposedOf1Corrected1 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf1->sharePoolingAssetDisposal)
-            ->withSameDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired2->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf1->disposal)
+            ->withSameDayQuantity(new Quantity('20'), id: $sharePoolingAssetAcquired2->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('55')]),
     );
 
     $sharePoolingAssetDisposalReverted2 = new SharePoolingAssetDisposalReverted(
-        sharePoolingAssetDisposal: $sharePoolingAssetDisposedOf1Corrected1->sharePoolingAssetDisposal,
+        disposal: $sharePoolingAssetDisposedOf1Corrected1->disposal,
     );
 
     $sharePoolingAssetAcquired3 = new SharePoolingAssetAcquired(
-        sharePoolingAssetAcquisition: new SharePoolingAssetAcquisition(
+        acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('60'),
             costBasis: FiatAmount::GBP('90'),
@@ -867,16 +925,16 @@ it('can dispose of a same-day share pooling asset several times on the same day 
     );
 
     $sharePoolingAssetDisposedOf1Corrected2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->copyFrom($sharePoolingAssetDisposedOf1Corrected1->sharePoolingAssetDisposal)
-            ->withSameDayQuantity(new Quantity('30'), id: $sharePoolingAssetAcquired3->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->copyFrom($sharePoolingAssetDisposedOf1Corrected1->disposal)
+            ->withSameDayQuantity(new Quantity('30'), id: $sharePoolingAssetAcquired3->acquisition->id)
             ->make(['costBasis' => FiatAmount::GBP('71.875')]),
     );
 
     // When
 
     $disposeOfSharePoolingAsset2 = new DisposeOfSharePoolingAsset(
-        id: SharePoolingAssetTransactionId::generate(),
+        transactionId: SharePoolingAssetTransactionId::generate(),
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('40'),
         proceeds: FiatAmount::GBP('50'),
@@ -885,10 +943,10 @@ it('can dispose of a same-day share pooling asset several times on the same day 
     // Then
 
     $sharePoolingAssetDisposedOf2 = new SharePoolingAssetDisposedOf(
-        sharePoolingAssetDisposal: SharePoolingAssetDisposal::factory()
-            ->withSameDayQuantity(new Quantity('30'), id: $sharePoolingAssetAcquired3->sharePoolingAssetAcquisition->id)
+        disposal: SharePoolingAssetDisposal::factory()
+            ->withSameDayQuantity(new Quantity('30'), id: $sharePoolingAssetAcquired3->acquisition->id)
             ->make([
-                'id' => $disposeOfSharePoolingAsset2->id,
+                'id' => $disposeOfSharePoolingAsset2->transactionId,
                 'date' => $disposeOfSharePoolingAsset2->date,
                 'quantity' => $disposeOfSharePoolingAsset2->quantity,
                 'costBasis' => FiatAmount::GBP('53.125'),

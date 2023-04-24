@@ -9,7 +9,7 @@ use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 final readonly class RevertSharePoolingAssetDisposal
 {
     public function __construct(
-        public SharePoolingAssetDisposal $sharePoolingAssetDisposal,
+        public SharePoolingAssetDisposal $disposal,
     ) {
     }
 }
