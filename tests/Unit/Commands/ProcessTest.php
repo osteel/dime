@@ -24,7 +24,7 @@ it('cannot read a spreadsheet because the file is not found', function () {
 });
 
 it('can read a spreadsheet and pass the transactions to the transaction processor', function () {
-    $path = base_path('tests/stubs/transactions.csv');
+    $path = base_path('tests/stubs/transactions/valid.csv');
 
     $this->transactionReader->shouldReceive('read')->with($path)->once()->andReturn(generator(['foo']));
     $this->transactionReader->shouldReceive('read')->with($path)->once()->andReturn(generator(['foo']));

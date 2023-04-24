@@ -16,19 +16,19 @@ beforeEach(function () {
 
 it('can parse a receive transaction and pass it on to the dispatcher', function () {
     $transaction = [
-        'Date' => '21/10/2015',
-        'Operation' => 'receive',
-        'Market value' => '1000',
-        'Sent asset' => '',
-        'Sent quantity' => '',
-        'Sent asset is non-fungible' => 'FALSE',
-        'Received asset' => 'BTC',
-        'Received quantity' => '1',
-        'Received asset is non-fungible' => 'FALSE',
-        'Fee currency' => 'GBP',
-        'Fee quantity' => '20',
-        'Fee market value' => '20',
-        'Income' => 'TRUE',
+        'date' => '21/10/2015',
+        'operation' => 'receive',
+        'market_value' => '1000',
+        'sent_asset' => '',
+        'sent_quantity' => '',
+        'sent_asset_is_non_fungible' => 'FALSE',
+        'received_asset' => 'BTC',
+        'received_quantity' => '1',
+        'received_asset_is_non_fungible' => 'FALSE',
+        'fee_currency' => 'GBP',
+        'fee_quantity' => '20',
+        'fee_market_value' => '20',
+        'income' => 'TRUE',
     ];
 
     $this->transactionProcessor->process($transaction);
@@ -49,19 +49,19 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
 
 it('can parse a send transaction and pass it on to the dispatcher', function () {
     $transaction = [
-        'Date' => '21/10/2015',
-        'Operation' => 'send',
-        'Market value' => '1000',
-        'Sent asset' => 'BTC',
-        'Sent quantity' => '1',
-        'Sent asset is non-fungible' => 'FALSE',
-        'Received asset' => '',
-        'Received quantity' => '',
-        'Received asset is non-fungible' => 'FALSE',
-        'Fee currency' => 'BTC',
-        'Fee quantity' => '0.001',
-        'Fee market value' => '10',
-        'Income' => 'FALSE',
+        'date' => '21/10/2015',
+        'operation' => 'send',
+        'market_value' => '1000',
+        'sent_asset' => 'BTC',
+        'sent_quantity' => '1',
+        'sent_asset_is_non_fungible' => 'FALSE',
+        'received_asset' => '',
+        'received_quantity' => '',
+        'received_asset_is_non_fungible' => 'FALSE',
+        'fee_currency' => 'BTC',
+        'fee_quantity' => '0.001',
+        'fee_market_value' => '10',
+        'income' => 'FALSE',
     ];
 
     $this->transactionProcessor->process($transaction);
@@ -81,19 +81,19 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
 
 it('can parse a swap transaction and pass it on to the dispatcher', function () {
     $transaction = [
-        'Date' => '21/10/2015',
-        'Operation' => 'swap',
-        'Market value' => '1000',
-        'Sent asset' => 'ETH',
-        'Sent quantity' => '5',
-        'Sent asset is non-fungible' => 'FALSE',
-        'Received asset' => 'BTC',
-        'Received quantity' => '1',
-        'Received asset is non-fungible' => 'FALSE',
-        'Fee currency' => '',
-        'Fee quantity' => '',
-        'Fee market value' => '',
-        'Income' => 'FALSE',
+        'date' => '21/10/2015',
+        'operation' => 'swap',
+        'market_value' => '1000',
+        'sent_asset' => 'ETH',
+        'sent_quantity' => '5',
+        'sent_asset_is_non_fungible' => 'FALSE',
+        'received_asset' => 'BTC',
+        'received_quantity' => '1',
+        'received_asset_is_non_fungible' => 'FALSE',
+        'fee_currency' => '',
+        'fee_quantity' => '',
+        'fee_market_value' => '',
+        'income' => 'FALSE',
     ];
 
     $this->transactionProcessor->process($transaction);
@@ -114,19 +114,19 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
 
 it('can parse a transfer transaction and pass it on to the dispatcher', function () {
     $transaction = [
-        'Date' => '21/10/2015',
-        'Operation' => 'transfer',
-        'Market value' => '',
-        'Sent asset' => '0x123456789',
-        'Sent quantity' => '1',
-        'Sent asset is non-fungible' => 'TRUE',
-        'Received asset' => '',
-        'Received quantity' => '',
-        'Received asset is non-fungible' => 'FALSE',
-        'Fee currency' => '',
-        'Fee quantity' => '',
-        'Fee market value' => '',
-        'Income' => 'FALSE',
+        'date' => '21/10/2015',
+        'operation' => 'transfer',
+        'market_value' => '',
+        'sent_asset' => '0x123456789',
+        'sent_quantity' => '1',
+        'sent_asset_is_non_fungible' => 'TRUE',
+        'received_asset' => '',
+        'received_quantity' => '',
+        'received_asset_is_non_fungible' => 'FALSE',
+        'fee_currency' => '',
+        'fee_quantity' => '',
+        'fee_market_value' => '',
+        'income' => 'FALSE',
     ];
 
     $this->transactionProcessor->process($transaction);

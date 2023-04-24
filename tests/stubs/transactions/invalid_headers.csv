@@ -1,0 +1,2 @@
+Date,Operation,Value,Sent asset,Sent quantity,Sent asset is NFT,Received asset,Received quantity,Received asset is NFT,Fee currency,Fee quantity,Fee value,Income
+08/01/2020,swap,9900,GBP,10000,FALSE,BTC,0.99,FALSE,GBP,100,100,FALSE
