@@ -34,7 +34,8 @@ class PhpSpreadsheetAdapter implements TransactionReader
         $headers = [];
 
         foreach ($worksheet->current()->getCellIterator() as $cell) {
-            assert(is_string($header = $cell->getValue()));
+            $header = $cell->getValue();
+            assert(is_string($header));
             $headers[] = str_replace('-', '_', Str::snake($header));
         }
 
