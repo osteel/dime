@@ -3,7 +3,6 @@
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetDisposedOf;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
-use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\Tests\Aggregates\NonFungibleAsset\Reactors\NonFungibleAssetReactorTestCase;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\Message;
@@ -12,10 +11,6 @@ use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 uses(NonFungibleAssetReactorTestCase::class);
 
 it('can handle a capital gain', function () {
-    $taxYearSpy = Mockery::spy(TaxYear::class);
-    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
-    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
-
     $nonFungibleAssetDisposedOf = new NonFungibleAssetDisposedOf(
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
@@ -25,17 +20,13 @@ it('can handle a capital gain', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($nonFungibleAssetDisposedOf))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived(
-            'updateCapitalGain',
+        ->then(fn () => $this->dispatcher->shouldHaveReceived(
+            'dispatchSync',
             fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('1'),
         )->once());
 });
 
 it('can handle a capital loss', function () {
-    $taxYearSpy = Mockery::spy(TaxYear::class);
-    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
-    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
-
     $nonFungibleAssetDisposedOf = new NonFungibleAssetDisposedOf(
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
@@ -45,8 +36,8 @@ it('can handle a capital loss', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($nonFungibleAssetDisposedOf))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived(
-            'updateCapitalGain',
+        ->then(fn () => $this->dispatcher->shouldHaveReceived(
+            'dispatchSync',
             fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('-1'),
         )->once());
 });

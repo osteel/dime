@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
-use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
-use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
 use Domain\ValueObjects\Transactions\Transfer;
+use Illuminate\Contracts\Bus\Dispatcher;
 
 class TransferHandler
 {
-    public function __construct(private readonly TaxYearRepository $taxYearRepository)
+    public function __construct(private readonly Dispatcher $dispatcher)
     {
     }
 
@@ -23,14 +22,9 @@ class TransferHandler
             return;
         }
 
-        $taxYearId = TaxYearId::fromDate($transaction->date);
-        $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
-
-        $taxYearAggregate->updateNonAttributableAllowableCost(new UpdateNonAttributableAllowableCost(
+        $this->dispatcher->dispatchSync(new UpdateNonAttributableAllowableCost(
             date: $transaction->date,
             nonAttributableAllowableCost: $transaction->fee->marketValue,
         ));
-
-        $this->taxYearRepository->save($taxYearAggregate);
     }
 }
