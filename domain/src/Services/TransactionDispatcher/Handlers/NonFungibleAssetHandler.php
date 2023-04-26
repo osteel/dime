@@ -27,13 +27,13 @@ class NonFungibleAssetHandler
     {
         $transaction->hasNonFungibleAsset() || throw NonFungibleAssetHandlerException::noNonFungibleAsset($transaction);
 
-        if ($transaction instanceof Acquisition && $transaction->asset->isNonFungibleAsset) {
+        if ($transaction instanceof Acquisition && $transaction->asset->isNonFungible) {
             $this->handleAcquisition($transaction, $transaction->asset);
 
             return;
         }
 
-        if ($transaction instanceof Disposal && $transaction->asset->isNonFungibleAsset) {
+        if ($transaction instanceof Disposal && $transaction->asset->isNonFungible) {
             $this->handleDisposal($transaction, $transaction->asset);
 
             return;
@@ -41,11 +41,11 @@ class NonFungibleAssetHandler
 
         assert($transaction instanceof Swap);
 
-        if ($transaction->acquiredAsset->isNonFungibleAsset) {
+        if ($transaction->acquiredAsset->isNonFungible) {
             $this->handleAcquisition($transaction, $transaction->acquiredAsset);
         }
 
-        if ($transaction->disposedOfAsset->isNonFungibleAsset) {
+        if ($transaction->disposedOfAsset->isNonFungible) {
             $this->handleDisposal($transaction, $transaction->disposedOfAsset);
         }
     }

@@ -160,8 +160,8 @@ it('cannot increase the cost basis of a non-fungible asset because the currency 
 
     $cannotIncreaseCostBasis = NonFungibleAssetException::cannotIncreaseCostBasisFromDifferentCurrency(
         nonFungibleAssetId: $this->aggregateRootId,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */

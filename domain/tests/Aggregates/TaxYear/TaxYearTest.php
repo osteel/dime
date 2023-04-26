@@ -77,8 +77,8 @@ it('cannot update the capital gain because the currencies don\'t match', functio
     $cannotUpdateCapitalGain = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $updateCapitalGain,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -168,8 +168,8 @@ it('cannot revert a capital gain update because the currencies don\'t match', fu
     $cannotRevertCapitalGainUpdate = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $revertCapitalGainUpdate,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -234,8 +234,8 @@ it('cannot update the income because the currencies don\'t match', function () {
     $cannotUpdateIncome = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $updateIncome,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -300,8 +300,8 @@ it('cannot update the non-attributable allowable cost because the currencies don
     $cannotUpdateNonAttributableAllowableCost = TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $updateNonAttributableAllowableCost,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */

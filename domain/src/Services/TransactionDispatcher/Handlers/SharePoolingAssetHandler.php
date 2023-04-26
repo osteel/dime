@@ -6,8 +6,6 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetRepository;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\SharePoolingAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
 use Domain\ValueObjects\Asset;
@@ -15,12 +13,13 @@ use Domain\ValueObjects\Quantity;
 use Domain\ValueObjects\Transactions\Acquisition;
 use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
+use Illuminate\Contracts\Bus\Dispatcher;
 
 class SharePoolingAssetHandler
 {
     use AttributesFees;
 
-    public function __construct(private readonly SharePoolingAssetRepository $sharePoolingRepository)
+    public function __construct(private readonly Dispatcher $dispatcher)
     {
     }
 
@@ -52,29 +51,21 @@ class SharePoolingAssetHandler
 
     private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
     {
-        $sharePoolingId = SharePoolingAssetId::fromAsset($asset);
-        $sharePooling = $this->sharePoolingRepository->get($sharePoolingId);
-
-        $sharePooling->disposeOf(new DisposeOfSharePoolingAsset(
+        $this->dispatcher->dispatchSync(new DisposeOfSharePoolingAsset(
+            asset: $asset,
             date: $transaction->date,
             quantity: $quantity,
             proceeds: $transaction->marketValue->minus($this->splitFees($transaction)),
         ));
-
-        $this->sharePoolingRepository->save($sharePooling);
     }
 
     private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
     {
-        $sharePoolingId = SharePoolingAssetId::fromAsset($asset);
-        $sharePooling = $this->sharePoolingRepository->get($sharePoolingId);
-
-        $sharePooling->acquire(new AcquireSharePoolingAsset(
+        $this->dispatcher->dispatchSync(new AcquireSharePoolingAsset(
+            asset: $asset,
             date: $transaction->date,
             quantity: $quantity,
             costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),
         ));
-
-        $this->sharePoolingRepository->save($sharePooling);
     }
 }

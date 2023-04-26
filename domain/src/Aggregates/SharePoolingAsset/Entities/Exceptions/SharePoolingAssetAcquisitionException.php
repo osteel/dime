@@ -30,6 +30,7 @@ final class SharePoolingAssetAcquisitionException extends RuntimeException
 
     public static function insufficientThirtyDayQuantity(Quantity $quantity, Quantity $thirtyDayQuantity): self
     {
+        debug_print_backtrace();
         return new self(sprintf(
             'Cannot decrease 30-day quantity by %s: only %s available',
             $quantity,

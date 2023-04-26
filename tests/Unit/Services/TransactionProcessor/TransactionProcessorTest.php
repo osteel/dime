@@ -39,7 +39,7 @@ it('can parse a receive transaction and pass it on to the dispatcher', function 
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
             && $transaction->asset->symbol === 'BTC'
             && $transaction->quantity->isEqualTo('1')
-            && $transaction->asset->isNonFungibleAsset === false
+            && $transaction->asset->isNonFungible === false
             && (string) $transaction->fee->currency === 'GBP'
             && $transaction->fee->isFiat()
             && $transaction->fee->quantity->isEqualTo('20')
@@ -72,7 +72,7 @@ it('can parse a send transaction and pass it on to the dispatcher', function () 
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
             && $transaction->asset->symbol === 'BTC'
             && $transaction->quantity->isEqualTo('1')
-            && $transaction->asset->isNonFungibleAsset === false
+            && $transaction->asset->isNonFungible === false
             && (string) $transaction->fee->currency === 'BTC'
             && $transaction->fee->isFiat() === false
             && $transaction->fee->quantity->isEqualTo('0.001'),
@@ -104,10 +104,10 @@ it('can parse a swap transaction and pass it on to the dispatcher', function () 
             && $transaction->marketValue->isEqualTo(new FiatAmount('1000', FiatCurrency::GBP))
             && $transaction->disposedOfAsset->symbol === 'ETH'
             && $transaction->disposedOfQuantity->isEqualTo('5')
-            && $transaction->disposedOfAsset->isNonFungibleAsset === false
+            && $transaction->disposedOfAsset->isNonFungible === false
             && $transaction->acquiredAsset->symbol === 'BTC'
             && $transaction->acquiredQuantity->isEqualTo('1')
-            && $transaction->acquiredAsset->isNonFungibleAsset === false
+            && $transaction->acquiredAsset->isNonFungible === false
             && is_null($transaction->fee)
     )->once();
 });
@@ -136,7 +136,7 @@ it('can parse a transfer transaction and pass it on to the dispatcher', function
         fn (Transfer $transaction) => $transaction->date->__toString() === '2015-10-21'
             && $transaction->asset->symbol === '0x123456789'
             && $transaction->quantity->isEqualTo('1')
-            && $transaction->asset->isNonFungibleAsset === true
+            && $transaction->asset->isNonFungible === true
             && is_null($transaction->fee),
     )->once();
 });

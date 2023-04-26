@@ -8,28 +8,40 @@ use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
+use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetFiatCurrencySet;
+use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetSet;
 use Domain\Aggregates\SharePoolingAsset\Exceptions\SharePoolingAssetException;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\Enums\FiatCurrency;
 use Domain\Tests\Aggregates\SharePoolingAsset\SharePoolingAssetTestCase;
+use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 
 uses(SharePoolingAssetTestCase::class);
 
+beforeEach(function () {
+    $this->asset = new Asset('FOO');
+});
+
 it('can acquire a share pooling asset', function () {
     // When
 
     $acquireSharePoolingAsset = new AcquireSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('100'),
     );
 
     // Then
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -42,11 +54,15 @@ it('can acquire a share pooling asset', function () {
 
     /** @var AggregateRootTestCase $this */
     $this->when($acquireSharePoolingAsset)
-        ->then($sharePoolingAssetAcquired);
+        ->then($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $sharePoolingAssetAcquired);
 });
 
 it('can acquire more of the same share pooling asset', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -60,6 +76,7 @@ it('can acquire more of the same share pooling asset', function () {
 
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('300'),
@@ -77,13 +94,17 @@ it('can acquire more of the same share pooling asset', function () {
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($someSharePoolingAssetAcquired)
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $someSharePoolingAssetAcquired)
         ->when($acquireMoreSharePoolingAsset)
         ->then($moreSharePoolingAssetAcquired);
 });
 
-it('cannot acquire more of the same share pooling asset because the currencies don\'t match', function () {
+it('cannot acquire more of the same share pooling asset because the assets don\'t match', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -96,6 +117,46 @@ it('cannot acquire more of the same share pooling asset because the currencies d
     // When
 
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
+        asset: new Asset('BAR'),
+        date: LocalDate::parse('2015-10-21'),
+        quantity: new Quantity('100'),
+        costBasis: FiatAmount::GBP('100'),
+    );
+
+    // Then
+
+    $cannotAcquireSharePoolingAsset = SharePoolingAssetException::assetMismatch(
+        sharePoolingAssetId: $this->aggregateRootId,
+        action: $acquireMoreSharePoolingAsset,
+        current: $this->asset,
+        incoming: $acquireMoreSharePoolingAsset->asset,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $someSharePoolingAssetAcquired)
+        ->when($acquireMoreSharePoolingAsset)
+        ->expectToFail($cannotAcquireSharePoolingAsset);
+});
+
+it('cannot acquire more of the same share pooling asset because the currencies don\'t match', function () {
+    // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
+
+    $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
+        acquisition: new SharePoolingAssetAcquisition(
+            date: LocalDate::parse('2015-10-21'),
+            quantity: new Quantity('100'),
+            costBasis: FiatAmount::GBP('100'),
+        ),
+    );
+
+    // When
+
+    $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: new FiatAmount('300', FiatCurrency::EUR),
@@ -106,18 +167,23 @@ it('cannot acquire more of the same share pooling asset because the currencies d
     $cannotAcquireSharePoolingAsset = SharePoolingAssetException::currencyMismatch(
         sharePoolingAssetId: $this->aggregateRootId,
         action: $acquireMoreSharePoolingAsset,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($someSharePoolingAssetAcquired)
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $someSharePoolingAssetAcquired)
         ->when($acquireMoreSharePoolingAsset)
         ->expectToFail($cannotAcquireSharePoolingAsset);
 });
 
 it('cannot acquire more of the same share pooling asset because the transaction is older than the previous one', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
+
 
     $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -130,6 +196,7 @@ it('cannot acquire more of the same share pooling asset because the transaction 
     // When
 
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-20'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('100'),
@@ -144,13 +211,17 @@ it('cannot acquire more of the same share pooling asset because the transaction 
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($someSharePoolingAssetAcquired)
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $someSharePoolingAssetAcquired)
         ->when($acquireMoreSharePoolingAsset)
         ->expectToFail($cannotAcquireSharePoolingAsset);
 });
 
 it('can dispose of a share pooling asset', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -164,6 +235,7 @@ it('can dispose of a share pooling asset', function () {
 
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('50'),
         proceeds: FiatAmount::GBP('150'),
@@ -182,13 +254,17 @@ it('can dispose of a share pooling asset', function () {
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($sharePoolingAssetAcquired)
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $sharePoolingAssetAcquired)
         ->when($disposeOfSharePoolingAsset)
         ->then($sharePoolingAssetDisposedOf);
 });
 
-it('cannot dispose of a share pooling asset because the currencies don\'t match', function () {
+it('cannot dispose of a share pooling asset because the assets don\'t match', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -201,6 +277,46 @@ it('cannot dispose of a share pooling asset because the currencies don\'t match'
     // When
 
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
+        asset: new Asset('BAR'),
+        date: LocalDate::parse('2015-10-25'),
+        quantity: new Quantity('100'),
+        proceeds: FiatAmount::GBP('100'),
+    );
+
+    // Then
+
+    $cannotDisposeOfSharePoolingAsset = SharePoolingAssetException::assetMismatch(
+        sharePoolingAssetId: $this->aggregateRootId,
+        action: $disposeOfSharePoolingAsset,
+        current: $this->asset,
+        incoming: $disposeOfSharePoolingAsset->asset,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $sharePoolingAssetAcquired)
+        ->when($disposeOfSharePoolingAsset)
+        ->expectToFail($cannotDisposeOfSharePoolingAsset);
+});
+
+it('cannot dispose of a share pooling asset because the currencies don\'t match', function () {
+    // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
+
+    $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
+        acquisition: new SharePoolingAssetAcquisition(
+            date: LocalDate::parse('2015-10-21'),
+            quantity: new Quantity('100'),
+            costBasis: FiatAmount::GBP('100'),
+        ),
+    );
+
+    // When
+
+    $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('100'),
         proceeds: new FiatAmount('100', FiatCurrency::EUR),
@@ -211,18 +327,22 @@ it('cannot dispose of a share pooling asset because the currencies don\'t match'
     $cannotDisposeOfSharePoolingAsset = SharePoolingAssetException::currencyMismatch(
         sharePoolingAssetId: $this->aggregateRootId,
         action: $disposeOfSharePoolingAsset,
-        from: FiatCurrency::GBP,
-        to: FiatCurrency::EUR,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($sharePoolingAssetAcquired)
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $sharePoolingAssetAcquired)
         ->when($disposeOfSharePoolingAsset)
         ->expectToFail($cannotDisposeOfSharePoolingAsset);
 });
 
 it('cannot dispose of a share pooling asset because the transaction is older than the previous one', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -235,6 +355,7 @@ it('cannot dispose of a share pooling asset because the transaction is older tha
     // When
 
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-20'),
         quantity: new Quantity('100'),
         proceeds: FiatAmount::GBP('100'),
@@ -249,13 +370,17 @@ it('cannot dispose of a share pooling asset because the transaction is older tha
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($sharePoolingAssetAcquired)
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $sharePoolingAssetAcquired)
         ->when($disposeOfSharePoolingAsset)
         ->expectToFail($cannotDisposeOfSharePoolingAsset);
 });
 
 it('cannot dispose of a share pooling asset because the quantity is too high', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -268,6 +393,7 @@ it('cannot dispose of a share pooling asset because the quantity is too high', f
     // When
 
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('101'),
         proceeds: FiatAmount::GBP('100'),
@@ -282,13 +408,17 @@ it('cannot dispose of a share pooling asset because the quantity is too high', f
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($sharePoolingAssetAcquired)
+    $this->given($sharePoolingAssetSet, $sharePoolingAssetFiatCurrencySet, $sharePoolingAssetAcquired)
         ->when($disposeOfSharePoolingAsset)
         ->expectToFail($cannotDisposeOfSharePoolingAsset);
 });
 
 it('can use the average cost basis per unit of a section 104 pool to calculate the cost basis of a disposal', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -310,6 +440,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
 
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('20'),
         proceeds: FiatAmount::GBP('40'),
@@ -328,13 +459,22 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($someSharePoolingAssetsAcquired, $moreSharePoolingAssetsAcquired)
+    $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
+        $someSharePoolingAssetsAcquired,
+        $moreSharePoolingAssetsAcquired,
+    )
         ->when($disposeOfSharePoolingAsset)
         ->then($sharePoolingAssetDisposedOf);
 });
 
 it('can dispose of a share pooling asset on the same day they were acquired', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -356,6 +496,7 @@ it('can dispose of a share pooling asset on the same day they were acquired', fu
 
     $disposeOfSharePoolingAsset = new DisposeOfSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-26'),
         quantity: new Quantity('150'),
         proceeds: FiatAmount::GBP('300'),
@@ -376,13 +517,22 @@ it('can dispose of a share pooling asset on the same day they were acquired', fu
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($someSharePoolingAssetsAcquired, $moreSharePoolingAssetsAcquired)
+    $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
+        $someSharePoolingAssetsAcquired,
+        $moreSharePoolingAssetsAcquired,
+    )
         ->when($disposeOfSharePoolingAsset)
         ->then($sharePoolingAssetDisposedOf);
 });
 
 it('can use the average cost basis per unit of a section 104 pool to calculate the cost basis of a disposal on the same day as an acquisition', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -421,6 +571,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
 
     $disposeOfMoreSharePoolingAsset = new DisposeOfSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-26'),
         quantity: new Quantity('60'),
         proceeds: FiatAmount::GBP('70'),
@@ -442,6 +593,8 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
 
     /** @var AggregateRootTestCase $this */
     $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
         $someSharePoolingAssetsAcquired,
         $moreSharePoolingAssetsAcquired,
         $someSharePoolingAssetsDisposedOf,
@@ -453,6 +606,10 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
 
 it('can acquire a share pooling asset within 30 days of their disposal', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $someSharePoolingAssetsAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -475,6 +632,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
 
     $acquireMoreSharePoolingAsset = new AcquireSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('25'),
         costBasis: FiatAmount::GBP('20'),
@@ -507,13 +665,22 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
     );
 
     /** @var AggregateRootTestCase $this */
-    $this->given($someSharePoolingAssetsAcquired, $someSharePoolingAssetsDisposedOf)
+    $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
+        $someSharePoolingAssetsAcquired,
+        $someSharePoolingAssetsDisposedOf,
+    )
         ->when($acquireMoreSharePoolingAsset)
         ->then($sharePoolingAssetDisposalReverted, $moreSharePoolingAssetAcquired, $correctedSharePoolingAssetsDisposedOf);
 });
 
 it('can acquire a share pooling asset several times within 30 days of their disposal', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -575,6 +742,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
 
     $acquireSharePoolingAsset4 = new AcquireSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('20'),
         costBasis: FiatAmount::GBP('40'),
@@ -616,6 +784,8 @@ it('can acquire a share pooling asset several times within 30 days of their disp
 
     /** @var AggregateRootTestCase $this */
     $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
         $sharePoolingAssetAcquired1,
         $sharePoolingAssetAcquired2,
         $sharePoolingAssetDisposedOf1,
@@ -636,6 +806,10 @@ it('can acquire a share pooling asset several times within 30 days of their disp
 
 it('can dispose of a share pooling asset on the same day as an acquisition within 30 days of another disposal', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -732,6 +906,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
 
     $disposeOfSharePoolingAsset3 = new DisposeOfSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('10'),
         proceeds: FiatAmount::GBP('30'),
@@ -765,6 +940,8 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
 
     /** @var AggregateRootTestCase $this */
     $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
         $sharePoolingAssetAcquired1,
         $sharePoolingAssetAcquired2,
         $sharePoolingAssetDisposedOf1,
@@ -784,6 +961,10 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
 
 it('can acquire a same-day share pooling asset several times on the same day as their disposal', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -830,6 +1011,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
 
     $acquireSharePoolingAsset3 = new AcquireSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('10'),
         costBasis: FiatAmount::GBP('14'),
@@ -861,6 +1043,8 @@ it('can acquire a same-day share pooling asset several times on the same day as 
 
     /** @var AggregateRootTestCase $this */
     $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
         $sharePoolingAssetAcquired1,
         $sharePoolingAssetDisposedOf,
         $sharePoolingAssetDisposalReverted,
@@ -873,6 +1057,10 @@ it('can acquire a same-day share pooling asset several times on the same day as 
 
 it('can dispose of a same-day share pooling asset several times on the same day as several acquisitions', function () {
     // Given
+
+    $sharePoolingAssetSet = new SharePoolingAssetSet($this->asset);
+
+    $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
     $sharePoolingAssetAcquired1 = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
@@ -935,6 +1123,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
 
     $disposeOfSharePoolingAsset2 = new DisposeOfSharePoolingAsset(
         transactionId: SharePoolingAssetTransactionId::generate(),
+        asset: $this->asset,
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('40'),
         proceeds: FiatAmount::GBP('50'),
@@ -956,6 +1145,8 @@ it('can dispose of a same-day share pooling asset several times on the same day 
 
     /** @var AggregateRootTestCase $this */
     $this->given(
+        $sharePoolingAssetSet,
+        $sharePoolingAssetFiatCurrencySet,
         $sharePoolingAssetAcquired1,
         $sharePoolingAssetDisposedOf1,
         $sharePoolingAssetDisposalReverted1,

@@ -45,14 +45,14 @@ final class NonFungibleAssetException extends RuntimeException
 
     public static function cannotIncreaseCostBasisFromDifferentCurrency(
         NonFungibleAssetId $nonFungibleAssetId,
-        FiatCurrency $from,
-        FiatCurrency $to,
+        FiatCurrency $current,
+        FiatCurrency $incoming,
     ): self {
         return new self(sprintf(
-            'Cannot increase the cost basis of non-fungible asset %s because the currencies don\'t match (from %s to %s)',
+            'Cannot increase the cost basis of non-fungible asset %s because the currencies don\'t match (current: %s; incoming: %s)',
             $nonFungibleAssetId->toString(),
-            $from->name(),
-            $to->name(),
+            $current->name(),
+            $incoming->name(),
         ));
     }
 
