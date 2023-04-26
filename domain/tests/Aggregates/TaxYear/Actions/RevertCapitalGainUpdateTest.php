@@ -7,8 +7,8 @@ use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\ValueObjects\FiatAmount;
 
-it('can update the aggregate', function () {
-    $taxYear = Mockery::mock(TaxYear::class);
+it('can revert a capital gain update', function () {
+    $taxYear = Mockery::spy(TaxYear::class);
     $taxYearRepository = Mockery::mock(TaxYearRepository::class);
 
     $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
@@ -20,8 +20,9 @@ it('can update the aggregate', function () {
     );
 
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
-    $taxYear->shouldReceive('revertCapitalGainUpdate')->once()->with($revertCapitalGainUpdate);
     $taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
     $revertCapitalGainUpdate->handle($taxYearRepository);
+
+    $taxYear->shouldHaveReceived('revertCapitalGainUpdate')->once()->with($revertCapitalGainUpdate);
 });

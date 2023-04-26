@@ -6,8 +6,8 @@ use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\ValueObjects\FiatAmount;
 
-it('can update the aggregate', function () {
-    $taxYear = Mockery::mock(TaxYear::class);
+it('can update the non-attributable allowable cost', function () {
+    $taxYear = Mockery::spy(TaxYear::class);
     $taxYearRepository = Mockery::mock(TaxYearRepository::class);
 
     $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
@@ -16,8 +16,9 @@ it('can update the aggregate', function () {
     );
 
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
-    $taxYear->shouldReceive('updateNonAttributableAllowableCost')->once()->with($updateNonAttributableAllowableCost);
     $taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
     $updateNonAttributableAllowableCost->handle($taxYearRepository);
+
+    $taxYear->shouldHaveReceived('updateNonAttributableAllowableCost')->once()->with($updateNonAttributableAllowableCost);
 });

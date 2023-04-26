@@ -6,8 +6,8 @@ use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\ValueObjects\FiatAmount;
 
-it('can update the aggregate', function () {
-    $taxYear = Mockery::mock(TaxYear::class);
+it('can update the income', function () {
+    $taxYear = Mockery::spy(TaxYear::class);
     $taxYearRepository = Mockery::mock(TaxYearRepository::class);
 
     $updateIncome = new UpdateIncome(
@@ -16,8 +16,9 @@ it('can update the aggregate', function () {
     );
 
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
-    $taxYear->shouldReceive('updateIncome')->once()->with($updateIncome);
     $taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
     $updateIncome->handle($taxYearRepository);
+
+    $taxYear->shouldHaveReceived('updateIncome')->once()->with($updateIncome);
 });
