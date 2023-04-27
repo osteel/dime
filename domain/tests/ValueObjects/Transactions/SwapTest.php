@@ -14,7 +14,7 @@ it('cannot instantiate a swap because both assets are fiat', function () {
 
 it('can tell whether one of the assets is a non-fungible asset', function (?string $method, bool $result) {
     /** @var Swap */
-    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->$method())->make();
+    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->{$method}())->make();
 
     expect($transaction->hasNonFungibleAsset())->toBe($result);
 })->with([
@@ -26,7 +26,7 @@ it('can tell whether one of the assets is a non-fungible asset', function (?stri
 
 it('can tell whether the disposed of asset is a share pooling asset', function (?string $method, bool $result) {
     /** @var Swap */
-    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->$method())->make();
+    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->{$method}())->make();
 
     expect($transaction->disposedOfAssetIsSharePoolingAsset())->toBe($result);
 })->with([
@@ -37,7 +37,7 @@ it('can tell whether the disposed of asset is a share pooling asset', function (
 
 it('can tell whether the acquired asset is a share pooling asset', function (?string $method, bool $result) {
     /** @var Swap */
-    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->$method())->make();
+    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->{$method}())->make();
 
     expect($transaction->acquiredAssetIsSharePoolingAsset())->toBe($result);
 })->with([
@@ -48,7 +48,7 @@ it('can tell whether the acquired asset is a share pooling asset', function (?st
 
 it('can tell whether one of the assets is a share pooling asset', function (?string $method, bool $result) {
     /** @var Swap */
-    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->$method())->make();
+    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->{$method}())->make();
 
     expect($transaction->hasSharePoolingAsset())->toBe($result);
 })->with([
@@ -59,7 +59,7 @@ it('can tell whether one of the assets is a share pooling asset', function (?str
 
 it('can tell whether one of the assets is fiat', function (?string $method, bool $result) {
     /** @var Swap */
-    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->$method())->make();
+    $transaction = Swap::factory()->when($method, fn ($factory) => $factory->{$method}())->make();
 
     expect($transaction->hasFiat())->toBe($result);
 })->with([

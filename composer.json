@@ -67,9 +67,14 @@
     },
     "scripts": {
         "pint": "pint",
-        "rector": "rector process --dry-run",
         "stan": "phpstan",
-        "test": "pest"
+        "test": "pest",
+        "all": [
+            "@pint",
+            "@stan",
+            "@test"
+        ],
+        "rector": "rector process --dry-run"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,

@@ -23,6 +23,6 @@ final readonly class SharePoolingAssetSet implements SerializablePayload
     /** @param array{asset:array{symbol:string,is_non_fungible:string}} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(Asset::fromPayload($payload['asset']));
+        return new self(Asset::fromPayload($payload['asset']));
     }
 }

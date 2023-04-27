@@ -23,6 +23,6 @@ final readonly class SharePoolingAssetFiatCurrencySet implements SerializablePay
     /** @param array{fiat_currency:string} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(FiatCurrency::from($payload['fiat_currency']));
+        return new self(FiatCurrency::from($payload['fiat_currency']));
     }
 }

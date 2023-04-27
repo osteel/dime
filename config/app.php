@@ -13,7 +13,7 @@ return [
     | framework needs to place the application's name in a notification or
     | any other location as required by the application or its packages.
     |
-    */
+     */
 
     'name' => 'Dime',
 
@@ -26,7 +26,7 @@ return [
     | in. You may want to follow the "Semantic Versioning" - Given a version
     | number MAJOR.MINOR.PATCH when an update happens: https://semver.org.
     |
-    */
+     */
 
     'version' => app('git.version'),
 
@@ -40,7 +40,7 @@ return [
     | services the application utilizes. This can be overridden using
     | the global command line "--env" option when calling commands.
     |
-    */
+     */
 
     'env' => 'development',
 
@@ -53,7 +53,7 @@ return [
     | will be used by the PHP date and date-time functions. We have gone
     | ahead and set this to a sensible default for you out of the box.
     |
-    */
+     */
 
     'timezone' => 'UTC',
 
@@ -66,7 +66,7 @@ return [
     | request to your application. Feel free to add your own services to
     | this array to grant expanded functionality to your applications.
     |
-    */
+     */
 
     'providers' => [
         App\Providers\AppServiceProvider::class,

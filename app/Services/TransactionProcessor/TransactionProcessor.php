@@ -117,11 +117,7 @@ class TransactionProcessor
     {
         $value = strtolower(trim($value));
 
-        if (in_array($value, ['true', 'yes', 'y', '1'])) {
-            return true;
-        }
-
-        return false;
+        return in_array($value, ['true', 'yes', 'y', '1']);
     }
 
     /** @throws TransactionProcessorException */

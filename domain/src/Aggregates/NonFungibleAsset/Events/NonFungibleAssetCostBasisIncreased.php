@@ -28,7 +28,7 @@ final readonly class NonFungibleAssetCostBasisIncreased implements SerializableP
     /** @param array{date:string,cost_basis_increase:array{quantity:string,currency:string}} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(
+        return new self(
             LocalDate::parse($payload['date']),
             FiatAmount::fromPayload($payload['cost_basis_increase']),
         );

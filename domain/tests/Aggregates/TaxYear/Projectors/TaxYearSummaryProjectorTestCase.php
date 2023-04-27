@@ -15,6 +15,7 @@ class TaxYearSummaryProjectorTestCase extends MessageConsumerTestCase
     protected string $taxYear = '2015-2016';
 
     protected $aggregateRootId;
+
     protected MockInterface $taxYearSummaryRepository;
 
     protected function setUp(): void

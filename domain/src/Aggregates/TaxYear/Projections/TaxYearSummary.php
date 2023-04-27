@@ -16,12 +16,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @property TaxYearId $tax_year_id
- * @property string $tax_year
+ * @property CapitalGain  $capital_gain
  * @property FiatCurrency $currency
- * @property CapitalGain $capital_gain
- * @property FiatAmount $income
- * @property FiatAmount $non_attributable_allowable_cost
+ * @property FiatAmount   $income
+ * @property FiatAmount   $non_attributable_allowable_cost
+ * @property string       $tax_year
+ * @property TaxYearId    $tax_year_id
+ *
  * @method static self firstOrNew($attributes = [], $values = [])
  */
 final class TaxYearSummary extends Model

@@ -23,7 +23,7 @@ class NonFungibleAssetHandler
     }
 
     /** @throws NonFungibleAssetHandlerException */
-    public function handle(Acquisition | Disposal | Swap $transaction): void
+    public function handle(Acquisition|Disposal|Swap $transaction): void
     {
         $transaction->hasNonFungibleAsset() || throw NonFungibleAssetHandlerException::noNonFungibleAsset($transaction);
 
@@ -50,7 +50,7 @@ class NonFungibleAssetHandler
         }
     }
 
-    private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset): void
+    private function handleDisposal(Acquisition|Disposal|Swap $transaction, Asset $asset): void
     {
         $this->runner->run(new DisposeOfNonFungibleAsset(
             asset: $asset,
@@ -59,7 +59,7 @@ class NonFungibleAssetHandler
         ));
     }
 
-    private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset): void
+    private function handleAcquisition(Acquisition|Disposal|Swap $transaction, Asset $asset): void
     {
         $this->runner->run(new AcquireNonFungibleAsset(
             asset: $asset,

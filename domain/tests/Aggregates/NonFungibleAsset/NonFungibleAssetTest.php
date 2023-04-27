@@ -9,7 +9,7 @@ use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetCostBasisIncreased
 use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetDisposedOf;
 use Domain\Aggregates\NonFungibleAsset\Exceptions\NonFungibleAssetException;
 use Domain\Enums\FiatCurrency;
-use Domain\Tests\Aggregates\NonFungibleAsset\NonFungibleAssetTestCase as NonFungibleAssetTestCase;
+use Domain\Tests\Aggregates\NonFungibleAsset\NonFungibleAssetTestCase;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;

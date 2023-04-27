@@ -24,7 +24,7 @@ class SharePoolingAssetHandler
     }
 
     /** @throws SharePoolingAssetHandlerException */
-    public function handle(Acquisition | Disposal | Swap $transaction): void
+    public function handle(Acquisition|Disposal|Swap $transaction): void
     {
         $transaction->hasSharePoolingAsset() || throw SharePoolingAssetHandlerException::noSharePoolingAsset($transaction);
 
@@ -49,7 +49,7 @@ class SharePoolingAssetHandler
         }
     }
 
-    private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
+    private function handleDisposal(Acquisition|Disposal|Swap $transaction, Asset $asset, Quantity $quantity): void
     {
         $this->runner->run(new DisposeOfSharePoolingAsset(
             asset: $asset,
@@ -59,7 +59,7 @@ class SharePoolingAssetHandler
         ));
     }
 
-    private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
+    private function handleAcquisition(Acquisition|Disposal|Swap $transaction, Asset $asset, Quantity $quantity): void
     {
         $this->runner->run(new AcquireSharePoolingAsset(
             asset: $asset,

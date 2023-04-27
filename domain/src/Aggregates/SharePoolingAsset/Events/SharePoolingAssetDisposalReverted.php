@@ -23,6 +23,6 @@ final readonly class SharePoolingAssetDisposalReverted implements SerializablePa
     /** @param array{share_pooling_asset_disposal:array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool}} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(SharePoolingAssetDisposal::fromPayload($payload['share_pooling_asset_disposal']));
+        return new self(SharePoolingAssetDisposal::fromPayload($payload['share_pooling_asset_disposal']));
     }
 }

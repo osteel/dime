@@ -70,13 +70,13 @@ it('can round', function (string $number, int $precision, string $rounded) {
 it('can return whether it is equal to', function (string $term1, string $term2, bool $result) {
     expect(Math::eq($term1, $term2))->toBe($result);
 })->with([
-    'scenario 1' => ['1', '2', false,],
-    'scenario 2' => ['-1', '2', false,],
-    'scenario 3' => ['1', '1', true,],
-    'scenario 4' => ['-1', '-1', true,],
+    'scenario 1' => ['1', '2', false],
+    'scenario 2' => ['-1', '2', false],
+    'scenario 3' => ['1', '1', true],
+    'scenario 4' => ['-1', '-1', true],
     'scenario 5' => ['2', '1', false],
     'scenario 6' => ['0.000000023', '0.0000000230', true],
-    'scenario 7' => ['0.000000023', '0.0000000231', false,],
+    'scenario 7' => ['0.000000023', '0.0000000231', false],
     'scenario 8' => ['0.0000000231', '0.0000000230', false],
 ]);
 

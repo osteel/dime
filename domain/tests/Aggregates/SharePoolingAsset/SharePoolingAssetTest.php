@@ -184,7 +184,6 @@ it('cannot acquire more of the same share pooling asset because the transaction 
 
     $sharePoolingAssetFiatCurrencySet = new SharePoolingAssetFiatCurrencySet(FiatCurrency::GBP);
 
-
     $someSharePoolingAssetAcquired = new SharePoolingAssetAcquired(
         acquisition: new SharePoolingAssetAcquisition(
             date: LocalDate::parse('2015-10-21'),

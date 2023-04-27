@@ -15,6 +15,7 @@ use EventSauce\EventSourcing\Serialization\SerializablePayload;
 final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction implements SerializablePayload
 {
     private Quantity $sameDayQuantity;
+
     private Quantity $thirtyDayQuantity;
 
     public function __construct(
@@ -83,7 +84,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
             throw SharePoolingAssetAcquisitionException::insufficientSameDayQuantity($quantity, $this->sameDayQuantity);
         }
 
-        $this->sameDayQuantity = $this->sameDayQuantity->minus(($quantity));
+        $this->sameDayQuantity = $this->sameDayQuantity->minus($quantity);
 
         return $this;
     }
@@ -103,7 +104,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
             throw SharePoolingAssetAcquisitionException::insufficientThirtyDayQuantity($quantity, $this->thirtyDayQuantity);
         }
 
-        $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus(($quantity));
+        $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantity);
 
         return $this;
     }
@@ -124,7 +125,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
     /** @param array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(
+        return new self(
             id: SharePoolingAssetTransactionId::fromString($payload['id']),
             date: LocalDate::parse($payload['date']),
             quantity: new Quantity($payload['quantity']),
