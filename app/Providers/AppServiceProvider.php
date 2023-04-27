@@ -29,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     /** Bootstrap any application services. */
     public function boot(): void
     {
+        Model::preventAccessingMissingAttributes();
         Model::preventLazyLoading(! $this->isProduction());
     }
 
