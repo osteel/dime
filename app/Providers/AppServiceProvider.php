@@ -31,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::preventAccessingMissingAttributes();
         Model::preventLazyLoading(! $this->isProduction());
+        Model::preventSilentlyDiscardingAttributes();
     }
 
     private function isProduction(): bool
