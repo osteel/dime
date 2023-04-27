@@ -5,14 +5,14 @@ use Domain\Aggregates\NonFungibleAsset\Actions\AcquireNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\IncreaseNonFungibleAssetCostBasis;
 use Domain\Aggregates\NonFungibleAsset\NonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
-use Illuminate\Contracts\Bus\Dispatcher;
 
 it('can acquire a non-fungible asset', function () {
     $nonFungibleAsset = Mockery::spy(NonFungibleAsset::class);
     $nonFungibleAssetRepository = Mockery::mock(NonFungibleAssetRepository::class);
-    $dispatcher = Mockery::mock(Dispatcher::class);
+    $runner = Mockery::mock(ActionRunner::class);
 
     $acquireNonFungibleAsset = new AcquireNonFungibleAsset(
         asset: new Asset('FOO'),
@@ -23,7 +23,7 @@ it('can acquire a non-fungible asset', function () {
     $nonFungibleAssetRepository->shouldReceive('get')->once()->andReturn($nonFungibleAsset);
     $nonFungibleAssetRepository->shouldReceive('save')->once()->with($nonFungibleAsset);
 
-    $acquireNonFungibleAsset->handle($nonFungibleAssetRepository, $dispatcher);
+    $acquireNonFungibleAsset->handle($nonFungibleAssetRepository, $runner);
 
     $nonFungibleAsset->shouldHaveReceived('acquire')->once()->with($acquireNonFungibleAsset);
 });
@@ -31,7 +31,7 @@ it('can acquire a non-fungible asset', function () {
 it('can increase the cost basis of a non-fungible asset', function () {
     $nonFungibleAsset = Mockery::mock(NonFungibleAsset::class);
     $nonFungibleAssetRepository = Mockery::mock(NonFungibleAssetRepository::class);
-    $dispatcher = Mockery::mock(Dispatcher::class);
+    $runner = Mockery::mock(ActionRunner::class);
 
     $acquireNonFungibleAsset = new AcquireNonFungibleAsset(
         asset: new Asset('FOO'),
@@ -45,10 +45,10 @@ it('can increase the cost basis of a non-fungible asset', function () {
     $nonFungibleAsset->shouldReceive('isAlreadyAcquired')->once()->andReturn(true);
     $nonFungibleAsset->shouldNotReceive('acquire');
 
-    $dispatcher->shouldReceive('dispatchSync')
+    $runner->shouldReceive('run')
         ->once()
         ->withArgs(fn (IncreaseNonFungibleAssetCostBasis $action) => $action->date === $acquireNonFungibleAsset->date
             && $action->costBasisIncrease === $acquireNonFungibleAsset->costBasis);
 
-    $acquireNonFungibleAsset->handle($nonFungibleAssetRepository, $dispatcher);
+    $acquireNonFungibleAsset->handle($nonFungibleAssetRepository, $runner);
 });

@@ -3,6 +3,7 @@
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Actions\AcquireNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\DisposeOfNonFungibleAsset;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NonFungibleAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\NonFungibleAssetHandler;
 use Domain\ValueObjects\FiatAmount;
@@ -10,11 +11,10 @@ use Domain\ValueObjects\Transaction;
 use Domain\ValueObjects\Transactions\Acquisition;
 use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
-use Illuminate\Contracts\Bus\Dispatcher;
 
 beforeEach(function () {
-    $this->dispatcher = Mockery::spy(Dispatcher::class);
-    $this->nonFungibleAssetHandler = new NonFungibleAssetHandler($this->dispatcher);
+    $this->runner = Mockery::spy(ActionRunner::class);
+    $this->nonFungibleAssetHandler = new NonFungibleAssetHandler($this->runner);
 });
 
 it('can handle a receive operation', function () {
@@ -26,8 +26,8 @@ it('can handle a receive operation', function () {
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->costBasis->isEqualTo($transaction->marketValue),
     )->once();
@@ -45,8 +45,8 @@ it('can handle a receive operation with a fee', function () {
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
@@ -61,8 +61,8 @@ it('can handle a send operation', function () {
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->proceeds->isEqualTo($transaction->marketValue),
     )->once();
@@ -80,8 +80,8 @@ it('can handle a send operation with a fee', function () {
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();
@@ -96,8 +96,8 @@ it('can handle a swap operation where the received asset is a non-fungible asset
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->costBasis->isEqualTo($transaction->marketValue),
     )->once();
@@ -112,8 +112,8 @@ it('can handle a swap operation where the sent asset is a non-fungible asset', f
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->proceeds->isEqualTo($transaction->marketValue),
     )->once();
@@ -128,15 +128,15 @@ it('can handle a swap operation where both assets are non-fungible assets', func
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof DisposeOfNonFungibleAsset
             && $action->date->isEqualTo($transaction->date)
             && $action->proceeds->isEqualTo($transaction->marketValue),
     )->once();
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof AcquireNonFungibleAsset
             && $action->date->isEqualTo($transaction->date)
             && $action->costBasis->isEqualTo($transaction->marketValue),
@@ -155,15 +155,15 @@ it('can handle a swap operation with a fee', function () {
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof DisposeOfNonFungibleAsset
             && $action->date->isEqualTo($transaction->date)
             && $action->proceeds->isEqualTo(FiatAmount::GBP('45')),
     )->once();
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof AcquireNonFungibleAsset
             && $action->date->isEqualTo($transaction->date)
             && $action->costBasis->isEqualTo(FiatAmount::GBP('55')),
@@ -183,8 +183,8 @@ it('can handle a swap operation with a fee where the received asset is a non-fun
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
@@ -203,8 +203,8 @@ it('can handle a swap operation with a fee where the sent asset is a non-fungibl
 
     $this->nonFungibleAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfNonFungibleAsset $action) => $action->date->isEqualTo($transaction->date)
             && $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();

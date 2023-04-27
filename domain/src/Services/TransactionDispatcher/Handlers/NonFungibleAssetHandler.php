@@ -6,19 +6,19 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\NonFungibleAsset\Actions\AcquireNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\DisposeOfNonFungibleAsset;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NonFungibleAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Transactions\Acquisition;
 use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
-use Illuminate\Contracts\Bus\Dispatcher;
 
 class NonFungibleAssetHandler
 {
     use AttributesFees;
 
-    public function __construct(private readonly Dispatcher $dispatcher)
+    public function __construct(private readonly ActionRunner $runner)
     {
     }
 
@@ -52,7 +52,7 @@ class NonFungibleAssetHandler
 
     private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset): void
     {
-        $this->dispatcher->dispatchSync(new DisposeOfNonFungibleAsset(
+        $this->runner->run(new DisposeOfNonFungibleAsset(
             asset: $asset,
             date: $transaction->date,
             proceeds: $transaction->marketValue->minus($this->splitFees($transaction)),
@@ -61,7 +61,7 @@ class NonFungibleAssetHandler
 
     private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset): void
     {
-        $this->dispatcher->dispatchSync(new AcquireNonFungibleAsset(
+        $this->runner->run(new AcquireNonFungibleAsset(
             asset: $asset,
             date: $transaction->date,
             costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),

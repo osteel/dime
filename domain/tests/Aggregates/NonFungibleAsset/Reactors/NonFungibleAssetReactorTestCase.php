@@ -4,16 +4,16 @@ namespace Domain\Tests\Aggregates\NonFungibleAsset\Reactors;
 
 use Domain\Aggregates\NonFungibleAsset\Reactors\NonFungibleAssetReactor;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
+use Domain\Services\ActionRunner\ActionRunner;
 use EventSauce\EventSourcing\MessageConsumer;
 use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Mockery;
 use Mockery\MockInterface;
 
 class NonFungibleAssetReactorTestCase extends MessageConsumerTestCase
 {
     protected $aggregateRootId;
-    protected MockInterface $dispatcher;
+    protected MockInterface $runner;
 
     protected function setUp(): void
     {
@@ -24,8 +24,8 @@ class NonFungibleAssetReactorTestCase extends MessageConsumerTestCase
 
     public function messageConsumer(): MessageConsumer
     {
-        $this->dispatcher = Mockery::spy(Dispatcher::class);
+        $this->runner = Mockery::spy(ActionRunner::class);
 
-        return new NonFungibleAssetReactor($this->dispatcher);
+        return new NonFungibleAssetReactor($this->runner);
     }
 }

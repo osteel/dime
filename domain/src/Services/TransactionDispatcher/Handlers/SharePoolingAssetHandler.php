@@ -6,6 +6,7 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\SharePoolingAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
 use Domain\ValueObjects\Asset;
@@ -13,13 +14,12 @@ use Domain\ValueObjects\Quantity;
 use Domain\ValueObjects\Transactions\Acquisition;
 use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
-use Illuminate\Contracts\Bus\Dispatcher;
 
 class SharePoolingAssetHandler
 {
     use AttributesFees;
 
-    public function __construct(private readonly Dispatcher $dispatcher)
+    public function __construct(private readonly ActionRunner $runner)
     {
     }
 
@@ -51,7 +51,7 @@ class SharePoolingAssetHandler
 
     private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
     {
-        $this->dispatcher->dispatchSync(new DisposeOfSharePoolingAsset(
+        $this->runner->run(new DisposeOfSharePoolingAsset(
             asset: $asset,
             date: $transaction->date,
             quantity: $quantity,
@@ -61,7 +61,7 @@ class SharePoolingAssetHandler
 
     private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset, Quantity $quantity): void
     {
-        $this->dispatcher->dispatchSync(new AcquireSharePoolingAsset(
+        $this->runner->run(new AcquireSharePoolingAsset(
             asset: $asset,
             date: $transaction->date,
             quantity: $quantity,

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
 use Domain\ValueObjects\Transactions\Transfer;
-use Illuminate\Contracts\Bus\Dispatcher;
 
 class TransferHandler
 {
-    public function __construct(private readonly Dispatcher $dispatcher)
+    public function __construct(private readonly ActionRunner $runner)
     {
     }
 
@@ -22,7 +22,7 @@ class TransferHandler
             return;
         }
 
-        $this->dispatcher->dispatchSync(new UpdateNonAttributableAllowableCost(
+        $this->runner->run(new UpdateNonAttributableAllowableCost(
             date: $transaction->date,
             nonAttributableAllowableCost: $transaction->fee->marketValue,
         ));

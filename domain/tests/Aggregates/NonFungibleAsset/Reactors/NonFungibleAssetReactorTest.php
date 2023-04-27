@@ -20,8 +20,8 @@ it('can handle a capital gain', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($nonFungibleAssetDisposedOf))
-        ->then(fn () => $this->dispatcher->shouldHaveReceived(
-            'dispatchSync',
+        ->then(fn () => $this->runner->shouldHaveReceived(
+            'run',
             fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('1'),
         )->once());
 });
@@ -36,8 +36,8 @@ it('can handle a capital loss', function () {
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($nonFungibleAssetDisposedOf))
-        ->then(fn () => $this->dispatcher->shouldHaveReceived(
-            'dispatchSync',
+        ->then(fn () => $this->runner->shouldHaveReceived(
+            'run',
             fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('-1'),
         )->once());
 });

@@ -27,8 +27,8 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingAssetDisposedOf))
-        ->then(fn () => $this->dispatcher->shouldHaveReceived(
-            'dispatchSync',
+        ->then(fn () => $this->runner->shouldHaveReceived(
+            'run',
             fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo($capitalGain)
         )->once());
 })->with([
@@ -49,8 +49,8 @@ it('can handle a capital gain update reversion', function (string $costBasis, st
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingAssetDisposalReverted))
-        ->then(fn () => $this->dispatcher->shouldHaveReceived(
-            'dispatchSync',
+        ->then(fn () => $this->runner->shouldHaveReceived(
+            'run',
             fn (RevertCapitalGainUpdate $action) => $action->capitalGain->difference->isEqualTo($capitalGain)
         )->once());
 })->with([

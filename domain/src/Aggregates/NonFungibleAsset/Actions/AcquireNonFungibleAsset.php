@@ -7,9 +7,9 @@ namespace Domain\Aggregates\NonFungibleAsset\Actions;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
-use Illuminate\Contracts\Bus\Dispatcher;
 
 final readonly class AcquireNonFungibleAsset
 {
@@ -20,13 +20,13 @@ final readonly class AcquireNonFungibleAsset
     ) {
     }
 
-    public function handle(NonFungibleAssetRepository $nonFungibleAssetRepository, Dispatcher $dispatcher): void
+    public function handle(NonFungibleAssetRepository $nonFungibleAssetRepository, ActionRunner $runner): void
     {
         $nonFungibleAssetId = NonFungibleAssetId::fromNonFungibleAssetId((string) $this->asset);
         $nonFungibleAsset = $nonFungibleAssetRepository->get($nonFungibleAssetId);
 
         if ($nonFungibleAsset->isAlreadyAcquired()) {
-            $dispatcher->dispatchSync(new IncreaseNonFungibleAssetCostBasis(
+            $runner->run(new IncreaseNonFungibleAssetCostBasis(
                 asset: $this->asset,
                 date: $this->date,
                 costBasisIncrease: $this->costBasis,

@@ -3,17 +3,17 @@
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\SharePoolingAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingAssetHandler;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Transactions\Acquisition;
 use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
-use Illuminate\Contracts\Bus\Dispatcher;
 
 beforeEach(function () {
-    $this->dispatcher = Mockery::spy(Dispatcher::class);
-    $this->sharePoolingAssetHandler = new SharePoolingAssetHandler($this->dispatcher);
+    $this->runner = Mockery::spy(ActionRunner::class);
+    $this->sharePoolingAssetHandler = new SharePoolingAssetHandler($this->runner);
     $this->sharePoolingAsset = Mockery::spy(SharePoolingAsset::class);
 });
 
@@ -22,8 +22,8 @@ it('can handle a receive operation', function () {
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireSharePoolingAsset $action) => $action->costBasis->isEqualTo($transaction->marketValue),
     )->once();
 });
@@ -35,8 +35,8 @@ it('can handle a receive operation with a fee', function () {
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireSharePoolingAsset $action) => $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
 });
@@ -46,8 +46,8 @@ it('can handle a send operation', function () {
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfSharePoolingAsset $action) => $action->proceeds->isEqualTo($transaction->marketValue),
     )->once();
 });
@@ -59,8 +59,8 @@ it('can handle a send operation with a fee', function () {
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfSharePoolingAsset $action) => $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();
 });
@@ -70,8 +70,8 @@ it('can handle a swap operation where the received asset is not a non-fungible a
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireSharePoolingAsset $action) => $action->costBasis->isEqualTo($transaction->marketValue),
     )->once();
 });
@@ -81,8 +81,8 @@ it('can handle a swap operation where the sent asset is not a non-fungible asset
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfSharePoolingAsset $action) => $action->proceeds->isEqualTo($transaction->marketValue),
     )->once();
 });
@@ -92,14 +92,14 @@ it('can handle a swap operation where neither asset is a non-fungible asset', fu
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof DisposeOfSharePoolingAsset
             && $action->proceeds->isEqualTo($transaction->marketValue),
     )->once();
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof AcquireSharePoolingAsset
             && $action->costBasis->isEqualTo($transaction->marketValue),
     )->once();
@@ -110,8 +110,8 @@ it('can handle a swap operation where the received asset is some fiat currency',
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfSharePoolingAsset $action) => $action->proceeds->isEqualTo($transaction->marketValue),
     )->once();
 
@@ -123,8 +123,8 @@ it('can handle a swap operation where the sent asset is some fiat currency', fun
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireSharePoolingAsset $action) => $action->costBasis->isEqualTo($transaction->marketValue),
     )->once();
 
@@ -138,14 +138,14 @@ it('can handle a swap operation with a fee', function () {
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof DisposeOfSharePoolingAsset
             && $action->proceeds->isEqualTo(FiatAmount::GBP('45')),
     )->once();
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (object $action) => $action instanceof AcquireSharePoolingAsset
             && $action->costBasis->isEqualTo(FiatAmount::GBP('55')),
     )->once();
@@ -159,8 +159,8 @@ it('can handle a swap operation with a fee where the received asset is some fiat
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (DisposeOfSharePoolingAsset $action) => $action->proceeds->isEqualTo(FiatAmount::GBP('40')),
     )->once();
 
@@ -175,8 +175,8 @@ it('can handle a swap operation with a fee where the sent asset is some fiat cur
 
     $this->sharePoolingAssetHandler->handle($transaction);
 
-    $this->dispatcher->shouldHaveReceived(
-        'dispatchSync',
+    $this->runner->shouldHaveReceived(
+        'run',
         fn (AcquireSharePoolingAsset $action) => $action->costBasis->isEqualTo(FiatAmount::GBP('60')),
     )->once();
 
