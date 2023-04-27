@@ -23,6 +23,6 @@ final readonly class SharePoolingAssetAcquired implements SerializablePayload
     /** @param array{share_pooling_asset_acquisition:array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string}} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(SharePoolingAssetAcquisition::fromPayload($payload['share_pooling_asset_acquisition']));
+        return new self(SharePoolingAssetAcquisition::fromPayload($payload['share_pooling_asset_acquisition']));
     }
 }

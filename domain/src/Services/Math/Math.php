@@ -89,7 +89,7 @@ final class Math
      *
      * @throws MathException
      */
-    public static function rnd(string $number, int $precision = null): string
+    public static function rnd(string $number, ?int $precision = null): string
     {
         $operand = bcpow('10', self::add((string) $precision, '1'));
 

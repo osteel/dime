@@ -54,7 +54,7 @@ it('can dispatch to the transfer handler', function (bool $isNonFungibleAsset) {
 ]);
 
 it('can dispatch to the non-fungible asset handler', function (TransactionFactory $factory, string $method, bool $sharePoolingAssetHandler) {
-    $transaction = $factory->$method()->make();
+    $transaction = $factory->{$method}()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -76,7 +76,7 @@ it('can dispatch to the non-fungible asset handler', function (TransactionFactor
 ]);
 
 it('can dispatch to the share pooling asset handler', function (TransactionFactory $factory, ?string $method, bool $nonFungibleAssetHandler) {
-    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->make();
+    $transaction = $factory->when($method, fn ($factory) => $factory->{$method}())->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -106,7 +106,7 @@ it('can dispatch to the share pooling asset handler', function (TransactionFacto
 
 it('can dispatch the fee to the share pooling asset handler', function (TransactionFactory $factory, ?string $method, bool $sharePoolingAssetHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
-    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee()->make();
+    $transaction = $factory->when($method, fn ($factory) => $factory->{$method}())->withFee()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -151,7 +151,7 @@ it('can dispatch the fee to the share pooling asset handler', function (Transact
 
 it('does not dispatch the fee to the share pooling asset handler when it is zero', function (TransactionFactory $factory, ?string $method, bool $sharePoolingAssetHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
-    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFee(FiatAmount::GBP('0'))->make();
+    $transaction = $factory->when($method, fn ($factory) => $factory->{$method}())->withFee(FiatAmount::GBP('0'))->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 
@@ -196,7 +196,7 @@ it('does not dispatch the fee to the share pooling asset handler when it is zero
 
 it('does not dispatch the fee to the share pooling asset handler when it is fiat', function (TransactionFactory $factory, ?string $method, bool $sharePoolingAssetHandler, bool $nonFungibleAssetHandler) {
     /** @var Transaction */
-    $transaction = $factory->when($method, fn ($factory) => $factory->$method())->withFeeInFiat()->make();
+    $transaction = $factory->when($method, fn ($factory) => $factory->{$method}())->withFeeInFiat()->make();
 
     $this->transactionDispatcher->dispatch($transaction);
 

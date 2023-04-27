@@ -145,8 +145,7 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
 
         $transactions = array_filter(
             $this->transactions,
-            fn (SharePoolingAssetTransaction $transaction) =>
-                $transaction->date->isAfterOrEqualTo($from->isBefore($to) ? $from : $to)
+            fn (SharePoolingAssetTransaction $transaction) => $transaction->date->isAfterOrEqualTo($from->isBefore($to) ? $from : $to)
                 && $transaction->date->isBeforeOrEqualTo($to->isAfter($from) ? $to : $from)
                 && (is_null($type) ? true : $transaction instanceof $type),
         );

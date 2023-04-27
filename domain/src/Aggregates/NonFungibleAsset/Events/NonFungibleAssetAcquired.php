@@ -28,7 +28,7 @@ final readonly class NonFungibleAssetAcquired implements SerializablePayload
     /** @param array{date:string,cost_basis:array{quantity:string,currency:string}} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(
+        return new self(
             LocalDate::parse($payload['date']),
             FiatAmount::fromPayload($payload['cost_basis']),
         );

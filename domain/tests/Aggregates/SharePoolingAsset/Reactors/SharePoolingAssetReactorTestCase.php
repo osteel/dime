@@ -13,6 +13,7 @@ use Mockery\MockInterface;
 class SharePoolingAssetReactorTestCase extends MessageConsumerTestCase
 {
     protected $aggregateRootId;
+
     protected MockInterface $runner;
 
     protected function setUp(): void

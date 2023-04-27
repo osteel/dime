@@ -31,6 +31,7 @@ use Stringable;
 
 /**
  * @implements AggregateRoot<SharePoolingAssetId>
+ *
  * @property SharePoolingAssetId $aggregateRootId
  */
 class SharePoolingAsset implements AggregateRoot
@@ -39,8 +40,11 @@ class SharePoolingAsset implements AggregateRoot
     use AggregateRootBehaviour;
 
     private ?Asset $asset = null;
+
     private ?FiatCurrency $fiatCurrency = null;
+
     private ?LocalDate $previousTransactionDate = null;
+
     private readonly SharePoolingAssetTransactions $transactions;
 
     private function __construct(AggregateRootId $aggregateRootId)
@@ -249,7 +253,7 @@ class SharePoolingAsset implements AggregateRoot
     }
 
     /** @throws SharePoolingAssetException */
-    private function validateTimeline(Timely & Stringable $action): void
+    private function validateTimeline(Timely&Stringable $action): void
     {
         if (is_null($this->previousTransactionDate) || $action->getDate()->isAfterOrEqualTo($this->previousTransactionDate)) {
             return;

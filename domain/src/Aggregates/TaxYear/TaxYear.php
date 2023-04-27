@@ -25,6 +25,7 @@ use Stringable;
 
 /**
  * @implements AggregateRoot<TaxYearId>
+ *
  * @property TaxYearId $aggregateRootId
  */
 class TaxYear implements AggregateRoot
@@ -33,8 +34,11 @@ class TaxYear implements AggregateRoot
     use AggregateRootBehaviour;
 
     private ?FiatCurrency $currency = null;
+
     private ?FiatAmount $capitalGain = null;
+
     private ?FiatAmount $income = null;
+
     private ?FiatAmount $nonAttributableAllowableCost = null;
 
     private function __construct(AggregateRootId $aggregateRootId)

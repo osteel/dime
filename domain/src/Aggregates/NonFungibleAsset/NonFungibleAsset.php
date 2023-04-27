@@ -21,6 +21,7 @@ use EventSauce\EventSourcing\AggregateRootId;
 
 /**
  * @implements AggregateRoot<NonFungibleAssetId>
+ *
  * @property NonFungibleAssetId $aggregateRootId
  */
 class NonFungibleAsset implements AggregateRoot
@@ -29,6 +30,7 @@ class NonFungibleAsset implements AggregateRoot
     use AggregateRootBehaviour;
 
     private ?FiatAmount $costBasis = null;
+
     private ?LocalDate $previousTransactionDate = null;
 
     private function __construct(AggregateRootId $aggregateRootId)

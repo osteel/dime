@@ -16,6 +16,7 @@ use EventSauce\EventSourcing\Serialization\SerializablePayload;
 final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction implements SerializablePayload
 {
     public readonly QuantityAllocation $sameDayQuantityAllocation;
+
     public readonly QuantityAllocation $thirtyDayQuantityAllocation;
 
     public function __construct(
@@ -23,8 +24,8 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         Quantity $quantity,
         FiatAmount $costBasis,
         public readonly FiatAmount $proceeds,
-        QuantityAllocation $sameDayQuantityAllocation = null,
-        QuantityAllocation $thirtyDayQuantityAllocation = null,
+        ?QuantityAllocation $sameDayQuantityAllocation = null,
+        ?QuantityAllocation $thirtyDayQuantityAllocation = null,
         bool $processed = true,
         ?SharePoolingAssetTransactionId $id = null,
     ) {
@@ -99,7 +100,7 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     /** @param array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} $payload */
     public static function fromPayload(array $payload): static
     {
-        return new static(
+        return new self(
             id: SharePoolingAssetTransactionId::fromString($payload['id']),
             date: LocalDate::parse($payload['date']),
             quantity: new Quantity($payload['quantity']),

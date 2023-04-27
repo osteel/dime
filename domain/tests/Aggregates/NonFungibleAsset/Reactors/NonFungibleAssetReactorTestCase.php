@@ -13,6 +13,7 @@ use Mockery\MockInterface;
 class NonFungibleAssetReactorTestCase extends MessageConsumerTestCase
 {
     protected $aggregateRootId;
+
     protected MockInterface $runner;
 
     protected function setUp(): void

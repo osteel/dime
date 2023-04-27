@@ -109,7 +109,7 @@ final class DisposalProcessor
             $quantityToAllocate = Quantity::minimum($remainder, $acquisition->availableSameDayQuantity());
             $sameDayQuantityAllocation->allocateQuantity($quantityToAllocate, $acquisition);
             $acquisition->increaseSameDayQuantity($remainder);
-            $remainder =  $remainder->minus($quantityToAllocate);
+            $remainder = $remainder->minus($quantityToAllocate);
             if ($remainder->isZero()) {
                 break;
             }
@@ -202,10 +202,8 @@ final class DisposalProcessor
         $averageCostBasisPerUnit = $priorAcquisitions->averageSection104PoolCostBasisPerUnit();
 
         // Apply the section 104 pool's average cost basis per unit to the remainder
-        $costBasis = $averageCostBasisPerUnit
+        return $averageCostBasisPerUnit
             ? $costBasis->plus($averageCostBasisPerUnit->multipliedBy($remainingQuantity))
             : $costBasis;
-
-        return $costBasis;
     }
 }

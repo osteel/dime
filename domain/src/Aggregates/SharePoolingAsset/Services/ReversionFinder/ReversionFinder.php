@@ -113,7 +113,7 @@ final class ReversionFinder
 
                 // Stop as soon as the disposal's quantity has fully been matched
                 if ($remainingQuantity->isZero()) {
-                    break(2);
+                    break 2;
                 }
             }
         }

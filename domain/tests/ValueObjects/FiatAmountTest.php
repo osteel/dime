@@ -11,25 +11,25 @@ it('cannot instantiate a fiat amount', function () {
 });
 
 it('can instantiate a fiat amount', function () {
-    expect((string) (FiatAmount::GBP('10'))->quantity)->toBe('10');
+    expect((string) FiatAmount::GBP('10')->quantity)->toBe('10');
 });
 
 it('can return a fiat amount with a zero quantity', function () {
-    $amount = (FiatAmount::GBP('10'))->zero();
+    $amount = FiatAmount::GBP('10')->zero();
 
     expect($amount->quantity->isZero())->toBeTrue();
     $this->assertEquals($amount->currency, FiatCurrency::GBP);
 });
 
 it('can return a fiat amount with the opposite quantity', function (string $from, string $to) {
-    expect((string) (FiatAmount::GBP($from))->opposite()->quantity)->toBe($to);
+    expect((string) FiatAmount::GBP($from)->opposite()->quantity)->toBe($to);
 })->with([
     'positive' => ['1', '-1'],
     'negative' => ['-1', '1'],
 ]);
 
 it('can tell whether a fiat amount is positive', function (string $quantity, bool $result) {
-    expect((FiatAmount::GBP($quantity))->isPositive())->toBe($result);
+    expect(FiatAmount::GBP($quantity)->isPositive())->toBe($result);
 })->with([
     'scenario 1' => ['1', true],
     'scenario 2' => ['-1', false],
@@ -38,7 +38,7 @@ it('can tell whether a fiat amount is positive', function (string $quantity, boo
 ]);
 
 it('can tell whether a fiat amount is negative', function (string $quantity, bool $result) {
-    expect((FiatAmount::GBP($quantity))->isNegative())->toBe($result);
+    expect(FiatAmount::GBP($quantity)->isNegative())->toBe($result);
 })->with([
     'scenario 1' => ['1', false],
     'scenario 2' => ['-1', true],
@@ -47,7 +47,7 @@ it('can tell whether a fiat amount is negative', function (string $quantity, boo
 ]);
 
 it('can tell whether a fiat amount is zero', function (string $quantity, bool $result) {
-    expect((FiatAmount::GBP($quantity))->isZero())->toBe($result);
+    expect(FiatAmount::GBP($quantity)->isZero())->toBe($result);
 })->with([
     'scenario 1' => ['0', true],
     'scenario 2' => ['1', false],
@@ -56,8 +56,8 @@ it('can tell whether a fiat amount is zero', function (string $quantity, bool $r
 ]);
 
 it('can tell whether two fiat amounts are equal', function (string $quantity1, string $quantity2, bool $result) {
-    expect((FiatAmount::GBP($quantity1))->isEqualTo($quantity2))->toBe($result);
-    expect((FiatAmount::GBP($quantity1))
+    expect(FiatAmount::GBP($quantity1)->isEqualTo($quantity2))->toBe($result);
+    expect(FiatAmount::GBP($quantity1)
         ->isEqualTo(FiatAmount::GBP($quantity2)))
         ->toBe($result);
 })->with([
@@ -69,8 +69,8 @@ it('can tell whether two fiat amounts are equal', function (string $quantity1, s
 ]);
 
 it('can tell whether a fiat amount is greater than another one', function (string $quantity1, string $quantity2, bool $result) {
-    expect((FiatAmount::GBP($quantity1))->isGreaterThan($quantity2))->toBe($result);
-    expect((FiatAmount::GBP($quantity1))
+    expect(FiatAmount::GBP($quantity1)->isGreaterThan($quantity2))->toBe($result);
+    expect(FiatAmount::GBP($quantity1)
         ->isGreaterThan(FiatAmount::GBP($quantity2)))
         ->toBe($result);
 })->with([
@@ -82,8 +82,8 @@ it('can tell whether a fiat amount is greater than another one', function (strin
 ]);
 
 it('can tell whether a fiat amount is greater than or equal to another one', function (string $quantity1, string $quantity2, bool $result) {
-    expect((FiatAmount::GBP($quantity1))->isGreaterThanOrEqualTo($quantity2))->toBe($result);
-    expect((FiatAmount::GBP($quantity1))
+    expect(FiatAmount::GBP($quantity1)->isGreaterThanOrEqualTo($quantity2))->toBe($result);
+    expect(FiatAmount::GBP($quantity1)
         ->isGreaterThanOrEqualTo(FiatAmount::GBP($quantity2)))
         ->toBe($result);
 })->with([
@@ -95,8 +95,8 @@ it('can tell whether a fiat amount is greater than or equal to another one', fun
 ]);
 
 it('can tell whether a fiat amount is less than another one', function (string $quantity1, string $quantity2, bool $result) {
-    expect((FiatAmount::GBP($quantity1))->isLessThan($quantity2))->toBe($result);
-    expect((FiatAmount::GBP($quantity1))
+    expect(FiatAmount::GBP($quantity1)->isLessThan($quantity2))->toBe($result);
+    expect(FiatAmount::GBP($quantity1)
         ->isLessThan(FiatAmount::GBP($quantity2)))
         ->toBe($result);
 })->with([
@@ -108,8 +108,8 @@ it('can tell whether a fiat amount is less than another one', function (string $
 ]);
 
 it('can tell whether a fiat amount is less than or equal to another one', function (string $quantity1, string $quantity2, bool $result) {
-    expect((FiatAmount::GBP($quantity1))->isLessThanOrEqualTo($quantity2))->toBe($result);
-    expect((FiatAmount::GBP($quantity1))
+    expect(FiatAmount::GBP($quantity1)->isLessThanOrEqualTo($quantity2))->toBe($result);
+    expect(FiatAmount::GBP($quantity1)
         ->isLessThanOrEqualTo(FiatAmount::GBP($quantity2)))
         ->toBe($result);
 })->with([
@@ -121,8 +121,8 @@ it('can tell whether a fiat amount is less than or equal to another one', functi
 ]);
 
 it('can add a fiat amount to another one', function (string $quantity1, string $quantity2, string $result) {
-    expect((string) (FiatAmount::GBP($quantity1))->plus($quantity2)->quantity)->toBe($result);
-    expect((string) (FiatAmount::GBP($quantity1))
+    expect((string) FiatAmount::GBP($quantity1)->plus($quantity2)->quantity)->toBe($result);
+    expect((string) FiatAmount::GBP($quantity1)
         ->plus(FiatAmount::GBP($quantity2))->quantity)
         ->toBe($result);
 })->with([
@@ -133,8 +133,8 @@ it('can add a fiat amount to another one', function (string $quantity1, string $
 ]);
 
 it('can subtract a fiat amount from another one', function (string $quantity1, string $quantity2, string $result) {
-    expect((string) (FiatAmount::GBP($quantity1))->minus($quantity2)->quantity)->toBe($result);
-    expect((string) (FiatAmount::GBP($quantity1))
+    expect((string) FiatAmount::GBP($quantity1)->minus($quantity2)->quantity)->toBe($result);
+    expect((string) FiatAmount::GBP($quantity1)
         ->minus(FiatAmount::GBP($quantity2))->quantity)
         ->toBe($result);
 })->with([
@@ -146,8 +146,8 @@ it('can subtract a fiat amount from another one', function (string $quantity1, s
 ]);
 
 it('can multiply a fiat amount by another one', function (string $quantity1, string $quantity2, string $result) {
-    expect((string) (FiatAmount::GBP($quantity1))->multipliedBy($quantity2)->quantity)->toBe($result);
-    expect((string) (FiatAmount::GBP($quantity1))
+    expect((string) FiatAmount::GBP($quantity1)->multipliedBy($quantity2)->quantity)->toBe($result);
+    expect((string) FiatAmount::GBP($quantity1)
         ->multipliedBy(FiatAmount::GBP($quantity2))->quantity)
         ->toBe($result);
 })->with([
@@ -160,8 +160,8 @@ it('can multiply a fiat amount by another one', function (string $quantity1, str
 ]);
 
 it('can divide a fiat amount by another one', function (string $quantity1, string $quantity2, string $result) {
-    expect((string) (FiatAmount::GBP($quantity1))->dividedBy($quantity2)->quantity)->toBe($result);
-    expect((string) (FiatAmount::GBP($quantity1))
+    expect((string) FiatAmount::GBP($quantity1)->dividedBy($quantity2)->quantity)->toBe($result);
+    expect((string) FiatAmount::GBP($quantity1)
         ->dividedBy(FiatAmount::GBP($quantity2))->quantity)
         ->toBe($result);
 })->with([
@@ -172,7 +172,7 @@ it('can divide a fiat amount by another one', function (string $quantity1, strin
 ]);
 
 it('cannot perform a fiat amount operation because the currencies do not match', function (string $operation) {
-    expect(fn () => (FiatAmount::GBP('10'))->$operation(new FiatAmount('10', FiatCurrency::EUR)))->toThrow(
+    expect(fn () => (FiatAmount::GBP('10'))->{$operation}(new FiatAmount('10', FiatCurrency::EUR)))->toThrow(
         FiatAmountException::class,
         FiatAmountException::fiatCurrenciesDoNotMatch(FiatCurrency::GBP->value, FiatCurrency::EUR->value)->getMessage(),
     );
@@ -189,5 +189,5 @@ it('cannot perform a fiat amount operation because the currencies do not match',
 ]);
 
 it('can express a fiat amount as a string', function () {
-    expect((string) (FiatAmount::GBP('10')))->toBe('£10');
+    expect((string) FiatAmount::GBP('10'))->toBe('£10');
 });

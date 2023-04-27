@@ -11,7 +11,7 @@ use Domain\ValueObjects\Transactions\Swap;
 
 trait AttributesFees
 {
-    private function splitFees(Acquisition | Disposal | Swap $transaction): FiatAmount
+    private function splitFees(Acquisition|Disposal|Swap $transaction): FiatAmount
     {
         $amount = $transaction->fee?->marketValue ?? $transaction->marketValue->zero();
 
