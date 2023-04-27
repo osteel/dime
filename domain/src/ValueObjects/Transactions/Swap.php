@@ -34,17 +34,17 @@ final readonly class Swap extends Transaction
 
     public function hasNonFungibleAsset(): bool
     {
-        return $this->disposedOfAsset->isNonFungibleAsset || $this->acquiredAsset->isNonFungibleAsset;
+        return $this->disposedOfAsset->isNonFungible || $this->acquiredAsset->isNonFungible;
     }
 
     public function disposedOfAssetIsSharePoolingAsset(): bool
     {
-        return ! $this->disposedOfAsset->isNonFungibleAsset && ! $this->disposedOfAsset->isFiat();
+        return ! $this->disposedOfAsset->isNonFungible && ! $this->disposedOfAsset->isFiat();
     }
 
     public function acquiredAssetIsSharePoolingAsset(): bool
     {
-        return ! $this->acquiredAsset->isNonFungibleAsset && ! $this->acquiredAsset->isFiat();
+        return ! $this->acquiredAsset->isNonFungible && ! $this->acquiredAsset->isFiat();
     }
 
     public function hasSharePoolingAsset(): bool
@@ -63,10 +63,10 @@ final readonly class Swap extends Transaction
             '%s | disposed of: %s | non-fungible asset: %s | quantity: %s | acquired: %s | non-fungible asset: %s | quantity: %s | cost basis: %s | Fee: %s',
             (string) $this->date,
             (string) $this->disposedOfAsset,
-            $this->disposedOfAsset->isNonFungibleAsset ? 'yes' : 'no',
+            $this->disposedOfAsset->isNonFungible ? 'yes' : 'no',
             (string) $this->disposedOfQuantity,
             (string) $this->acquiredAsset,
-            $this->acquiredAsset->isNonFungibleAsset ? 'yes' : 'no',
+            $this->acquiredAsset->isNonFungible ? 'yes' : 'no',
             (string) $this->acquiredQuantity,
             (string) $this->marketValue ?: 'N/A',
             (string) $this->fee ?: 'N/A',

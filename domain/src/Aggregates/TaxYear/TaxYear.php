@@ -149,8 +149,8 @@ class TaxYear implements AggregateRoot
         throw TaxYearException::currencyMismatch(
             taxYearId: $this->aggregateRootId,
             action: $action,
-            from: $this->currency,
-            to: $incoming,
+            current: $this->currency,
+            incoming: $incoming,
         );
     }
 }

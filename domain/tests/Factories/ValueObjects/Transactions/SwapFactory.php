@@ -20,9 +20,9 @@ class SwapFactory extends TransactionFactory
     {
         return [
             'date' => LocalDate::parse('2015-10-21'),
-            'disposedOfAsset' => new Asset(symbol: 'BTC', isNonFungibleAsset: false),
+            'disposedOfAsset' => new Asset(symbol: 'BTC', isNonFungible: false),
             'disposedOfQuantity' => new Quantity('1'),
-            'acquiredAsset' => new Asset(symbol: 'ETH', isNonFungibleAsset: false),
+            'acquiredAsset' => new Asset(symbol: 'ETH', isNonFungible: false),
             'acquiredQuantity' => new Quantity('10'),
             'marketValue' => FiatAmount::GBP('100'),
             'fee' => null,
@@ -32,7 +32,7 @@ class SwapFactory extends TransactionFactory
     public function toNonFungibleAsset(): static
     {
         return $this->state([
-            'acquiredAsset' => new Asset(symbol: md5(time()), isNonFungibleAsset: true),
+            'acquiredAsset' => new Asset(symbol: md5(time()), isNonFungible: true),
             'acquiredQuantity' => new Quantity('1'),
         ]);
     }
@@ -40,7 +40,7 @@ class SwapFactory extends TransactionFactory
     public function fromNonFungibleAsset(): static
     {
         return $this->state([
-            'disposedOfAsset' => new Asset(symbol: md5(time()), isNonFungibleAsset: true),
+            'disposedOfAsset' => new Asset(symbol: md5(time()), isNonFungible: true),
             'disposedOfQuantity' => new Quantity('1'),
         ]);
     }
@@ -53,7 +53,7 @@ class SwapFactory extends TransactionFactory
     public function toFiat(): static
     {
         return $this->state([
-            'acquiredAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNonFungibleAsset: false),
+            'acquiredAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNonFungible: false),
             'acquiredQuantity' => new Quantity('1000'),
         ]);
     }
@@ -61,7 +61,7 @@ class SwapFactory extends TransactionFactory
     public function fromFiat(): static
     {
         return $this->state([
-            'disposedOfAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNonFungibleAsset: false),
+            'disposedOfAsset' => new Asset(symbol: FiatCurrency::GBP->value, isNonFungible: false),
             'disposedOfQuantity' => new Quantity('1000'),
         ]);
     }

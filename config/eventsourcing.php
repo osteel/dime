@@ -10,6 +10,8 @@ use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
+use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetFiatCurrencySet;
+use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetSet;
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
@@ -31,6 +33,8 @@ return [
         SharePoolingAssetAcquired::class => 'share_pooling_asset.share_pooling_asset_acquired',
         SharePoolingAssetDisposalReverted::class => 'share_pooling_asset.share_pooling_asset_disposal_reverted',
         SharePoolingAssetDisposedOf::class => 'share_pooling_asset.share_pooling_asset_disposed_of',
+        SharePoolingAssetFiatCurrencySet::class => 'share_pooling_asset.share_pooling_asset_fiat_currency_set',
+        SharePoolingAssetSet::class => 'share_pooling_asset.share_pooling_asset_set',
         TaxYear::class => 'tax_year.tax_year',
         TaxYearId::class => 'tax_year.tax_year_id',
         CapitalGainUpdated::class => 'tax_year.capital_gain_updated',

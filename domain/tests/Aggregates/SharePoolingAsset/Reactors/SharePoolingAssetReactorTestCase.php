@@ -4,7 +4,7 @@ namespace Domain\Tests\Aggregates\SharePoolingAsset\Reactors;
 
 use Domain\Aggregates\SharePoolingAsset\Reactors\SharePoolingAssetReactor;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
-use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
+use Domain\Services\ActionRunner\ActionRunner;
 use EventSauce\EventSourcing\MessageConsumer;
 use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 use Mockery;
@@ -13,7 +13,7 @@ use Mockery\MockInterface;
 class SharePoolingAssetReactorTestCase extends MessageConsumerTestCase
 {
     protected $aggregateRootId;
-    protected MockInterface $taxYearRepository;
+    protected MockInterface $runner;
 
     protected function setUp(): void
     {
@@ -24,8 +24,8 @@ class SharePoolingAssetReactorTestCase extends MessageConsumerTestCase
 
     public function messageConsumer(): MessageConsumer
     {
-        $this->taxYearRepository = Mockery::mock(TaxYearRepository::class);
+        $this->runner = Mockery::spy(ActionRunner::class);
 
-        return new SharePoolingAssetReactor($this->taxYearRepository);
+        return new SharePoolingAssetReactor($this->runner);
     }
 }

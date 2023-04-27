@@ -6,7 +6,6 @@ use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
-use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\Tests\Aggregates\SharePoolingAsset\Reactors\SharePoolingAssetReactorTestCase;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
@@ -16,10 +15,6 @@ use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 uses(SharePoolingAssetReactorTestCase::class);
 
 it('can handle a capital gain update', function (string $costBasis, string $proceeds, string $capitalGain) {
-    $taxYearSpy = Mockery::spy(TaxYear::class);
-    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
-    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
-
     $sharePoolingAssetDisposedOf = new SharePoolingAssetDisposedOf(
         new SharePoolingAssetDisposal(
             date: LocalDate::parse('2015-10-21'),
@@ -32,8 +27,8 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingAssetDisposedOf))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived(
-            'updateCapitalGain',
+        ->then(fn () => $this->runner->shouldHaveReceived(
+            'run',
             fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo($capitalGain)
         )->once());
 })->with([
@@ -42,10 +37,6 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
 ]);
 
 it('can handle a capital gain update reversion', function (string $costBasis, string $proceeds, string $capitalGain) {
-    $taxYearSpy = Mockery::spy(TaxYear::class);
-    $this->taxYearRepository->shouldReceive('get')->once()->andReturn($taxYearSpy);
-    $this->taxYearRepository->shouldReceive('save')->once()->with($taxYearSpy);
-
     $sharePoolingAssetDisposalReverted = new SharePoolingAssetDisposalReverted(
         new SharePoolingAssetDisposal(
             date: LocalDate::parse('2015-10-21'),
@@ -58,8 +49,8 @@ it('can handle a capital gain update reversion', function (string $costBasis, st
     /** @var MessageConsumerTestCase $this */
     $this->givenNextMessagesHaveAggregateRootIdOf($this->aggregateRootId)
         ->when(new Message($sharePoolingAssetDisposalReverted))
-        ->then(fn () => $taxYearSpy->shouldHaveReceived(
-            'revertCapitalGainUpdate',
+        ->then(fn () => $this->runner->shouldHaveReceived(
+            'run',
             fn (RevertCapitalGainUpdate $action) => $action->capitalGain->difference->isEqualTo($capitalGain)
         )->once());
 })->with([

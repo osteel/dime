@@ -7,6 +7,7 @@ namespace Domain\Aggregates\SharePoolingAsset\Exceptions;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Enums\FiatCurrency;
+use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Quantity;
 use RuntimeException;
 use Stringable;
@@ -18,17 +19,32 @@ final class SharePoolingAssetException extends RuntimeException
         parent::__construct($message);
     }
 
+    public static function assetMismatch(
+        SharePoolingAssetId $sharePoolingAssetId,
+        Stringable $action,
+        ?Asset $current,
+        Asset $incoming,
+    ): self {
+        return new self(sprintf(
+            'Cannot process this %s share pooling asset transaction because the assets don\'t match (current: %s; incoming: %s): %s',
+            $sharePoolingAssetId->toString(),
+            (string) $current ?: 'undefined',
+            (string) $incoming,
+            (string) $action,
+        ));
+    }
+
     public static function currencyMismatch(
         SharePoolingAssetId $sharePoolingAssetId,
         Stringable $action,
-        ?FiatCurrency $from,
-        FiatCurrency $to,
+        ?FiatCurrency $current,
+        FiatCurrency $incoming,
     ): self {
         return new self(sprintf(
-            'Cannot process this %s share pooling asset transaction because the currencies don\'t match (from %s to %s): %s',
+            'Cannot process this %s share pooling asset transaction because the currencies don\'t match (current: %s; incoming: %s): %s',
             $sharePoolingAssetId->toString(),
-            $from?->name() ?? 'undefined',
-            $to->name(),
+            $current?->name() ?? 'undefined',
+            $incoming->name(),
             (string) $action,
         ));
     }

@@ -32,14 +32,14 @@ final class TaxYearException extends RuntimeException
     public static function currencyMismatch(
         TaxYearId $taxYearId,
         Stringable $action,
-        ?FiatCurrency $from,
-        FiatCurrency $to,
+        ?FiatCurrency $current,
+        FiatCurrency $incoming,
     ): self {
         return new self(sprintf(
-            'Cannot process this %s tax year action because the currencies don\'t match (from %s to %s): %s',
+            'Cannot process this %s tax year action because the currencies don\'t match (current: %s; incoming: %s): %s',
             $taxYearId->toString(),
-            $from?->name() ?? 'undefined',
-            $to->name(),
+            $current?->name() ?? 'undefined',
+            $incoming->name(),
             (string) $action,
         ));
     }

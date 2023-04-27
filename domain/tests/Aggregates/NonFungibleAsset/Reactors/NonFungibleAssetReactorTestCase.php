@@ -2,9 +2,9 @@
 
 namespace Domain\Tests\Aggregates\NonFungibleAsset\Reactors;
 
-use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Aggregates\NonFungibleAsset\Reactors\NonFungibleAssetReactor;
-use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
+use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
+use Domain\Services\ActionRunner\ActionRunner;
 use EventSauce\EventSourcing\MessageConsumer;
 use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 use Mockery;
@@ -13,7 +13,7 @@ use Mockery\MockInterface;
 class NonFungibleAssetReactorTestCase extends MessageConsumerTestCase
 {
     protected $aggregateRootId;
-    protected MockInterface $taxYearRepository;
+    protected MockInterface $runner;
 
     protected function setUp(): void
     {
@@ -24,8 +24,8 @@ class NonFungibleAssetReactorTestCase extends MessageConsumerTestCase
 
     public function messageConsumer(): MessageConsumer
     {
-        $this->taxYearRepository = Mockery::mock(TaxYearRepository::class);
+        $this->runner = Mockery::spy(ActionRunner::class);
 
-        return new NonFungibleAssetReactor($this->taxYearRepository);
+        return new NonFungibleAssetReactor($this->runner);
     }
 }

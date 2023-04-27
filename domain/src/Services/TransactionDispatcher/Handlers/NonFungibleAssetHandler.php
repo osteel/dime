@@ -6,9 +6,7 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\NonFungibleAsset\Actions\AcquireNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\DisposeOfNonFungibleAsset;
-use Domain\Aggregates\NonFungibleAsset\Actions\IncreaseNonFungibleAssetCostBasis;
-use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
-use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
+use Domain\Services\ActionRunner\ActionRunner;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\NonFungibleAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\Traits\AttributesFees;
 use Domain\ValueObjects\Asset;
@@ -20,7 +18,7 @@ class NonFungibleAssetHandler
 {
     use AttributesFees;
 
-    public function __construct(private readonly NonFungibleAssetRepository $nonFungibleAssetRepository)
+    public function __construct(private readonly ActionRunner $runner)
     {
     }
 
@@ -29,13 +27,13 @@ class NonFungibleAssetHandler
     {
         $transaction->hasNonFungibleAsset() || throw NonFungibleAssetHandlerException::noNonFungibleAsset($transaction);
 
-        if ($transaction instanceof Acquisition && $transaction->asset->isNonFungibleAsset) {
+        if ($transaction instanceof Acquisition && $transaction->asset->isNonFungible) {
             $this->handleAcquisition($transaction, $transaction->asset);
 
             return;
         }
 
-        if ($transaction instanceof Disposal && $transaction->asset->isNonFungibleAsset) {
+        if ($transaction instanceof Disposal && $transaction->asset->isNonFungible) {
             $this->handleDisposal($transaction, $transaction->asset);
 
             return;
@@ -43,45 +41,30 @@ class NonFungibleAssetHandler
 
         assert($transaction instanceof Swap);
 
-        if ($transaction->acquiredAsset->isNonFungibleAsset) {
+        if ($transaction->acquiredAsset->isNonFungible) {
             $this->handleAcquisition($transaction, $transaction->acquiredAsset);
         }
 
-        if ($transaction->disposedOfAsset->isNonFungibleAsset) {
+        if ($transaction->disposedOfAsset->isNonFungible) {
             $this->handleDisposal($transaction, $transaction->disposedOfAsset);
         }
     }
 
     private function handleDisposal(Acquisition | Disposal | Swap $transaction, Asset $asset): void
     {
-        $nonFungibleAssetId = NonFungibleAssetId::fromNonFungibleAssetId((string) $asset);
-        $nonFungibleAsset = $this->nonFungibleAssetRepository->get($nonFungibleAssetId);
-
-        $nonFungibleAsset->disposeOf(new DisposeOfNonFungibleAsset(
+        $this->runner->run(new DisposeOfNonFungibleAsset(
+            asset: $asset,
             date: $transaction->date,
             proceeds: $transaction->marketValue->minus($this->splitFees($transaction)),
         ));
-
-        $this->nonFungibleAssetRepository->save($nonFungibleAsset);
     }
 
     private function handleAcquisition(Acquisition | Disposal | Swap $transaction, Asset $asset): void
     {
-        $nonFungibleAssetId = NonFungibleAssetId::fromNonFungibleAssetId((string) $asset);
-        $nonFungibleAsset = $this->nonFungibleAssetRepository->get($nonFungibleAssetId);
-
-        if ($nonFungibleAsset->isAlreadyAcquired()) {
-            $nonFungibleAsset->increaseCostBasis(new IncreaseNonFungibleAssetCostBasis(
-                date: $transaction->date,
-                costBasisIncrease: $transaction->marketValue->plus($this->splitFees($transaction)),
-            ));
-        } else {
-            $nonFungibleAsset->acquire(new AcquireNonFungibleAsset(
-                date: $transaction->date,
-                costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),
-            ));
-        }
-
-        $this->nonFungibleAssetRepository->save($nonFungibleAsset);
+        $this->runner->run(new AcquireNonFungibleAsset(
+            asset: $asset,
+            date: $transaction->date,
+            costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),
+        ));
     }
 }

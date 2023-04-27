@@ -75,8 +75,8 @@ class NonFungibleAsset implements AggregateRoot
         if ($this->costBasis->currency !== $action->costBasisIncrease->currency) {
             throw NonFungibleAssetException::cannotIncreaseCostBasisFromDifferentCurrency(
                 nonFungibleAssetId: $this->aggregateRootId,
-                from: $this->costBasis->currency,
-                to: $action->costBasisIncrease->currency,
+                current: $this->costBasis->currency,
+                incoming: $action->costBasisIncrease->currency,
             );
         }
 

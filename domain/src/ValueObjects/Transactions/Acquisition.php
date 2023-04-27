@@ -33,12 +33,12 @@ final readonly class Acquisition extends Transaction
 
     public function hasNonFungibleAsset(): bool
     {
-        return $this->asset->isNonFungibleAsset;
+        return $this->asset->isNonFungible;
     }
 
     public function hasSharePoolingAsset(): bool
     {
-        return ! $this->asset->isNonFungibleAsset;
+        return ! $this->asset->isNonFungible;
     }
 
     public function __toString(): string
@@ -47,7 +47,7 @@ final readonly class Acquisition extends Transaction
             '%s | acquired: %s | non-fungible asset: %s | quantity: %s | cost basis: %s | income: %s | Fee: %s',
             (string) $this->date,
             (string) $this->asset,
-            $this->asset->isNonFungibleAsset ? 'yes' : 'no',
+            $this->asset->isNonFungible ? 'yes' : 'no',
             (string) $this->quantity,
             (string) $this->marketValue ?: 'N/A',
             $this->isIncome ? 'yes' : 'no',

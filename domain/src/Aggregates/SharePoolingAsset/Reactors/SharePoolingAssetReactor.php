@@ -8,43 +8,30 @@ use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
-use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
-use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
+use Domain\Services\ActionRunner\ActionRunner;
 use EventSauce\EventSourcing\EventConsumption\EventConsumer;
 use EventSauce\EventSourcing\Message;
 
 final class SharePoolingAssetReactor extends EventConsumer
 {
-    public function __construct(private readonly TaxYearRepository $taxYearRepository)
+    public function __construct(private readonly ActionRunner $runner)
     {
     }
 
     public function handleSharePoolingAssetDisposedOf(SharePoolingAssetDisposedOf $event, Message $message): void
     {
-        $disposal = $event->sharePoolingAssetDisposal;
-        $taxYearId = TaxYearId::fromDate($disposal->date);
-        $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
-
-        $taxYearAggregate->updateCapitalGain(new UpdateCapitalGain(
-            date: $disposal->date,
-            capitalGain: new CapitalGain($disposal->costBasis, $disposal->proceeds),
+        $this->runner->run(new UpdateCapitalGain(
+            date: $event->disposal->date,
+            capitalGain: new CapitalGain($event->disposal->costBasis, $event->disposal->proceeds),
         ));
-
-        $this->taxYearRepository->save($taxYearAggregate);
     }
 
     public function handleSharePoolingAssetDisposalReverted(SharePoolingAssetDisposalReverted $event, Message $message): void
     {
-        $disposal = $event->sharePoolingAssetDisposal;
-        $taxYearId = TaxYearId::fromDate($disposal->date);
-        $taxYearAggregate = $this->taxYearRepository->get($taxYearId);
-
-        $taxYearAggregate->revertCapitalGainUpdate(new RevertCapitalGainUpdate(
-            date: $disposal->date,
-            capitalGain: new CapitalGain($disposal->costBasis, $disposal->proceeds),
+        $this->runner->run(new RevertCapitalGainUpdate(
+            date: $event->disposal->date,
+            capitalGain: new CapitalGain($event->disposal->costBasis, $event->disposal->proceeds),
         ));
-
-        $this->taxYearRepository->save($taxYearAggregate);
     }
 }

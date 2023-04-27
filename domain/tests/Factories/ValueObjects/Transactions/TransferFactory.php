@@ -18,7 +18,7 @@ class TransferFactory extends TransactionFactory
     {
         return [
             'date' => LocalDate::parse('2015-10-21'),
-            'asset' => new Asset(symbol: 'BTC', isNonFungibleAsset: false),
+            'asset' => new Asset(symbol: 'BTC', isNonFungible: false),
             'quantity' => new Quantity('1'),
             'fee' => null,
         ];
@@ -27,7 +27,7 @@ class TransferFactory extends TransactionFactory
     public function nonFungibleAsset(): static
     {
         return $this->state([
-            'asset' => new Asset(symbol: md5(time()), isNonFungibleAsset: true),
+            'asset' => new Asset(symbol: md5(time()), isNonFungible: true),
             'quantity' => new Quantity('1'),
         ]);
     }
