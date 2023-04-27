@@ -28,12 +28,11 @@ final readonly class AcquireSharePoolingAsset implements Stringable, Timely
 
     public function handle(SharePoolingAssetRepository $sharePoolingAssetRepository): void
     {
-        $sharePoolingId = SharePoolingAssetId::fromAsset($this->asset);
-        $sharePooling = $sharePoolingAssetRepository->get($sharePoolingId);
+        $sharePoolingAssetId = SharePoolingAssetId::fromAsset($this->asset);
+        $sharePoolingAsset = $sharePoolingAssetRepository->get($sharePoolingAssetId);
 
-        $sharePooling->acquire($this);
-
-        $sharePoolingAssetRepository->save($sharePooling);
+        $sharePoolingAsset->acquire($this);
+        $sharePoolingAssetRepository->save($sharePoolingAsset);
     }
 
     public function getDate(): LocalDate

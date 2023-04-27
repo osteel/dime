@@ -21,11 +21,10 @@ final class RevertCapitalGainUpdate implements Stringable
     public function handle(TaxYearRepository $taxYearRepository): void
     {
         $taxYearId = TaxYearId::fromDate($this->date);
-        $taxYearAggregate = $taxYearRepository->get($taxYearId);
+        $taxYear = $taxYearRepository->get($taxYearId);
 
-        $taxYearAggregate->revertCapitalGainUpdate($this);
-
-        $taxYearRepository->save($taxYearAggregate);
+        $taxYear->revertCapitalGainUpdate($this);
+        $taxYearRepository->save($taxYear);
     }
 
     public function __toString(): string

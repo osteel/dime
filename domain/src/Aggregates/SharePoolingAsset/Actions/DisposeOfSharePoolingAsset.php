@@ -28,12 +28,11 @@ final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely
 
     public function handle(SharePoolingAssetRepository $sharePoolingAssetRepository): void
     {
-        $sharePoolingId = SharePoolingAssetId::fromAsset($this->asset);
-        $sharePooling = $sharePoolingAssetRepository->get($sharePoolingId);
+        $sharePoolingAssetId = SharePoolingAssetId::fromAsset($this->asset);
+        $sharePoolingAsset = $sharePoolingAssetRepository->get($sharePoolingAssetId);
 
-        $sharePooling->disposeOf($this);
-
-        $sharePoolingAssetRepository->save($sharePooling);
+        $sharePoolingAsset->disposeOf($this);
+        $sharePoolingAssetRepository->save($sharePoolingAsset);
     }
 
     public function isReplay(): bool
