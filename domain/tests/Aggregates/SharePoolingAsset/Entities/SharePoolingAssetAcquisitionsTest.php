@@ -61,7 +61,7 @@ it('can return the total quantity of a collection of acquisitions', function (ar
 
     $acquisitions = SharePoolingAssetAcquisitions::make(...$items);
 
-    expect($acquisitions->quantity())->toBeInstanceOf(Quantity::class)->toMatchObject(new Quantity($total));
+    expect($acquisitions->quantity())->toBeInstanceOf(Quantity::class)->toEqual(new Quantity($total));
 })->with([
     'scenario 1' => [['10'], '10'],
     'scenario 2' => [['10', '30', '40', '20'], '100'],
