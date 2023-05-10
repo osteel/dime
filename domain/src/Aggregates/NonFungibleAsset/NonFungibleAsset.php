@@ -101,6 +101,7 @@ class NonFungibleAsset implements AggregateRoot
         $this->isAlreadyAcquired() || throw NonFungibleAssetException::cannotDisposeOfBeforeAcquisition($action->asset);
 
         $this->validateAsset($action);
+        $this->validateCurrency($action, $action->proceeds->currency);
         $this->validateTimeline($action);
 
         assert(! is_null($this->costBasis));

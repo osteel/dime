@@ -307,6 +307,37 @@ it('cannot dispose of a non-fungible asset because the assets don\'t match', fun
         ->expectToFail($cannotIncreaseCostBasis);
 });
 
+it('cannot dispose of a non-fungible asset because the currencies don\'t match', function () {
+    // Given
+
+    $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
+        asset: $this->asset,
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+    );
+
+    // When
+
+    $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
+        asset: $this->asset,
+        date: LocalDate::parse('2015-10-21'),
+        proceeds: new FiatAmount('100', FiatCurrency::EUR),
+    );
+
+    // Then
+
+    $cannotIncreaseCostBasis = NonFungibleAssetException::currencyMismatch(
+        action: $disposeOfNonFungibleAsset,
+        current: FiatCurrency::GBP,
+        incoming: FiatCurrency::EUR,
+    );
+
+    /** @var AggregateRootTestCase $this */
+    $this->given($nonFungibleAssetAcquired)
+        ->when($disposeOfNonFungibleAsset)
+        ->expectToFail($cannotIncreaseCostBasis);
+});
+
 it('cannot dispose of a non-fungible asset because the transaction is older than the previous one', function () {
     // Given
 
