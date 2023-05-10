@@ -74,6 +74,7 @@ class NonFungibleAsset implements AggregateRoot
         $this->isAlreadyAcquired()
             || throw NonFungibleAssetException::cannotIncreaseCostBasisBeforeAcquisition($action->asset);
 
+        $this->validateAsset($action);
         $this->validateCurrency($action, $action->costBasisIncrease->currency);
         $this->validateTimeline($action);
 
@@ -97,6 +98,7 @@ class NonFungibleAsset implements AggregateRoot
     {
         $this->isAlreadyAcquired() || throw NonFungibleAssetException::cannotDisposeOfBeforeAcquisition($action->asset);
 
+        $this->validateAsset($action);
         $this->validateTimeline($action);
 
         assert(! is_null($this->costBasis));
@@ -114,6 +116,16 @@ class NonFungibleAsset implements AggregateRoot
         $this->asset = null;
         $this->costBasis = null;
         $this->previousTransactionDate = null;
+    }
+
+    /** @throws NonFungibleAssetException */
+    private function validateAsset(Stringable&WithAsset $action): void
+    {
+        if (is_null($this->asset) || $action->getAsset()->is($this->asset)) {
+            return;
+        }
+
+        throw NonFungibleAssetException::assetMismatch(current: $this->asset, action: $action);
     }
 
     /** @throws NonFungibleAssetException */

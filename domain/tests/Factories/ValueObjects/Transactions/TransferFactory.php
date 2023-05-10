@@ -27,7 +27,7 @@ class TransferFactory extends TransactionFactory
     public function nonFungibleAsset(): static
     {
         return $this->state([
-            'asset' => new Asset(symbol: md5(time()), isNonFungible: true),
+            'asset' => Asset::nonFungible(md5(time())),
             'quantity' => new Quantity('1'),
         ]);
     }

@@ -18,6 +18,13 @@ it('can instantiate an asset', function (string $symbol, bool $isNonFungible, st
     'scenario 4' => [' foo ', true, 'foo'],
 ]);
 
+it('can instantiate a non-fungible asset', function () {
+    $asset = Asset::nonFungible('foo');
+
+    expect($asset->symbol)->toBe('foo');
+    expect($asset->isNonFungible)->toBeTrue();
+});
+
 it('can tell whether two assets are the same', function (string $symbol1, bool $isNonFungible1, string $symbol2, bool $isNonFungible2, bool $result) {
     expect((new Asset($symbol1, $isNonFungible1))->is(new Asset($symbol2, $isNonFungible2)))->toBe($result);
 })->with([

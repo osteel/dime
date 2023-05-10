@@ -23,6 +23,16 @@ final class NonFungibleAssetException extends RuntimeException
         return new self(sprintf('Non-fungible asset %s has already been acquired', (string) $asset));
     }
 
+    public static function assetMismatch(Asset $current, Stringable&WithAsset $action): self
+    {
+        return new self(sprintf(
+            'Cannot process this non-fungible asset %s transaction because the assets don\'t match (incoming: %s): %s',
+            (string) $current,
+            (string) $action->getAsset(),
+            (string) $action,
+        ));
+    }
+
     public static function olderThanPreviousTransaction(
         Stringable&WithAsset $action,
         LocalDate $previousTransactionDate,
@@ -41,7 +51,7 @@ final class NonFungibleAssetException extends RuntimeException
         FiatCurrency $incoming,
     ): self {
         return new self(sprintf(
-            'Cannot process this %s non-fungible asset transaction because the currencies don\'t match (current: %s; incoming: %s): %s',
+            'Cannot process this non-fungible asset %s transaction because the currencies don\'t match (current: %s; incoming: %s): %s',
             (string) $action->getAsset(),
             $current?->name() ?? 'undefined',
             $incoming->name(),

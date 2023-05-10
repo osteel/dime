@@ -12,7 +12,7 @@ use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 uses(NonFungibleAssetReactorTestCase::class);
 
 beforeEach(function () {
-    $this->asset = new Asset(symbol: 'foo', isNonFungible: true);
+    $this->asset = Asset::nonFungible('foo');
 });
 
 it('can handle a capital gain', function () {

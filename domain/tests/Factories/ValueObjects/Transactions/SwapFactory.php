@@ -32,7 +32,7 @@ class SwapFactory extends TransactionFactory
     public function toNonFungibleAsset(): static
     {
         return $this->state([
-            'acquiredAsset' => new Asset(symbol: md5(time()), isNonFungible: true),
+            'acquiredAsset' => Asset::nonFungible(md5(time())),
             'acquiredQuantity' => new Quantity('1'),
         ]);
     }
@@ -40,7 +40,7 @@ class SwapFactory extends TransactionFactory
     public function fromNonFungibleAsset(): static
     {
         return $this->state([
-            'disposedOfAsset' => new Asset(symbol: md5(time()), isNonFungible: true),
+            'disposedOfAsset' => Asset::nonFungible(md5(time())),
             'disposedOfQuantity' => new Quantity('1'),
         ]);
     }
