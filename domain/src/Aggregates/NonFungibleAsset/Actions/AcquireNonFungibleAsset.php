@@ -11,8 +11,9 @@ use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Services\ActionRunner\ActionRunner;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
+use Stringable;
 
-final readonly class AcquireNonFungibleAsset implements WithAsset
+final readonly class AcquireNonFungibleAsset implements Stringable, WithAsset
 {
     public function __construct(
         public Asset $asset,
@@ -43,5 +44,16 @@ final readonly class AcquireNonFungibleAsset implements WithAsset
     public function getAsset(): Asset
     {
         return $this->asset;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf(
+            '%s (asset: %s, date: %s, cost basis: %s)',
+            self::class,
+            (string) $this->asset,
+            (string) $this->date,
+            (string) $this->costBasis,
+        );
     }
 }

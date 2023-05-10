@@ -42,6 +42,24 @@ it('can acquire a non-fungible asset', function () {
         ->then($nonFungibleAssetAcquired);
 });
 
+it('cannot acquire a non-fungible asset because the asset is fungible', function () {
+    // When
+
+    $acquireNonFungibleAsset = new AcquireNonFungibleAsset(
+        asset: new Asset('FOO'),
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+    );
+
+    // Then
+
+    $assetIsFungible = NonFungibleAssetException::assetIsFungible($acquireNonFungibleAsset);
+
+    /** @var AggregateRootTestCase $this */
+    $this->when($acquireNonFungibleAsset)
+        ->expectToFail($assetIsFungible);
+});
+
 it('cannot acquire the same non-fungible asset more than once', function () {
     // Given
 

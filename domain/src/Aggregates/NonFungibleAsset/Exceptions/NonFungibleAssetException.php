@@ -23,6 +23,15 @@ final class NonFungibleAssetException extends RuntimeException
         return new self(sprintf('Non-fungible asset %s has already been acquired', (string) $asset));
     }
 
+    public static function assetIsFungible(Stringable&WithAsset $action): self
+    {
+        return new self(sprintf(
+            'Cannot process this non-fungible asset %s transaction because the asset is fungible: %s',
+            (string) $action->getAsset(),
+            (string) $action,
+        ));
+    }
+
     public static function assetMismatch(Asset $current, Stringable&WithAsset $action): self
     {
         return new self(sprintf(

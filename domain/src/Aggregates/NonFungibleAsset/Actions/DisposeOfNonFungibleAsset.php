@@ -43,6 +43,12 @@ final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely, Wi
 
     public function __toString(): string
     {
-        return sprintf('%s (date: %s, proceeds: %s)', self::class, (string) $this->date, (string) $this->proceeds);
+        return sprintf(
+            '%s (asset: %s, date: %s, proceeds: %s)',
+            self::class,
+            (string) $this->asset,
+            (string) $this->date,
+            (string) $this->proceeds,
+        );
     }
 }

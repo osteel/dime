@@ -54,6 +54,8 @@ class NonFungibleAsset implements AggregateRoot
     {
         $this->isAlreadyAcquired() === false || throw NonFungibleAssetException::alreadyAcquired($action->asset);
 
+        $this->validateAsset($action);
+
         $this->recordThat(new NonFungibleAssetAcquired(
             asset: $action->asset,
             date: $action->date,
@@ -121,11 +123,13 @@ class NonFungibleAsset implements AggregateRoot
     /** @throws NonFungibleAssetException */
     private function validateAsset(Stringable&WithAsset $action): void
     {
-        if (is_null($this->asset) || $action->getAsset()->is($this->asset)) {
-            return;
+        if (is_null($this->asset) && ! $action->getAsset()->isNonFungible) {
+            throw NonFungibleAssetException::assetIsFungible($action);
         }
 
-        throw NonFungibleAssetException::assetMismatch(current: $this->asset, action: $action);
+        if ($this->asset !== null && ! $action->getAsset()->is($this->asset)) {
+            throw NonFungibleAssetException::assetMismatch(current: $this->asset, action: $action);
+        }
     }
 
     /** @throws NonFungibleAssetException */
