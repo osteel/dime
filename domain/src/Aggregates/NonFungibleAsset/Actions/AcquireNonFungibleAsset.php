@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Domain\Aggregates\NonFungibleAsset\Actions;
 
 use Brick\DateTime\LocalDate;
+use Domain\Aggregates\NonFungibleAsset\Actions\Contracts\WithAsset;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Services\ActionRunner\ActionRunner;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 
-final readonly class AcquireNonFungibleAsset
+final readonly class AcquireNonFungibleAsset implements WithAsset
 {
     public function __construct(
-        private Asset $asset,
+        public Asset $asset,
         public LocalDate $date,
         public FiatAmount $costBasis,
     ) {
@@ -37,5 +38,10 @@ final readonly class AcquireNonFungibleAsset
 
         $nonFungibleAsset->acquire($this);
         $nonFungibleAssetRepository->save($nonFungibleAsset);
+    }
+
+    public function getAsset(): Asset
+    {
+        return $this->asset;
     }
 }

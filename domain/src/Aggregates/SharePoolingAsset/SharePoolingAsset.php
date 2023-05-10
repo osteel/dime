@@ -253,7 +253,7 @@ class SharePoolingAsset implements AggregateRoot
     }
 
     /** @throws SharePoolingAssetException */
-    private function validateTimeline(Timely&Stringable $action): void
+    private function validateTimeline(Stringable&Timely $action): void
     {
         if (is_null($this->previousTransactionDate) || $action->getDate()->isAfterOrEqualTo($this->previousTransactionDate)) {
             return;
