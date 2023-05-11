@@ -35,7 +35,7 @@
         "intonate/tinker-zero": "^1.2",
         "laravel/pint": "^1.6",
         "mockery/mockery": "^1.5.1",
-        "pestphp/pest": "^2.0",
+        "pestphp/pest": "^2.5",
         "pestphp/pest-plugin-mock": "^2.0",
         "phpstan/extension-installer": "^1.2",
         "phpstan/phpstan": "^1.10.6",
