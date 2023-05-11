@@ -1,6 +1,5 @@
 <?php
 
-use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
@@ -16,12 +15,11 @@ uses(SharePoolingAssetReactorTestCase::class);
 
 it('can handle a capital gain update', function (string $costBasis, string $proceeds, string $capitalGain) {
     $sharePoolingAssetDisposedOf = new SharePoolingAssetDisposedOf(
-        new SharePoolingAssetDisposal(
-            date: LocalDate::parse('2015-10-21'),
-            quantity: new Quantity('100'),
-            costBasis: FiatAmount::GBP($costBasis),
-            proceeds: FiatAmount::GBP($proceeds),
-        ),
+        SharePoolingAssetDisposal::factory()->make([
+            'quantity' => new Quantity('100'),
+            'costBasis' => FiatAmount::GBP($costBasis),
+            'proceeds' => FiatAmount::GBP($proceeds),
+        ]),
     );
 
     /** @var MessageConsumerTestCase $this */
@@ -38,12 +36,11 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
 
 it('can handle a capital gain update reversion', function (string $costBasis, string $proceeds, string $capitalGain) {
     $sharePoolingAssetDisposalReverted = new SharePoolingAssetDisposalReverted(
-        new SharePoolingAssetDisposal(
-            date: LocalDate::parse('2015-10-21'),
-            quantity: new Quantity('100'),
-            costBasis: FiatAmount::GBP($costBasis),
-            proceeds: FiatAmount::GBP($proceeds),
-        ),
+        SharePoolingAssetDisposal::factory()->make([
+            'quantity' => new Quantity('100'),
+            'costBasis' => FiatAmount::GBP($costBasis),
+            'proceeds' => FiatAmount::GBP($proceeds),
+        ]),
     );
 
     /** @var MessageConsumerTestCase $this */

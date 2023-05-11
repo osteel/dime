@@ -6,6 +6,7 @@ namespace Domain\Aggregates\SharePoolingAsset\Entities;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
+use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,6 +19,7 @@ abstract class SharePoolingAssetTransaction implements Stringable
     public readonly SharePoolingAssetTransactionId $id;
 
     public function __construct(
+        public readonly Asset $asset,
         public readonly LocalDate $date,
         public readonly Quantity $quantity,
         public readonly FiatAmount $costBasis,

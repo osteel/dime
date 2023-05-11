@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Domain\Aggregates\SharePoolingAsset\Exceptions;
 
 use Brick\DateTime\LocalDate;
-use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
+use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\WithAsset;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Quantity;
@@ -19,30 +19,24 @@ final class SharePoolingAssetException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function assetMismatch(
-        SharePoolingAssetId $sharePoolingAssetId,
-        Stringable $action,
-        ?Asset $current,
-        Asset $incoming,
-    ): self {
+    public static function assetMismatch(Stringable&WithAsset $action, Asset $incoming): self
+    {
         return new self(sprintf(
-            'Cannot process this %s share pooling asset transaction because the assets don\'t match (current: %s; incoming: %s): %s',
-            $sharePoolingAssetId->toString(),
-            (string) $current ?: 'undefined',
+            'Cannot process this share pooling asset %s transaction because the assets don\'t match (incoming: %s): %s',
+            (string) $action->getAsset(),
             (string) $incoming,
             (string) $action,
         ));
     }
 
     public static function currencyMismatch(
-        SharePoolingAssetId $sharePoolingAssetId,
-        Stringable $action,
+        Stringable&WithAsset $action,
         ?FiatCurrency $current,
         FiatCurrency $incoming,
     ): self {
         return new self(sprintf(
-            'Cannot process this %s share pooling asset transaction because the currencies don\'t match (current: %s; incoming: %s): %s',
-            $sharePoolingAssetId->toString(),
+            'Cannot process this share pooling asset %s transaction because the currencies don\'t match (current: %s; incoming: %s): %s',
+            (string) $action->getAsset(),
             $current?->name() ?? 'undefined',
             $incoming->name(),
             (string) $action,
@@ -50,27 +44,26 @@ final class SharePoolingAssetException extends RuntimeException
     }
 
     public static function olderThanPreviousTransaction(
-        SharePoolingAssetId $sharePoolingAssetId,
-        Stringable $action,
+        Stringable&WithAsset $action,
         LocalDate $previousTransactionDate,
     ): self {
         return new self(sprintf(
-            'This %s share pooling asset transaction appears to be older than the previous one (%s): %s',
-            $sharePoolingAssetId->toString(),
+            'This share pooling asset %s transaction appears to be older than the previous one (%s): %s',
+            (string) $action->getAsset(),
             (string) $previousTransactionDate,
             (string) $action,
         ));
     }
 
     public static function insufficientQuantity(
-        SharePoolingAssetId $sharePoolingAssetId,
+        Asset $asset,
         Quantity $disposalQuantity,
         Quantity $availableQuantity,
     ): self {
         return new self(sprintf(
             'Trying to dispose of %s %s tokens but only %s are available',
             $disposalQuantity,
-            $sharePoolingAssetId->toString(),
+            $asset,
             $availableQuantity,
         ));
     }

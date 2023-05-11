@@ -7,6 +7,7 @@ namespace Domain\Aggregates\SharePoolingAsset;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\Timely;
+use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\WithAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
@@ -98,6 +99,7 @@ class SharePoolingAsset implements AggregateRoot
         $this->recordThat(new SharePoolingAssetAcquired(
             acquisition: new SharePoolingAssetAcquisition(
                 id: $action->transactionId, // Only ever present for testing purposes
+                asset: $action->asset,
                 date: $action->date,
                 quantity: $action->quantity,
                 costBasis: $action->costBasis,
@@ -143,6 +145,7 @@ class SharePoolingAsset implements AggregateRoot
         // don't try to match their 30-day quantity with the disposal's same-day acquisitions
         $this->transactions->add(new SharePoolingAssetDisposal(
             id: $action->transactionId,
+            asset: $action->asset,
             date: $action->date,
             quantity: $action->quantity,
             costBasis: $action->proceeds->zero(),
@@ -215,7 +218,7 @@ class SharePoolingAsset implements AggregateRoot
 
         if ($action->quantity->isGreaterThan($availableQuantity)) {
             throw SharePoolingAssetException::insufficientQuantity(
-                sharePoolingAssetId: $this->aggregateRootId,
+                asset: $action->asset,
                 disposalQuantity: $action->quantity,
                 availableQuantity: $availableQuantity,
             );
@@ -223,29 +226,23 @@ class SharePoolingAsset implements AggregateRoot
     }
 
     /** @throws SharePoolingAssetException */
-    private function validateAsset(Asset $incoming, Stringable $action): void
+    private function validateAsset(Asset $incoming, Stringable&WithAsset $action): void
     {
         if (is_null($this->asset) || $incoming->is($this->asset)) {
             return;
         }
 
-        throw SharePoolingAssetException::assetMismatch(
-            sharePoolingAssetId: $this->aggregateRootId,
-            action: $action,
-            current: $this->asset,
-            incoming: $incoming,
-        );
+        throw SharePoolingAssetException::assetMismatch(action: $action, incoming: $incoming);
     }
 
     /** @throws SharePoolingAssetException */
-    private function validateCurrency(FiatCurrency $incoming, Stringable $action): void
+    private function validateCurrency(FiatCurrency $incoming, Stringable&WithAsset $action): void
     {
         if (is_null($this->fiatCurrency) || $this->fiatCurrency === $incoming) {
             return;
         }
 
         throw SharePoolingAssetException::currencyMismatch(
-            sharePoolingAssetId: $this->aggregateRootId,
             action: $action,
             current: $this->fiatCurrency,
             incoming: $incoming,
@@ -253,14 +250,13 @@ class SharePoolingAsset implements AggregateRoot
     }
 
     /** @throws SharePoolingAssetException */
-    private function validateTimeline(Stringable&Timely $action): void
+    private function validateTimeline(Stringable&Timely&WithAsset $action): void
     {
         if (is_null($this->previousTransactionDate) || $action->getDate()->isAfterOrEqualTo($this->previousTransactionDate)) {
             return;
         }
 
         throw SharePoolingAssetException::olderThanPreviousTransaction(
-            sharePoolingAssetId: $this->aggregateRootId,
             action: $action,
             previousTransactionDate: $this->previousTransactionDate,
         );
