@@ -8,6 +8,7 @@ use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\Enums\FiatCurrency;
+use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
@@ -34,6 +35,7 @@ it('cannot instantiate a disposal because the allocated quantity is greater than
 
 it('can instantiate a disposal', function () {
     $disposal = new SharePoolingAssetDisposal(
+        asset: new Asset('FOO'),
         date: LocalDate::now(TimeZone::utc()),
         quantity: Quantity::zero(),
         costBasis: FiatAmount::GBP('100'),

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "932bbc2e1add3342b2a9e375fe24220a",
+    "content-hash": "d0e242c9fb239d8fb6c73403bb930c99",
     "packages": [
         {
             "name": "brick/date-time",
@@ -5278,7 +5278,7 @@
         },
         {
             "name": "eventsauce/test-utilities",
-            "version": "dev-main",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/EventSaucePHP/TestUtilities.git",
@@ -5295,7 +5295,6 @@
                 "php": "^8.0",
                 "phpunit/phpunit": "^8.5|^9.4|^10.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -5319,7 +5318,7 @@
             ],
             "description": "Test utilities for EventSauce.",
             "support": {
-                "source": "https://github.com/EventSaucePHP/TestUtilities/tree/main"
+                "source": "https://github.com/EventSaucePHP/TestUtilities/tree/3.3.0"
             },
             "funding": [
                 {
@@ -8406,9 +8405,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "eventsauce/test-utilities": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

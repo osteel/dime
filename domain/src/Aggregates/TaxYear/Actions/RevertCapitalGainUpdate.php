@@ -29,11 +29,6 @@ final class RevertCapitalGainUpdate implements Stringable
 
     public function __toString(): string
     {
-        return sprintf(
-            '%s (date: %s, capital gain: (%s))',
-            self::class,
-            (string) $this->date,
-            (string) $this->capitalGain,
-        );
+        return sprintf('%s (date: %s, capital gain: (%s))', self::class, $this->date, $this->capitalGain);
     }
 }

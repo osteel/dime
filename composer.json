@@ -30,12 +30,12 @@
         "ramsey/uuid": "^4.7.3"
     },
     "require-dev": {
-        "eventsauce/test-utilities": "dev-main",
+        "eventsauce/test-utilities": "^3.3",
         "fakerphp/faker": "^1.21.0",
         "intonate/tinker-zero": "^1.2",
         "laravel/pint": "^1.6",
         "mockery/mockery": "^1.5.1",
-        "pestphp/pest": "^2.0",
+        "pestphp/pest": "^2.5",
         "pestphp/pest-plugin-mock": "^2.0",
         "phpstan/extension-installer": "^1.2",
         "phpstan/phpstan": "^1.10.6",
@@ -68,7 +68,7 @@
     "scripts": {
         "pint": "pint",
         "stan": "phpstan",
-        "test": "pest",
+        "test": "pest --coverage",
         "all": [
             "@pint",
             "@stan",

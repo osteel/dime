@@ -7,6 +7,7 @@ use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
+use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Tests\Factories\PlainObjectFactory;
@@ -26,6 +27,7 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
     {
         return [
             'id' => SharePoolingAssetTransactionId::generate(),
+            'asset' => new Asset('FOO'),
             'date' => LocalDate::parse('2015-10-21'),
             'quantity' => new Quantity('100'),
             'costBasis' => FiatAmount::GBP('100'),
@@ -40,6 +42,7 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
     {
         return $this->state([
             'id' => $transaction->id,
+            'asset' => $transaction->asset,
             'date' => $transaction->date,
             'quantity' => $transaction->quantity,
             'costBasis' => $transaction->costBasis,

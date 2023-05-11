@@ -6,16 +6,17 @@ namespace Domain\Aggregates\NonFungibleAsset\Actions;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Actions\Contracts\Timely;
+use Domain\Aggregates\NonFungibleAsset\Actions\Contracts\WithAsset;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Stringable;
 
-final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Timely
+final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Timely, WithAsset
 {
     public function __construct(
-        private Asset $asset,
+        public Asset $asset,
         public LocalDate $date,
         public FiatAmount $costBasisIncrease,
     ) {
@@ -30,6 +31,11 @@ final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Ti
         $nonFungibleAssetRepository->save($nonFungibleAsset);
     }
 
+    public function getAsset(): Asset
+    {
+        return $this->asset;
+    }
+
     public function getDate(): LocalDate
     {
         return $this->date;
@@ -38,10 +44,11 @@ final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Ti
     public function __toString(): string
     {
         return sprintf(
-            '%s (date: %s, cost basis increase: %s)',
+            '%s (asset: %s, date: %s, cost basis increase: %s)',
             self::class,
-            (string) $this->date,
-            (string) $this->costBasisIncrease,
+            $this->asset,
+            $this->date,
+            $this->costBasisIncrease,
         );
     }
 }

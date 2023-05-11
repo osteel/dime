@@ -6,6 +6,7 @@ namespace Domain\Aggregates\SharePoolingAsset\Actions;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\Timely;
+use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\WithAsset;
 use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetRepository;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
@@ -14,7 +15,7 @@ use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Stringable;
 
-final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely
+final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely, WithAsset
 {
     public function __construct(
         public Asset $asset,
@@ -40,6 +41,11 @@ final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely
         return ! is_null($this->transactionId);
     }
 
+    public function getAsset(): Asset
+    {
+        return $this->asset;
+    }
+
     public function getDate(): LocalDate
     {
         return $this->date;
@@ -48,11 +54,12 @@ final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely
     public function __toString(): string
     {
         return sprintf(
-            '%s (date: %s, quantity: %s, proceeds: %s)',
+            '%s (asset: %s, date: %s, quantity: %s, proceeds: %s)',
             self::class,
-            (string) $this->date,
-            (string) $this->quantity,
-            (string) $this->proceeds,
+            $this->asset,
+            $this->date,
+            $this->quantity,
+            $this->proceeds,
         );
     }
 }

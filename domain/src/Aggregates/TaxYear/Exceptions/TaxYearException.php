@@ -25,7 +25,7 @@ final class TaxYearException extends RuntimeException
             'Cannot process this %s tax year action because incoming tax year %s doesn\'t match: %s',
             $taxYearId->toString(),
             $incomingTaxYear,
-            (string) $action,
+            $action,
         ));
     }
 
@@ -40,7 +40,7 @@ final class TaxYearException extends RuntimeException
             $taxYearId->toString(),
             $current?->name() ?? 'undefined',
             $incoming->name(),
-            (string) $action,
+            $action,
         ));
     }
 

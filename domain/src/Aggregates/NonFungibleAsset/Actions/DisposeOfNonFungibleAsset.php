@@ -6,16 +6,17 @@ namespace Domain\Aggregates\NonFungibleAsset\Actions;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Actions\Contracts\Timely;
+use Domain\Aggregates\NonFungibleAsset\Actions\Contracts\WithAsset;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Stringable;
 
-final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely
+final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely, WithAsset
 {
     public function __construct(
-        private Asset $asset,
+        public Asset $asset,
         public LocalDate $date,
         public FiatAmount $proceeds,
     ) {
@@ -30,6 +31,11 @@ final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely
         $nonFungibleAssetRepository->save($nonFungibleAsset);
     }
 
+    public function getAsset(): Asset
+    {
+        return $this->asset;
+    }
+
     public function getDate(): LocalDate
     {
         return $this->date;
@@ -37,6 +43,6 @@ final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely
 
     public function __toString(): string
     {
-        return sprintf('%s (date: %s, proceeds: %s)', self::class, (string) $this->date, (string) $this->proceeds);
+        return sprintf('%s (asset: %s, date: %s, proceeds: %s)', self::class, $this->asset, $this->date, $this->proceeds);
     }
 }

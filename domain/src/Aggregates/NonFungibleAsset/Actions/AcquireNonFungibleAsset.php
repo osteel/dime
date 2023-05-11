@@ -5,16 +5,18 @@ declare(strict_types=1);
 namespace Domain\Aggregates\NonFungibleAsset\Actions;
 
 use Brick\DateTime\LocalDate;
+use Domain\Aggregates\NonFungibleAsset\Actions\Contracts\WithAsset;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Services\ActionRunner\ActionRunner;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
+use Stringable;
 
-final readonly class AcquireNonFungibleAsset
+final readonly class AcquireNonFungibleAsset implements Stringable, WithAsset
 {
     public function __construct(
-        private Asset $asset,
+        public Asset $asset,
         public LocalDate $date,
         public FiatAmount $costBasis,
     ) {
@@ -37,5 +39,15 @@ final readonly class AcquireNonFungibleAsset
 
         $nonFungibleAsset->acquire($this);
         $nonFungibleAssetRepository->save($nonFungibleAsset);
+    }
+
+    public function getAsset(): Asset
+    {
+        return $this->asset;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('%s (asset: %s, date: %s, cost basis: %s)', self::class, $this->asset, $this->date, $this->costBasis);
     }
 }

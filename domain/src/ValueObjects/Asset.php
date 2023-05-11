@@ -25,6 +25,11 @@ final readonly class Asset implements SerializablePayload, Stringable
         }
     }
 
+    public static function nonFungible(string $symbol): self
+    {
+        return new self(symbol: $symbol, isNonFungible: true);
+    }
+
     public function is(Asset $asset): bool
     {
         return $asset->symbol === $this->symbol && $asset->isNonFungible === $this->isNonFungible;

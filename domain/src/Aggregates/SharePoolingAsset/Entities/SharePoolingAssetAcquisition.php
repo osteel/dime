@@ -8,6 +8,7 @@ use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Entities\Exceptions\SharePoolingAssetAcquisitionException;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\Tests\Aggregates\SharePoolingAsset\Factories\Entities\SharePoolingAssetAcquisitionFactory;
+use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
@@ -19,6 +20,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
     private Quantity $thirtyDayQuantity;
 
     public function __construct(
+        Asset $asset,
         LocalDate $date,
         Quantity $quantity,
         FiatAmount $costBasis,
@@ -26,7 +28,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
         ?Quantity $sameDayQuantity = null,
         ?Quantity $thirtyDayQuantity = null,
     ) {
-        parent::__construct($date, $quantity, $costBasis, id: $id, processed: true);
+        parent::__construct($asset, $date, $quantity, $costBasis, id: $id, processed: true);
 
         $this->sameDayQuantity = $sameDayQuantity ?? Quantity::zero();
         $this->thirtyDayQuantity = $thirtyDayQuantity ?? Quantity::zero();
@@ -109,11 +111,12 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
         return $this;
     }
 
-    /** @return array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string} */
+    /** @return array{id:string,asset:array{symbol:string,is_non_fungible:string},date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string} */
     public function toPayload(): array
     {
         return [
             'id' => (string) $this->id,
+            'asset' => $this->asset->toPayload(),
             'date' => (string) $this->date,
             'quantity' => (string) $this->quantity,
             'cost_basis' => $this->costBasis->toPayload(),
@@ -122,11 +125,12 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
         ];
     }
 
-    /** @param array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string} $payload */
+    /** @param array{id:string,asset:array{symbol:string,is_non_fungible:string},date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string} $payload */
     public static function fromPayload(array $payload): static
     {
         return new self(
             id: SharePoolingAssetTransactionId::fromString($payload['id']),
+            asset: Asset::fromPayload($payload['asset']),
             date: LocalDate::parse($payload['date']),
             quantity: new Quantity($payload['quantity']),
             costBasis: FiatAmount::fromPayload($payload['cost_basis']),
@@ -137,6 +141,6 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
 
     public function __toString(): string
     {
-        return sprintf('%s: acquired %s tokens for %s', $this->date, $this->quantity, $this->costBasis);
+        return sprintf('%s: acquired %s %s tokens for %s', $this->date, $this->quantity, $this->asset, $this->costBasis);
     }
 }
