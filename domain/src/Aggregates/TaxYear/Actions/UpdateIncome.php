@@ -29,11 +29,6 @@ final class UpdateIncome implements Stringable
 
     public function __toString(): string
     {
-        return sprintf(
-            '%s (date: %s, income: %s)',
-            self::class,
-            (string) $this->date,
-            (string) $this->income,
-        );
+        return sprintf('%s (date: %s, income: %s)', self::class, $this->date, $this->income);
     }
 }

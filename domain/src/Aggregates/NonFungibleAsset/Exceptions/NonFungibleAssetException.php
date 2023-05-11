@@ -27,8 +27,8 @@ final class NonFungibleAssetException extends RuntimeException
     {
         return new self(sprintf(
             'Cannot process this non-fungible asset %s transaction because the asset is fungible: %s',
-            (string) $action->getAsset(),
-            (string) $action,
+            $action->getAsset(),
+            $action,
         ));
     }
 
@@ -36,9 +36,9 @@ final class NonFungibleAssetException extends RuntimeException
     {
         return new self(sprintf(
             'Cannot process this non-fungible asset %s transaction because the assets don\'t match (incoming: %s): %s',
-            (string) $current,
-            (string) $action->getAsset(),
-            (string) $action,
+            $current,
+            $action->getAsset(),
+            $action,
         ));
     }
 
@@ -48,9 +48,9 @@ final class NonFungibleAssetException extends RuntimeException
     ): self {
         return new self(sprintf(
             'This non-fungible asset %s transaction appears to be older than the previous one (%s): %s',
-            (string) $action->getAsset(),
-            (string) $previousTransactionDate,
-            (string) $action,
+            $action->getAsset(),
+            $previousTransactionDate,
+            $action,
         ));
     }
 
@@ -61,10 +61,10 @@ final class NonFungibleAssetException extends RuntimeException
     ): self {
         return new self(sprintf(
             'Cannot process this non-fungible asset %s transaction because the currencies don\'t match (current: %s; incoming: %s): %s',
-            (string) $action->getAsset(),
+            $action->getAsset(),
             $current?->name() ?? 'undefined',
             $incoming->name(),
-            (string) $action,
+            $action,
         ));
     }
 
@@ -72,12 +72,12 @@ final class NonFungibleAssetException extends RuntimeException
     {
         return new self(sprintf(
             'Cannot increase the cost basis of non-fungible asset %s as it has not been acquired',
-            (string) $asset,
+            $asset,
         ));
     }
 
     public static function cannotDisposeOfBeforeAcquisition(Asset $asset): self
     {
-        return new self(sprintf('Cannot dispose of non-fungible asset %s as it has not been acquired', (string) $asset));
+        return new self(sprintf('Cannot dispose of non-fungible asset %s as it has not been acquired', $asset));
     }
 }

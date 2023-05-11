@@ -32,8 +32,8 @@ final class UpdateNonAttributableAllowableCost implements Stringable
         return sprintf(
             '%s (date: %s, non-attributable allowable cost: %s)',
             self::class,
-            (string) $this->date,
-            (string) $this->nonAttributableAllowableCost,
+            $this->date,
+            $this->nonAttributableAllowableCost,
         );
     }
 }

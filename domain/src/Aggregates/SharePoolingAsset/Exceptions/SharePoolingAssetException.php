@@ -23,9 +23,9 @@ final class SharePoolingAssetException extends RuntimeException
     {
         return new self(sprintf(
             'Cannot process this share pooling asset %s transaction because the assets don\'t match (incoming: %s): %s',
-            (string) $action->getAsset(),
-            (string) $incoming,
-            (string) $action,
+            $action->getAsset(),
+            $incoming,
+            $action,
         ));
     }
 
@@ -36,10 +36,10 @@ final class SharePoolingAssetException extends RuntimeException
     ): self {
         return new self(sprintf(
             'Cannot process this share pooling asset %s transaction because the currencies don\'t match (current: %s; incoming: %s): %s',
-            (string) $action->getAsset(),
+            $action->getAsset(),
             $current?->name() ?? 'undefined',
             $incoming->name(),
-            (string) $action,
+            $action,
         ));
     }
 
@@ -49,9 +49,9 @@ final class SharePoolingAssetException extends RuntimeException
     ): self {
         return new self(sprintf(
             'This share pooling asset %s transaction appears to be older than the previous one (%s): %s',
-            (string) $action->getAsset(),
-            (string) $previousTransactionDate,
-            (string) $action,
+            $action->getAsset(),
+            $previousTransactionDate,
+            $action,
         ));
     }
 

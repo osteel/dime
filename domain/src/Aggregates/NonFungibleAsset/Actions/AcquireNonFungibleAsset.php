@@ -48,12 +48,6 @@ final readonly class AcquireNonFungibleAsset implements Stringable, WithAsset
 
     public function __toString(): string
     {
-        return sprintf(
-            '%s (asset: %s, date: %s, cost basis: %s)',
-            self::class,
-            (string) $this->asset,
-            (string) $this->date,
-            (string) $this->costBasis,
-        );
+        return sprintf('%s (asset: %s, date: %s, cost basis: %s)', self::class, $this->asset, $this->date, $this->costBasis);
     }
 }

@@ -49,11 +49,12 @@ final readonly class AcquireSharePoolingAsset implements Stringable, Timely, Wit
     public function __toString(): string
     {
         return sprintf(
-            '%s (date: %s, quantity: %s, cost basis: %s)',
+            '%s (asset: %s, date: %s, quantity: %s, cost basis: %s)',
             self::class,
-            (string) $this->date,
-            (string) $this->quantity,
-            (string) $this->costBasis,
+            $this->asset,
+            $this->date,
+            $this->quantity,
+            $this->costBasis,
         );
     }
 }

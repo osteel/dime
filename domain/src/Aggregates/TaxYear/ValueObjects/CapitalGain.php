@@ -79,6 +79,6 @@ final readonly class CapitalGain implements JsonSerializable, SerializablePayloa
 
     public function __toString(): string
     {
-        return sprintf('cost basis: %s, proceeds: %s', (string) $this->costBasis, (string) $this->proceeds);
+        return sprintf('cost basis: %s, proceeds: %s', $this->costBasis, $this->proceeds);
     }
 }

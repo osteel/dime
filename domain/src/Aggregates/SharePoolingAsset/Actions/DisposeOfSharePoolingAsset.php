@@ -54,11 +54,12 @@ final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely, W
     public function __toString(): string
     {
         return sprintf(
-            '%s (date: %s, quantity: %s, proceeds: %s)',
+            '%s (asset: %s, date: %s, quantity: %s, proceeds: %s)',
             self::class,
-            (string) $this->date,
-            (string) $this->quantity,
-            (string) $this->proceeds,
+            $this->asset,
+            $this->date,
+            $this->quantity,
+            $this->proceeds,
         );
     }
 }

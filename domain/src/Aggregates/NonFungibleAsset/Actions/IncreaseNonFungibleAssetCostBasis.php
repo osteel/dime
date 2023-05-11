@@ -46,9 +46,9 @@ final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Ti
         return sprintf(
             '%s (asset: %s, date: %s, cost basis increase: %s)',
             self::class,
-            (string) $this->asset,
-            (string) $this->date,
-            (string) $this->costBasisIncrease,
+            $this->asset,
+            $this->date,
+            $this->costBasisIncrease,
         );
     }
 }
