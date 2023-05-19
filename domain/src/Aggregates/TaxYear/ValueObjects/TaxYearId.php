@@ -9,7 +9,7 @@ use Domain\ValueObjects\AggregateRootId;
 use Domain\Aggregates\TaxYear\Services\TaxYearNormaliser\TaxYearNormaliser;
 use Ramsey\Uuid\Uuid;
 
-final class TaxYearId extends AggregateRootId
+final readonly class TaxYearId extends AggregateRootId
 {
     private const NAMESPACE = '4c6f1e6b-b69c-4b01-8200-3a73dd49cc9c';
 

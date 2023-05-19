@@ -16,7 +16,6 @@ use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetDisposedOf;
 use Domain\Aggregates\NonFungibleAsset\Exceptions\NonFungibleAssetException;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Enums\FiatCurrency;
-use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
@@ -33,7 +32,7 @@ class NonFungibleAsset implements AggregateRoot
     /** @phpstan-use AggregateRootBehaviour<NonFungibleAssetId> */
     use AggregateRootBehaviour;
 
-    private ?Asset $asset = null;
+    private bool $acquired = false;
 
     private ?FiatAmount $costBasis = null;
 
@@ -46,7 +45,7 @@ class NonFungibleAsset implements AggregateRoot
 
     public function isAlreadyAcquired(): bool
     {
-        return ! is_null($this->asset);
+        return $this->acquired;
     }
 
     /** @throws NonFungibleAssetException */
@@ -54,10 +53,9 @@ class NonFungibleAsset implements AggregateRoot
     {
         $this->isAlreadyAcquired() === false || throw NonFungibleAssetException::alreadyAcquired($action->asset);
 
-        $this->validateAsset($action);
+        $action->asset->isNonFungible || throw NonFungibleAssetException::assetIsFungible($action);
 
         $this->recordThat(new NonFungibleAssetAcquired(
-            asset: $action->asset,
             date: $action->date,
             costBasis: $action->costBasis,
         ));
@@ -65,7 +63,7 @@ class NonFungibleAsset implements AggregateRoot
 
     public function applyNonFungibleAssetAcquired(NonFungibleAssetAcquired $event): void
     {
-        $this->asset = $event->asset;
+        $this->acquired = true;
         $this->costBasis = $event->costBasis;
         $this->previousTransactionDate = $event->date;
     }
@@ -76,12 +74,10 @@ class NonFungibleAsset implements AggregateRoot
         $this->isAlreadyAcquired()
             || throw NonFungibleAssetException::cannotIncreaseCostBasisBeforeAcquisition($action->asset);
 
-        $this->validateAsset($action);
         $this->validateCurrency($action, $action->costBasisIncrease->currency);
         $this->validateTimeline($action);
 
         $this->recordThat(new NonFungibleAssetCostBasisIncreased(
-            asset: $action->asset,
             date: $action->date,
             costBasisIncrease: $action->costBasisIncrease,
         ));
@@ -100,14 +96,12 @@ class NonFungibleAsset implements AggregateRoot
     {
         $this->isAlreadyAcquired() || throw NonFungibleAssetException::cannotDisposeOfBeforeAcquisition($action->asset);
 
-        $this->validateAsset($action);
         $this->validateCurrency($action, $action->proceeds->currency);
         $this->validateTimeline($action);
 
         assert(! is_null($this->costBasis));
 
         $this->recordThat(new NonFungibleAssetDisposedOf(
-            asset: $action->asset,
             date: $action->date,
             costBasis: $this->costBasis,
             proceeds: $action->proceeds,
@@ -116,21 +110,9 @@ class NonFungibleAsset implements AggregateRoot
 
     public function applyNonFungibleAssetDisposedOf(NonFungibleAssetDisposedOf $event): void
     {
-        $this->asset = null;
+        $this->acquired = false;
         $this->costBasis = null;
         $this->previousTransactionDate = null;
-    }
-
-    /** @throws NonFungibleAssetException */
-    private function validateAsset(Stringable&WithAsset $action): void
-    {
-        if (is_null($this->asset) && ! $action->getAsset()->isNonFungible) {
-            throw NonFungibleAssetException::assetIsFungible($action);
-        }
-
-        if ($this->asset !== null && ! $action->getAsset()->is($this->asset)) {
-            throw NonFungibleAssetException::assetMismatch(current: $this->asset, action: $action);
-        }
     }
 
     /** @throws NonFungibleAssetException */

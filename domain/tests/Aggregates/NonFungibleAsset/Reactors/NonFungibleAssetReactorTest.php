@@ -4,20 +4,14 @@ use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Events\NonFungibleAssetDisposedOf;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Tests\Aggregates\NonFungibleAsset\Reactors\NonFungibleAssetReactorTestCase;
-use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use EventSauce\EventSourcing\Message;
 use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 
 uses(NonFungibleAssetReactorTestCase::class);
 
-beforeEach(function () {
-    $this->asset = Asset::nonFungible('foo');
-});
-
 it('can handle a capital gain', function () {
     $nonFungibleAssetDisposedOf = new NonFungibleAssetDisposedOf(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
         proceeds: FiatAmount::GBP('101'),
@@ -34,7 +28,6 @@ it('can handle a capital gain', function () {
 
 it('can handle a capital loss', function () {
     $nonFungibleAssetDisposedOf = new NonFungibleAssetDisposedOf(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
         proceeds: FiatAmount::GBP('99'),

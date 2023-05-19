@@ -16,15 +16,11 @@ use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
 
 uses(NonFungibleAssetTestCase::class);
 
-beforeEach(function () {
-    $this->asset = Asset::nonFungible('foo');
-});
-
 it('can acquire a non-fungible asset', function () {
     // When
 
     $acquireNonFungibleAsset = new AcquireNonFungibleAsset(
-        asset: $this->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -32,7 +28,6 @@ it('can acquire a non-fungible asset', function () {
     // Then
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $acquireNonFungibleAsset->asset,
         date: $acquireNonFungibleAsset->date,
         costBasis: $acquireNonFungibleAsset->costBasis,
     );
@@ -64,7 +59,6 @@ it('cannot acquire the same non-fungible asset more than once', function () {
     // Given
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -72,14 +66,14 @@ it('cannot acquire the same non-fungible asset more than once', function () {
     // When
 
     $acquireSameNonFungibleAsset = new AcquireNonFungibleAsset(
-        asset: $nonFungibleAssetAcquired->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
 
     // Then
 
-    $alreadyAcquired = NonFungibleAssetException::alreadyAcquired($this->asset);
+    $alreadyAcquired = NonFungibleAssetException::alreadyAcquired($this->aggregateRootId->toAsset());
 
     /** @var AggregateRootTestCase $this */
     $this->given($nonFungibleAssetAcquired)
@@ -91,7 +85,6 @@ it('can increase the cost basis of a non-fungible asset', function () {
     // Given
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -99,7 +92,7 @@ it('can increase the cost basis of a non-fungible asset', function () {
     // When
 
     $increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
-        asset: $nonFungibleAssetAcquired->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasisIncrease: FiatAmount::GBP('50'),
     );
@@ -107,7 +100,6 @@ it('can increase the cost basis of a non-fungible asset', function () {
     // Then
 
     $nonFungibleAssetCostBasisIncreased = new NonFungibleAssetCostBasisIncreased(
-        asset: $increaseNonFungibleAssetCostBasis->asset,
         date: $increaseNonFungibleAssetCostBasis->date,
         costBasisIncrease: $increaseNonFungibleAssetCostBasis->costBasisIncrease,
     );
@@ -122,47 +114,17 @@ it('cannot increase the cost basis of a non-fungible asset that has not been acq
     // When
 
     $increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
-        asset: $this->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasisIncrease: FiatAmount::GBP('100'),
     );
 
     // Then
 
-    $cannotIncreaseCostBasis = NonFungibleAssetException::cannotIncreaseCostBasisBeforeAcquisition($this->asset);
+    $cannotIncreaseCostBasis = NonFungibleAssetException::cannotIncreaseCostBasisBeforeAcquisition($this->aggregateRootId->toAsset());
 
     /** @var AggregateRootTestCase $this */
     $this->when($increaseNonFungibleAssetCostBasis)
-        ->expectToFail($cannotIncreaseCostBasis);
-});
-
-it('cannot increase the cost basis of a non-fungible asset because the assets don\'t match', function () {
-    // Given
-
-    $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
-        date: LocalDate::parse('2015-10-21'),
-        costBasis: FiatAmount::GBP('100'),
-    );
-
-    // When
-
-    $increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
-        asset: Asset::nonFungible('bar'),
-        date: LocalDate::parse('2015-10-21'),
-        costBasisIncrease: FiatAmount::GBP('50'),
-    );
-
-    // Then
-
-    $cannotIncreaseCostBasis = NonFungibleAssetException::assetMismatch(
-        current: $this->asset,
-        action: $increaseNonFungibleAssetCostBasis,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($nonFungibleAssetAcquired)
-        ->when($increaseNonFungibleAssetCostBasis)
         ->expectToFail($cannotIncreaseCostBasis);
 });
 
@@ -170,7 +132,6 @@ it('cannot increase the cost basis of a non-fungible asset because the transacti
     // Given
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -178,7 +139,7 @@ it('cannot increase the cost basis of a non-fungible asset because the transacti
     // When
 
     $increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
-        asset: $nonFungibleAssetAcquired->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-20'),
         costBasisIncrease: FiatAmount::GBP('100'),
     );
@@ -200,7 +161,6 @@ it('cannot increase the cost basis of a non-fungible asset because the currency 
     // Given
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -208,7 +168,7 @@ it('cannot increase the cost basis of a non-fungible asset because the currency 
     // When
 
     $increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
-        asset: $nonFungibleAssetAcquired->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasisIncrease: new FiatAmount('100', FiatCurrency::EUR),
     );
@@ -231,7 +191,6 @@ it('can dispose of a non-fungible asset', function () {
     // Given
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -239,7 +198,7 @@ it('can dispose of a non-fungible asset', function () {
     // When
 
     $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
-        asset: $nonFungibleAssetAcquired->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         proceeds: FiatAmount::GBP('150'),
     );
@@ -247,7 +206,6 @@ it('can dispose of a non-fungible asset', function () {
     // Then
 
     $nonFungibleAssetDisposedOf = new NonFungibleAssetDisposedOf(
-        asset: $disposeOfNonFungibleAsset->asset,
         date: $disposeOfNonFungibleAsset->date,
         costBasis: $nonFungibleAssetAcquired->costBasis,
         proceeds: $disposeOfNonFungibleAsset->proceeds,
@@ -263,55 +221,24 @@ it('cannot dispose of a non-fungible asset that has not been acquired', function
     // When
 
     $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
-        asset: $this->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         proceeds: FiatAmount::GBP('100'),
     );
 
     // Then
 
-    $cannotDisposeOf = NonFungibleAssetException::cannotDisposeOfBeforeAcquisition($this->asset);
+    $cannotDisposeOf = NonFungibleAssetException::cannotDisposeOfBeforeAcquisition($this->aggregateRootId->toAsset());
 
     /** @var AggregateRootTestCase $this */
     $this->when($disposeOfNonFungibleAsset)
         ->expectToFail($cannotDisposeOf);
 });
 
-it('cannot dispose of a non-fungible asset because the assets don\'t match', function () {
-    // Given
-
-    $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
-        date: LocalDate::parse('2015-10-21'),
-        costBasis: FiatAmount::GBP('100'),
-    );
-
-    // When
-
-    $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
-        asset: Asset::nonFungible('bar'),
-        date: LocalDate::parse('2015-10-21'),
-        proceeds: FiatAmount::GBP('100'),
-    );
-
-    // Then
-
-    $cannotIncreaseCostBasis = NonFungibleAssetException::assetMismatch(
-        current: $this->asset,
-        action: $disposeOfNonFungibleAsset,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($nonFungibleAssetAcquired)
-        ->when($disposeOfNonFungibleAsset)
-        ->expectToFail($cannotIncreaseCostBasis);
-});
-
 it('cannot dispose of a non-fungible asset because the currencies don\'t match', function () {
     // Given
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -319,7 +246,7 @@ it('cannot dispose of a non-fungible asset because the currencies don\'t match',
     // When
 
     $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
-        asset: $this->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         proceeds: new FiatAmount('100', FiatCurrency::EUR),
     );
@@ -342,7 +269,6 @@ it('cannot dispose of a non-fungible asset because the transaction is older than
     // Given
 
     $nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
-        asset: $this->asset,
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
     );
@@ -350,7 +276,7 @@ it('cannot dispose of a non-fungible asset because the transaction is older than
     // When
 
     $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
-        asset: $nonFungibleAssetAcquired->asset,
+        asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-20'),
         proceeds: FiatAmount::GBP('150'),
     );

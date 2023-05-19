@@ -12,7 +12,7 @@ it('can increase the cost basis of a non-fungible asset', function () {
     $nonFungibleAssetRepository = Mockery::mock(NonFungibleAssetRepository::class);
 
     $increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
-        asset: new Asset('FOO'),
+        asset: Asset::nonFungible('foo'),
         date: LocalDate::parse('2015-10-21'),
         costBasisIncrease: FiatAmount::GBP('1'),
     );

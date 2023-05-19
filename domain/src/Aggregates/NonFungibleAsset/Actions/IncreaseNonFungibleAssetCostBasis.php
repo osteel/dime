@@ -24,7 +24,7 @@ final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Ti
 
     public function handle(NonFungibleAssetRepository $nonFungibleAssetRepository): void
     {
-        $nonFungibleAssetId = NonFungibleAssetId::fromNonFungibleAssetId((string) $this->asset);
+        $nonFungibleAssetId = NonFungibleAssetId::fromAsset($this->asset);
         $nonFungibleAsset = $nonFungibleAssetRepository->get($nonFungibleAssetId);
 
         $nonFungibleAsset->increaseCostBasis($this);

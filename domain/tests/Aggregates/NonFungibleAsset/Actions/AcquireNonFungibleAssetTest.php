@@ -15,7 +15,7 @@ it('can acquire a non-fungible asset', function () {
     $runner = Mockery::mock(ActionRunner::class);
 
     $acquireNonFungibleAsset = new AcquireNonFungibleAsset(
-        asset: new Asset('FOO'),
+        asset: Asset::nonFungible('foo'),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('1'),
     );
@@ -34,7 +34,7 @@ it('can increase the cost basis of a non-fungible asset', function () {
     $runner = Mockery::mock(ActionRunner::class);
 
     $acquireNonFungibleAsset = new AcquireNonFungibleAsset(
-        asset: new Asset('FOO'),
+        asset: Asset::nonFungible('foo'),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('1'),
     );

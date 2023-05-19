@@ -7,9 +7,9 @@ namespace Domain\ValueObjects;
 use EventSauce\EventSourcing\AggregateRootId as AggregateRootIdInterface;
 use Ramsey\Uuid\Uuid;
 
-abstract class AggregateRootId implements AggregateRootIdInterface
+abstract readonly class AggregateRootId implements AggregateRootIdInterface
 {
-    final private function __construct(public readonly string $id)
+    final private function __construct(protected readonly string $id)
     {
     }
 
