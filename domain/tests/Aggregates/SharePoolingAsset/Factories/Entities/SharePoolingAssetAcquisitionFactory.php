@@ -5,7 +5,6 @@ namespace Domain\Tests\Aggregates\SharePoolingAsset\Factories\Entities;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
-use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use Tests\Factories\PlainObjectFactory;
@@ -25,7 +24,6 @@ class SharePoolingAssetAcquisitionFactory extends PlainObjectFactory
     {
         return [
             'id' => SharePoolingAssetTransactionId::generate(),
-            'asset' => new Asset('FOO'),
             'date' => LocalDate::parse('2015-10-21'),
             'quantity' => new Quantity('100'),
             'costBasis' => FiatAmount::GBP('100'),

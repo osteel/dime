@@ -36,7 +36,6 @@ final class DisposalProcessor
         // Disposals being replayed must keep the same ID so they are inserted back in the right place
         return new SharePoolingAssetDisposal(
             id: $disposal->transactionId,
-            asset: $disposal->asset,
             date: $disposal->date,
             quantity: $disposal->quantity,
             costBasis: $costBasis,

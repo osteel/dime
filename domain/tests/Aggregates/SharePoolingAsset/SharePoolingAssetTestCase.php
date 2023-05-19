@@ -13,7 +13,7 @@ abstract class SharePoolingAssetTestCase extends AggregateRootTestCase
 {
     protected function newAggregateRootId(): AggregateRootId
     {
-        return SharePoolingAssetId::generate();
+        return SharePoolingAssetId::fromString('FOO');
     }
 
     protected function aggregateRootClassName(): string

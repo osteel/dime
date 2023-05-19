@@ -17,14 +17,12 @@ use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetFiatCurrencySet;
-use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetSet;
 use Domain\Aggregates\SharePoolingAsset\Exceptions\SharePoolingAssetException;
 use Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor\DisposalProcessor;
 use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\QuantityAdjuster;
 use Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder\ReversionFinder;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Enums\FiatCurrency;
-use Domain\ValueObjects\Asset;
 use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
@@ -40,8 +38,6 @@ class SharePoolingAsset implements AggregateRoot
     /** @phpstan-use AggregateRootBehaviour<SharePoolingAssetId> */
     use AggregateRootBehaviour;
 
-    private ?Asset $asset = null;
-
     private ?FiatCurrency $fiatCurrency = null;
 
     private ?LocalDate $previousTransactionDate = null;
@@ -52,18 +48,6 @@ class SharePoolingAsset implements AggregateRoot
     {
         $this->aggregateRootId = SharePoolingAssetId::fromString($aggregateRootId->toString());
         $this->transactions = SharePoolingAssetTransactions::make();
-    }
-
-    private function setAsset(Asset $asset): void
-    {
-        if (is_null($this->asset)) {
-            $this->recordThat(new SharePoolingAssetSet($asset));
-        }
-    }
-
-    public function applySharePoolingAssetSet(SharePoolingAssetSet $event): void
-    {
-        $this->asset = $event->asset;
     }
 
     private function setFiatCurrency(FiatCurrency $fiatCurrency): void
@@ -81,10 +65,8 @@ class SharePoolingAsset implements AggregateRoot
     /** @throws SharePoolingAssetException */
     public function acquire(AcquireSharePoolingAsset $action): void
     {
-        $this->setAsset($action->asset);
         $this->setFiatCurrency($action->costBasis->currency);
 
-        $this->validateAsset($action->asset, $action);
         $this->validateCurrency($action->costBasis->currency, $action);
         $this->validateTimeline($action);
 
@@ -99,7 +81,6 @@ class SharePoolingAsset implements AggregateRoot
         $this->recordThat(new SharePoolingAssetAcquired(
             acquisition: new SharePoolingAssetAcquisition(
                 id: $action->transactionId, // Only ever present for testing purposes
-                asset: $action->asset,
                 date: $action->date,
                 quantity: $action->quantity,
                 costBasis: $action->costBasis,
@@ -118,7 +99,6 @@ class SharePoolingAsset implements AggregateRoot
     /** @throws SharePoolingAssetException */
     public function disposeOf(DisposeOfSharePoolingAsset $action): void
     {
-        $this->validateAsset($action->asset, $action);
         $this->validateCurrency($action->proceeds->currency, $action);
 
         if (! $action->isReplay()) {
@@ -145,7 +125,6 @@ class SharePoolingAsset implements AggregateRoot
         // don't try to match their 30-day quantity with the disposal's same-day acquisitions
         $this->transactions->add(new SharePoolingAssetDisposal(
             id: $action->transactionId,
-            asset: $action->asset,
             date: $action->date,
             quantity: $action->quantity,
             costBasis: $action->proceeds->zero(),
@@ -161,10 +140,8 @@ class SharePoolingAsset implements AggregateRoot
     private function replayDisposals(SharePoolingAssetDisposals $disposals): void
     {
         foreach ($disposals as $disposal) {
-            assert(! is_null($this->asset));
-
             $this->disposeOf(new DisposeOfSharePoolingAsset(
-                asset: $this->asset,
+                asset: $this->aggregateRootId->toAsset(),
                 transactionId: $disposal->id,
                 date: $disposal->date,
                 quantity: $disposal->quantity,
@@ -223,16 +200,6 @@ class SharePoolingAsset implements AggregateRoot
                 availableQuantity: $availableQuantity,
             );
         }
-    }
-
-    /** @throws SharePoolingAssetException */
-    private function validateAsset(Asset $incoming, Stringable&WithAsset $action): void
-    {
-        if (is_null($this->asset) || $incoming->is($this->asset)) {
-            return;
-        }
-
-        throw SharePoolingAssetException::assetMismatch(action: $action, incoming: $incoming);
     }
 
     /** @throws SharePoolingAssetException */

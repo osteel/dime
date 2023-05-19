@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
 
+use Domain\Aggregates\SharePoolingAsset\ValueObjects\Exceptions\SharePoolingAssetIdException;
 use Domain\ValueObjects\AggregateRootId;
 use Domain\ValueObjects\Asset;
-use Ramsey\Uuid\Uuid;
 
 final readonly class SharePoolingAssetId extends AggregateRootId
 {
-    private const NAMESPACE = '94ff3977-46f5-4efe-8a89-e474d375232f';
-
     public static function fromAsset(Asset $asset): static
     {
-        return self::fromString(Uuid::uuid5(self::NAMESPACE, (string) $asset)->toString());
+        ! $asset->isNonFungible || throw SharePoolingAssetIdException::assetIsNonFungible($asset);
+
+        return self::fromString((string) $asset);
+    }
+
+    public function toAsset(): Asset
+    {
+        return new Asset($this->id);
     }
 }

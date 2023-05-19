@@ -9,7 +9,6 @@ use Domain\Aggregates\SharePoolingAsset\Entities\Exceptions\SharePoolingAssetDis
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\Tests\Aggregates\SharePoolingAsset\Factories\Entities\SharePoolingAssetDisposalFactory;
-use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 use EventSauce\EventSourcing\Serialization\SerializablePayload;
@@ -21,7 +20,6 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     public readonly QuantityAllocation $thirtyDayQuantityAllocation;
 
     public function __construct(
-        Asset $asset,
         LocalDate $date,
         Quantity $quantity,
         FiatAmount $costBasis,
@@ -31,7 +29,7 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         bool $processed = true,
         ?SharePoolingAssetTransactionId $id = null,
     ) {
-        parent::__construct($asset, $date, $quantity, $costBasis, id: $id, processed: $processed);
+        parent::__construct($date, $quantity, $costBasis, id: $id, processed: $processed);
 
         $costBasis->currency === $proceeds->currency
             || throw SharePoolingAssetDisposalException::currencyMismatch($costBasis->currency, $proceeds->currency);
@@ -56,7 +54,6 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     {
         return new self(
             id: $this->id,
-            asset: $this->asset,
             date: $this->date,
             quantity: $this->quantity,
             costBasis: $this->costBasis->zero(),
@@ -85,12 +82,11 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         return $this->thirtyDayQuantityAllocation->quantityAllocatedTo($acquisition);
     }
 
-    /** @return array{id:string,asset:array{symbol:string,is_non_fungible:string},date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} */
+    /** @return array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} */
     public function toPayload(): array
     {
         return [
             'id' => (string) $this->id,
-            'asset' => $this->asset->toPayload(),
             'date' => (string) $this->date,
             'quantity' => (string) $this->quantity,
             'cost_basis' => $this->costBasis->toPayload(),
@@ -101,12 +97,11 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
         ];
     }
 
-    /** @param array{id:string,asset:array{symbol:string,is_non_fungible:string},date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} $payload */
+    /** @param array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} $payload */
     public static function fromPayload(array $payload): static
     {
         return new self(
             id: SharePoolingAssetTransactionId::fromString($payload['id']),
-            asset: Asset::fromPayload($payload['asset']),
             date: LocalDate::parse($payload['date']),
             quantity: new Quantity($payload['quantity']),
             costBasis: FiatAmount::fromPayload($payload['cost_basis']),
@@ -120,10 +115,9 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     public function __toString(): string
     {
         return sprintf(
-            '%s: disposed of %s %s tokens for %s (cost basis: %s)',
+            '%s: disposed of %s tokens for %s (cost basis: %s)',
             $this->date,
             $this->quantity,
-            $this->asset,
             $this->proceeds,
             $this->costBasis,
         );

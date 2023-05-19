@@ -6,6 +6,7 @@ namespace App\Aggregates\SharePoolingAsset;
 
 use App\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetMessageRepository;
 use App\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetRepository;
+use App\Services\UuidEncoder\UuidEncoder;
 use Domain\Aggregates\SharePoolingAsset\Reactors\SharePoolingAssetReactor;
 use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetMessageRepository as SharePoolingAssetMessageRepositoryInterface;
 use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetRepository as SharePoolingAssetRepositoryInterface;
@@ -16,7 +17,6 @@ use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
 use EventSauce\EventSourcing\Serialization\PayloadSerializerSupportingObjectMapperAndSerializablePayload;
 use EventSauce\EventSourcing\SynchronousMessageDispatcher;
-use EventSauce\UuidEncoding\StringUuidEncoder;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
 use LaravelZero\Framework\Application;
@@ -37,7 +37,7 @@ class SharePoolingAssetServiceProvider extends ServiceProvider
                 $classNameInflector,
                 new PayloadSerializerSupportingObjectMapperAndSerializablePayload(),
             ),
-            uuidEncoder: new StringUuidEncoder(),
+            uuidEncoder: new UuidEncoder(),
         ));
 
         $this->app->bind(SharePoolingAssetRepositoryInterface::class, fn () => new SharePoolingAssetRepository(

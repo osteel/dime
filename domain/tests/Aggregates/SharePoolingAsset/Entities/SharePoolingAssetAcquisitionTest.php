@@ -5,7 +5,6 @@ use Brick\DateTime\TimeZone;
 use Domain\Aggregates\SharePoolingAsset\Entities\Exceptions\SharePoolingAssetAcquisitionException;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
-use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
@@ -22,7 +21,6 @@ it('cannot instantiate an acquisition because the allocated quantity is greater 
 
 it('can instantiate an acquisition', function () {
     $acquisition = new SharePoolingAssetAcquisition(
-        asset: new Asset('FOO'),
         date: LocalDate::now(TimeZone::utc()),
         quantity: Quantity::zero(),
         costBasis: FiatAmount::GBP('100'),
