@@ -24,9 +24,8 @@ final class TaxYearSummaryProjector extends EventConsumer
     public function handleCapitalGainUpdated(CapitalGainUpdated $event, Message $message): void
     {
         $this->taxYearSummaryRepository->updateCapitalGain(
-            $this->getTaxYearId($message),
-            $event->taxYear,
-            $event->capitalGain,
+            taxYearId: $this->getTaxYearId($message),
+            capitalGain: $event->capitalGain,
         );
     }
 
@@ -34,9 +33,8 @@ final class TaxYearSummaryProjector extends EventConsumer
     public function handleCapitalGainUpdateReverted(CapitalGainUpdateReverted $event, Message $message): void
     {
         $this->taxYearSummaryRepository->updateCapitalGain(
-            $this->getTaxYearId($message),
-            $event->taxYear,
-            $event->capitalGain->opposite(),
+            taxYearId: $this->getTaxYearId($message),
+            capitalGain: $event->capitalGain->opposite(),
         );
     }
 
@@ -44,9 +42,8 @@ final class TaxYearSummaryProjector extends EventConsumer
     public function handleIncomeUpdated(IncomeUpdated $event, Message $message): void
     {
         $this->taxYearSummaryRepository->updateIncome(
-            $this->getTaxYearId($message),
-            $event->taxYear,
-            $event->income,
+            taxYearId: $this->getTaxYearId($message),
+            income: $event->income,
         );
     }
 
@@ -56,9 +53,8 @@ final class TaxYearSummaryProjector extends EventConsumer
         Message $message,
     ): void {
         $this->taxYearSummaryRepository->updateNonAttributableAllowableCost(
-            $this->getTaxYearId($message),
-            $event->taxYear,
-            $event->nonAttributableAllowableCost,
+            taxYearId: $this->getTaxYearId($message),
+            nonAttributableAllowableCost: $event->nonAttributableAllowableCost,
         );
     }
 

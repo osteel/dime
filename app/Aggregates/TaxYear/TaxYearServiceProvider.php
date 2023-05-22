@@ -7,6 +7,7 @@ namespace App\Aggregates\TaxYear;
 use App\Aggregates\TaxYear\Repositories\TaxYearMessageRepository;
 use App\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use App\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
+use App\Services\UuidEncoder\UuidEncoder;
 use Domain\Aggregates\TaxYear\Projectors\TaxYearSummaryProjector;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearMessageRepository as TaxYearMessageRepositoryInterface;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository as TaxYearRepositoryInterface;
@@ -18,7 +19,6 @@ use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
 use EventSauce\EventSourcing\Serialization\PayloadSerializerSupportingObjectMapperAndSerializablePayload;
 use EventSauce\EventSourcing\SynchronousMessageDispatcher;
-use EventSauce\UuidEncoding\StringUuidEncoder;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
 use LaravelZero\Framework\Application;
@@ -44,7 +44,7 @@ class TaxYearServiceProvider extends ServiceProvider
                 $classNameInflector,
                 new PayloadSerializerSupportingObjectMapperAndSerializablePayload(),
             ),
-            uuidEncoder: new StringUuidEncoder(),
+            uuidEncoder: new UuidEncoder(),
         ));
 
         $this->app->bind(TaxYearRepositoryInterface::class, fn () => new TaxYearRepository(

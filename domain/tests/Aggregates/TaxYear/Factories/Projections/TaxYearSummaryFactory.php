@@ -21,7 +21,6 @@ class TaxYearSummaryFactory extends Factory
     {
         return [
             'tax_year_id' => TaxYearId::fromDate(LocalDate::parse('2015-10-21')),
-            'tax_year' => '2015-2016',
             'currency' => FiatCurrency::GBP,
             'capital_gain' => new CapitalGain(
                 costBasis: FiatAmount::GBP('100'),

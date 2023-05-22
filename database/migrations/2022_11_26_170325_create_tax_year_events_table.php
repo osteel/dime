@@ -15,7 +15,7 @@ return new class () extends Migration {
         Schema::create('tax_year_events', function (Blueprint $table) {
             $table->id()->unsigned();
             $table->uuid('event_id');
-            $table->uuid('aggregate_root_id');
+            $table->string('aggregate_root_id', 9);
             $table->unsignedInteger('version')->nullable();
             $table->jsonb('payload');
 
