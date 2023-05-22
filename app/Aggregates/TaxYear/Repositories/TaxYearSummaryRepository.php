@@ -13,32 +13,29 @@ use Domain\ValueObjects\FiatAmount;
 
 class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
 {
-    public function updateCapitalGain(TaxYearId $taxYearId, string $taxYear, CapitalGain $capitalGain): void
+    public function updateCapitalGain(TaxYearId $taxYearId, CapitalGain $capitalGain): void
     {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $capitalGain->currency())
+        $this->fetchTaxYearSummary($taxYearId, $capitalGain->currency())
             ->updateCapitalGain($capitalGain)
             ->save();
     }
 
-    public function updateIncome(TaxYearId $taxYearId, string $taxYear, FiatAmount $income): void
+    public function updateIncome(TaxYearId $taxYearId, FiatAmount $income): void
     {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $income->currency)
+        $this->fetchTaxYearSummary($taxYearId, $income->currency)
             ->updateIncome($income)
             ->save();
     }
 
-    public function updateNonAttributableAllowableCost(TaxYearId $taxYearId, string $taxYear, FiatAmount $nonAttributableAllowableCost): void
+    public function updateNonAttributableAllowableCost(TaxYearId $taxYearId, FiatAmount $nonAttributableAllowableCost): void
     {
-        $this->fetchTaxYearSummary($taxYearId, $taxYear, $nonAttributableAllowableCost->currency)
+        $this->fetchTaxYearSummary($taxYearId, $nonAttributableAllowableCost->currency)
             ->updateNonAttributableAllowableCost($nonAttributableAllowableCost)
             ->save();
     }
 
-    private function fetchTaxYearSummary(TaxYearId $taxYearId, string $taxYear, FiatCurrency $currency): TaxYearSummary
+    private function fetchTaxYearSummary(TaxYearId $taxYearId, FiatCurrency $currency): TaxYearSummary
     {
-        return TaxYearSummary::firstOrNew(
-            ['tax_year_id' => $taxYearId->toString(), 'currency' => $currency],
-            ['tax_year' => $taxYear],
-        );
+        return TaxYearSummary::firstOrNew(['tax_year_id' => $taxYearId->toString(), 'currency' => $currency]);
     }
 }

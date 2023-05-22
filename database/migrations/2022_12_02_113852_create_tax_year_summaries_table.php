@@ -13,8 +13,7 @@ return new class () extends Migration {
     public function up()
     {
         Schema::create('tax_year_summaries', function (Blueprint $table) {
-            $table->uuid('tax_year_id')->primary();
-            $table->string('tax_year', 9);
+            $table->string('tax_year_id', 9)->primary();
             $table->string('currency', 3);
             $table->json('capital_gain')->default('{"cost_basis":"0","proceeds":"0","difference":"0"}');
             $table->string('income')->default('0');

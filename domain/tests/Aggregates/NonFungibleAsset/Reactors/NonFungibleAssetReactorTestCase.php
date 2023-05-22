@@ -20,7 +20,7 @@ class NonFungibleAssetReactorTestCase extends MessageConsumerTestCase
     {
         parent::setUp();
 
-        $this->aggregateRootId = NonFungibleAssetId::generate();
+        $this->aggregateRootId = NonFungibleAssetId::fromString('foo');
     }
 
     public function messageConsumer(): MessageConsumer

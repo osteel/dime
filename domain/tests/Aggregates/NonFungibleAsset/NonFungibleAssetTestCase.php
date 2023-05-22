@@ -14,7 +14,7 @@ abstract class NonFungibleAssetTestCase extends AggregateRootTestCase
 {
     protected function newAggregateRootId(): AggregateRootId
     {
-        return NonFungibleAssetId::generate();
+        return NonFungibleAssetId::fromString('foo');
     }
 
     protected function aggregateRootClassName(): string

@@ -6,6 +6,7 @@ namespace App\Aggregates\NonFungibleAsset;
 
 use App\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetMessageRepository;
 use App\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
+use App\Services\UuidEncoder\UuidEncoder;
 use Domain\Aggregates\NonFungibleAsset\Reactors\NonFungibleAssetReactor;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetMessageRepository as NonFungibleAssetMessageRepositoryInterface;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository as NonFungibleAssetRepositoryInterface;
@@ -16,7 +17,6 @@ use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
 use EventSauce\EventSourcing\Serialization\PayloadSerializerSupportingObjectMapperAndSerializablePayload;
 use EventSauce\EventSourcing\SynchronousMessageDispatcher;
-use EventSauce\UuidEncoding\StringUuidEncoder;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
 use LaravelZero\Framework\Application;
@@ -37,7 +37,7 @@ class NonFungibleAssetServiceProvider extends ServiceProvider
                 $classNameInflector,
                 new PayloadSerializerSupportingObjectMapperAndSerializablePayload(),
             ),
-            uuidEncoder: new StringUuidEncoder(),
+            uuidEncoder: new UuidEncoder(),
         ));
 
         $this->app->bind(NonFungibleAssetRepositoryInterface::class, fn () => new NonFungibleAssetRepository(

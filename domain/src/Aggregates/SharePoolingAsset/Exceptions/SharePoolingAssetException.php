@@ -19,16 +19,6 @@ final class SharePoolingAssetException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function assetMismatch(Stringable&WithAsset $action, Asset $incoming): self
-    {
-        return new self(sprintf(
-            'Cannot process this share pooling asset %s transaction because the assets don\'t match (incoming: %s): %s',
-            $action->getAsset(),
-            $incoming,
-            $action,
-        ));
-    }
-
     public static function currencyMismatch(
         Stringable&WithAsset $action,
         ?FiatCurrency $current,

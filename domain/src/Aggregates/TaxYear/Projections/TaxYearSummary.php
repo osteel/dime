@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property FiatCurrency $currency
  * @property FiatAmount   $income
  * @property FiatAmount   $non_attributable_allowable_cost
- * @property string       $tax_year
  * @property TaxYearId    $tax_year_id
  *
  * @method static self firstOrNew($attributes = [], $values = [])

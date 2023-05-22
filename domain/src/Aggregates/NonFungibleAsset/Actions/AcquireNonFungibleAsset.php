@@ -24,7 +24,7 @@ final readonly class AcquireNonFungibleAsset implements Stringable, WithAsset
 
     public function handle(NonFungibleAssetRepository $nonFungibleAssetRepository, ActionRunner $runner): void
     {
-        $nonFungibleAssetId = NonFungibleAssetId::fromNonFungibleAssetId((string) $this->asset);
+        $nonFungibleAssetId = NonFungibleAssetId::fromAsset($this->asset);
         $nonFungibleAsset = $nonFungibleAssetRepository->get($nonFungibleAssetId);
 
         if ($nonFungibleAsset->isAlreadyAcquired()) {

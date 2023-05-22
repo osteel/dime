@@ -12,7 +12,7 @@ it('can dispose of a non-fungible asset', function () {
     $nonFungibleAssetRepository = Mockery::mock(NonFungibleAssetRepository::class);
 
     $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
-        asset: new Asset('FOO'),
+        asset: Asset::nonFungible('foo'),
         date: LocalDate::parse('2015-10-21'),
         proceeds: FiatAmount::GBP('1'),
     );

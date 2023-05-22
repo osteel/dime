@@ -32,16 +32,6 @@ final class NonFungibleAssetException extends RuntimeException
         ));
     }
 
-    public static function assetMismatch(Asset $current, Stringable&WithAsset $action): self
-    {
-        return new self(sprintf(
-            'Cannot process this non-fungible asset %s transaction because the assets don\'t match (incoming: %s): %s',
-            $current,
-            $action->getAsset(),
-            $action,
-        ));
-    }
-
     public static function olderThanPreviousTransaction(
         Stringable&WithAsset $action,
         LocalDate $previousTransactionDate,

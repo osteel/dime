@@ -10,9 +10,9 @@ use Domain\ValueObjects\FiatAmount;
 
 interface TaxYearSummaryRepository
 {
-    public function updateCapitalGain(TaxYearId $taxYearId, string $taxYear, CapitalGain $capitalGain): void;
+    public function updateCapitalGain(TaxYearId $taxYearId, CapitalGain $capitalGain): void;
 
-    public function updateIncome(TaxYearId $taxYearId, string $taxYear, FiatAmount $income): void;
+    public function updateIncome(TaxYearId $taxYearId, FiatAmount $income): void;
 
-    public function updateNonAttributableAllowableCost(TaxYearId $taxYearId, string $taxYear, FiatAmount $nonAttributableAllowableCost): void;
+    public function updateNonAttributableAllowableCost(TaxYearId $taxYearId, FiatAmount $nonAttributableAllowableCost): void;
 }

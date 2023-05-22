@@ -16,19 +16,6 @@ final class TaxYearException extends RuntimeException
         parent::__construct($message);
     }
 
-    public static function taxYearMismatch(
-        TaxYearId $taxYearId,
-        Stringable $action,
-        string $incomingTaxYear,
-    ): self {
-        return new self(sprintf(
-            'Cannot process this %s tax year action because incoming tax year %s doesn\'t match: %s',
-            $taxYearId->toString(),
-            $incomingTaxYear,
-            $action,
-        ));
-    }
-
     public static function currencyMismatch(
         TaxYearId $taxYearId,
         Stringable $action,
