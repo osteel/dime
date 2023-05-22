@@ -4,5 +4,5 @@
 /.vagrant
 /database/database.sqlite
 .phpunit.result.cache
-composer.lock/database/database.sqlite
+composer.lock
 **/.DS_Store

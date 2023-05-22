@@ -26,8 +26,7 @@
         "illuminate/database": "^10.3.3",
         "laravel-zero/framework": "^10.0",
         "nunomaduro/termwind": "^1.15.1",
-        "phpoffice/phpspreadsheet": "^1.28",
-        "ramsey/uuid": "^4.7.3"
+        "phpoffice/phpspreadsheet": "^1.28"
     },
     "require-dev": {
         "eventsauce/test-utilities": "^3.3",

@@ -22,7 +22,7 @@ class TaxYearSummaryProjectorTestCase extends MessageConsumerTestCase
     {
         parent::setUp();
 
-        $this->aggregateRootId = TaxYearId::generate();
+        $this->aggregateRootId = TaxYearId::fromString($this->taxYear);
     }
 
     public function messageConsumer(): MessageConsumer

@@ -20,7 +20,7 @@ class SharePoolingAssetReactorTestCase extends MessageConsumerTestCase
     {
         parent::setUp();
 
-        $this->aggregateRootId = SharePoolingAssetId::generate();
+        $this->aggregateRootId = SharePoolingAssetId::fromString('FOO');
     }
 
     public function messageConsumer(): MessageConsumer
