@@ -6,9 +6,8 @@ namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
 
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\ValueObjects\Quantity;
-use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class QuantityAllocation implements SerializablePayload
+final class QuantityAllocation
 {
     /** @param array<string,Quantity> $allocation */
     public function __construct(private array $allocation = [])
@@ -52,21 +51,5 @@ final class QuantityAllocation implements SerializablePayload
     public function transactionIds(): array
     {
         return array_map(fn (string $id) => SharePoolingAssetTransactionId::fromString($id), array_keys($this->allocation));
-    }
-
-    /** @return array{allocation:array<string,string>} */
-    public function toPayload(): array
-    {
-        return [
-            'allocation' => array_map(fn (Quantity $quantity) => (string) $quantity, $this->allocation),
-        ];
-    }
-
-    /** @param array{allocation:array<string,string>} $payload */
-    public static function fromPayload(array $payload): static
-    {
-        return new self(
-            allocation: array_map(fn (string $quantity) => new Quantity($quantity), $payload['allocation']),
-        );
     }
 }

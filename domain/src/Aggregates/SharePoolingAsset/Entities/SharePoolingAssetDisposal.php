@@ -11,9 +11,8 @@ use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactio
 use Domain\Tests\Aggregates\SharePoolingAsset\Factories\Entities\SharePoolingAssetDisposalFactory;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
-use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction implements SerializablePayload
+final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction
 {
     public readonly QuantityAllocation $sameDayQuantityAllocation;
 
@@ -80,36 +79,6 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction imple
     public function thirtyDayQuantityAllocatedTo(SharePoolingAssetAcquisition $acquisition): Quantity
     {
         return $this->thirtyDayQuantityAllocation->quantityAllocatedTo($acquisition);
-    }
-
-    /** @return array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} */
-    public function toPayload(): array
-    {
-        return [
-            'id' => (string) $this->id,
-            'date' => (string) $this->date,
-            'quantity' => (string) $this->quantity,
-            'cost_basis' => $this->costBasis->toPayload(),
-            'proceeds' => $this->proceeds->toPayload(),
-            'same_day_quantity_allocation' => $this->sameDayQuantityAllocation->toPayload(),
-            'thirty_day_quantity_allocation' => $this->thirtyDayQuantityAllocation->toPayload(),
-            'processed' => $this->processed,
-        ];
-    }
-
-    /** @param array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},same_day_quantity_allocation:array{allocation:array<string,string>},thirty_day_quantity_allocation:array{allocation:array<string,string>},processed:bool} $payload */
-    public static function fromPayload(array $payload): static
-    {
-        return new self(
-            id: SharePoolingAssetTransactionId::fromString($payload['id']),
-            date: LocalDate::parse($payload['date']),
-            quantity: new Quantity($payload['quantity']),
-            costBasis: FiatAmount::fromPayload($payload['cost_basis']),
-            proceeds: FiatAmount::fromPayload($payload['proceeds']),
-            sameDayQuantityAllocation: QuantityAllocation::fromPayload($payload['same_day_quantity_allocation']),
-            thirtyDayQuantityAllocation: QuantityAllocation::fromPayload($payload['thirty_day_quantity_allocation']),
-            processed: (bool) $payload['processed'],
-        );
     }
 
     public function __toString(): string

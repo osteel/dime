@@ -10,9 +10,8 @@ use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactio
 use Domain\Tests\Aggregates\SharePoolingAsset\Factories\Entities\SharePoolingAssetAcquisitionFactory;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
-use EventSauce\EventSourcing\Serialization\SerializablePayload;
 
-final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction implements SerializablePayload
+final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
 {
     private Quantity $sameDayQuantity;
 
@@ -107,32 +106,6 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction im
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantity);
 
         return $this;
-    }
-
-    /** @return array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string} */
-    public function toPayload(): array
-    {
-        return [
-            'id' => (string) $this->id,
-            'date' => (string) $this->date,
-            'quantity' => (string) $this->quantity,
-            'cost_basis' => $this->costBasis->toPayload(),
-            'same_day_quantity' => (string) $this->sameDayQuantity,
-            'thirty_day_quantity' => (string) $this->thirtyDayQuantity,
-        ];
-    }
-
-    /** @param array{id:string,date:string,quantity:string,cost_basis:array{quantity:string,currency:string},same_day_quantity:string,thirty_day_quantity:string} $payload */
-    public static function fromPayload(array $payload): static
-    {
-        return new self(
-            id: SharePoolingAssetTransactionId::fromString($payload['id']),
-            date: LocalDate::parse($payload['date']),
-            quantity: new Quantity($payload['quantity']),
-            costBasis: FiatAmount::fromPayload($payload['cost_basis']),
-            sameDayQuantity: new Quantity($payload['same_day_quantity']),
-            thirtyDayQuantity: new Quantity($payload['thirty_day_quantity']),
-        );
     }
 
     public function __toString(): string

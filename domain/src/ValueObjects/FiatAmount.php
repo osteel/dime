@@ -7,10 +7,9 @@ namespace Domain\ValueObjects;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\Exceptions\FiatAmountException;
 use Domain\ValueObjects\Exceptions\QuantityException;
-use EventSauce\EventSourcing\Serialization\SerializablePayload;
 use Stringable;
 
-final readonly class FiatAmount implements SerializablePayload, Stringable
+final readonly class FiatAmount implements Stringable
 {
     public Quantity $quantity;
 
@@ -128,24 +127,6 @@ final readonly class FiatAmount implements SerializablePayload, Stringable
         if (count($currencies) > 1) {
             throw FiatAmountException::fiatCurrenciesDoNotMatch(...$currencies);
         }
-    }
-
-    /** @return array{quantity:string,currency:string} */
-    public function toPayload(): array
-    {
-        return [
-            'quantity' => (string) $this->quantity,
-            'currency' => $this->currency->value,
-        ];
-    }
-
-    /** @param array{quantity:string,currency:string} $payload */
-    public static function fromPayload(array $payload): static
-    {
-        return new self(
-            quantity: new Quantity($payload['quantity']),
-            currency: FiatCurrency::from($payload['currency']),
-        );
     }
 
     public function __toString(): string

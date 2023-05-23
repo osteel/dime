@@ -6,10 +6,9 @@ namespace Domain\ValueObjects;
 
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\Exceptions\AssetException;
-use EventSauce\EventSourcing\Serialization\SerializablePayload;
 use Stringable;
 
-final readonly class Asset implements SerializablePayload, Stringable
+final readonly class Asset implements Stringable
 {
     public string|FiatCurrency $symbol;
 
@@ -38,24 +37,6 @@ final readonly class Asset implements SerializablePayload, Stringable
     public function isFiat(): bool
     {
         return $this->symbol instanceof FiatCurrency;
-    }
-
-    /** @return array{symbol:string,is_non_fungible:string} */
-    public function toPayload(): array
-    {
-        return [
-            'symbol' => $this->symbol instanceof FiatCurrency ? $this->symbol->value : $this->symbol,
-            'is_non_fungible' => (string) $this->isNonFungible,
-        ];
-    }
-
-    /** @param array{symbol:string,is_non_fungible:string} $payload */
-    public static function fromPayload(array $payload): static
-    {
-        return new self(
-            symbol: $payload['symbol'],
-            isNonFungible: (bool) $payload['is_non_fungible'],
-        );
     }
 
     public function __toString(): string
