@@ -17,7 +17,7 @@ use EventSauce\EventSourcing\ExplicitlyMappedClassNameInflector;
 use EventSauce\EventSourcing\MessageDecoratorChain;
 use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
-use EventSauce\EventSourcing\Serialization\PayloadSerializerSupportingObjectMapperAndSerializablePayload;
+use EventSauce\EventSourcing\Serialization\ObjectMapperPayloadSerializer;
 use EventSauce\EventSourcing\SynchronousMessageDispatcher;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
@@ -40,10 +40,7 @@ class TaxYearServiceProvider extends ServiceProvider
             // @phpstan-ignore-next-line
             connection: $app->make(DatabaseManager::class)->connection(),
             tableName: 'tax_year_events',
-            serializer: new ConstructingMessageSerializer(
-                $classNameInflector,
-                new PayloadSerializerSupportingObjectMapperAndSerializablePayload(),
-            ),
+            serializer: new ConstructingMessageSerializer($classNameInflector, new ObjectMapperPayloadSerializer()),
             uuidEncoder: new UuidEncoder(),
         ));
 

@@ -6,11 +6,10 @@ namespace Domain\Aggregates\TaxYear\ValueObjects;
 
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
-use EventSauce\EventSourcing\Serialization\SerializablePayload;
 use JsonSerializable;
 use Stringable;
 
-final readonly class CapitalGain implements JsonSerializable, SerializablePayload, Stringable
+final readonly class CapitalGain implements JsonSerializable, Stringable
 {
     public FiatAmount $difference;
 
@@ -56,25 +55,6 @@ final readonly class CapitalGain implements JsonSerializable, SerializablePayloa
             'proceeds' => (string) $this->proceeds->quantity,
             'difference' => (string) $this->difference->quantity,
         ];
-    }
-
-    /** @return array{cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string},difference:array{quantity:string,currency:string}} */
-    public function toPayload(): array
-    {
-        return [
-            'cost_basis' => $this->costBasis->toPayload(),
-            'proceeds' => $this->proceeds->toPayload(),
-            'difference' => $this->difference->toPayload(),
-        ];
-    }
-
-    /** @param array{cost_basis:array{quantity:string,currency:string},proceeds:array{quantity:string,currency:string}} $payload */
-    public static function fromPayload(array $payload): static
-    {
-        return new self(
-            costBasis: FiatAmount::fromPayload($payload['cost_basis']),
-            proceeds: FiatAmount::fromPayload($payload['proceeds']),
-        );
     }
 
     public function __toString(): string
