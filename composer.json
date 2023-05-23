@@ -23,6 +23,7 @@
         "brick/date-time": "^0.4.1",
         "eventsauce/eventsauce": "^3.2.2",
         "eventsauce/message-repository-for-illuminate": "^0.4.2",
+        "eventsauce/object-hydrator": "^1.0",
         "illuminate/database": "^10.3.3",
         "laravel-zero/framework": "^10.0",
         "nunomaduro/termwind": "^1.15.1",
