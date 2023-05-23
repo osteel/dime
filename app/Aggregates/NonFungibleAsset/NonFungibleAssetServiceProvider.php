@@ -6,6 +6,7 @@ namespace App\Aggregates\NonFungibleAsset;
 
 use App\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetMessageRepository;
 use App\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
+use App\Services\ObjectHydration\ObjectMapperUsingReflectionAndClassMap;
 use App\Services\UuidEncoder\UuidEncoder;
 use Domain\Aggregates\NonFungibleAsset\Reactors\NonFungibleAssetReactor;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetMessageRepository as NonFungibleAssetMessageRepositoryInterface;
@@ -29,11 +30,14 @@ class NonFungibleAssetServiceProvider extends ServiceProvider
         // @phpstan-ignore-next-line
         $classNameInflector = new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map'));
 
+        // @phpstan-ignore-next-line
+        $payloadSerializer = new ObjectMapperPayloadSerializer(new ObjectMapperUsingReflectionAndClassMap(config('eventsourcing.hydrator_class_map')));
+
         $this->app->bind(NonFungibleAssetMessageRepositoryInterface::class, fn (Application $app) => new NonFungibleAssetMessageRepository(
             // @phpstan-ignore-next-line
             connection: $app->make(DatabaseManager::class)->connection(),
             tableName: 'non_fungible_asset_events',
-            serializer: new ConstructingMessageSerializer($classNameInflector, new ObjectMapperPayloadSerializer()),
+            serializer: new ConstructingMessageSerializer($classNameInflector, $payloadSerializer),
             uuidEncoder: new UuidEncoder(),
         ));
 

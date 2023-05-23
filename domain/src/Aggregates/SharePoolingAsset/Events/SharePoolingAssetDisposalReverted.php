@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePoolingAsset\Events;
 
-use App\Services\ObjectHydrators\SharePoolingAssetDisposalHydrator;
+use App\Services\ObjectHydration\Hydrators\SharePoolingAssetDisposalHydrator;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 
 final readonly class SharePoolingAssetDisposalReverted
