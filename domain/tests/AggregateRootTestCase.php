@@ -2,8 +2,7 @@
 
 namespace Domain\Tests;
 
-use App\Services\ObjectHydration\ObjectMapperUsingReflectionAndClassMap;
-use EventSauce\EventSourcing\Serialization\ObjectMapperPayloadSerializer;
+use App\Services\ObjectHydration\PayloadSerializerFactory;
 use EventSauce\EventSourcing\Serialization\PayloadSerializer;
 use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase as BaseAggregateRootTestCase;
 
@@ -13,6 +12,6 @@ abstract class AggregateRootTestCase extends BaseAggregateRootTestCase
     {
         $config = require __DIR__ . '/../../config/eventsourcing.php';
 
-        return new ObjectMapperPayloadSerializer(new ObjectMapperUsingReflectionAndClassMap($config['hydrator_class_map']));
+        return PayloadSerializerFactory::make($config['hydrator_class_map']);
     }
 }

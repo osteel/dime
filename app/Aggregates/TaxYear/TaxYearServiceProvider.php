@@ -7,6 +7,7 @@ namespace App\Aggregates\TaxYear;
 use App\Aggregates\TaxYear\Repositories\TaxYearMessageRepository;
 use App\Aggregates\TaxYear\Repositories\TaxYearRepository;
 use App\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
+use App\Services\ObjectHydration\PayloadSerializerFactory;
 use App\Services\UuidEncoder\UuidEncoder;
 use Domain\Aggregates\TaxYear\Projectors\TaxYearSummaryProjector;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearMessageRepository as TaxYearMessageRepositoryInterface;
@@ -17,7 +18,6 @@ use EventSauce\EventSourcing\ExplicitlyMappedClassNameInflector;
 use EventSauce\EventSourcing\MessageDecoratorChain;
 use EventSauce\EventSourcing\MessageDispatcherChain;
 use EventSauce\EventSourcing\Serialization\ConstructingMessageSerializer;
-use EventSauce\EventSourcing\Serialization\ObjectMapperPayloadSerializer;
 use EventSauce\EventSourcing\SynchronousMessageDispatcher;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
@@ -36,11 +36,14 @@ class TaxYearServiceProvider extends ServiceProvider
         // @phpstan-ignore-next-line
         $classNameInflector = new ExplicitlyMappedClassNameInflector(config('eventsourcing.class_map'));
 
+        // @phpstan-ignore-next-line
+        $payloadSerializer = PayloadSerializerFactory::make(config('eventsourcing.hydrator_class_map'));
+
         $this->app->bind(TaxYearMessageRepositoryInterface::class, fn (Application $app) => new TaxYearMessageRepository(
             // @phpstan-ignore-next-line
             connection: $app->make(DatabaseManager::class)->connection(),
             tableName: 'tax_year_events',
-            serializer: new ConstructingMessageSerializer($classNameInflector, new ObjectMapperPayloadSerializer()),
+            serializer: new ConstructingMessageSerializer($classNameInflector, $payloadSerializer),
             uuidEncoder: new UuidEncoder(),
         ));
 
