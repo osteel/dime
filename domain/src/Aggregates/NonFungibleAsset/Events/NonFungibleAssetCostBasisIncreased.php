@@ -12,6 +12,7 @@ final readonly class NonFungibleAssetCostBasisIncreased
     public function __construct(
         public LocalDate $date,
         public FiatAmount $costBasisIncrease,
+        public FiatAmount $newCostBasis,
     ) {
     }
 }
