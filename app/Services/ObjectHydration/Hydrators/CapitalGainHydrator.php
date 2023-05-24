@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services\ObjectHydrators;
+namespace App\Services\ObjectHydration\Hydrators;
 
 use Attribute;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
