@@ -12,7 +12,7 @@ it('can update the non-attributable allowable cost', function () {
 
     $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
         date: LocalDate::parse('2015-10-21'),
-        nonAttributableAllowableCost: FiatAmount::GBP('1'),
+        nonAttributableAllowableCostChange: FiatAmount::GBP('1'),
     );
 
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);

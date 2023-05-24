@@ -54,7 +54,7 @@ final class TaxYearSummaryProjector extends EventConsumer
     ): void {
         $this->taxYearSummaryRepository->updateNonAttributableAllowableCost(
             taxYearId: $this->getTaxYearId($message),
-            nonAttributableAllowableCost: $event->nonAttributableAllowableCost,
+            nonAttributableAllowableCost: $event->nonAttributableAllowableCostChange,
         );
     }
 

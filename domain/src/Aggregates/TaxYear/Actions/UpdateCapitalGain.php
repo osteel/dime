@@ -29,6 +29,11 @@ final class UpdateCapitalGain implements Stringable
 
     public function __toString(): string
     {
-        return sprintf('%s (date: %s, capital gain update: (%s))', self::class, $this->date, $this->capitalGainUpdate);
+        return sprintf(
+            '%s (date: %s, capital gain update change: (%s))',
+            self::class,
+            $this->date,
+            $this->capitalGainUpdate,
+        );
     }
 }

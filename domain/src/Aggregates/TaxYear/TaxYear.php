@@ -105,19 +105,20 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function updateNonAttributableAllowableCost(UpdateNonAttributableAllowableCost $action): void
     {
-        $this->checkCurrency($action->nonAttributableAllowableCost->currency, $action);
+        $this->checkCurrency($action->nonAttributableAllowableCostChange->currency, $action);
 
         $this->recordThat(new NonAttributableAllowableCostUpdated(
             date: $action->date,
-            nonAttributableAllowableCost: $action->nonAttributableAllowableCost,
+            nonAttributableAllowableCostChange: $action->nonAttributableAllowableCostChange,
+            newNonAttributableAllowableCost: $this->nonAttributableAllowableCost?->plus($action->nonAttributableAllowableCostChange)
+                ?? $action->nonAttributableAllowableCostChange,
         ));
     }
 
     public function applyNonAttributableAllowableCostUpdated(NonAttributableAllowableCostUpdated $event): void
     {
-        $this->currency ??= $event->nonAttributableAllowableCost->currency;
-        $this->nonAttributableAllowableCost = $this->nonAttributableAllowableCost?->plus($event->nonAttributableAllowableCost)
-            ?? $event->nonAttributableAllowableCost;
+        $this->currency ??= $event->nonAttributableAllowableCostChange->currency;
+        $this->nonAttributableAllowableCost = $event->newNonAttributableAllowableCost;
     }
 
     /** @throws TaxYearException */

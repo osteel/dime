@@ -181,12 +181,13 @@ it('cannot update the income because the currencies don\'t match', function () {
 it('can update the non-attributable allowable cost', function () {
     $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
         date: LocalDate::parse('2015-10-21'),
-        nonAttributableAllowableCost: FiatAmount::GBP('100'),
+        nonAttributableAllowableCostChange: FiatAmount::GBP('100'),
     );
 
     $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
         date: $updateNonAttributableAllowableCost->date,
-        nonAttributableAllowableCost: $updateNonAttributableAllowableCost->nonAttributableAllowableCost,
+        nonAttributableAllowableCostChange: $updateNonAttributableAllowableCost->nonAttributableAllowableCostChange,
+        newNonAttributableAllowableCost: $updateNonAttributableAllowableCost->nonAttributableAllowableCostChange,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -197,12 +198,13 @@ it('can update the non-attributable allowable cost', function () {
 it('cannot update the non-attributable allowable cost because the currencies don\'t match', function () {
     $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
         date: LocalDate::parse('2015-10-21'),
-        nonAttributableAllowableCost: FiatAmount::GBP('100'),
+        nonAttributableAllowableCostChange: FiatAmount::GBP('100'),
+        newNonAttributableAllowableCost: FiatAmount::GBP('100'),
     );
 
     $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
         date: LocalDate::parse('2015-10-21'),
-        nonAttributableAllowableCost: new FiatAmount('100', FiatCurrency::EUR),
+        nonAttributableAllowableCostChange: new FiatAmount('100', FiatCurrency::EUR),
     );
 
     $cannotUpdateNonAttributableAllowableCost = TaxYearException::currencyMismatch(

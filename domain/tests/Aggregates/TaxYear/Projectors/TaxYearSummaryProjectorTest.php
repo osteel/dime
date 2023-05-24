@@ -78,7 +78,8 @@ it('can handle an income update', function () {
 it('can handle a non-attributable allowable cost update', function () {
     $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
         date: LocalDate::parse('2015-10-21'),
-        nonAttributableAllowableCost: FiatAmount::GBP('100'),
+        nonAttributableAllowableCostChange: FiatAmount::GBP('100'),
+        newNonAttributableAllowableCost: FiatAmount::GBP('100'),
     );
 
     /** @var MessageConsumerTestCase $this */
@@ -86,6 +87,6 @@ it('can handle a non-attributable allowable cost update', function () {
         ->when(new Message($nonAttributableAllowableCostUpdated))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateNonAttributableAllowableCost')
             ->withArgs(fn (AggregateRootId $taxYearId, FiatAmount $nonAttributableAllowableCost) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $nonAttributableAllowableCost === $nonAttributableAllowableCostUpdated->nonAttributableAllowableCost)
+                && $nonAttributableAllowableCost === $nonAttributableAllowableCostUpdated->nonAttributableAllowableCostChange)
             ->once());
 });
