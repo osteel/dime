@@ -13,6 +13,7 @@ use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
 use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
 use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\Exceptions\TaxYearException;
+use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
@@ -33,7 +34,7 @@ class TaxYear implements AggregateRoot
 
     private ?FiatCurrency $currency = null;
 
-    private ?FiatAmount $capitalGain = null;
+    private ?CapitalGain $capitalGain = null;
 
     private ?FiatAmount $income = null;
 
@@ -47,18 +48,19 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function updateCapitalGain(UpdateCapitalGain $action): void
     {
-        $this->checkCurrency($action->capitalGain->currency(), $action);
+        $this->checkCurrency($action->capitalGainUpdate->currency(), $action);
 
         $this->recordThat(new CapitalGainUpdated(
             date: $action->date,
-            capitalGain: $action->capitalGain,
+            capitalGainUpdate: $action->capitalGainUpdate,
+            newCapitalGain: $this->capitalGain?->plus($action->capitalGainUpdate) ?? $action->capitalGainUpdate,
         ));
     }
 
     public function applyCapitalGainUpdated(CapitalGainUpdated $event): void
     {
-        $this->currency ??= $event->capitalGain->currency();
-        $this->capitalGain = $this->capitalGain?->plus($event->capitalGain->difference) ?? $event->capitalGain->difference;
+        $this->currency ??= $event->capitalGainUpdate->currency();
+        $this->capitalGain = $event->newCapitalGain;
     }
 
     /** @throws TaxYearException */
@@ -80,7 +82,7 @@ class TaxYear implements AggregateRoot
     {
         assert(! is_null($this->capitalGain));
 
-        $this->capitalGain = $this->capitalGain->minus($event->capitalGain->difference);
+        $this->capitalGain = $this->capitalGain->minus($event->capitalGain);
     }
 
     /** @throws TaxYearException */

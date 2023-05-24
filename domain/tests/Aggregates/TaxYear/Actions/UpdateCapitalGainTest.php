@@ -13,7 +13,7 @@ it('can update the capital gain', function () {
 
     $updateCapitalGain = new UpdateCapitalGain(
         date: LocalDate::parse('2015-10-21'),
-        capitalGain: new CapitalGain(
+        capitalGainUpdate: new CapitalGain(
             costBasis: FiatAmount::GBP('1'),
             proceeds: FiatAmount::GBP('2'),
         )

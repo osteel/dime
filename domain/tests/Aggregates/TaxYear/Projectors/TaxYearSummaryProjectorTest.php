@@ -16,9 +16,12 @@ use EventSauce\EventSourcing\TestUtilities\MessageConsumerTestCase;
 uses(TaxYearSummaryProjectorTestCase::class);
 
 it('can handle a capital gain update', function (string $costBasis, string $proceeds, string $capitalGainDifference) {
+    $capitalGainUpdate = new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds));
+
     $capitalGainUpdated = new CapitalGainUpdated(
         date: LocalDate::parse('2015-10-21'),
-        capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
+        capitalGainUpdate: $capitalGainUpdate,
+        newCapitalGain: $capitalGainUpdate,
     );
 
     /** @var MessageConsumerTestCase $this */
@@ -26,7 +29,7 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
         ->when(new Message($capitalGainUpdated))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateCapitalGain')
             ->withArgs(fn (AggregateRootId $taxYearId, CapitalGain $capitalGain) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $capitalGain->isEqualTo($capitalGainUpdated->capitalGain)
+                && $capitalGain->isEqualTo($capitalGainUpdated->capitalGainUpdate)
                 && (string) $capitalGain->difference->quantity === $capitalGainDifference)
             ->once());
 })->with([

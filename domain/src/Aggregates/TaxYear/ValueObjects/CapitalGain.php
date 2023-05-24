@@ -47,6 +47,22 @@ final readonly class CapitalGain implements JsonSerializable, Stringable
         return $this->difference->currency;
     }
 
+    public function plus(CapitalGain $capitalGain): self
+    {
+        return new self(
+            costBasis: $this->costBasis->plus($capitalGain->costBasis),
+            proceeds: $this->proceeds->plus($capitalGain->proceeds),
+        );
+    }
+
+    public function minus(CapitalGain $capitalGain): self
+    {
+        return new self(
+            costBasis: $this->costBasis->minus($capitalGain->costBasis),
+            proceeds: $this->proceeds->minus($capitalGain->proceeds),
+        );
+    }
+
     /** @return array{cost_basis:string,proceeds:string,difference:string} */
     public function jsonSerialize(): array
     {

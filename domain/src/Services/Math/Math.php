@@ -41,7 +41,7 @@ final class Math
      */
     public static function sub(string ...$operands): string
     {
-        if (empty($initial = array_shift($operands))) {
+        if (is_null($initial = array_shift($operands))) {
             return '0';
         }
 

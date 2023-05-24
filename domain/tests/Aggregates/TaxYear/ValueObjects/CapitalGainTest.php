@@ -41,3 +41,39 @@ it('can tell whether two capital gains are equal', function (string $costBasis1,
     'scenario 6' => ['2', '1', '2', '1', true],
     'scenario 7' => ['3', '2', '2', '1', false],
 ]);
+
+it('can add a capital gain to another one', function (array $quantities1, array $quantities2, array $result) {
+    $capitalGain1 = new CapitalGain(FiatAmount::GBP($quantities1[0]), FiatAmount::GBP($quantities1[1]));
+    $capitalGain2 = new CapitalGain(FiatAmount::GBP($quantities2[0]), FiatAmount::GBP($quantities2[1]));
+
+    $capitalGain = $capitalGain1->plus($capitalGain2);
+
+    expect((string) $capitalGain->costBasis->quantity)->toBe($result[0]);
+    expect((string) $capitalGain->proceeds->quantity)->toBe($result[1]);
+    expect((string) $capitalGain->difference->quantity)->toBe($result[2]);
+})->with([
+    'scenario 1' => [['1', '1'], ['1', '1'], ['2', '2', '0']],
+    'scenario 2' => [['-1', '-1'], ['-1', '-1'], ['-2', '-2', '0']],
+    'scenario 3' => [['0', '0'], ['0', '0'], ['0', '0', '0']],
+    'scenario 4' => [['-0', '-0'], ['-0', '-0'], ['0', '0', '0']],
+    'scenario 5' => [['1', '1'], ['0', '1'], ['1', '2', '1']],
+    'scenario 6' => [['1', '1'], ['1', '0'], ['2', '1', '-1']],
+]);
+
+it('can substract a capital gain from another one', function (array $quantities1, array $quantities2, array $result) {
+    $capitalGain1 = new CapitalGain(FiatAmount::GBP($quantities1[0]), FiatAmount::GBP($quantities1[1]));
+    $capitalGain2 = new CapitalGain(FiatAmount::GBP($quantities2[0]), FiatAmount::GBP($quantities2[1]));
+
+    $capitalGain = $capitalGain1->minus($capitalGain2);
+
+    expect((string) $capitalGain->costBasis->quantity)->toBe($result[0]);
+    expect((string) $capitalGain->proceeds->quantity)->toBe($result[1]);
+    expect((string) $capitalGain->difference->quantity)->toBe($result[2]);
+})->with([
+    'scenario 1' => [['1', '1'], ['1', '1'], ['0', '0', '0']],
+    'scenario 2' => [['-1', '-1'], ['-1', '-1'], ['0', '0', '0']],
+    'scenario 3' => [['0', '0'], ['0', '0'], ['0', '0', '0']],
+    'scenario 4' => [['-0', '-0'], ['-0', '-0'], ['0', '0', '0']],
+    'scenario 5' => [['1', '1'], ['0', '1'], ['1', '0', '-1']],
+    'scenario 6' => [['1', '1'], ['1', '0'], ['0', '1', '1']],
+]);

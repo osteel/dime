@@ -23,7 +23,7 @@ final class SharePoolingAssetReactor extends EventConsumer
     {
         $this->runner->run(new UpdateCapitalGain(
             date: $event->disposal->date,
-            capitalGain: new CapitalGain($event->disposal->costBasis, $event->disposal->proceeds),
+            capitalGainUpdate: new CapitalGain($event->disposal->costBasis, $event->disposal->proceeds),
         ));
     }
 
