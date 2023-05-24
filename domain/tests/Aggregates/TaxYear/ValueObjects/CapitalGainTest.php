@@ -15,18 +15,6 @@ it('can instantiate a capital gain and return whether it is a gain or a loss', f
     'zero' => ['1', '1', '0', true, false],
 ]);
 
-it('can return a capital gain with opposite quantities', function (string $from, string $to) {
-    $capitalGain = (new CapitalGain(FiatAmount::GBP($from), FiatAmount::GBP($from)))->opposite();
-
-    expect((string) $capitalGain->costBasis->quantity)->toBe($to);
-    expect((string) $capitalGain->proceeds->quantity)->toBe($to);
-    expect((string) $capitalGain->difference->quantity)->toBe('0');
-})->with([
-    'positive' => ['1', '-1'],
-    'negative' => ['-1', '1'],
-    'zero' => ['0', '-0'],
-]);
-
 it('can tell whether two capital gains are equal', function (string $costBasis1, string $proceeds1, string $costBasis2, string $proceeds2, bool $result) {
     $capitalGain1 = new CapitalGain(FiatAmount::GBP($costBasis1), FiatAmount::GBP($proceeds1));
     $capitalGain2 = new CapitalGain(FiatAmount::GBP($costBasis2), FiatAmount::GBP($proceeds2));

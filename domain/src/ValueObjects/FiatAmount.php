@@ -31,11 +31,6 @@ final readonly class FiatAmount implements Stringable
         return new self(Quantity::zero(), $this->currency);
     }
 
-    public function opposite(): FiatAmount
-    {
-        return new self($this->quantity->opposite(), $this->currency);
-    }
-
     public function isPositive(): bool
     {
         return $this->quantity->isPositive();

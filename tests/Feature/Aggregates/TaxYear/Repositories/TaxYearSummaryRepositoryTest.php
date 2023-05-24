@@ -81,7 +81,7 @@ it('can retrieve an existing tax year summary and update its capital gain', func
         ]),
     ]);
 
-    $capitalGain = new CapitalGain(costBasis: FiatAmount::GBP('100'), proceeds: FiatAmount::GBP('150'));
+    $capitalGain = new CapitalGain(costBasis: FiatAmount::GBP('200'), proceeds: FiatAmount::GBP('250'));
 
     $this->taxYearSummaryRepository->updateCapitalGain($this->taxYearId, $capitalGain);
 
@@ -113,7 +113,7 @@ it('can retrieve an existing tax year summary and update its income', function (
         'income' => '100',
     ]);
 
-    $this->taxYearSummaryRepository->updateIncome($this->taxYearId, FiatAmount::GBP('100'));
+    $this->taxYearSummaryRepository->updateIncome($this->taxYearId, FiatAmount::GBP('200'));
 
     $this->assertDatabaseCount('tax_year_summaries', 1);
     $this->assertDatabaseHas('tax_year_summaries', [
@@ -139,7 +139,7 @@ it('can retrieve an existing tax year summary and update its non-attributable al
         'non_attributable_allowable_cost' => '100',
     ]);
 
-    $this->taxYearSummaryRepository->updateNonAttributableAllowableCost($this->taxYearId, FiatAmount::GBP('100'));
+    $this->taxYearSummaryRepository->updateNonAttributableAllowableCost($this->taxYearId, FiatAmount::GBP('200'));
 
     $this->assertDatabaseCount('tax_year_summaries', 1);
     $this->assertDatabaseHas('tax_year_summaries', [

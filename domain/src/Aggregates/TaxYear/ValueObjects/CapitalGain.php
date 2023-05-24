@@ -20,11 +20,6 @@ final readonly class CapitalGain implements JsonSerializable, Stringable
         $this->difference = $proceeds->minus($costBasis);
     }
 
-    public function opposite(): self
-    {
-        return new self($this->costBasis->opposite(), $this->proceeds->opposite());
-    }
-
     public function isGain(): bool
     {
         return $this->difference->isPositive();
