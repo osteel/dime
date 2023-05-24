@@ -27,7 +27,7 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
         ->when(new Message($sharePoolingAssetDisposedOf))
         ->then(fn () => $this->runner->shouldHaveReceived(
             'run',
-            fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo($capitalGain)
+            fn (UpdateCapitalGain $action) => $action->capitalGainUpdate->difference->isEqualTo($capitalGain)
         )->once());
 })->with([
     'gain' => ['100', '101', '1'],
@@ -48,7 +48,7 @@ it('can handle a capital gain update reversion', function (string $costBasis, st
         ->when(new Message($sharePoolingAssetDisposalReverted))
         ->then(fn () => $this->runner->shouldHaveReceived(
             'run',
-            fn (RevertCapitalGainUpdate $action) => $action->capitalGain->difference->isEqualTo($capitalGain)
+            fn (RevertCapitalGainUpdate $action) => $action->capitalGainUpdate->difference->isEqualTo($capitalGain)
         )->once());
 })->with([
     'gain' => ['100', '101', '1'],

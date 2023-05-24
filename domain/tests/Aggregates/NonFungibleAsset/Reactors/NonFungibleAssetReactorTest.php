@@ -22,7 +22,7 @@ it('can handle a capital gain', function () {
         ->when(new Message($nonFungibleAssetDisposedOf))
         ->then(fn () => $this->runner->shouldHaveReceived(
             'run',
-            fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('1'),
+            fn (UpdateCapitalGain $action) => $action->capitalGainUpdate->difference->isEqualTo('1'),
         )->once());
 });
 
@@ -38,6 +38,6 @@ it('can handle a capital loss', function () {
         ->when(new Message($nonFungibleAssetDisposedOf))
         ->then(fn () => $this->runner->shouldHaveReceived(
             'run',
-            fn (UpdateCapitalGain $action) => $action->capitalGain->difference->isEqualTo('-1'),
+            fn (UpdateCapitalGain $action) => $action->capitalGainUpdate->difference->isEqualTo('-1'),
         )->once());
 });

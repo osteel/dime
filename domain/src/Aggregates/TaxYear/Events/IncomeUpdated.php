@@ -11,7 +11,8 @@ final class IncomeUpdated
 {
     public function __construct(
         public readonly LocalDate $date,
-        public readonly FiatAmount $income,
+        public readonly FiatAmount $incomeUpdate,
+        public readonly FiatAmount $newIncome,
     ) {
     }
 }

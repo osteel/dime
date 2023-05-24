@@ -21,7 +21,7 @@ final class NonFungibleAssetReactor extends EventConsumer
     {
         $this->runner->run(new UpdateCapitalGain(
             date: $event->date,
-            capitalGain: new CapitalGain($event->costBasis, $event->proceeds),
+            capitalGainUpdate: new CapitalGain($event->costBasis, $event->proceeds),
         ));
     }
 }

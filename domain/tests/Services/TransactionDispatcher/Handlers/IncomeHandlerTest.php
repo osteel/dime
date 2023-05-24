@@ -19,7 +19,7 @@ it('can handle an income transaction', function () {
 
     $this->runner->shouldHaveReceived(
         'run',
-        fn (UpdateIncome $action) => $action->income->isEqualTo($transaction->marketValue),
+        fn (UpdateIncome $action) => $action->incomeUpdate->isEqualTo($transaction->marketValue),
     )->once();
 });
 

@@ -14,7 +14,7 @@ final class UpdateNonAttributableAllowableCost implements Stringable
 {
     public function __construct(
         public readonly LocalDate $date,
-        public readonly FiatAmount $nonAttributableAllowableCost,
+        public readonly FiatAmount $nonAttributableAllowableCostChange,
     ) {
     }
 
@@ -30,10 +30,10 @@ final class UpdateNonAttributableAllowableCost implements Stringable
     public function __toString(): string
     {
         return sprintf(
-            '%s (date: %s, non-attributable allowable cost: %s)',
+            '%s (date: %s, non-attributable allowable cost change: %s)',
             self::class,
             $this->date,
-            $this->nonAttributableAllowableCost,
+            $this->nonAttributableAllowableCostChange,
         );
     }
 }

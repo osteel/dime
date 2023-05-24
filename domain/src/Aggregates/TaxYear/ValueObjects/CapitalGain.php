@@ -20,11 +20,6 @@ final readonly class CapitalGain implements JsonSerializable, Stringable
         $this->difference = $proceeds->minus($costBasis);
     }
 
-    public function opposite(): self
-    {
-        return new self($this->costBasis->opposite(), $this->proceeds->opposite());
-    }
-
     public function isGain(): bool
     {
         return $this->difference->isPositive();
@@ -45,6 +40,22 @@ final readonly class CapitalGain implements JsonSerializable, Stringable
     public function currency(): FiatCurrency
     {
         return $this->difference->currency;
+    }
+
+    public function plus(CapitalGain $capitalGain): self
+    {
+        return new self(
+            costBasis: $this->costBasis->plus($capitalGain->costBasis),
+            proceeds: $this->proceeds->plus($capitalGain->proceeds),
+        );
+    }
+
+    public function minus(CapitalGain $capitalGain): self
+    {
+        return new self(
+            costBasis: $this->costBasis->minus($capitalGain->costBasis),
+            proceeds: $this->proceeds->minus($capitalGain->proceeds),
+        );
     }
 
     /** @return array{cost_basis:string,proceeds:string,difference:string} */

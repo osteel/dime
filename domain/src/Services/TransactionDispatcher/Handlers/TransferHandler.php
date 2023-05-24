@@ -24,7 +24,7 @@ class TransferHandler
 
         $this->runner->run(new UpdateNonAttributableAllowableCost(
             date: $transaction->date,
-            nonAttributableAllowableCost: $transaction->fee->marketValue,
+            nonAttributableAllowableCostChange: $transaction->fee->marketValue,
         ));
     }
 }

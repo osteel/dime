@@ -80,6 +80,7 @@ class NonFungibleAsset implements AggregateRoot
         $this->recordThat(new NonFungibleAssetCostBasisIncreased(
             date: $action->date,
             costBasisIncrease: $action->costBasisIncrease,
+            newCostBasis: $this->costBasis?->plus($action->costBasisIncrease) ?? $action->costBasisIncrease,
         ));
     }
 
@@ -87,7 +88,7 @@ class NonFungibleAsset implements AggregateRoot
     {
         assert(! is_null($this->costBasis));
 
-        $this->costBasis = $this->costBasis->plus($event->costBasisIncrease);
+        $this->costBasis = $event->newCostBasis;
         $this->previousTransactionDate = $event->date;
     }
 

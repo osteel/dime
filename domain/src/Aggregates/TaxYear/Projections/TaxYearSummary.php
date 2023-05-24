@@ -9,7 +9,6 @@ use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Tests\Aggregates\TaxYear\Factories\Projections\TaxYearSummaryFactory;
-use Domain\ValueObjects\Exceptions\FiatAmountException;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -46,33 +45,6 @@ final class TaxYearSummary extends Model
     protected static function newFactory(): TaxYearSummaryFactory
     {
         return TaxYearSummaryFactory::new();
-    }
-
-    /** @throws FiatAmountException */
-    public function updateCapitalGain(CapitalGain $capitalGain): self
-    {
-        $this->capital_gain = new CapitalGain(
-            costBasis: $this->capital_gain->costBasis->plus($capitalGain->costBasis),
-            proceeds: $this->capital_gain->proceeds->plus($capitalGain->proceeds),
-        );
-
-        return $this;
-    }
-
-    /** @throws FiatAmountException */
-    public function updateIncome(FiatAmount $amount): self
-    {
-        $this->income = $this->income->plus($amount);
-
-        return $this;
-    }
-
-    /** @throws FiatAmountException */
-    public function updateNonAttributableAllowableCost(FiatAmount $amount): self
-    {
-        $this->non_attributable_allowable_cost = $this->non_attributable_allowable_cost->plus($amount);
-
-        return $this;
     }
 
     protected function taxYearId(): Attribute

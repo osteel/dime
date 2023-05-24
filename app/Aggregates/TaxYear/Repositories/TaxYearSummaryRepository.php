@@ -16,21 +16,21 @@ class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
     public function updateCapitalGain(TaxYearId $taxYearId, CapitalGain $capitalGain): void
     {
         $this->fetchTaxYearSummary($taxYearId, $capitalGain->currency())
-            ->updateCapitalGain($capitalGain)
+            ->fill(['capital_gain' => $capitalGain])
             ->save();
     }
 
     public function updateIncome(TaxYearId $taxYearId, FiatAmount $income): void
     {
         $this->fetchTaxYearSummary($taxYearId, $income->currency)
-            ->updateIncome($income)
+            ->fill(['income' => $income])
             ->save();
     }
 
     public function updateNonAttributableAllowableCost(TaxYearId $taxYearId, FiatAmount $nonAttributableAllowableCost): void
     {
         $this->fetchTaxYearSummary($taxYearId, $nonAttributableAllowableCost->currency)
-            ->updateNonAttributableAllowableCost($nonAttributableAllowableCost)
+            ->fill(['non_attributable_allowable_cost' => $nonAttributableAllowableCost])
             ->save();
     }
 

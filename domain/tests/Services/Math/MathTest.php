@@ -19,11 +19,12 @@ it('can subtract', function (array $operands, string $result) {
 })->with([
     'scenario 1' => [['1', '1'], '0'],
     'scenario 2' => [['1', '-1'], '2'],
-    'scenario 3' => [['1', '1', '1'], '-1'],
-    'scenario 4' => [['3.33', '1.11'], '2.22'],
-    'scenario 5' => [['-3.33', '1.11'], '-4.44'],
-    'scenario 6' => [['2.246913569', '1.123456789'], '1.12345678'],
-    'scenario 7' => [['2.2222223', '1.11111111'], '1.11111119'],
+    'scenario 4' => [['0', '1'], '-1'],
+    'scenario 5' => [['1', '1', '1'], '-1'],
+    'scenario 6' => [['3.33', '1.11'], '2.22'],
+    'scenario 7' => [['-3.33', '1.11'], '-4.44'],
+    'scenario 8' => [['2.246913569', '1.123456789'], '1.12345678'],
+    'scenario 9' => [['2.2222223', '1.11111111'], '1.11111119'],
 ]);
 
 it('can multiply', function (string $multiplicand, string $multiplier, string $result) {

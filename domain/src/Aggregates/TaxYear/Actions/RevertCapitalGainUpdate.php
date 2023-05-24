@@ -14,7 +14,7 @@ final class RevertCapitalGainUpdate implements Stringable
 {
     final public function __construct(
         public readonly LocalDate $date,
-        public readonly CapitalGain $capitalGain,
+        public readonly CapitalGain $capitalGainUpdate,
     ) {
     }
 
@@ -29,6 +29,6 @@ final class RevertCapitalGainUpdate implements Stringable
 
     public function __toString(): string
     {
-        return sprintf('%s (date: %s, capital gain: (%s))', self::class, $this->date, $this->capitalGain);
+        return sprintf('%s (date: %s, capital gain: (%s))', self::class, $this->date, $this->capitalGainUpdate);
     }
 }

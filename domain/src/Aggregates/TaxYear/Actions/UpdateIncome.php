@@ -14,7 +14,7 @@ final class UpdateIncome implements Stringable
 {
     public function __construct(
         public readonly LocalDate $date,
-        public readonly FiatAmount $income,
+        public readonly FiatAmount $incomeUpdate,
     ) {
     }
 
@@ -29,6 +29,6 @@ final class UpdateIncome implements Stringable
 
     public function __toString(): string
     {
-        return sprintf('%s (date: %s, income: %s)', self::class, $this->date, $this->income);
+        return sprintf('%s (date: %s, income change: %s)', self::class, $this->date, $this->incomeUpdate);
     }
 }

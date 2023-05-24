@@ -102,6 +102,7 @@ it('can increase the cost basis of a non-fungible asset', function () {
     $nonFungibleAssetCostBasisIncreased = new NonFungibleAssetCostBasisIncreased(
         date: $increaseNonFungibleAssetCostBasis->date,
         costBasisIncrease: $increaseNonFungibleAssetCostBasis->costBasisIncrease,
+        newCostBasis: FiatAmount::GBP('150'),
     );
 
     /** @var AggregateRootTestCase $this */

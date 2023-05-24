@@ -11,7 +11,8 @@ final class NonAttributableAllowableCostUpdated
 {
     public function __construct(
         public readonly LocalDate $date,
-        public readonly FiatAmount $nonAttributableAllowableCost,
+        public readonly FiatAmount $nonAttributableAllowableCostChange,
+        public readonly FiatAmount $newNonAttributableAllowableCost,
     ) {
     }
 }

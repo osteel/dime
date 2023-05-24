@@ -21,13 +21,6 @@ it('can return a fiat amount with a zero quantity', function () {
     $this->assertEquals($amount->currency, FiatCurrency::GBP);
 });
 
-it('can return a fiat amount with the opposite quantity', function (string $from, string $to) {
-    expect((string) FiatAmount::GBP($from)->opposite()->quantity)->toBe($to);
-})->with([
-    'positive' => ['1', '-1'],
-    'negative' => ['-1', '1'],
-]);
-
 it('can tell whether a fiat amount is positive', function (string $quantity, bool $result) {
     expect(FiatAmount::GBP($quantity)->isPositive())->toBe($result);
 })->with([

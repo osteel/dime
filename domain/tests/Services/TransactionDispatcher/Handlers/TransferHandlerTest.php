@@ -18,7 +18,7 @@ it('can handle a transfer operation', function () {
 
     $this->runner->shouldHaveReceived(
         'run',
-        fn (UpdateNonAttributableAllowableCost $action) => $action->nonAttributableAllowableCost->isEqualTo($fee),
+        fn (UpdateNonAttributableAllowableCost $action) => $action->nonAttributableAllowableCostChange->isEqualTo($fee),
     )->once();
 });
 

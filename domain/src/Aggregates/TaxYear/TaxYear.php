@@ -13,6 +13,7 @@ use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
 use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
 use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
 use Domain\Aggregates\TaxYear\Exceptions\TaxYearException;
+use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
@@ -33,7 +34,7 @@ class TaxYear implements AggregateRoot
 
     private ?FiatCurrency $currency = null;
 
-    private ?FiatAmount $capitalGain = null;
+    private ?CapitalGain $capitalGain = null;
 
     private ?FiatAmount $income = null;
 
@@ -47,18 +48,19 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function updateCapitalGain(UpdateCapitalGain $action): void
     {
-        $this->checkCurrency($action->capitalGain->currency(), $action);
+        $this->checkCurrency($action->capitalGainUpdate->currency(), $action);
 
         $this->recordThat(new CapitalGainUpdated(
             date: $action->date,
-            capitalGain: $action->capitalGain,
+            capitalGainUpdate: $action->capitalGainUpdate,
+            newCapitalGain: $this->capitalGain?->plus($action->capitalGainUpdate) ?? $action->capitalGainUpdate,
         ));
     }
 
     public function applyCapitalGainUpdated(CapitalGainUpdated $event): void
     {
-        $this->currency ??= $event->capitalGain->currency();
-        $this->capitalGain = $this->capitalGain?->plus($event->capitalGain->difference) ?? $event->capitalGain->difference;
+        $this->currency ??= $event->capitalGainUpdate->currency();
+        $this->capitalGain = $event->newCapitalGain;
     }
 
     /** @throws TaxYearException */
@@ -68,54 +70,55 @@ class TaxYear implements AggregateRoot
             throw TaxYearException::cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(taxYearId: $this->aggregateRootId);
         }
 
-        $this->checkCurrency($action->capitalGain->currency(), $action);
+        $this->checkCurrency($action->capitalGainUpdate->currency(), $action);
 
         $this->recordThat(new CapitalGainUpdateReverted(
             date: $action->date,
-            capitalGain: $action->capitalGain,
+            capitalGainUpdate: $action->capitalGainUpdate,
+            newCapitalGain: $this->capitalGain?->minus($action->capitalGainUpdate) ?? $action->capitalGainUpdate,
         ));
     }
 
     public function applyCapitalGainUpdateReverted(CapitalGainUpdateReverted $event): void
     {
-        assert(! is_null($this->capitalGain));
-
-        $this->capitalGain = $this->capitalGain->minus($event->capitalGain->difference);
+        $this->capitalGain = $event->newCapitalGain;
     }
 
     /** @throws TaxYearException */
     public function updateIncome(UpdateIncome $action): void
     {
-        $this->checkCurrency($action->income->currency, $action);
+        $this->checkCurrency($action->incomeUpdate->currency, $action);
 
         $this->recordThat(new IncomeUpdated(
             date: $action->date,
-            income: $action->income,
+            incomeUpdate: $action->incomeUpdate,
+            newIncome: $this->income?->plus($action->incomeUpdate) ?? $action->incomeUpdate,
         ));
     }
 
     public function applyIncomeUpdated(IncomeUpdated $event): void
     {
-        $this->currency ??= $event->income->currency;
-        $this->income = $this->income?->plus($event->income) ?? $event->income;
+        $this->currency ??= $event->incomeUpdate->currency;
+        $this->income = $event->newIncome;
     }
 
     /** @throws TaxYearException */
     public function updateNonAttributableAllowableCost(UpdateNonAttributableAllowableCost $action): void
     {
-        $this->checkCurrency($action->nonAttributableAllowableCost->currency, $action);
+        $this->checkCurrency($action->nonAttributableAllowableCostChange->currency, $action);
 
         $this->recordThat(new NonAttributableAllowableCostUpdated(
             date: $action->date,
-            nonAttributableAllowableCost: $action->nonAttributableAllowableCost,
+            nonAttributableAllowableCostChange: $action->nonAttributableAllowableCostChange,
+            newNonAttributableAllowableCost: $this->nonAttributableAllowableCost?->plus($action->nonAttributableAllowableCostChange)
+                ?? $action->nonAttributableAllowableCostChange,
         ));
     }
 
     public function applyNonAttributableAllowableCostUpdated(NonAttributableAllowableCostUpdated $event): void
     {
-        $this->currency ??= $event->nonAttributableAllowableCost->currency;
-        $this->nonAttributableAllowableCost = $this->nonAttributableAllowableCost?->plus($event->nonAttributableAllowableCost)
-            ?? $event->nonAttributableAllowableCost;
+        $this->currency ??= $event->nonAttributableAllowableCostChange->currency;
+        $this->nonAttributableAllowableCost = $event->newNonAttributableAllowableCost;
     }
 
     /** @throws TaxYearException */
