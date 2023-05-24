@@ -30,7 +30,7 @@
         "phpoffice/phpspreadsheet": "^1.28"
     },
     "require-dev": {
-        "eventsauce/test-utilities": "^3.3",
+        "eventsauce/pest-utilities": "^3.4",
         "fakerphp/faker": "^1.21.0",
         "intonate/tinker-zero": "^1.2",
         "laravel/pint": "^1.6",

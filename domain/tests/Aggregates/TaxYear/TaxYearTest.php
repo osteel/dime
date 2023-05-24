@@ -14,25 +14,25 @@ use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Enums\FiatCurrency;
 use Domain\Tests\Aggregates\TaxYear\TaxYearTestCase;
 use Domain\ValueObjects\FiatAmount;
-use EventSauce\EventSourcing\TestUtilities\AggregateRootTestCase;
+
+use function EventSauce\EventSourcing\PestTooling\expectToFail;
+use function EventSauce\EventSourcing\PestTooling\given;
+use function EventSauce\EventSourcing\PestTooling\then;
+use function EventSauce\EventSourcing\PestTooling\when;
 
 uses(TaxYearTestCase::class);
 
 it('can update the capital gain', function (string $costBasis, string $proceeds) {
-    $updateCapitalGain = new UpdateCapitalGain(
+    when($updateCapitalGain = new UpdateCapitalGain(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
-    );
+    ));
 
-    $capitalGainUpdated = new CapitalGainUpdated(
+    then(new CapitalGainUpdated(
         date: $updateCapitalGain->date,
         capitalGainUpdate: $updateCapitalGain->capitalGainUpdate,
         newCapitalGain: $updateCapitalGain->capitalGainUpdate,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->when($updateCapitalGain)
-        ->then($capitalGainUpdated);
+    ));
 })->with([
     'gain' => ['50', '150'],
     'loss' => ['150', '50'],
@@ -41,181 +41,141 @@ it('can update the capital gain', function (string $costBasis, string $proceeds)
 it('cannot update the capital gain because the currencies don\'t match', function () {
     $capitalGainUpdate = new CapitalGain(FiatAmount::GBP('50'), FiatAmount::GBP('150'));
 
-    $capitalGainUpdated = new CapitalGainUpdated(
+    given(new CapitalGainUpdated(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: $capitalGainUpdate,
         newCapitalGain: $capitalGainUpdate,
-    );
+    ));
 
-    $updateCapitalGain = new UpdateCapitalGain(
+    when($updateCapitalGain = new UpdateCapitalGain(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: new CapitalGain(new FiatAmount('50', FiatCurrency::EUR), new FiatAmount('150', FiatCurrency::EUR)),
-    );
+    ));
 
-    $cannotUpdateCapitalGain = TaxYearException::currencyMismatch(
+    expectToFail(TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $updateCapitalGain,
         current: FiatCurrency::GBP,
         incoming: FiatCurrency::EUR,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($capitalGainUpdated)
-        ->when($updateCapitalGain)
-        ->expectToFail($cannotUpdateCapitalGain);
+    ));
 });
 
 it('can revert a capital gain update', function (string $costBasis, string $proceeds) {
     $capitalGainUpdate = new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds));
 
-    $capitalGainUpdated = new CapitalGainUpdated(
+    given(new CapitalGainUpdated(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: $capitalGainUpdate,
         newCapitalGain: $capitalGainUpdate,
-    );
+    ));
 
-    $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
+    when($revertCapitalGainUpdate = new RevertCapitalGainUpdate(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
-    );
+    ));
 
-    $capitalGainReverted = new CapitalGainUpdateReverted(
+    then(new CapitalGainUpdateReverted(
         date: $revertCapitalGainUpdate->date,
         capitalGainUpdate: $revertCapitalGainUpdate->capitalGainUpdate,
         newCapitalGain: new CapitalGain(FiatAmount::GBP(0), FiatAmount::GBP(0)),
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($capitalGainUpdated)
-        ->when($revertCapitalGainUpdate)
-        ->then($capitalGainReverted);
+    ));
 })->with([
     'gain' => ['50', '150'],
     'loss' => ['150', '50'],
 ]);
 
 it('cannot revert a capital gain update before the capital gain was updated', function () {
-    $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
+    when(new RevertCapitalGainUpdate(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: new CapitalGain(FiatAmount::GBP('50'), FiatAmount::GBP('150')),
-    );
+    ));
 
-    $cannotRevertCapitalGain = TaxYearException::cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(
+    expectToFail(TaxYearException::cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(
         taxYearId: $this->aggregateRootId,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->when($revertCapitalGainUpdate)
-        ->expectToFail($cannotRevertCapitalGain);
+    ));
 });
 
 it('cannot revert a capital gain update because the currencies don\'t match', function () {
     $capitalGainUpdate = new CapitalGain(FiatAmount::GBP('50'), FiatAmount::GBP('150'));
 
-    $capitalGainUpdated = new CapitalGainUpdated(
+    given(new CapitalGainUpdated(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: $capitalGainUpdate,
         newCapitalGain: $capitalGainUpdate,
-    );
+    ));
 
-    $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
+    when($revertCapitalGainUpdate = new RevertCapitalGainUpdate(
         date: LocalDate::parse('2015-10-21'),
         capitalGainUpdate: new CapitalGain(new FiatAmount('50', FiatCurrency::EUR), new FiatAmount('150', FiatCurrency::EUR)),
-    );
+    ));
 
-    $cannotRevertCapitalGainUpdate = TaxYearException::currencyMismatch(
+    expectToFail(TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $revertCapitalGainUpdate,
         current: FiatCurrency::GBP,
         incoming: FiatCurrency::EUR,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($capitalGainUpdated)
-        ->when($revertCapitalGainUpdate)
-        ->expectToFail($cannotRevertCapitalGainUpdate);
+    ));
 });
 
 it('can update the income', function () {
-    $updateIncome = new UpdateIncome(
-        date: LocalDate::parse('2015-10-21'),
-        incomeUpdate: FiatAmount::GBP('100'),
-    );
+    when($updateIncome = new UpdateIncome(date: LocalDate::parse('2015-10-21'), incomeUpdate: FiatAmount::GBP('100')));
 
-    $incomeUpdated = new IncomeUpdated(
+    then(new IncomeUpdated(
         date: $updateIncome->date,
         incomeUpdate: $updateIncome->incomeUpdate,
         newIncome: $updateIncome->incomeUpdate,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->when($updateIncome)
-        ->then($incomeUpdated);
+    ));
 });
 
 it('cannot update the income because the currencies don\'t match', function () {
-    $incomeUpdated = new IncomeUpdated(
+    given(new IncomeUpdated(
         date: LocalDate::parse('2015-10-21'),
         incomeUpdate: FiatAmount::GBP('100'),
         newIncome: FiatAmount::GBP('100'),
-    );
+    ));
 
-    $updateIncome = new UpdateIncome(
+    when($updateIncome = new UpdateIncome(
         date: LocalDate::parse('2015-10-21'),
         incomeUpdate: new FiatAmount('100', FiatCurrency::EUR),
-    );
+    ));
 
-    $cannotUpdateIncome = TaxYearException::currencyMismatch(
+    expectToFail(TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $updateIncome,
         current: FiatCurrency::GBP,
         incoming: FiatCurrency::EUR,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($incomeUpdated)
-        ->when($updateIncome)
-        ->expectToFail($cannotUpdateIncome);
+    ));
 });
 
 it('can update the non-attributable allowable cost', function () {
-    $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
+    when($updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
         date: LocalDate::parse('2015-10-21'),
         nonAttributableAllowableCostChange: FiatAmount::GBP('100'),
-    );
+    ));
 
-    $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
+    then(new NonAttributableAllowableCostUpdated(
         date: $updateNonAttributableAllowableCost->date,
         nonAttributableAllowableCostChange: $updateNonAttributableAllowableCost->nonAttributableAllowableCostChange,
         newNonAttributableAllowableCost: $updateNonAttributableAllowableCost->nonAttributableAllowableCostChange,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->when($updateNonAttributableAllowableCost)
-        ->then($nonAttributableAllowableCostUpdated);
+    ));
 });
 
 it('cannot update the non-attributable allowable cost because the currencies don\'t match', function () {
-    $nonAttributableAllowableCostUpdated = new NonAttributableAllowableCostUpdated(
+    given(new NonAttributableAllowableCostUpdated(
         date: LocalDate::parse('2015-10-21'),
         nonAttributableAllowableCostChange: FiatAmount::GBP('100'),
         newNonAttributableAllowableCost: FiatAmount::GBP('100'),
-    );
+    ));
 
-    $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
+    when($updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(
         date: LocalDate::parse('2015-10-21'),
         nonAttributableAllowableCostChange: new FiatAmount('100', FiatCurrency::EUR),
-    );
+    ));
 
-    $cannotUpdateNonAttributableAllowableCost = TaxYearException::currencyMismatch(
+    expectToFail(TaxYearException::currencyMismatch(
         taxYearId: $this->aggregateRootId,
         action: $updateNonAttributableAllowableCost,
         current: FiatCurrency::GBP,
         incoming: FiatCurrency::EUR,
-    );
-
-    /** @var AggregateRootTestCase $this */
-    $this->given($nonAttributableAllowableCostUpdated)
-        ->when($updateNonAttributableAllowableCost)
-        ->expectToFail($cannotUpdateNonAttributableAllowableCost);
+    ));
 });
