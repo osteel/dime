@@ -11,7 +11,8 @@ final class CapitalGainUpdateReverted
 {
     final public function __construct(
         public readonly LocalDate $date,
-        public readonly CapitalGain $capitalGain,
+        public readonly CapitalGain $capitalGainUpdate,
+        public readonly CapitalGain $newCapitalGain,
     ) {
     }
 }

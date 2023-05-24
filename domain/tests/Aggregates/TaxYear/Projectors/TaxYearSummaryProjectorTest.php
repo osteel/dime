@@ -38,9 +38,12 @@ it('can handle a capital gain update', function (string $costBasis, string $proc
 ]);
 
 it('can handle a capital gain update reversion', function (string $costBasis, string $proceeds, string $capitalGainDifference) {
+    $capitalGainUpdate = new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds));
+
     $capitalGainUpdateReverted = new CapitalGainUpdateReverted(
         date: LocalDate::parse('2015-10-21'),
-        capitalGain: new CapitalGain(FiatAmount::GBP($costBasis), FiatAmount::GBP($proceeds)),
+        capitalGainUpdate: $capitalGainUpdate,
+        newCapitalGain: $capitalGainUpdate,
     );
 
     /** @var MessageConsumerTestCase $this */
@@ -48,7 +51,7 @@ it('can handle a capital gain update reversion', function (string $costBasis, st
         ->when(new Message($capitalGainUpdateReverted))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateCapitalGain')
             ->withArgs(fn (AggregateRootId $taxYearId, CapitalGain $capitalGain) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $capitalGain->isEqualTo($capitalGainUpdateReverted->capitalGain->opposite())
+                && $capitalGain->isEqualTo($capitalGainUpdateReverted->capitalGainUpdate->opposite())
                 && (string) $capitalGain->difference->quantity === (string) (new Quantity($capitalGainDifference))->opposite())
             ->once());
 })->with([

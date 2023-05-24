@@ -34,7 +34,7 @@ final class TaxYearSummaryProjector extends EventConsumer
     {
         $this->taxYearSummaryRepository->updateCapitalGain(
             taxYearId: $this->getTaxYearId($message),
-            capitalGain: $event->capitalGain->opposite(),
+            capitalGain: $event->capitalGainUpdate->opposite(),
         );
     }
 

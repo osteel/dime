@@ -70,19 +70,18 @@ class TaxYear implements AggregateRoot
             throw TaxYearException::cannotRevertCapitalGainUpdateBeforeCapitalGainIsUpdated(taxYearId: $this->aggregateRootId);
         }
 
-        $this->checkCurrency($action->capitalGain->currency(), $action);
+        $this->checkCurrency($action->capitalGainUpdate->currency(), $action);
 
         $this->recordThat(new CapitalGainUpdateReverted(
             date: $action->date,
-            capitalGain: $action->capitalGain,
+            capitalGainUpdate: $action->capitalGainUpdate,
+            newCapitalGain: $this->capitalGain?->minus($action->capitalGainUpdate) ?? $action->capitalGainUpdate,
         ));
     }
 
     public function applyCapitalGainUpdateReverted(CapitalGainUpdateReverted $event): void
     {
-        assert(! is_null($this->capitalGain));
-
-        $this->capitalGain = $this->capitalGain->minus($event->capitalGain);
+        $this->capitalGain = $event->newCapitalGain;
     }
 
     /** @throws TaxYearException */

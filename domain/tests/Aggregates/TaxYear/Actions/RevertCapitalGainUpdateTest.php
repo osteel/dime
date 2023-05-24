@@ -13,7 +13,7 @@ it('can revert a capital gain update', function () {
 
     $revertCapitalGainUpdate = new RevertCapitalGainUpdate(
         date: LocalDate::parse('2015-10-21'),
-        capitalGain: new CapitalGain(
+        capitalGainUpdate: new CapitalGain(
             costBasis: FiatAmount::GBP('1'),
             proceeds: FiatAmount::GBP('2'),
         )
