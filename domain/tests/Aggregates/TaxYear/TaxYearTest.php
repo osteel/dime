@@ -139,12 +139,13 @@ it('cannot revert a capital gain update because the currencies don\'t match', fu
 it('can update the income', function () {
     $updateIncome = new UpdateIncome(
         date: LocalDate::parse('2015-10-21'),
-        income: FiatAmount::GBP('100'),
+        incomeUpdate: FiatAmount::GBP('100'),
     );
 
     $incomeUpdated = new IncomeUpdated(
         date: $updateIncome->date,
-        income: $updateIncome->income,
+        incomeUpdate: $updateIncome->incomeUpdate,
+        newIncome: $updateIncome->incomeUpdate,
     );
 
     /** @var AggregateRootTestCase $this */
@@ -155,12 +156,13 @@ it('can update the income', function () {
 it('cannot update the income because the currencies don\'t match', function () {
     $incomeUpdated = new IncomeUpdated(
         date: LocalDate::parse('2015-10-21'),
-        income: FiatAmount::GBP('100'),
+        incomeUpdate: FiatAmount::GBP('100'),
+        newIncome: FiatAmount::GBP('100'),
     );
 
     $updateIncome = new UpdateIncome(
         date: LocalDate::parse('2015-10-21'),
-        income: new FiatAmount('100', FiatCurrency::EUR),
+        incomeUpdate: new FiatAmount('100', FiatCurrency::EUR),
     );
 
     $cannotUpdateIncome = TaxYearException::currencyMismatch(

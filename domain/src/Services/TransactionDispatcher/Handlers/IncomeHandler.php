@@ -22,7 +22,7 @@ class IncomeHandler
 
         $this->runner->run(new UpdateIncome(
             date: $transaction->date,
-            income: $transaction->marketValue,
+            incomeUpdate: $transaction->marketValue,
         ));
     }
 }

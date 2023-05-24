@@ -87,18 +87,19 @@ class TaxYear implements AggregateRoot
     /** @throws TaxYearException */
     public function updateIncome(UpdateIncome $action): void
     {
-        $this->checkCurrency($action->income->currency, $action);
+        $this->checkCurrency($action->incomeUpdate->currency, $action);
 
         $this->recordThat(new IncomeUpdated(
             date: $action->date,
-            income: $action->income,
+            incomeUpdate: $action->incomeUpdate,
+            newIncome: $this->income?->plus($action->incomeUpdate) ?? $action->incomeUpdate,
         ));
     }
 
     public function applyIncomeUpdated(IncomeUpdated $event): void
     {
-        $this->currency ??= $event->income->currency;
-        $this->income = $this->income?->plus($event->income) ?? $event->income;
+        $this->currency ??= $event->incomeUpdate->currency;
+        $this->income = $event->newIncome;
     }
 
     /** @throws TaxYearException */

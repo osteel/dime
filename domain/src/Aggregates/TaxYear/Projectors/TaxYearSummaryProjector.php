@@ -43,7 +43,7 @@ final class TaxYearSummaryProjector extends EventConsumer
     {
         $this->taxYearSummaryRepository->updateIncome(
             taxYearId: $this->getTaxYearId($message),
-            income: $event->income,
+            income: $event->incomeUpdate,
         );
     }
 

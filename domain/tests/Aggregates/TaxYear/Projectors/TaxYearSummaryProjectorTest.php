@@ -62,7 +62,8 @@ it('can handle a capital gain update reversion', function (string $costBasis, st
 it('can handle an income update', function () {
     $incomeUpdated = new IncomeUpdated(
         date: LocalDate::parse('2015-10-21'),
-        income: FiatAmount::GBP('100'),
+        incomeUpdate: FiatAmount::GBP('100'),
+        newIncome: FiatAmount::GBP('100'),
     );
 
     /** @var MessageConsumerTestCase $this */
@@ -70,7 +71,7 @@ it('can handle an income update', function () {
         ->when(new Message($incomeUpdated))
         ->then(fn () => $this->taxYearSummaryRepository->shouldHaveReceived('updateIncome')
             ->withArgs(fn (AggregateRootId $taxYearId, FiatAmount $income) => $taxYearId->toString() === $this->aggregateRootId->toString()
-                && $income === $incomeUpdated->income)
+                && $income === $incomeUpdated->incomeUpdate)
             ->once());
 });
 

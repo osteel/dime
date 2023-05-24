@@ -12,7 +12,7 @@ it('can update the income', function () {
 
     $updateIncome = new UpdateIncome(
         date: LocalDate::parse('2015-10-21'),
-        income: FiatAmount::GBP('1'),
+        incomeUpdate: FiatAmount::GBP('1'),
     );
 
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
