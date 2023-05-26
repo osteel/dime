@@ -9,7 +9,7 @@ use Brick\DateTime\LocalDate;
 use DateTime;
 use Domain\Enums\FiatCurrency;
 use Domain\Enums\Operation;
-use Domain\Services\TransactionDispatcher\TransactionDispatcher;
+use Domain\Services\TransactionDispatcher\TransactionDispatcherContract;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\Fee;
 use Domain\ValueObjects\FiatAmount;
@@ -21,7 +21,7 @@ use Domain\ValueObjects\Transactions\Transfer;
 
 final class TransactionProcessor implements TransactionProcessorContract
 {
-    public function __construct(private readonly TransactionDispatcher $transactionDispatcher)
+    public function __construct(private readonly TransactionDispatcherContract $transactionDispatcher)
     {
     }
 

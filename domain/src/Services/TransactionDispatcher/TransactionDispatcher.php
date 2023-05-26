@@ -15,7 +15,7 @@ use Domain\ValueObjects\Transactions\Swap;
 use Domain\ValueObjects\Transactions\Transaction;
 use Domain\ValueObjects\Transactions\Transfer;
 
-class TransactionDispatcher
+final class TransactionDispatcher implements TransactionDispatcherContract
 {
     public function __construct(
         private readonly IncomeHandler $incomeHandler,
