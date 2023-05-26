@@ -3,13 +3,13 @@
 namespace Domain\Tests\Aggregates\TaxYear;
 
 use Brick\DateTime\LocalDate;
+use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
 use Domain\Aggregates\TaxYear\Actions\UpdateCapitalGain;
 use Domain\Aggregates\TaxYear\Actions\UpdateIncome;
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
-use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
 use Domain\Aggregates\TaxYear\TaxYear;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
-use Domain\Tests\AggregateRootTestCase;
+use Domain\Tests\Aggregates\AggregateRootTestCase;
 use EventSauce\EventSourcing\AggregateRootId;
 
 abstract class TaxYearTestCase extends AggregateRootTestCase

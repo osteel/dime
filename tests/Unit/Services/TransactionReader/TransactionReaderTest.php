@@ -26,7 +26,7 @@ it('can read a spreadsheet of transactions', function () {
     /** @var Generator */
     $transactions = $this->transactionReader->read($path);
 
-    expect(iterator_count($transactions))->toBe(17);
+    expect(iterator_count($transactions))->toBe(19);
 
     /** @var Generator */
     $transactions = $this->transactionReader->read($path);

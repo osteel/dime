@@ -6,7 +6,7 @@ use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
-use Domain\Tests\AggregateRootTestCase;
+use Domain\Tests\Aggregates\AggregateRootTestCase;
 use EventSauce\EventSourcing\AggregateRootId;
 
 abstract class SharePoolingAssetTestCase extends AggregateRootTestCase
