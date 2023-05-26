@@ -6,6 +6,7 @@ namespace App\Aggregates\SharePoolingAsset\Repositories;
 
 use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetRepository as SharePoolingAssetRepositoryInterface;
 use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
+use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetContract;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use EventSauce\EventSourcing\ClassNameInflector;
 use EventSauce\EventSourcing\EventSourcedAggregateRootRepository;
@@ -13,7 +14,7 @@ use EventSauce\EventSourcing\MessageDecorator;
 use EventSauce\EventSourcing\MessageDispatcher;
 use EventSauce\EventSourcing\MessageRepository;
 
-/** @extends EventSourcedAggregateRootRepository<SharePoolingAsset> */
+/** @extends EventSourcedAggregateRootRepository<SharePoolingAssetContract> */
 final class SharePoolingAssetRepository extends EventSourcedAggregateRootRepository implements SharePoolingAssetRepositoryInterface
 {
     public function __construct(
@@ -25,12 +26,12 @@ final class SharePoolingAssetRepository extends EventSourcedAggregateRootReposit
         parent::__construct(SharePoolingAsset::class, $messageRepository, $dispatcher, $decorator, $classNameInflector);
     }
 
-    public function get(SharePoolingAssetId $sharePoolingAssetId): SharePoolingAsset
+    public function get(SharePoolingAssetId $sharePoolingAssetId): SharePoolingAssetContract
     {
         return $this->retrieve($sharePoolingAssetId);
     }
 
-    public function save(SharePoolingAsset $sharePoolingAsset): void
+    public function save(SharePoolingAssetContract $sharePoolingAsset): void
     {
         $this->persist($sharePoolingAsset);
     }

@@ -3,13 +3,13 @@
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Repositories\SharePoolingAssetRepository;
-use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
+use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetContract;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Quantity;
 
 it('can acquire a share pooling asset', function () {
-    $sharePoolingAsset = Mockery::spy(SharePoolingAsset::class);
+    $sharePoolingAsset = Mockery::spy(SharePoolingAssetContract::class);
     $sharePoolingAssetRepository = Mockery::mock(SharePoolingAssetRepository::class);
 
     $acquireSharePoolingAsset = new AcquireSharePoolingAsset(

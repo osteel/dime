@@ -23,17 +23,12 @@ use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\QuantityAdjust
 use Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder\ReversionFinder;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
 use Domain\Enums\FiatCurrency;
-use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 use Stringable;
 
-/**
- * @implements AggregateRoot<SharePoolingAssetId>
- *
- * @property SharePoolingAssetId $aggregateRootId
- */
-class SharePoolingAsset implements AggregateRoot
+/** @property SharePoolingAssetId $aggregateRootId */
+final class SharePoolingAsset implements SharePoolingAssetContract
 {
     /** @phpstan-use AggregateRootBehaviour<SharePoolingAssetId> */
     use AggregateRootBehaviour;
