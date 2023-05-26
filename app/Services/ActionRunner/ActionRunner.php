@@ -7,7 +7,7 @@ namespace App\Services\ActionRunner;
 use Domain\Services\ActionRunner\ActionRunner as ActionRunnerInterface;
 use Illuminate\Bus\Dispatcher;
 
-class ActionRunner implements ActionRunnerInterface
+final class ActionRunner implements ActionRunnerInterface
 {
     public function run(object $action): void
     {

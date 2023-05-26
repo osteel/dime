@@ -9,7 +9,7 @@ use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use EventSauce\MessageRepository\IlluminateMessageRepository\IlluminateUuidV4MessageRepository;
 use Generator;
 
-class TaxYearMessageRepository extends IlluminateUuidV4MessageRepository implements TaxYearMessageRepositoryInterface
+final class TaxYearMessageRepository extends IlluminateUuidV4MessageRepository implements TaxYearMessageRepositoryInterface
 {
     public function all(TaxYearId $taxYearId): Generator
     {

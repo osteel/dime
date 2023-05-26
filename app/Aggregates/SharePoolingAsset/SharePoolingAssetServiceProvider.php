@@ -21,7 +21,7 @@ use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
 use LaravelZero\Framework\Application;
 
-class SharePoolingAssetServiceProvider extends ServiceProvider
+final class SharePoolingAssetServiceProvider extends ServiceProvider
 {
     /** Register any application services. */
     public function register(): void

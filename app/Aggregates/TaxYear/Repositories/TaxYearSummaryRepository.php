@@ -11,7 +11,7 @@ use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
 
-class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
+final class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
 {
     public function updateCapitalGain(TaxYearId $taxYearId, CapitalGain $capitalGain): void
     {

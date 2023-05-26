@@ -13,7 +13,7 @@ use Illuminate\Support\ServiceProvider;
 use Intonate\TinkerZero\TinkerZeroServiceProvider;
 use LaravelZero\Framework\Application;
 
-class AppServiceProvider extends ServiceProvider
+final class AppServiceProvider extends ServiceProvider
 {
     /** Register any application services. */
     public function register(): void

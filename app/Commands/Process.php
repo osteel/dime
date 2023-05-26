@@ -8,7 +8,7 @@ use App\Services\TransactionReader\Exceptions\TransactionReaderException;
 use App\Services\TransactionReader\TransactionReader;
 use LaravelZero\Framework\Commands\Command;
 
-class Process extends Command
+final class Process extends Command
 {
     /**
      * The signature of the command.

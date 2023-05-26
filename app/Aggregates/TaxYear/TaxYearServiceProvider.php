@@ -23,7 +23,7 @@ use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
 use LaravelZero\Framework\Application;
 
-class TaxYearServiceProvider extends ServiceProvider
+final class TaxYearServiceProvider extends ServiceProvider
 {
     /** Register any application services. */
     public function register(): void
