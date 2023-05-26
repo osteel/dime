@@ -17,17 +17,12 @@ use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
-use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 use Stringable;
 
-/**
- * @implements AggregateRoot<TaxYearId>
- *
- * @property TaxYearId $aggregateRootId
- */
-class TaxYear implements AggregateRoot
+/** @property TaxYearId $aggregateRootId */
+final class TaxYear implements TaxYearContract
 {
     /** @phpstan-use AggregateRootBehaviour<TaxYearId> */
     use AggregateRootBehaviour;
