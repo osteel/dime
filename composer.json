@@ -4,7 +4,7 @@
     "keywords": ["crypto", "taxes", "hmrc", "php", "console", "cli"],
     "homepage": "https://github.com/osteel/dime",
     "type": "project",
-    "license": "MIT",
+    "license": "AGPL-3.0-or-later",
     "support": {
         "issues": "https://github.com/osteel/dime/issues",
         "source": "https://github.com/osteel/dime"
