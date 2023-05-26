@@ -1,17 +1,17 @@
 <?php
 
 use App\Services\TransactionProcessor\Exceptions\TransactionProcessorException;
-use App\Services\TransactionProcessor\TransactionProcessor;
+use App\Services\TransactionProcessor\TransactionProcessorContract;
 use App\Services\TransactionReader\Exceptions\TransactionReaderException;
 use App\Services\TransactionReader\TransactionReader;
 use LaravelZero\Framework\Commands\Command;
 
 beforeEach(function () {
     $this->transactionReader = Mockery::mock(TransactionReader::class);
-    $this->transactionProcessor = Mockery::spy(TransactionProcessor::class);
+    $this->transactionProcessor = Mockery::spy(TransactionProcessorContract::class);
 
     $this->instance(TransactionReader::class, $this->transactionReader);
-    $this->instance(TransactionProcessor::class, $this->transactionProcessor);
+    $this->instance(TransactionProcessorContract::class, $this->transactionProcessor);
 
     // The content of the file doesn't matter here, the path just needs to be valid
     $this->path = base_path('tests/stubs/transactions/valid.csv');

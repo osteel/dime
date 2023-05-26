@@ -19,7 +19,7 @@ use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
 use Domain\ValueObjects\Transactions\Transfer;
 
-class TransactionProcessor
+final class TransactionProcessor implements TransactionProcessorContract
 {
     public function __construct(private readonly TransactionDispatcher $transactionDispatcher)
     {
