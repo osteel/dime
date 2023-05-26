@@ -2,13 +2,13 @@
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Actions\DisposeOfNonFungibleAsset;
-use Domain\Aggregates\NonFungibleAsset\NonFungibleAsset;
+use Domain\Aggregates\NonFungibleAsset\NonFungibleAssetContract;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 
 it('can dispose of a non-fungible asset', function () {
-    $nonFungibleAsset = Mockery::spy(NonFungibleAsset::class);
+    $nonFungibleAsset = Mockery::spy(NonFungibleAssetContract::class);
     $nonFungibleAssetRepository = Mockery::mock(NonFungibleAssetRepository::class);
 
     $disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(

@@ -3,14 +3,14 @@
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\NonFungibleAsset\Actions\AcquireNonFungibleAsset;
 use Domain\Aggregates\NonFungibleAsset\Actions\IncreaseNonFungibleAssetCostBasis;
-use Domain\Aggregates\NonFungibleAsset\NonFungibleAsset;
+use Domain\Aggregates\NonFungibleAsset\NonFungibleAssetContract;
 use Domain\Aggregates\NonFungibleAsset\Repositories\NonFungibleAssetRepository;
 use Domain\Services\ActionRunner\ActionRunner;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
 
 it('can acquire a non-fungible asset', function () {
-    $nonFungibleAsset = Mockery::spy(NonFungibleAsset::class);
+    $nonFungibleAsset = Mockery::spy(NonFungibleAssetContract::class);
     $nonFungibleAssetRepository = Mockery::mock(NonFungibleAssetRepository::class);
     $runner = Mockery::mock(ActionRunner::class);
 
@@ -29,7 +29,7 @@ it('can acquire a non-fungible asset', function () {
 });
 
 it('can increase the cost basis of a non-fungible asset', function () {
-    $nonFungibleAsset = Mockery::mock(NonFungibleAsset::class);
+    $nonFungibleAsset = Mockery::mock(NonFungibleAssetContract::class);
     $nonFungibleAssetRepository = Mockery::mock(NonFungibleAssetRepository::class);
     $runner = Mockery::mock(ActionRunner::class);
 
