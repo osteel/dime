@@ -3,12 +3,12 @@
 namespace App\Commands;
 
 use App\Services\TransactionProcessor\Exceptions\TransactionProcessorException;
-use App\Services\TransactionProcessor\TransactionProcessor;
+use App\Services\TransactionProcessor\TransactionProcessorContract;
 use App\Services\TransactionReader\Exceptions\TransactionReaderException;
 use App\Services\TransactionReader\TransactionReader;
 use LaravelZero\Framework\Commands\Command;
 
-class Process extends Command
+final class Process extends Command
 {
     /**
      * The signature of the command.
@@ -27,7 +27,7 @@ class Process extends Command
     protected $description = 'Process a spreadsheet of transactions';
 
     /** Execute the console command. */
-    public function handle(TransactionReader $transactionReader, TransactionProcessor $transactionProcessor): int
+    public function handle(TransactionReader $transactionReader, TransactionProcessorContract $transactionProcessor): int
     {
         $spreadsheet = $this->argument('spreadsheet');
 

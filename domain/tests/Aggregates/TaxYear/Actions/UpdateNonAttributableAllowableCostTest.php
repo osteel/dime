@@ -3,11 +3,11 @@
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearRepository;
-use Domain\Aggregates\TaxYear\TaxYear;
+use Domain\Aggregates\TaxYear\TaxYearContract;
 use Domain\ValueObjects\FiatAmount;
 
 it('can update the non-attributable allowable cost', function () {
-    $taxYear = Mockery::spy(TaxYear::class);
+    $taxYear = Mockery::spy(TaxYearContract::class);
     $taxYearRepository = Mockery::mock(TaxYearRepository::class);
 
     $updateNonAttributableAllowableCost = new UpdateNonAttributableAllowableCost(

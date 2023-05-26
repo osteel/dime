@@ -2,7 +2,7 @@
 
 use Domain\Aggregates\SharePoolingAsset\Actions\AcquireSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
-use Domain\Aggregates\SharePoolingAsset\SharePoolingAsset;
+use Domain\Aggregates\SharePoolingAsset\SharePoolingAssetContract;
 use Domain\Services\ActionRunner\ActionRunner;
 use Domain\Services\TransactionDispatcher\Handlers\Exceptions\SharePoolingAssetHandlerException;
 use Domain\Services\TransactionDispatcher\Handlers\SharePoolingAssetHandler;
@@ -14,7 +14,7 @@ use Domain\ValueObjects\Transactions\Swap;
 beforeEach(function () {
     $this->runner = Mockery::spy(ActionRunner::class);
     $this->sharePoolingAssetHandler = new SharePoolingAssetHandler($this->runner);
-    $this->sharePoolingAsset = Mockery::spy(SharePoolingAsset::class);
+    $this->sharePoolingAsset = Mockery::spy(SharePoolingAssetContract::class);
 });
 
 it('can handle a receive operation', function () {

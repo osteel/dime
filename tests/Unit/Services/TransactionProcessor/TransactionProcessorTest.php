@@ -2,7 +2,7 @@
 
 use App\Services\TransactionProcessor\TransactionProcessor;
 use Domain\Enums\FiatCurrency;
-use Domain\Services\TransactionDispatcher\TransactionDispatcher;
+use Domain\Services\TransactionDispatcher\TransactionDispatcherContract;
 use Domain\ValueObjects\FiatAmount;
 use Domain\ValueObjects\Transactions\Acquisition;
 use Domain\ValueObjects\Transactions\Disposal;
@@ -10,7 +10,7 @@ use Domain\ValueObjects\Transactions\Swap;
 use Domain\ValueObjects\Transactions\Transfer;
 
 beforeEach(function () {
-    $this->transactionDispatcher = Mockery::spy(TransactionDispatcher::class);
+    $this->transactionDispatcher = Mockery::spy(TransactionDispatcherContract::class);
     $this->transactionProcessor = new TransactionProcessor($this->transactionDispatcher);
 });
 

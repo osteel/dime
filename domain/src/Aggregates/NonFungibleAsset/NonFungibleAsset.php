@@ -17,17 +17,12 @@ use Domain\Aggregates\NonFungibleAsset\Exceptions\NonFungibleAssetException;
 use Domain\Aggregates\NonFungibleAsset\ValueObjects\NonFungibleAssetId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
-use EventSauce\EventSourcing\AggregateRoot;
 use EventSauce\EventSourcing\AggregateRootBehaviour;
 use EventSauce\EventSourcing\AggregateRootId;
 use Stringable;
 
-/**
- * @implements AggregateRoot<NonFungibleAssetId>
- *
- * @property NonFungibleAssetId $aggregateRootId
- */
-class NonFungibleAsset implements AggregateRoot
+/** @property NonFungibleAssetId $aggregateRootId */
+final class NonFungibleAsset implements NonFungibleAssetContract
 {
     /** @phpstan-use AggregateRootBehaviour<NonFungibleAssetId> */
     use AggregateRootBehaviour;

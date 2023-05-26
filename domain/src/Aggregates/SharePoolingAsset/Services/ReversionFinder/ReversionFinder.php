@@ -111,7 +111,7 @@ final class ReversionFinder
                 $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityAllocatedTo($acquisition), $remainingQuantity);
                 $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
-                // Stop as soon as the disposal's quantity has fully been matched
+                // Stop as soon as the disposal's quantity has fully been allocated
                 if ($remainingQuantity->isZero()) {
                     break 2;
                 }
