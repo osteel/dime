@@ -203,6 +203,7 @@ it('can return a collection of transactions that happened between two dates', fu
     'scenario 4' => ['2015-10-24', '2015-10-25', 2],
     'scenario 5' => ['2015-10-25', '2015-10-21', 6],
     'scenario 6' => ['2015-10-26', '2015-10-27', 0],
+    'scenario 7' => ['2015-10-21', '2015-10-21', 2],
 ]);
 
 it('can return a collection of acquisitions that happened between two dates', function (string $date1, string $date2, int $count) {

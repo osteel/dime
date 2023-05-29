@@ -5,6 +5,7 @@ use Domain\Aggregates\TaxYear\Events\CapitalGainUpdated;
 use Domain\Aggregates\TaxYear\Events\CapitalGainUpdateReverted;
 use Domain\Aggregates\TaxYear\Events\IncomeUpdated;
 use Domain\Aggregates\TaxYear\Events\NonAttributableAllowableCostUpdated;
+use Domain\Aggregates\TaxYear\Projectors\Exceptions\TaxYearSummaryProjectionException;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Tests\Aggregates\TaxYear\Projectors\TaxYearSummaryProjectorTestCase;
 use Domain\ValueObjects\FiatAmount;
@@ -84,4 +85,16 @@ it('can handle a non-attributable allowable cost update', function () {
             ->withArgs(fn (AggregateRootId $taxYearId, FiatAmount $nonAttributableAllowableCost) => $taxYearId->toString() === $this->aggregateRootId->toString()
                 && $nonAttributableAllowableCost === $nonAttributableAllowableCostUpdated->newNonAttributableAllowableCost)
             ->once());
+});
+
+it('throws an exception when the aggregate root ID is missing', function () {
+    $capitalGainUpdated = new CapitalGainUpdated(
+        date: LocalDate::parse('2015-10-21'),
+        capitalGainUpdate: new CapitalGain(FiatAmount::GBP('100'), FiatAmount::GBP('100')),
+        newCapitalGain: new CapitalGain(FiatAmount::GBP('100'), FiatAmount::GBP('100')),
+    );
+
+    /** @var MessageConsumerTestCase $this */
+    $this->when(new Message($capitalGainUpdated))
+        ->expectToFail(TaxYearSummaryProjectionException::missingTaxYearId(CapitalGainUpdated::class));
 });

@@ -16,14 +16,16 @@ final readonly class Swap extends Transaction
 {
     /** @throws SwapException */
     public function __construct(
-        public LocalDate $date,
+        LocalDate $date,
         public Asset $disposedOfAsset,
         public Quantity $disposedOfQuantity,
         public Asset $acquiredAsset,
         public Quantity $acquiredQuantity,
         public FiatAmount $marketValue,
-        public ?Fee $fee = null,
+        ?Fee $fee = null,
     ) {
+        parent::__construct($date, $fee);
+
         ! $disposedOfAsset->isFiat() || ! $acquiredAsset->isFiat() || throw SwapException::bothSidesAreFiat($this);
     }
 
@@ -61,15 +63,15 @@ final readonly class Swap extends Transaction
     {
         return sprintf(
             '%s | disposed of: %s | non-fungible asset: %s | quantity: %s | acquired: %s | non-fungible asset: %s | quantity: %s | cost basis: %s | Fee: %s',
-            (string) $this->date,
-            (string) $this->disposedOfAsset,
+            $this->date,
+            $this->disposedOfAsset,
             $this->disposedOfAsset->isNonFungible ? 'yes' : 'no',
-            (string) $this->disposedOfQuantity,
-            (string) $this->acquiredAsset,
+            $this->disposedOfQuantity,
+            $this->acquiredAsset,
             $this->acquiredAsset->isNonFungible ? 'yes' : 'no',
-            (string) $this->acquiredQuantity,
+            $this->acquiredQuantity,
             (string) $this->marketValue ?: 'N/A',
-            (string) $this->fee ?: 'N/A',
+            $this->fee ?: 'N/A',
         );
     }
 }

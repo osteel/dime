@@ -167,3 +167,14 @@ it('can decrease the 30-day quantity', function () {
 
     expect((string) $acquisition->thirtyDayQuantity())->toBe('50');
 });
+
+it('can return an acquisition as a string', function () {
+    /** @var SharePoolingAssetAcquisition */
+    $acquisition = SharePoolingAssetAcquisition::factory()->make([
+        'date' => LocalDate::parse('2015-10-21'),
+        'quantity' => new Quantity('100'),
+        'costBasis' => FiatAmount::GBP('100'),
+    ]);
+
+    expect((string) $acquisition)->toBe('2015-10-21: acquired 100 tokens for £100');
+});

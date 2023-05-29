@@ -16,13 +16,15 @@ final readonly class Acquisition extends Transaction
 {
     /** @throws AcquisitionException */
     public function __construct(
-        public LocalDate $date,
+        LocalDate $date,
         public Asset $asset,
         public Quantity $quantity,
         public FiatAmount $marketValue,
-        public ?Fee $fee = null,
+        ?Fee $fee = null,
         public bool $isIncome = false,
     ) {
+        parent::__construct($date, $fee);
+
         ! $asset->isFiat() || throw AcquisitionException::isFiat($this);
     }
 
@@ -45,13 +47,13 @@ final readonly class Acquisition extends Transaction
     {
         return sprintf(
             '%s | acquired: %s | non-fungible asset: %s | quantity: %s | cost basis: %s | income: %s | Fee: %s',
-            (string) $this->date,
-            (string) $this->asset,
+            $this->date,
+            $this->asset,
             $this->asset->isNonFungible ? 'yes' : 'no',
-            (string) $this->quantity,
+            $this->quantity,
             (string) $this->marketValue ?: 'N/A',
             $this->isIncome ? 'yes' : 'no',
-            (string) $this->fee ?: 'N/A',
+            $this->fee ?: 'N/A',
         );
     }
 }

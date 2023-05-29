@@ -13,11 +13,12 @@ use Domain\ValueObjects\Quantity;
 final readonly class Transfer extends Transaction
 {
     public function __construct(
-        public LocalDate $date,
+        LocalDate $date,
         public Asset $asset,
         public Quantity $quantity,
-        public ?Fee $fee = null,
+        ?Fee $fee = null,
     ) {
+        parent::__construct($date, $fee);
     }
 
     protected static function newFactory(): TransferFactory
@@ -39,11 +40,11 @@ final readonly class Transfer extends Transaction
     {
         return sprintf(
             '%s | transferred: %s | non-fungible asset: %s | quantity: %s | Fee: %s',
-            (string) $this->date,
-            (string) $this->asset,
+            $this->date,
+            $this->asset,
             $this->asset->isNonFungible ? 'yes' : 'no',
-            (string) $this->quantity,
-            (string) $this->fee ?: 'N/A',
+            $this->quantity,
+            $this->fee ?: 'N/A',
         );
     }
 }

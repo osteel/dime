@@ -6,7 +6,6 @@ namespace Domain\Services\TransactionDispatcher\Handlers;
 
 use Domain\Aggregates\TaxYear\Actions\UpdateNonAttributableAllowableCost;
 use Domain\Services\ActionRunner\ActionRunner;
-use Domain\Services\TransactionDispatcher\Handlers\Exceptions\TransferHandlerException;
 use Domain\ValueObjects\Transactions\Transfer;
 
 class TransferHandler
@@ -15,7 +14,6 @@ class TransferHandler
     {
     }
 
-    /** @throws TransferHandlerException */
     public function handle(Transfer $transaction): void
     {
         if (is_null($transaction->fee)) {

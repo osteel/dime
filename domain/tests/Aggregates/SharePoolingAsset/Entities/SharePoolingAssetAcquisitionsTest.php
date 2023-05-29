@@ -68,7 +68,7 @@ it('can return the total quantity of a collection of acquisitions', function (ar
     'scenario 3' => [['1.12345678', '1.123456789'], '2.246913569'],
 ]);
 
-it('can return the cost basis of a collection of acquisitions', function (array $costBases, string $total) {
+it('can return the cost basis of a collection of acquisitions', function (array $costBases, ?string $total) {
     $acquisitions = [];
 
     foreach ($costBases as $costBasis) {
@@ -80,12 +80,13 @@ it('can return the cost basis of a collection of acquisitions', function (array 
     $acquisitions = SharePoolingAssetAcquisitions::make(...$acquisitions);
 
     expect($acquisitions->costBasis())
-        ->toBeInstanceOf(FiatAmount::class)
-        ->toEqual(FiatAmount::GBP($total));
+        ->when(empty($costBases), fn ($costBasis) => $costBasis->toBeNull())
+        ->unless(empty($costBases), fn ($costBasis) => $costBasis->toBeInstanceOf(FiatAmount::class)->toEqual(FiatAmount::GBP($total)));
 })->with([
     'scenario 1' => [['10'], '10'],
     'scenario 2' => [['4', '10', '11'], '25'],
     'scenario 3' => [['1.12345678', '1.123456789'], '2.246913569'],
+    'scenario 4' => [[], null],
 ]);
 
 it('can return the average cost basis per unit of a collection of acquisitions', function (array $costBases, string $average) {
@@ -169,6 +170,27 @@ it('can return the section 104 pool cost basis of a collection of acquisitions',
     expect($acquisitions->section104PoolCostBasis())
         ->toBeInstanceOf(FiatAmount::class)
         ->toEqual(FiatAmount::GBP('160'));
+});
+
+it('can return the section 104 pool cost basis of an empty collection of acquisitions', function () {
+    expect(SharePoolingAssetAcquisitions::make()->section104PoolCostBasis())->toBeNull();
+});
+
+it('can return the section 104 pool cost basis of a collection of acquisitions with no section 104 pool quantity', function () {
+    /** @var list<SharePoolingAssetAcquisition> */
+    $items = [
+        SharePoolingAssetAcquisition::factory()->make([
+            'costBasis' => FiatAmount::GBP('100'),
+            'quantity' => new Quantity('100'),
+            'sameDayQuantity' => new Quantity('100'),
+        ]),
+    ];
+
+    $acquisitions = SharePoolingAssetAcquisitions::make(...$items);
+
+    expect($acquisitions->section104PoolCostBasis())
+        ->toBeInstanceOf(FiatAmount::class)
+        ->toEqual(FiatAmount::GBP('0'));
 });
 
 it('can return the average section 104 pool cost basis per unit of a collection of acquisitions', function () {

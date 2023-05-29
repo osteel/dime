@@ -22,6 +22,6 @@ final readonly class Fee implements Stringable
 
     public function __toString(): string
     {
-        return sprintf('%s %s', (string) $this->currency, $this->quantity);
+        return sprintf('%s %s (market value: %s)', $this->currency, $this->quantity, $this->marketValue);
     }
 }
