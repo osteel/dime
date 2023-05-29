@@ -30,6 +30,8 @@ it('can create a tax year summary and update its capital gain', function () {
             'difference' => '50',
         ]),
     ]);
+
+    expect(TaxYearSummary::first()->capital_gain)->toEqual($capitalGain);
 });
 
 it('can create a tax year summary and update its income', function () {

@@ -24,7 +24,11 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
         return new self(array_values($transactions));
     }
 
-    /** @return Traversable<int, SharePoolingAssetTransaction> */
+    /**
+     * @return Traversable<int, SharePoolingAssetTransaction>
+     *
+     * @codeCoverageIgnore
+     */
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->transactions);

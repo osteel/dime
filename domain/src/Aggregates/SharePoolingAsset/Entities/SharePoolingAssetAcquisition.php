@@ -42,7 +42,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
         return SharePoolingAssetAcquisitionFactory::new();
     }
 
-    public function averageCostBasisPerUnit(): ?FiatAmount
+    public function averageCostBasisPerUnit(): FiatAmount
     {
         return $this->costBasis->dividedBy($this->quantity);
     }

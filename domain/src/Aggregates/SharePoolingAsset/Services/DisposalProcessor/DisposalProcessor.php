@@ -166,9 +166,7 @@ final class DisposalProcessor
 
             $averageCostBasisPerUnit = $acquisition->averageCostBasisPerUnit();
 
-            $costBasis = $averageCostBasisPerUnit
-                ? $costBasis->plus($averageCostBasisPerUnit->multipliedBy($thirtyDayQuantityToApply))
-                : $costBasis;
+            $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($thirtyDayQuantityToApply));
 
             $thirtyDayQuantityAllocation->allocateQuantity($thirtyDayQuantityToApply, $acquisition);
             $acquisition->increaseThirtyDayQuantity($thirtyDayQuantityToApply);

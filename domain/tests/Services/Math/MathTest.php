@@ -1,5 +1,6 @@
 <?php
 
+use Domain\Services\Math\Exceptions\MathException;
 use Domain\Services\Math\Math;
 
 it('can add', function (array $operands, string $result) {
@@ -14,6 +15,10 @@ it('can add', function (array $operands, string $result) {
     'scenario 7' => [['1.11111119', '1.11111111'], '2.2222223'],
 ]);
 
+it('can throw an exception when adding', function () {
+    expect(fn () => Math::add('foo'))->toThrow(MathException::class);
+});
+
 it('can subtract', function (array $operands, string $result) {
     expect(Math::sub(...$operands))->toBe($result);
 })->with([
@@ -25,7 +30,13 @@ it('can subtract', function (array $operands, string $result) {
     'scenario 7' => [['-3.33', '1.11'], '-4.44'],
     'scenario 8' => [['2.246913569', '1.123456789'], '1.12345678'],
     'scenario 9' => [['2.2222223', '1.11111111'], '1.11111119'],
+    'scenario 10' => [[''], '0'],
+    'scenario 11' => [[], '0'],
 ]);
+
+it('can throw an exception when subtracting', function () {
+    expect(fn () => Math::sub('foo', 'bar'))->toThrow(MathException::class);
+});
 
 it('can multiply', function (string $multiplicand, string $multiplier, string $result) {
     expect(Math::mul($multiplicand, $multiplier))->toBe($result);
@@ -39,6 +50,10 @@ it('can multiply', function (string $multiplicand, string $multiplier, string $r
     'scenario 7' => ['0.00000000222351', '0.105473', '0.00000000023452027023'],
 ]);
 
+it('can throw an exception when multiplying', function () {
+    expect(fn () => Math::mul('foo', 'bar'))->toThrow(MathException::class);
+});
+
 it('can divide', function (string $dividend, string $divisor, string $result) {
     expect(Math::div($dividend, $divisor))->toBe($result);
 })->with([
@@ -50,6 +65,10 @@ it('can divide', function (string $dividend, string $divisor, string $result) {
     'scenario 6' => ['-0.0000000022', '0.1', '-0.000000022'],
     'scenario 7' => ['0.00000000222351', '0.105473', '0.00000002108131938979644079527462'],
 ]);
+
+it('can throw an exception when dividing', function () {
+    expect(fn () => Math::div('foo', 'bar'))->toThrow(MathException::class);
+});
 
 it('can round', function (string $number, int $precision, string $rounded) {
     expect(Math::rnd($number, $precision))->toBe($rounded);
@@ -112,6 +131,10 @@ it('can return whether it is less than or equal to', function (string $term1, st
     'scenario 10' => ['0.000000023', '0.0000000230', false, false],
     'scenario 11' => ['0.0000000230', '0.0000000231', false, true],
 ]);
+
+it('can throw an exception when comparing', function (string $method) {
+    expect(fn () => Math::$method('foo', 'bar'))->toThrow(MathException::class);
+})->with(['eq', 'gt', 'gte', 'lt', 'lte']);
 
 it('can return the smallest number', function (string $term1, string $term2, string $result) {
     expect(Math::min($term1, $term2))->toBe($result);

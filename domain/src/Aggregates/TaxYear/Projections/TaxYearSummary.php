@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\TaxYear\Projections;
 
-use Domain\Aggregates\TaxYear\Projections\Exceptions\TaxYearSummaryException;
 use Domain\Enums\FiatCurrency;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
@@ -63,16 +62,13 @@ final class TaxYearSummary extends Model
         );
     }
 
-    /** @throws TaxYearSummaryException */
     protected function capitalGain(): Attribute
     {
         return Attribute::make(
             get: function (?string $value) {
                 $values = is_null($value) ? [] : json_decode($value, true);
 
-                if (! is_array($values)) {
-                    throw TaxYearSummaryException::invalidCapitalGainValues($value);
-                }
+                assert(is_array($values));
 
                 return new CapitalGain(
                     costBasis: new FiatAmount($values['cost_basis'] ?? '0', $this->currency),

@@ -119,3 +119,15 @@ it('can return the 30-day quantity allocated to an acquisition', function () {
     expect($disposal->hasThirtyDayQuantityAllocatedTo($qux))->toBeFalse();
     expect((string) $disposal->thirtyDayQuantityAllocatedTo($qux))->toBe('0');
 });
+
+it('can return a disposal as a string', function () {
+    /** @var SharePoolingAssetDisposal */
+    $acquisition = SharePoolingAssetDisposal::factory()->make([
+        'date' => LocalDate::parse('2015-10-21'),
+        'quantity' => new Quantity('100'),
+        'proceeds' => FiatAmount::GBP('150'),
+        'costBasis' => FiatAmount::GBP('100'),
+    ]);
+
+    expect((string) $acquisition)->toBe('2015-10-21: disposed of 100 tokens for £150 (cost basis: £100)');
+});
