@@ -63,6 +63,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          coverage: xdebug
 
       - name: Install composer dependencies
         uses: ramsey/composer-install@v2
@@ -70,4 +71,4 @@ jobs:
           dependency-versions: ${{ matrix.dependency-versions }}
 
       - name: Run test suite
-        run: vendor/bin/pest --coverage
+        run: vendor/bin/pest --coverage --min=100
