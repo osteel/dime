@@ -24,7 +24,7 @@ function generator(array $value): Generator
 
 it('cannot read a spreadsheet because the file is not found', function () {
     $this->artisan('process', ['spreadsheet' => 'foo'])
-        ->expectsOutput('No spreadsheet could be found at foo')
+        ->expectsOutputToContain('No spreadsheet could be found at foo')
         ->assertExitCode(Command::INVALID);
 });
 

@@ -6,7 +6,6 @@ use App\Services\TransactionProcessor\Exceptions\TransactionProcessorException;
 use App\Services\TransactionProcessor\TransactionProcessorContract;
 use App\Services\TransactionReader\Exceptions\TransactionReaderException;
 use App\Services\TransactionReader\TransactionReader;
-use LaravelZero\Framework\Commands\Command;
 
 final class Process extends Command
 {
@@ -34,7 +33,7 @@ final class Process extends Command
         assert(is_string($spreadsheet));
 
         if (! is_file($spreadsheet)) {
-            $this->error(sprintf('No spreadsheet could be found at %s', $spreadsheet));
+            $this->presenter->error(sprintf('No spreadsheet could be found at %s', $spreadsheet));
 
             return self::INVALID;
         }
@@ -43,29 +42,32 @@ final class Process extends Command
             $this->callSilent('migrate:fresh');
         }
 
+        $this->presenter->info(sprintf('Processing %s...', basename($spreadsheet)));
+
         try {
-            $bar = $this->output->createProgressBar(iterator_count($transactionReader->read($spreadsheet)));
+            $this->presenter->progressStart(iterator_count($transactionReader->read($spreadsheet)));
         } catch (TransactionReaderException $exception) {
             $this->error($exception->getMessage());
 
             return self::INVALID;
         }
 
-        $bar->start();
-
         foreach ($transactionReader->read($spreadsheet) as $transaction) {
             try {
                 $transactionProcessor->process($transaction);
             } catch (TransactionProcessorException $exception) {
+                $this->presenter->progressComplete();
                 $this->error($exception->getMessage());
 
                 return self::INVALID;
             }
 
-            $bar->advance();
+            $this->presenter->progressAdvance();
         }
 
-        $bar->finish();
+        $this->presenter->progressComplete();
+
+        $this->presenter->success('Transactions successfully processed!');
 
         return self::SUCCESS;
     }
