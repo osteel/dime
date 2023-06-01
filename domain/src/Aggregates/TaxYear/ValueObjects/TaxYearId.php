@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Domain\Aggregates\TaxYear\ValueObjects;
 
 use Brick\DateTime\LocalDate;
+use Domain\Aggregates\TaxYear\ValueObjects\Exceptions\TaxYearIdException;
 use Domain\ValueObjects\AggregateRootId;
 
 final readonly class TaxYearId extends AggregateRootId
@@ -22,5 +23,16 @@ final readonly class TaxYearId extends AggregateRootId
         }
 
         return self::fromString(sprintf('%s-%s', $year, $year + 1));
+    }
+
+    public static function fromString(string $aggregateRootId): static
+    {
+        $years = explode('-', $aggregateRootId);
+
+        if (count($years) !== 2 || (int) $years[1] !== (int) $years[0] + 1) {
+            throw TaxYearIdException::invalidTaxYear();
+        }
+
+        return parent::fromString($aggregateRootId);
     }
 }

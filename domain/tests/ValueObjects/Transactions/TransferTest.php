@@ -33,5 +33,5 @@ it('can return the transfer as a string', function () {
         'fee' => new Fee(new Asset(FiatCurrency::GBP->value), new Quantity('1'), FiatAmount::GBP('1')),
     ]);
 
-    expect((string) $transaction)->toBe('2015-10-21 | transferred: FOO | non-fungible asset: no | quantity: 100 | Fee: GBP 1 (market value: £1)');
+    expect((string) $transaction)->toBe('2015-10-21 | transferred: FOO | non-fungible asset: no | quantity: 100 | Fee: GBP 1 (market value: £1.00)');
 });

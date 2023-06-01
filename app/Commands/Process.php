@@ -69,6 +69,6 @@ final class Process extends Command
 
         $this->presenter->success('Transactions successfully processed!');
 
-        return self::SUCCESS;
+        return $this->option('test') ? self::SUCCESS : $this->call('review');
     }
 }

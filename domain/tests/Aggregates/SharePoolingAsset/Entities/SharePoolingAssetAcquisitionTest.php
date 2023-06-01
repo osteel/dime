@@ -176,5 +176,5 @@ it('can return an acquisition as a string', function () {
         'costBasis' => FiatAmount::GBP('100'),
     ]);
 
-    expect((string) $acquisition)->toBe('2015-10-21: acquired 100 tokens for £100');
+    expect((string) $acquisition)->toBe('2015-10-21: acquired 100 tokens for £100.00');
 });
