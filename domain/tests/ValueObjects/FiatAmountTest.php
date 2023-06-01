@@ -181,6 +181,9 @@ it('cannot perform a fiat amount operation because the currencies do not match',
     'dividedBy',
 ]);
 
-it('can express a fiat amount as a string', function () {
-    expect((string) FiatAmount::GBP('10'))->toBe('£10');
-});
+it('can express a fiat amount as a string', function (string $quantity, string $result) {
+    expect((string) FiatAmount::GBP($quantity))->toBe($result);
+})->with([
+    'scenario 1' => ['10', '£10.00'],
+    'scenario 2' => ['10000.10', '£10,000.10'],
+]);

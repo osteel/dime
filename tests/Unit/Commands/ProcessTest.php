@@ -22,13 +22,13 @@ function generator(array $value): Generator
     yield $value;
 }
 
-it('cannot read a spreadsheet because the file is not found', function () {
+it('cannot process a spreadsheet because the file is not found', function () {
     $this->artisan('process', ['spreadsheet' => 'foo'])
         ->expectsOutputToContain('No spreadsheet could be found at foo')
         ->assertExitCode(Command::INVALID);
 });
 
-it('cannot read a spreadsheet because of a transaction reader exception', function () {
+it('cannot process a spreadsheet because of a transaction reader exception', function () {
     $exception = TransactionReaderException::missingHeaders(['foo']);
 
     $this->transactionReader->shouldReceive('read')->with($this->path)->once()->andThrow($exception);
@@ -38,7 +38,7 @@ it('cannot read a spreadsheet because of a transaction reader exception', functi
         ->assertExitCode(Command::INVALID);
 });
 
-it('cannot read a spreadsheet because of a transaction processor exception', function () {
+it('cannot process a spreadsheet because of a transaction processor exception', function () {
     $exception = TransactionProcessorException::cannotParseDate('foo');
 
     $this->transactionReader->shouldReceive('read')->with($this->path)->once()->andReturn(generator(['foo']));
@@ -50,7 +50,7 @@ it('cannot read a spreadsheet because of a transaction processor exception', fun
         ->assertExitCode(Command::INVALID);
 });
 
-it('can read a spreadsheet and pass the transactions to the transaction processor', function () {
+it('can process a spreadsheet and pass the transactions to the transaction processor', function () {
     $this->transactionReader->shouldReceive('read')->with($this->path)->once()->andReturn(generator(['foo']));
     $this->transactionReader->shouldReceive('read')->with($this->path)->once()->andReturn(generator(['foo']));
 

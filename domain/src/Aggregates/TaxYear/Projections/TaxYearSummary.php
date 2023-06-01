@@ -20,7 +20,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property FiatAmount   $non_attributable_allowable_cost
  * @property TaxYearId    $tax_year_id
  *
- * @method static self firstOrNew($attributes = [], $values = [])
+ * @method static self|null find(string $id)
+ * @method static self      firstOrNew($attributes = [], $values = [])
  */
 final class TaxYearSummary extends Model
 {

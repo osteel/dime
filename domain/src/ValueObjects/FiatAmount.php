@@ -126,6 +126,6 @@ final readonly class FiatAmount implements Stringable
 
     public function __toString(): string
     {
-        return sprintf('%s%s', $this->currency->symbol(), $this->quantity);
+        return sprintf('%s%s', $this->currency->symbol(), number_format((float) $this->quantity->quantity, 2));
     }
 }

@@ -14,5 +14,5 @@ it('can tell whether the fee is fiat', function () {
 it('can return the fee as a string', function () {
     $fee = new Fee(new Asset(FiatCurrency::GBP->value), new Quantity('100'), FiatAmount::GBP('100'));
 
-    expect((string) $fee)->toBe('GBP 100 (market value: £100)');
+    expect((string) $fee)->toBe('GBP 100 (market value: £100.00)');
 });

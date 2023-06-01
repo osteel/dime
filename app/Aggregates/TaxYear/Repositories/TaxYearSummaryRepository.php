@@ -13,6 +13,17 @@ use Domain\ValueObjects\FiatAmount;
 
 final class TaxYearSummaryRepository implements TaxYearSummaryRepositoryInterface
 {
+    public function find(TaxYearId $taxYearId): ?TaxYearSummary
+    {
+        return TaxYearSummary::find($taxYearId->toString());
+    }
+
+    /** @return list<TaxYearSummary> */
+    public function all(): array
+    {
+        return TaxYearSummary::all()->all();
+    }
+
     public function updateCapitalGain(TaxYearId $taxYearId, CapitalGain $capitalGain): void
     {
         $this->fetchTaxYearSummary($taxYearId, $capitalGain->currency())
