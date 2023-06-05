@@ -1,13 +1,15 @@
 <?php
 
+use App\Services\CommandRunner\CommandRunnerContract;
 use Domain\Enums\FiatCurrency;
 use LaravelZero\Framework\Commands\Command;
 
 it('can process a spreadhseet', function () {
+    $this->instance(CommandRunnerContract::class, $commandRunner = Mockery::spy(CommandRunnerContract::class));
+
     $path = base_path('tests/stubs/transactions/valid.csv');
 
-    $this->artisan('process', ['spreadsheet' => $path, '--test' => true])
-        ->assertExitCode(Command::SUCCESS);
+    $this->artisan('process', ['spreadsheet' => $path])->assertExitCode(Command::SUCCESS);
 
     $this->assertDatabaseCount('tax_year_summaries', 2);
 
@@ -34,4 +36,6 @@ it('can process a spreadhseet', function () {
         'income' => '1000',
         'non_attributable_allowable_cost' => '117',
     ]);
+
+    $commandRunner->shouldHaveReceived('run')->once()->with('review');
 });

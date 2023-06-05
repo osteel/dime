@@ -2,6 +2,9 @@
 
 namespace App\Commands;
 
+use App\Services\CommandRunner\CommandRunnerContract;
+use App\Services\DatabaseManager\DatabaseManagerContract;
+use App\Services\DatabaseManager\Exceptions\DatabaseManagerException;
 use App\Services\TransactionProcessor\Exceptions\TransactionProcessorException;
 use App\Services\TransactionProcessor\TransactionProcessorContract;
 use App\Services\TransactionReader\Exceptions\TransactionReaderException;
@@ -14,9 +17,7 @@ final class Process extends Command
      *
      * @var string
      */
-    protected $signature = 'process
-        {spreadsheet : Absolute or relative path to the spreadsheet to process}
-        {--test : Run the command in test mode}';
+    protected $signature = 'process {spreadsheet : Absolute or relative path to the spreadsheet to process}';
 
     /**
      * The description of the command.
@@ -26,8 +27,12 @@ final class Process extends Command
     protected $description = 'Process a spreadsheet of transactions';
 
     /** Execute the console command. */
-    public function handle(TransactionReader $transactionReader, TransactionProcessorContract $transactionProcessor): int
-    {
+    public function handle(
+        DatabaseManagerContract $database,
+        TransactionReader $transactionReader,
+        TransactionProcessorContract $transactionProcessor,
+        CommandRunnerContract $commandRunner,
+    ): int {
         $spreadsheet = $this->argument('spreadsheet');
 
         assert(is_string($spreadsheet));
@@ -38,8 +43,12 @@ final class Process extends Command
             return self::INVALID;
         }
 
-        if (! $this->option('test')) {
-            $this->callSilent('migrate:fresh');
+        try {
+            $database->prepare();
+        } catch (DatabaseManagerException $exception) {
+            $this->presenter->error(sprintf('Database error: %s', $exception->getMessage()));
+
+            return self::FAILURE;
         }
 
         $this->presenter->info(sprintf('Processing %s...', basename($spreadsheet)));
@@ -69,6 +78,6 @@ final class Process extends Command
 
         $this->presenter->success('Transactions successfully processed!');
 
-        return $this->option('test') ? self::SUCCESS : $this->call('review');
+        return $commandRunner->run('review');
     }
 }
