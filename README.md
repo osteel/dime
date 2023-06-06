@@ -300,24 +300,17 @@ A technical description of the architecture is available [here](https://tech.ost
 
 ## Maintenance
 
-### Update Dime
-
-To update Dime to a minor version (e.g. `1.1`):
+To update Dime:
 
 ```
-$ composer global update osteel/dime
+$ dime self-update
 ```
 
-To update Dime to a major version (e.g. `2.0`):
-
-```
-$ composer global require osteel/dime
-```
-
-### Delete Dime
+To delete Dime:
 
 ```
 $ composer global remove osteel/dime
+$ rm -r ~/.dime
 ```
 
 ## Issue reporting

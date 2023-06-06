@@ -6,6 +6,7 @@ use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
 use Domain\Aggregates\TaxYear\ValueObjects\Exceptions\TaxYearIdException;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
+use Illuminate\Database\QueryException;
 
 final class Review extends Command
 {
@@ -29,21 +30,32 @@ final class Review extends Command
     {
         $taxYear = $this->argument('taxyear');
 
-        if (! is_null($taxYear) && ! is_string($taxYear)) {
-            $this->presenter->error(TaxYearIdException::invalidTaxYear()->getMessage());
+        try {
+            $this->validateTaxYear($taxYear);
+        } catch (TaxYearIdException $exception) {
+            $this->presenter->error($exception->getMessage());
 
             return self::INVALID;
         }
 
-        $availableTaxYears = array_filter(array_map(
-            fn (mixed $taxYearId) => $taxYearId instanceof TaxYearId ? $taxYearId->toString() : null,
-            array_column($repository->all(), 'tax_year_id'),
-        ));
+        try {
+            $availableTaxYears = array_filter(array_map(
+                fn (mixed $taxYearId) => $taxYearId instanceof TaxYearId ? $taxYearId->toString() : null,
+                array_column($repository->all(), 'tax_year_id'),
+            ));
+        } catch (QueryException) {
+            $availableTaxYears = [];
+        }
 
         if (empty($availableTaxYears)) {
             $this->presenter->warning('No tax year to review. Please submit transactions first, using the `process` command');
 
             return self::SUCCESS;
+        }
+
+        if (! is_null($taxYear) && ! in_array($taxYear, $availableTaxYears)) {
+            $this->presenter->warning('This tax year is not available');
+            $taxYear = null;
         }
 
         // Order tax years from more recent to older
@@ -53,20 +65,15 @@ final class Review extends Command
             ? $availableTaxYears[0]
             : $this->presenter->choice('Please select a tax year', $availableTaxYears, $availableTaxYears[0]);
 
+        assert(is_string($taxYear));
+
         return $this->summary($repository, $taxYear, $availableTaxYears);
     }
 
     /** @param list<string> $availableTaxYears */
     private function summary(TaxYearSummaryRepository $repository, string $taxYear, array $availableTaxYears): int
     {
-        try {
-            $taxYearId = TaxYearId::fromString($taxYear);
-        } catch (TaxYearIdException $exception) {
-            $this->presenter->error($exception->getMessage());
-
-            return self::INVALID;
-        }
-
+        $taxYearId = TaxYearId::fromString($taxYear);
         $taxYearSummary = $repository->find($taxYearId);
 
         assert($taxYearSummary instanceof TaxYearSummary);
@@ -93,5 +100,11 @@ final class Review extends Command
         }
 
         return $this->summary($repository, $taxYear, $availableTaxYears);
+    }
+
+    /** @throws TaxYearIdException */
+    private function validateTaxYear(mixed $taxYear): void
+    {
+        is_null($taxYear) || TaxYearId::fromString(is_string($taxYear) ? $taxYear : '');
     }
 }
