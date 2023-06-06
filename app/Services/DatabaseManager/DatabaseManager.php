@@ -25,8 +25,9 @@ final class DatabaseManager implements DatabaseManagerContract
      */
     public function prepare(): void
     {
-        is_string($file = $this->config->get(self::ENTRY))
-            || throw DatabaseManagerException::invalidDatabaseLocation(self::ENTRY);
+        $entry = sprintf('database.connections.%s.database', $this->config->get('app.env')); // @phpstan-ignore-line
+
+        is_string($file = $this->config->get($entry)) || throw DatabaseManagerException::invalidDatabaseLocation($entry);
 
         try {
             is_file($file) || $this->initialise($file);
@@ -34,12 +35,16 @@ final class DatabaseManager implements DatabaseManagerContract
             throw DatabaseManagerException::processError($exception);
         }
 
-        $this->artisan->call(command: 'migrate:fresh', outputBuffer: new NullOutput());
+        $this->artisan->call('migrate:fresh', ['--force' => true], new NullOutput());
     }
 
     /** @throws ProcessFailedException */
     private function initialise(string $file): void
     {
+        if ($file === ':memory:') {
+            return;
+        }
+
         is_dir($directory = dirname($file)) || $this->process->run(sprintf('mkdir -m755 %s', $directory))->throw();
 
         $this->process->run(sprintf('touch %s', $file))->throw();

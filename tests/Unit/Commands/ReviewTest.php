@@ -7,6 +7,7 @@ use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
+use Illuminate\Database\QueryException;
 use LaravelZero\Framework\Commands\Command;
 
 beforeEach(function () {
@@ -29,6 +30,21 @@ it('cannot review a tax year because none are available', function () {
     $this->artisan('review')
         ->expectsOutputToContain('No tax year to review')
         ->assertExitCode(Command::SUCCESS);
+});
+
+it('cannot review a tax year because there is an issue with the database', function () {
+    $this->taxYearSummaryRepository->shouldReceive('all')->once()->andThrow(Mockery::mock(QueryException::class));
+
+    $this->artisan('review')
+        ->expectsOutputToContain('No tax year to review')
+        ->assertExitCode(Command::SUCCESS);
+});
+
+it('cannot review a tax year because the submitted tax year is not available', function () {
+    $this->taxYearSummaryRepository->shouldReceive('all')->andReturn([['tax_year_id' => TaxYearId::fromString('2021-2022')]]);
+    $this->taxYearSummaryRepository->shouldReceive('find')->andReturn(TaxYearSummary::factory()->make());
+
+    $this->artisan('review', ['taxyear' => '2022-2023'])->expectsOutputToContain('This tax year is not available');
 });
 
 it('can review a tax year', function () {

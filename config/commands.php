@@ -56,16 +56,20 @@ return [
     |
      */
 
-    'hidden' => [
+    'hidden' => array_merge([
         NunoMaduro\LaravelConsoleSummary\SummaryCommand::class,
         Symfony\Component\Console\Command\DumpCompletionCommand::class,
-        Symfony\Component\Console\Command\HelpCommand::class,
         Illuminate\Console\Scheduling\ScheduleRunCommand::class,
         Illuminate\Console\Scheduling\ScheduleListCommand::class,
         Illuminate\Console\Scheduling\ScheduleFinishCommand::class,
         Illuminate\Foundation\Console\VendorPublishCommand::class,
         LaravelZero\Framework\Commands\StubPublishCommand::class,
-    ],
+    ], Phar::running() ? [
+        Illuminate\Database\Console\Migrations\FreshCommand::class,
+        Illuminate\Database\Console\Migrations\InstallCommand::class,
+        Illuminate\Database\Console\Migrations\MigrateCommand::class,
+        Illuminate\Database\Console\WipeCommand::class,
+    ] : []),
 
     /*
     |--------------------------------------------------------------------------
@@ -80,17 +84,14 @@ return [
 
     'remove' => Phar::running() ? [
         Illuminate\Database\Console\Factories\FactoryMakeCommand::class,
-        Illuminate\Database\Console\Migrations\MigrateMakeCommand::class,
         Illuminate\Database\Console\Seeds\SeedCommand::class,
         Illuminate\Database\Console\Seeds\SeederMakeCommand::class,
-        Illuminate\Database\Console\WipeCommand::class,
-        Illuminate\Database\Console\Migrations\FreshCommand::class,
-        Illuminate\Database\Console\Migrations\MigrateCommand::class,
-        Illuminate\Database\Console\Migrations\InstallCommand::class,
+        Illuminate\Database\Console\Migrations\MigrateMakeCommand::class,
         Illuminate\Database\Console\Migrations\RefreshCommand::class,
         Illuminate\Database\Console\Migrations\ResetCommand::class,
         Illuminate\Database\Console\Migrations\RollbackCommand::class,
         Illuminate\Database\Console\Migrations\StatusCommand::class,
+        Illuminate\Database\Console\WipeCommand::class,
         Illuminate\Foundation\Console\ModelMakeCommand::class,
         LaravelZero\Framework\Commands\BuildCommand::class,
         LaravelZero\Framework\Commands\InstallCommand::class,
