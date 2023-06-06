@@ -10,7 +10,7 @@
   </testsuites>
   <coverage/>
   <php>
-    <server name="DB_CONNECTION" value="testing"/>
+    <server name="APP_ENV" value="testing"/>
   </php>
   <source>
     <include>

@@ -15,7 +15,7 @@ return [
     |
      */
 
-    'default' => env('DB_CONNECTION', 'development'),
+    'default' => env('APP_ENV', 'production'),
 
     /*
     |--------------------------------------------------------------------------
@@ -35,7 +35,7 @@ return [
 
     'connections' => [
 
-        'development' => [
+        'local' => [
             'driver' => 'sqlite',
             'url' => '',
             'database' => database_path('database.sqlite'),
