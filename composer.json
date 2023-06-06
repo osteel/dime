@@ -1,6 +1,6 @@
 {
     "name": "osteel/dime",
-    "description": "Extract tax-related data from crypto transactions",
+    "description": "Calculate your cryptoasset taxes in the UK",
     "keywords": ["crypto", "taxes", "hmrc", "php", "console", "cli"],
     "homepage": "https://github.com/osteel/dime",
     "type": "project",
