@@ -35,6 +35,8 @@ You should seek the advice of a professional accountant before using this progra
 ## Table of contents
 
 * [Installation](#installation)
+	* [Composer](#composer)
+	* [PHAR (Linux / Unix / macOS)](#phar-linux--unix--macos)
 * [Usage](#usage)
 * [Spreadsheet format](#spreadsheet-format)
 	* [Date](#date)
@@ -57,7 +59,9 @@ You should seek the advice of a professional accountant before using this progra
 > **Note**
 > Dime requires PHP 8.2 and the [BCMath](https://www.php.net/manual/en/book.bc.php) extension.
 
-Dime is written in PHP and installed using [Composer](https://getcomposer.org):
+### Composer
+
+The simplest way to instal Dime is to use [Composer](https://getcomposer.org):
 
 ```
 $ composer global require osteel/dime
@@ -82,6 +86,29 @@ Run the following command on the file you've just updated for the change to take
 $ source ~/.bash_profile
 ```
 </details>
+
+You can now run `dime` from anywhere to use the application.
+
+If you encounter some dependency conflicts that you cannot resolve easily, consider the method below instead.
+
+### PHAR (Linux / Unix / macOS)
+
+[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1/dime.phar) from the latest [release](https://github.com/osteel/dime/releases).
+
+You can use the application straight away:
+
+```
+$ php dime.phar
+```
+
+But you may want to move it to a directory that is in your system's `PATH`:
+
+```
+$ chmod +x dime.phar
+$ mv dime.phar /usr/local/bin/dime
+```
+
+You can now run `dime` from anywhere instead of `php dime.phar`.
 
 ## Usage
 
