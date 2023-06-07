@@ -49,8 +49,8 @@ You should seek the advice of a professional accountant before using this progra
 	* [Special cases](#special-cases)
 * [How it works](#how-it-works)
 * [Maintenance](#maintenance)
-	* [Update Dime](#update-dime)
-	* [Delete Dime](#delete-dime)
+	* [Upgrade](#upgrade)
+	* [Delete](#delete)
 * [Issue reporting](#issue-reporting)
 * [Contributing](#contributing)
 
@@ -89,7 +89,7 @@ $ source ~/.bash_profile
 
 You can now run `dime` from anywhere to use the application.
 
-If you encounter some dependency conflicts that you cannot resolve easily, consider the method below instead.
+If you get some dependency conflicts that you cannot resolve easily, consider the method below instead.
 
 ### PHAR (Linux / Unix / macOS)
 
@@ -327,16 +327,45 @@ A technical description of the architecture is available [here](https://tech.ost
 
 ## Maintenance
 
-To update Dime:
+Upgrading and deleting Dime depends on how you have installed it in the first place.
+
+### Upgrade
+
+If you have installed Dime **via Composer**, this is how to upgrade to a minor version (e.g. `v1.1`):
+
+```
+$ composer global update osteel/dime
+```
+
+To a major version (e.g. `v2.0`):
+
+```
+$ composer global require osteel/dime
+```
+
+If you have installed Dime by downloading the **PHAR archive**:
 
 ```
 $ dime self-update
 ```
 
-To delete Dime:
+### Delete
+
+If you have installed Dime **via Composer**:
 
 ```
 $ composer global remove osteel/dime
+```
+
+If you have installed Dime by downloading the **PHAR archive**, you need to manually delete it from its location, e.g.:
+
+```
+$ rm /usr/local/bin/dime
+```
+
+**In both cases**, you also need to delete the `.dime` folder (that contains the database):
+
+```
 $ rm -r ~/.dime
 ```
 
