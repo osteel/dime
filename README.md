@@ -230,6 +230,8 @@ If the asset is an NFT, you can use any string value you like, so long as it is 
 
 The quantity sent. For NFTs, that would be `1`.
 
+Be as precise as possible and report all available decimal places.
+
 #### Sent asset is non-fungible
 
 Whether the sent asset is an NFT. This is a boolean value that can be any of `true`, `yes`, `y`, and `1`. If your spreadsheet software allows you to insert checkboxes in your cells, use that.
@@ -249,6 +251,8 @@ If the asset is an NFT, you can use any string value you like, so long as it is 
 #### Received quantity
 
 The quantity received. For NFTs, that would be `1`.
+
+Be as precise as possible and report all available decimal places.
 
 #### Received asset is non-fungible
 
@@ -274,6 +278,8 @@ This is the symbol (or ticker) of the asset used to pay for the fee (e.g. `BTC` 
 #### Fee quantity
 
 The quantity used for the fee.
+
+Be as precise as possible and report all available decimal places.
 
 #### Fee market value
 
