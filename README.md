@@ -98,17 +98,17 @@ If you encounter some dependency conflicts that you cannot resolve easily, consi
 You can use the application straight away:
 
 ```
-$ php dime.phar
+$ php dime
 ```
 
 But you may want to move it to a directory that is in your system's `PATH`:
 
 ```
-$ chmod +x dime.phar
-$ mv dime.phar /usr/local/bin/dime
+$ chmod +x dime
+$ mv dime /usr/local/bin/dime
 ```
 
-You can now run `dime` from anywhere instead of `php dime.phar`.
+You can now run `dime` from anywhere instead of `php dime`.
 
 ## Usage
 
