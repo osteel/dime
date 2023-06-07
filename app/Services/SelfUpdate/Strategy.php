@@ -15,6 +15,6 @@ final class Strategy extends GithubStrategy implements StrategyInterface
      */
     protected function getDownloadUrl(array $package): string
     {
-        return sprintf('%sdime.phar', parent::getDownloadUrl($package));
+        return sprintf('%sdime', parent::getDownloadUrl($package));
     }
 }

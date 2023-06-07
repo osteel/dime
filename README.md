@@ -93,7 +93,7 @@ If you encounter some dependency conflicts that you cannot resolve easily, consi
 
 ### PHAR (Linux / Unix / macOS)
 
-[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1/dime.phar) from the latest [release](https://github.com/osteel/dime/releases).
+[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1/dime) from the latest [release](https://github.com/osteel/dime/releases).
 
 You can use the application straight away:
 
