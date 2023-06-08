@@ -46,6 +46,7 @@ You should seek the advice of a professional accountant before using this progra
 	* [Received asset](#received-asset)
 	* [Fee](#fee)
 	* [Income](#income)
+	* [Summary](#summary)
 	* [Special cases](#special-cases)
 * [How it works](#how-it-works)
 * [Maintenance](#maintenance)
@@ -128,9 +129,10 @@ Pass your transaction spreadsheet to the `process` command:
 $ dime process transactions.csv
 ```
 
-It will validate and process each transaction and display the corresponding tax figures or report any error.
+It will validate and process each transaction and display the corresponding tax figures or report any errors.
 
-Note that you will need to run this command every time you update the spreadsheet.
+> **Note**
+> You will need to run this command every time you update the spreadsheet.
 
 See the [Spreadsheet format](#spreadsheet-format) section to learn how to report your transactions.
 
@@ -152,7 +154,7 @@ $ dime review 2015-2016
 
 ## Spreadsheet format
 
-Here is a [sample CSV file](/tests/stubs/transactions/valid.csv) you can use as a starting point.
+Here is a [sample CSV file](/tests/stubs/transactions/valid.csv) you can use as a starting point. It is recommended to read this entire section to ensure proper reporting, however.
 
 Your spreadsheet must contain at least the following columns:
 
@@ -175,7 +177,7 @@ Each operation requires different columns to have values (see detail below). You
 
 #### Receive
 
-This operation is for transactions where you receive a cryptoasset in exchange for nothing. This happens when someone gifts you some crypto, for instance, or when you get an airdrop.
+This operation is for transactions where you receive a cryptoasset in exchange for nothing. This happens when someone gifts you some crypto, for instance, or when you get or claim an airdrop.
 
 `receive` transactions require values for the `Market value`, `Received asset`, and `Received quantity` columns.
 
@@ -203,19 +205,34 @@ This operation is for transactions where you transfer a cryptoasset from and to 
 
 The market value of a transaction is its value expressed in pound sterling at the time of the transaction.
 
+The market value is at the centre of Dime's calculation rules so it is crucial to report it correctly.
+
+#### Rules
+
+When the transaction includes a sent asset (and is not a transfer – transfers don't need a market value), you must use the sent asset's market value as the transaction's market value, _based on the reported sent quantity_ (see [Sent quantity](#sent-quantity) section below to learn how to report it correctly).
+
 > **Note**
-> Always exclude the [fee](#fee)'s market value from the transaction's market value. E.g. if you send £50.00 to an exchange and do a transaction that incurs a £0.50 fee, the transaction's market value is £49.50.
+> Be particularly vigilant when selling an asset for some fiat currency. It is tempting to use the received fiat amount as the market value, but if a fee was taken, the actual market value is the received amount plus the fee's market value.
 
-There are several ways to figure it out:
+When the transaction does not include a sent asset (i.e. `receive` transactions), the transaction's market value is the received asset's market value.
 
-* If either the received or sent asset is a fiat amount, use that as the market value (use HMRC's [exchange rates](https://www.gov.uk/government/publications/hmrc-exchange-rates-for-2023-monthly "HMRC exchange rates for 2023: monthly") to convert it to pound sterling if necessary);
-* If swapping a cryptoasset for another on an exchange, use the exchange's rate for the asset you are disposing of (or whichever has price data available on the exchange);
-* If using a decentralised protocol, use the value indicated by the corresponding blockchain's explorer if available ([example](https://etherscan.io/tx/0x2c9310e04c01e1329973c205cc6f3d3a7be3237ed09b968faef7ed85d9dfea65));
+#### How to find the market value
+
+There are several ways to figure out a transaction's market value.
+
+Keeping in mind that when a transaction includes a sent asset, its market value takes precedence:
+
+* If the sent asset is a fiat amount, use that as the market value;
+* If performing a transaction on an exchange, use the exchange's rate for the asset at the time of the transaction;
+* If using a decentralised protocol, use the value reported by the corresponding blockchain's explorer (see the value between brackets in the _Tokens Transferred_ section [here](https://etherscan.io/tx/0x2c9310e04c01e1329973c205cc6f3d3a7be3237ed09b968faef7ed85d9dfea65), for instance);
 * If none of the above applies, look up the asset on price-tracking websites such as [CoinMarketCap](https://coinmarketcap.com/) or [CoinGecko](https://www.coingecko.com/).
 
-But sometimes, none of the transaction's asset prices are tracked anywhere, including the aforementioned websites. When that happens, you are supposed to figure out the assets' _fair market value_ – but since there is no guidance on how to do that, I personally set the market value to £0.00.
+> **Note**
+> If any of the above amounts are expressed in a foreign currency, use HMRC's [exchange rates](https://www.gov.uk/government/publications/hmrc-exchange-rates-for-2023-monthly "HMRC exchange rates for 2023: monthly") to convert them to pound sterling.
 
-A lack of price-tracking information usually indicates that the asset isn't being traded at all – in other words, that nobody wants it. Zero seems like a fair market value in that case.
+Sometimes, while the transaction includes a sent asset, its price isn't tracked anywhere. In that case, use the received asset's market value plus the fee's market value, if you paid for that fee.
+
+In some cases, none of the transaction's asset prices are tracked anywhere. When that happens, you are supposed to figure out the assets' _fair market value_, although there is no clear guidance on how to do that.
 
 ### Sent asset
 
@@ -234,6 +251,11 @@ If the asset is an NFT, you can use any string value you like, so long as it is 
 The quantity sent. For NFTs, that would be `1`.
 
 Be as precise as possible and report all available decimal places.
+
+> **Note**
+> When the sent asset and the [fee](#fee)'s currency are the same (e.g. GBP in both cases), _and the fee's quantity was deducted from the sent quantity_, the sent quantity must exclude the fee's quantity.
+> * Example #1: If you send £50 to an exchange and spend it all in a transaction that incurs a £0.50 fee, the sent quantity is 49.5.
+> * Example #2: If you swap 1 bitcoin for 10 ethers on an exchange and the transaction incurs a BTC 0.01 fee, the sent quantity is 0.99.
 
 #### Sent asset is non-fungible
 
@@ -272,6 +294,9 @@ Different values must be used depending on the context:
 
 The reason for the latter is that exchanges usually estimate how much the fee will be and charge that estimate. This amount is almost always different from the actual fee, but that's the amount you will be charged anyway.
 
+> **Note**
+> Be sure not to report fees that you didn't pay for. For instance, if you received an airdrop that was sent by the token issuer and the transaction includes a fee, the issuer paid for that fee, not you, so you don't have to report it.
+
 Here is the detail of each fee-related column.
 
 #### Fee currency
@@ -296,6 +321,21 @@ For instance, if you had purchased an [ENS domain](https://ens.domains/) before 
 
 The `Income` column is a boolean value that can be any of `true`, `yes`, `y`, and `1`. If your spreadsheet software allows you to insert checkboxes in your cells, use that.
 
+### Summary
+
+Here is a summary of the important rules:
+
+* Always use the sent asset's market value when available, even if the received asset is a fiat amount;
+* Transfers don't need a market value;
+* The sent quantity must exclude the fee's quantity when the sent asset and the fee's currency are the same;
+* The sent asset's market value must be based on the reported sent quantity;
+* In `receive` transactions, the market value is the received asset's market value (plus the fee's market value if you paid for it);
+* Use HMRC's [exchange rates](https://www.gov.uk/government/publications/hmrc-exchange-rates-for-2023-monthly "HMRC exchange rates for 2023: monthly") to convert foreign currency amounts to pound sterling.
+
+If you got this far you must have realised by now that reporting transactions is a bit of work. Dime grants you more control over your reporting but the trade-off is that it is your responsibility to do it well.
+
+In other words, the returned tax figures are only as good as the spreadsheet's accuracy.
+
 ### Special cases
 
 Here is a list of edge cases that need to be reported in a certain way to be correctly processed.
@@ -303,9 +343,9 @@ Here is a list of edge cases that need to be reported in a certain way to be cor
 #### Minting an NFT out of several other NFTs
 
 <details>
-<summary>Details</summary>
+<summary>Detail</summary>
 
-Some collections allow you to collect NFTs that you can then combine to mint a new NFT through a _forge_. In practice, that means exchanging several NFTs for another one in one transaction. NFTs being unique, there is no easy way to report such a transaction as a single spreadsheet row.
+Some collections allow you to collect NFTs that you can then combine to mint a new NFT through a _forge_. In practice, that means exchanging several NFTs for another one in a single transaction. NFTs being unique, there is no easy way to report such a transaction as a single spreadsheet row.
 
 The way to do this in Dime is to split the transaction into as many transactions as there are NFTs involved in the creation of the new one.
 
@@ -336,11 +376,11 @@ A technical description of the architecture is available [here](https://tech.ost
 
 ## Maintenance
 
-Upgrading and deleting Dime depends on how you have installed it in the first place.
+Upgrading and deleting Dime depends on how you installed it in the first place.
 
 ### Upgrade
 
-If you have installed Dime **via Composer**, this is how to upgrade to a minor version (e.g. `v1.1`):
+If you have installed Dime [via Composer](#composer), this is how to upgrade to a minor version (e.g. `v1.1`):
 
 ```
 $ composer global update osteel/dime
@@ -352,7 +392,7 @@ To a major version (e.g. `v2.0`):
 $ composer global require osteel/dime
 ```
 
-If you have installed Dime by downloading the **PHAR archive**:
+If you have installed Dime by downloading the [PHAR archive](#phar-linux--unix--macos):
 
 ```
 $ dime self-update
@@ -360,13 +400,13 @@ $ dime self-update
 
 ### Delete
 
-If you have installed Dime **via Composer**:
+If you have installed Dime [via Composer](#composer):
 
 ```
 $ composer global remove osteel/dime
 ```
 
-If you have installed Dime by downloading the **PHAR archive**, you need to manually delete it from its location, e.g.:
+If you have installed Dime by downloading the [PHAR archive](#phar-linux--unix--macos), you need to manually delete it from its location, e.g.:
 
 ```
 $ rm /usr/local/bin/dime
@@ -384,7 +424,7 @@ I don't take feature requests at this stage (although I will look at pull reques
 
 If Dime seemingly crashes for no reason or returns numbers that appear to be wrong, please file an issue [here](https://github.com/osteel/dime/issues) using the relevant template.
 
-Also feel free to open a [discussion](https://github.com/osteel/dime/discussions) for anything else related to the program (e.g. tax rules, how to report something in the spreadsheet, etc.). I cannot guarantee that I will personally reply, but someone else might.
+Also, feel free to open a [discussion](https://github.com/osteel/dime/discussions) for anything else related to the program (e.g. tax rules, how to report something in the spreadsheet, etc.). I cannot guarantee that I will personally reply, but someone else might.
 
 ## Contributing
 
