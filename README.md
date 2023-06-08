@@ -90,8 +90,6 @@ $ source ~/.bash_profile
 ```
 </details>
 
-If you get some dependency conflicts that you cannot resolve easily, consider the method below instead.
-
 ### PHAR (Linux / Unix / macOS)
 
 [Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1/dime) from the latest [release](https://github.com/osteel/dime/releases).
