@@ -61,13 +61,15 @@ You should seek the advice of a professional accountant before using this progra
 
 ### Composer
 
-The simplest way to instal Dime is to use [Composer](https://getcomposer.org):
+You can instal Dime via [Composer](https://getcomposer.org):
 
 ```
 $ composer global require osteel/dime
 ```
 
-Make sure the `~/.composer/vendor/bin` directory is in your system's `PATH`.
+Once the script is done, you should be able to run `dime` from anywhere to use the application.
+
+If not, make sure the `~/.composer/vendor/bin` directory is in your system's `PATH`.
 
 <details>
 <summary>Show me how</summary>
@@ -86,8 +88,6 @@ Run the following command on the file you've just updated for the change to take
 $ source ~/.bash_profile
 ```
 </details>
-
-You can now run `dime` from anywhere to use the application.
 
 If you get some dependency conflicts that you cannot resolve easily, consider the method below instead.
 
@@ -202,6 +202,9 @@ This operation is for transactions where you transfer a cryptoasset from and to 
 ### Market value
 
 The market value of a transaction is its value expressed in pound sterling at the time of the transaction.
+
+> **Note**
+> Always exclude the [fee](#fee)'s market value from the transaction's market value. E.g. if you send £50.00 to an exchange and do a transaction that incurs a £0.50 fee, the transaction's market value is £49.50.
 
 There are several ways to figure it out:
 
