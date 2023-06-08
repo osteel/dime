@@ -327,7 +327,7 @@ Here is a summary of the important rules:
 * Transfers don't need a market value;
 * The sent quantity must exclude the fee's quantity when the sent asset and the fee's currency are the same;
 * The sent asset's market value must be based on the reported sent quantity;
-* In `receive` transactions, the market value is the received asset's market value (plus the fee's market value if you paid for it);
+* In `receive` transactions, the market value is the received asset's market value;
 * Use HMRC's [exchange rates](https://www.gov.uk/government/publications/hmrc-exchange-rates-for-2023-monthly "HMRC exchange rates for 2023: monthly") to convert foreign currency amounts to pound sterling.
 
 If you got this far you must have realised by now that reporting transactions is a bit of work. Dime grants you more control over your reporting but the trade-off is that it is your responsibility to do it well.
