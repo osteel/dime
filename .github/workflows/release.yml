@@ -27,16 +27,24 @@ jobs:
       - name: Validate dependencies
         run: "composer validate --strict"
 
-      - name: Install composer dependencies
+      - name: Install dependencies
         uses: ramsey/composer-install@v2
 
       - name: Build archive
-        run: "php dime app:build dime --build-version=${{ github.ref }}"
+        run: "php dime app:build dime --build-version=${{ github.ref_name }}"
 
       - name: Draft release
-        id: draft_release
         uses: softprops/action-gh-release@v1
         with:
           draft: true
           files: ./builds/dime
           generate_release_notes: true
+
+      - name: Update README
+        run: "php release.php ${{ github.ref_name }}"
+
+      - name: Push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: main
+          commit_message: "Updated README"

@@ -92,7 +92,9 @@ $ source ~/.bash_profile
 
 ### PHAR (Linux / Unix / macOS)
 
-[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1/dime) from the latest [release](https://github.com/osteel/dime/releases).
+<!-- phar -->
+[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1/dime) from the [latest release](https://github.com/osteel/dime/releases/tag/v0.1).
+<!-- /phar -->
 
 You can use the application straight away:
 
