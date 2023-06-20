@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ["*"]
+
+env:
+  APP_ENV: "local"
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: "bcmath"
+          coverage: "none"
+
+      - name: Validate dependencies
+        run: "composer validate --strict"
+
+      - name: Install composer dependencies
+        uses: ramsey/composer-install@v2
+
+      - name: Build archive
+        run: "php dime app:build dime --build-version=${{ github.ref }}"
+
+      - name: Draft release
+        id: draft_release
+        uses: softprops/action-gh-release@v1
+        with:
+          draft: true
+          files: ./builds/dime
+          generate_release_notes: true

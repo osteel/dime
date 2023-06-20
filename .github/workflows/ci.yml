@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  PHP_VERSION: "8.2"
+  PHP_EXTENSIONS: "bcmath"
+
 jobs:
 
   style:
@@ -13,11 +17,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup PHP
+      - name: Set up PHP
         uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
 
       - name: Install composer dependencies
         uses: ramsey/composer-install@v2
@@ -30,11 +38,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup PHP
+      - name: Set up PHP
         uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
 
       - name: Install composer dependencies
         uses: ramsey/composer-install@v2
@@ -56,13 +68,14 @@ jobs:
           - "highest"
 
     steps:
-      - name: Check out
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup PHP
+      - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
           coverage: xdebug
 
       - name: Install composer dependencies
