@@ -3,8 +3,6 @@ name: Release
 on:
   push:
     tags: ["v*"]
-  pull_request:
-    branches: [main]
 
 env:
   APP_ENV: "local"
@@ -34,8 +32,7 @@ jobs:
         uses: ramsey/composer-install@v2
 
       - name: Build archive
-        run: "php dime app:build dime --build-version=v0.1.2"
-        #run: "php dime app:build dime --build-version=${{ github.ref_name }}"
+        run: "php dime app:build dime --build-version=${{ github.ref_name }}"
 
       - name: Draft release
         uses: softprops/action-gh-release@v1
@@ -45,8 +42,7 @@ jobs:
           generate_release_notes: true
 
       - name: Update README
-        run: "php .github/release.php v0.1.2"
-        #run: "php .github/release.php ${{ github.ref_name }}"
+        run: "php .github/release.php ${{ github.ref_name }}"
 
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4
