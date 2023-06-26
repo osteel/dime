@@ -1,5 +1,6 @@
 * text=auto eol=lf
 
+/.docker            export-ignore
 /.github            export-ignore
 /app                export-ignore
 /bootstrap          export-ignore

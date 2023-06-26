@@ -37,6 +37,7 @@ You should seek the advice of a professional accountant before using this progra
 * [Installation](#installation)
 	* [Composer](#composer)
 	* [PHAR (Linux / Unix / macOS)](#phar-linux--unix--macos)
+	* [Docker](#docker)
 * [Usage](#usage)
 * [Spreadsheet format](#spreadsheet-format)
 	* [Date](#date)
@@ -57,10 +58,10 @@ You should seek the advice of a professional accountant before using this progra
 
 ## Installation
 
-> **Note**
-> Dime requires PHP 8.2 and the [BCMath](https://www.php.net/manual/en/book.bc.php) extension.
-
 ### Composer
+
+> **Note**
+> Requires [Composer](https://getcomposer.org/) as well as PHP 8.2 and the [BCMath](https://www.php.net/manual/en/book.bc.php) extension.
 
 You can instal Dime via [Composer](https://getcomposer.org):
 
@@ -92,8 +93,11 @@ $ source ~/.bash_profile
 
 ### PHAR (Linux / Unix / macOS)
 
+> **Note**
+> Requires PHP 8.2 and the [BCMath](https://www.php.net/manual/en/book.bc.php) extension.
+
 <!-- phar -->
-[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1.1/dime) from the [latest release](https://github.com/osteel/dime/releases/tag/v0.1.1).
+[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1.2/dime) from the [latest release](https://github.com/osteel/dime/releases/tag/v0.1.2).
 <!-- /phar -->
 
 You can use the application straight away:
@@ -102,7 +106,7 @@ You can use the application straight away:
 $ php dime
 ```
 
-But you may want to move it to a directory that is in your system's `PATH`:
+Or you may want to move it to a directory that is in your system's `PATH`:
 
 ```
 $ chmod +x dime
@@ -110,6 +114,28 @@ $ mv dime /usr/local/bin/dime
 ```
 
 You can now run `dime` from anywhere instead of `php dime`.
+
+### Docker
+
+> **Note**
+> Requires [Docker](https://www.docker.com/) and sh or Bash.
+
+[Download this shell script](/.docker/dime.sh) and use it straight away:
+
+```
+$ sh dime.sh
+```
+
+It will download Dime's [Docker image](https://github.com/users/osteel/packages/container/package/dime) and pass on commands to it.
+
+You may also want to move the script to a directory that is in your system's `PATH`:
+
+```
+$ chmod +x dime.sh
+$ mv dime.sh /usr/local/bin/dime
+```
+
+You can now run `dime` from anywhere.
 
 ## Usage
 
@@ -398,6 +424,12 @@ If you have installed Dime by downloading the [PHAR archive](#phar-linux--unix--
 $ dime self-update
 ```
 
+If you have installed Dime via [Docker](#docker):
+
+```
+$ docker pull ghcr.io/osteel/dime:latest
+```
+
 ### Delete
 
 If you have installed Dime [via Composer](#composer):
@@ -412,7 +444,13 @@ If you have installed Dime by downloading the [PHAR archive](#phar-linux--unix--
 $ rm /usr/local/bin/dime
 ```
 
-**In both cases**, you also need to delete the `.dime` folder (that contains the database):
+If you have installed Dime via [Docker](#docker):
+
+```
+$ dime delete
+```
+
+**In all cases**, you also need to delete the `.dime` folder (unless you want to keep the database):
 
 ```
 $ rm -r ~/.dime

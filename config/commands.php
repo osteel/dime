@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Services\SelfUpdate\Helpers;
+use App\Commands\Helpers;
 
 return [
 
@@ -107,8 +107,11 @@ return [
             LaravelZero\Framework\Commands\StubPublishCommand::class,
             LaravelZero\Framework\Commands\TestMakeCommand::class,
         ] : [],
-        Helpers::installedViaComposer() ? [
+        Helpers::installedViaPhar() === false ? [
             LaravelZero\Framework\Components\Updater\SelfUpdateCommand::class,
+        ] : [],
+        Helpers::installedViaDocker() === false ? [
+            \App\Commands\Delete::class,
         ] : [],
     ),
 
