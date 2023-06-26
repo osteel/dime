@@ -118,13 +118,12 @@ You can now run `dime` from anywhere instead of `php dime`.
 ### Docker
 
 > **Note**
-> Requires [Docker](https://www.docker.com/).
+> Requires [Docker](https://www.docker.com/) and sh or Bash.
 
-[Download this Bash script](https://raw.githubusercontent.com/osteel/dime/main/.docker/dime) (right click and "Save Link As..." "dime") and use it straight away:
-[Download this Bash script](https://raw.githubusercontent.com/osteel/dime/feature/docker/.docker/dime) (right click and "Save Link As..." "dime") and use it straight away:
+[Download this shell script](/.docker/dime.sh) and use it straight away:
 
 ```
-$ ./dime
+$ sh dime.sh
 ```
 
 It will download Dime's [Docker image](https://github.com/users/osteel/packages/container/package/dime) and pass on commands to it.
@@ -132,7 +131,8 @@ It will download Dime's [Docker image](https://github.com/users/osteel/packages/
 You may also want to move the script to a directory that is in your system's `PATH`:
 
 ```
-$ mv dime /usr/local/bin/dime
+$ chmod +x dime.sh
+$ mv dime.sh /usr/local/bin/dime
 ```
 
 You can now run `dime` from anywhere.
