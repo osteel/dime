@@ -1,8 +1,12 @@
 name: Release
 
 on:
-  push:
-    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version'
+        type: string
+        required: true
 
 env:
   APP_ENV: "local"
@@ -15,10 +19,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Validate tag
+        uses: FidelusAleksander/gh-action-regex@v0.2.0
+        with:
+          regex_pattern: "^v\\d+(\\.\\d+)?(\\.\\d+)?$"
+          regex_match_type: match
+          text: ${{ github.event.inputs.version }}
+
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          ref: main
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -34,23 +43,25 @@ jobs:
         uses: ramsey/composer-install@v2
 
       - name: Build archive
-        run: "php dime app:build dime --build-version=${{ github.ref_name }}"
-
-      - name: Draft release
-        uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          files: ./builds/dime
-          generate_release_notes: true
+        run: "php dime app:build dime --build-version=${{ github.event.inputs.version }}"
 
       - name: Update README
-        run: "php .github/release.php ${{ github.ref_name }}"
+        run: "php .github/release.php ${{ github.event.inputs.version }}"
 
       - name: Push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           branch: main
-          commit_message: "Updated README"
+          commit_message: "Updated phar and README"
+
+      - name: Draft release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.event.inputs.version }}
+          tag_name: ${{ github.event.inputs.version }}
+          draft: true
+          files: ./builds/dime
+          generate_release_notes: true
 
   docker:
     name: Docker
