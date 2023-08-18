@@ -40,6 +40,7 @@ final class DisposalProcessor
             quantity: $disposal->quantity,
             costBasis: $costBasis,
             proceeds: $disposal->proceeds,
+            forFiat: $disposal->forFiat,
             sameDayQuantityAllocation: $sameDayQuantityAllocation,
             thirtyDayQuantityAllocation: $thirtyDayQuantityAllocation,
         );

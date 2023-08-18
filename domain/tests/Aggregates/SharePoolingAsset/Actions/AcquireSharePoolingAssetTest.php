@@ -17,6 +17,7 @@ it('can acquire a share pooling asset', function () {
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('1'),
         costBasis: FiatAmount::GBP('1'),
+        forFiat: false,
     );
 
     $sharePoolingAssetRepository->shouldReceive('get')->once()->andReturn($sharePoolingAsset);

@@ -38,6 +38,7 @@ it('can instantiate a disposal', function () {
         quantity: Quantity::zero(),
         costBasis: FiatAmount::GBP('100'),
         proceeds: FiatAmount::GBP('150'),
+        forFiat: false,
     );
 
     expect($disposal->id)->toBeInstanceOf(SharePoolingAssetTransactionId::class);
@@ -129,5 +130,5 @@ it('can return a disposal as a string', function () {
         'costBasis' => FiatAmount::GBP('100'),
     ]);
 
-    expect((string) $acquisition)->toBe('2015-10-21: disposed of 100 tokens for £150.00 (cost basis: £100.00)');
+    expect((string) $acquisition)->toBe('2015-10-21: disposed of 100 tokens for £150.00 (cost basis: £100.00, for fiat: no)');
 });

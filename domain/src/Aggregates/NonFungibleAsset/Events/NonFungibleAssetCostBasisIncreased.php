@@ -13,6 +13,7 @@ final readonly class NonFungibleAssetCostBasisIncreased
         public LocalDate $date,
         public FiatAmount $costBasisIncrease,
         public FiatAmount $newCostBasis,
+        public bool $forFiat,
     ) {
     }
 }

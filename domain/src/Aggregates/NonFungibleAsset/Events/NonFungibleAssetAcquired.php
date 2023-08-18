@@ -12,6 +12,7 @@ final readonly class NonFungibleAssetAcquired
     public function __construct(
         public LocalDate $date,
         public FiatAmount $costBasis,
+        public bool $forFiat,
     ) {
     }
 }

@@ -6,6 +6,7 @@ use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
 use Domain\Aggregates\TaxYear\ValueObjects\Exceptions\TaxYearIdException;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
+use Domain\Repositories\SummaryRepository;
 use Illuminate\Database\QueryException;
 
 final class Review extends Command
@@ -26,7 +27,7 @@ final class Review extends Command
     protected $description = 'Display a tax year\'s summary';
 
     /** Execute the console command. */
-    public function handle(TaxYearSummaryRepository $repository): int
+    public function handle(SummaryRepository $summaryRepository, TaxYearSummaryRepository $taxYearRepository): int
     {
         $taxYear = $this->argument('taxyear');
 
@@ -41,7 +42,7 @@ final class Review extends Command
         try {
             $availableTaxYears = array_filter(array_map(
                 fn (mixed $taxYearId) => $taxYearId instanceof TaxYearId ? $taxYearId->toString() : null,
-                array_column($repository->all(), 'tax_year_id'),
+                array_column($taxYearRepository->all(), 'tax_year_id'),
             ));
         } catch (QueryException) {
             $availableTaxYears = [];
@@ -58,16 +59,20 @@ final class Review extends Command
             $taxYear = null;
         }
 
+        if (is_null($taxYear)) {
+            $this->presenter->info(sprintf('Current fiat balance: %s', $summaryRepository->get()?->fiat_balance ?? ''));
+        }
+
         // Order tax years from more recent to older
         rsort($availableTaxYears);
 
         $taxYear ??= count($availableTaxYears) === 1
             ? $availableTaxYears[0]
-            : $this->presenter->choice('Please select a tax year', $availableTaxYears, $availableTaxYears[0]);
+            : $this->presenter->choice('Please select a tax year for details', $availableTaxYears, $availableTaxYears[0]);
 
         assert(is_string($taxYear));
 
-        return $this->summary($repository, $taxYear, $availableTaxYears);
+        return $this->summary($taxYearRepository, $taxYear, $availableTaxYears);
     }
 
     /** @param list<string> $availableTaxYears */

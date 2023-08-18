@@ -6,14 +6,18 @@ use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
+use Domain\Projections\Summary;
+use Domain\Repositories\SummaryRepository;
 use Domain\ValueObjects\FiatAmount;
 use Illuminate\Database\QueryException;
 use LaravelZero\Framework\Commands\Command;
 
 beforeEach(function () {
+    $this->summaryRepository = Mockery::mock(SummaryRepository::class);
     $this->taxYearSummaryRepository = Mockery::mock(TaxYearSummaryRepository::class);
 
     $this->instance(TaxYearSummaryRepository::class, $this->taxYearSummaryRepository);
+    $this->instance(SummaryRepository::class, $this->summaryRepository);
 });
 
 it('cannot review a tax year because the submitted tax year is invalid', function (mixed $value) {
@@ -41,6 +45,10 @@ it('cannot review a tax year because there is an issue with the database', funct
 });
 
 it('cannot review a tax year because the submitted tax year is not available', function () {
+    $this->summaryRepository->shouldReceive('get')
+        ->once()
+        ->andReturn(Summary::make(['currency' => FiatCurrency::GBP, 'fiat_balance' => FiatAmount::GBP('10')]));
+
     $this->taxYearSummaryRepository->shouldReceive('all')->andReturn([['tax_year_id' => TaxYearId::fromString('2021-2022')]]);
     $this->taxYearSummaryRepository->shouldReceive('find')->andReturn(TaxYearSummary::factory()->make());
 
@@ -48,6 +56,10 @@ it('cannot review a tax year because the submitted tax year is not available', f
 });
 
 it('can review a tax year', function () {
+    $this->summaryRepository->shouldReceive('get')
+        ->once()
+        ->andReturn(Summary::make(['currency' => FiatCurrency::GBP, 'fiat_balance' => FiatAmount::GBP('10')]));
+
     $taxYearId = TaxYearId::fromString('2021-2022');
 
     $this->taxYearSummaryRepository->shouldReceive('all')->once()->andReturn([['tax_year_id' => $taxYearId]]);
@@ -66,6 +78,7 @@ it('can review a tax year', function () {
         ]));
 
     $presenter = Mockery::mock(PresenterContract::class);
+    $presenter->shouldReceive('info')->once()->with('Current fiat balance: £10.00')->andReturn();
     $presenter->shouldReceive('summary')
         ->once()
         ->with($taxYearId->toString(), '£4.00', '£2.00', '£1.00', '£3.00', '£1.00', '£10.00')
@@ -77,6 +90,10 @@ it('can review a tax year', function () {
 });
 
 it('offers to choose a tax year', function () {
+    $this->summaryRepository->shouldReceive('get')
+        ->once()
+        ->andReturn(Summary::make(['currency' => FiatCurrency::GBP, 'fiat_balance' => FiatAmount::GBP('-10')]));
+
     $this->taxYearSummaryRepository->shouldReceive('all')->once()->andReturn([
         ['tax_year_id' => TaxYearId::fromString('2021-2022')],
         ['tax_year_id' => TaxYearId::fromString('2022-2023')],
@@ -93,7 +110,8 @@ it('offers to choose a tax year', function () {
         ->andReturn(TaxYearSummary::factory()->make());
 
     $presenter = Mockery::mock(PresenterContract::class);
-    $presenter->shouldReceive('choice')->once()->with('Please select a tax year', ['2022-2023', '2021-2022'], '2022-2023')->andReturn('2022-2023');
+    $presenter->shouldReceive('info')->once()->with('Current fiat balance: £-10.00')->andReturn();
+    $presenter->shouldReceive('choice')->once()->with('Please select a tax year for details', ['2022-2023', '2021-2022'], '2022-2023')->andReturn('2022-2023');
     $presenter->shouldReceive('choice')->once()->with('Review another tax year?', ['No', '2022-2023', '2021-2022'], 'No')->andReturn('2021-2022');
     $presenter->shouldReceive('choice')->once()->with('Review another tax year?', ['No', '2022-2023', '2021-2022'], 'No')->andReturn('No');
     $presenter->shouldReceive('summary')->twice()->andReturn();

@@ -31,6 +31,7 @@ it('can acquire a share pooling asset', function () {
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     then(
@@ -41,6 +42,7 @@ it('can acquire a share pooling asset', function () {
                 date: $acquireSharePoolingAsset->date,
                 quantity: new Quantity('100'),
                 costBasis: $acquireSharePoolingAsset->costBasis,
+                forFiat: false,
             ),
         ),
     );
@@ -54,6 +56,7 @@ it('can acquire more of the same share pooling asset', function () {
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -63,6 +66,7 @@ it('can acquire more of the same share pooling asset', function () {
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('300'),
+        forFiat: false,
     ));
 
     then(new SharePoolingAssetAcquired(
@@ -71,6 +75,7 @@ it('can acquire more of the same share pooling asset', function () {
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('300'),
+            forFiat: false,
         ),
     ));
 });
@@ -83,6 +88,7 @@ it('cannot acquire more of the same share pooling asset because the currencies d
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -91,6 +97,7 @@ it('cannot acquire more of the same share pooling asset because the currencies d
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         costBasis: new FiatAmount('300', FiatCurrency::EUR),
+        forFiat: false,
     ));
 
     expectToFail(SharePoolingAssetException::currencyMismatch(
@@ -108,6 +115,7 @@ it('cannot acquire more of the same share pooling asset because the transaction 
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -116,6 +124,7 @@ it('cannot acquire more of the same share pooling asset because the transaction 
         date: LocalDate::parse('2015-10-20'),
         quantity: new Quantity('100'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(SharePoolingAssetException::olderThanPreviousTransaction(
@@ -132,6 +141,7 @@ it('can dispose of a share pooling asset', function () {
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('200'),
+            forFiat: false,
         ),
     ));
 
@@ -141,6 +151,7 @@ it('can dispose of a share pooling asset', function () {
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('50'),
         proceeds: FiatAmount::GBP('150'),
+        forFiat: false,
     ));
 
     then(new SharePoolingAssetDisposedOf(
@@ -150,6 +161,7 @@ it('can dispose of a share pooling asset', function () {
             quantity: $disposeOfSharePoolingAsset->quantity,
             costBasis: FiatAmount::GBP('100'),
             proceeds: $disposeOfSharePoolingAsset->proceeds,
+            forFiat: false,
         ),
     ));
 });
@@ -162,6 +174,7 @@ it('cannot dispose of a share pooling asset because the currencies don\'t match'
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -170,6 +183,7 @@ it('cannot dispose of a share pooling asset because the currencies don\'t match'
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('100'),
         proceeds: new FiatAmount('100', FiatCurrency::EUR),
+        forFiat: false,
     ));
 
     expectToFail(SharePoolingAssetException::currencyMismatch(
@@ -187,6 +201,7 @@ it('cannot dispose of a share pooling asset because the transaction is older tha
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -195,6 +210,7 @@ it('cannot dispose of a share pooling asset because the transaction is older tha
         date: LocalDate::parse('2015-10-20'),
         quantity: new Quantity('100'),
         proceeds: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(SharePoolingAssetException::olderThanPreviousTransaction(
@@ -211,6 +227,7 @@ it('cannot dispose of a share pooling asset because the quantity is too high', f
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -219,6 +236,7 @@ it('cannot dispose of a share pooling asset because the quantity is too high', f
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('101'),
         proceeds: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(SharePoolingAssetException::insufficientQuantity(
@@ -236,6 +254,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -244,6 +263,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
             date: LocalDate::parse('2015-10-23'),
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('65'),
+            forFiat: false,
         ),
     ));
 
@@ -253,6 +273,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
         date: LocalDate::parse('2015-10-25'),
         quantity: new Quantity('20'),
         proceeds: FiatAmount::GBP('40'),
+        forFiat: false,
     ));
 
     then(new SharePoolingAssetDisposedOf(
@@ -274,6 +295,7 @@ it('can dispose of a share pooling asset on the same day they were acquired', fu
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -282,6 +304,7 @@ it('can dispose of a share pooling asset on the same day they were acquired', fu
             date: LocalDate::parse('2015-10-26'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('150'),
+            forFiat: false,
         ),
     ));
 
@@ -291,6 +314,7 @@ it('can dispose of a share pooling asset on the same day they were acquired', fu
         date: LocalDate::parse('2015-10-26'),
         quantity: new Quantity('150'),
         proceeds: FiatAmount::GBP('300'),
+        forFiat: false,
     ));
 
     then(new SharePoolingAssetDisposedOf(
@@ -314,6 +338,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -322,6 +347,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
             date: LocalDate::parse('2015-10-23'),
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('65'),
+            forFiat: false,
         ),
     ));
 
@@ -331,6 +357,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('22'),
             proceeds: FiatAmount::GBP('40'),
+            forFiat: false,
         ),
     ));
 
@@ -339,6 +366,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
             date: LocalDate::parse('2015-10-26'),
             quantity: new Quantity('30'),
             costBasis: FiatAmount::GBP('36'),
+            forFiat: false,
         ),
     ));
 
@@ -348,6 +376,7 @@ it('can use the average cost basis per unit of a section 104 pool to calculate t
         date: LocalDate::parse('2015-10-26'),
         quantity: new Quantity('60'),
         proceeds: FiatAmount::GBP('70'),
+        forFiat: false,
     ));
 
     then(new SharePoolingAssetDisposedOf(
@@ -371,6 +400,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -380,6 +410,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
             proceeds: FiatAmount::GBP('75'),
+            forFiat: false,
         ),
     ));
 
@@ -389,6 +420,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('25'),
         costBasis: FiatAmount::GBP('20'),
+        forFiat: false,
     ));
 
     then(
@@ -399,6 +431,7 @@ it('can acquire a share pooling asset within 30 days of their disposal', functio
                 date: $acquireMoreSharePoolingAsset->date,
                 quantity: $acquireMoreSharePoolingAsset->quantity,
                 costBasis: $acquireMoreSharePoolingAsset->costBasis,
+                forFiat: false,
                 thirtyDayQuantity: new Quantity('25'),
             ),
         ),
@@ -422,6 +455,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -430,6 +464,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('25'),
             costBasis: FiatAmount::GBP('50'),
+            forFiat: false,
             sameDayQuantity: new Quantity('25'),
         ),
     ));
@@ -450,6 +485,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
             quantity: new Quantity('25'),
             costBasis: FiatAmount::GBP('25'),
             proceeds: FiatAmount::GBP('50'),
+            forFiat: false,
         ),
     ));
 
@@ -458,6 +494,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
             date: LocalDate::parse('2015-10-28'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('60'),
+            forFiat: false,
             thirtyDayQuantity: new Quantity('20'),
         ),
     ));
@@ -477,6 +514,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('20'),
         costBasis: FiatAmount::GBP('40'),
+        forFiat: false,
     ));
 
     then(
@@ -488,6 +526,7 @@ it('can acquire a share pooling asset several times within 30 days of their disp
                 date: $acquireSharePoolingAsset4->date,
                 quantity: $acquireSharePoolingAsset4->quantity,
                 costBasis: $acquireSharePoolingAsset4->costBasis,
+                forFiat: false,
                 thirtyDayQuantity: new Quantity('20'),
             ),
         ),
@@ -514,6 +553,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -522,6 +562,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('25'),
             costBasis: FiatAmount::GBP('50'),
+            forFiat: false,
             sameDayQuantity: new Quantity('25'),
         ),
     ));
@@ -550,6 +591,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
             date: LocalDate::parse('2015-10-28'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('60'),
+            forFiat: false,
             thirtyDayQuantity: new Quantity('20'),
         ),
     ));
@@ -568,6 +610,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
             date: LocalDate::parse('2015-10-29'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('40'),
+            forFiat: false,
             thirtyDayQuantity: new Quantity('20'),
         ),
     ));
@@ -598,6 +641,7 @@ it('can dispose of a share pooling asset on the same day as an acquisition withi
         date: LocalDate::parse('2015-10-29'),
         quantity: new Quantity('10'),
         proceeds: FiatAmount::GBP('30'),
+        forFiat: false,
     ));
 
     then(
@@ -631,6 +675,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -640,6 +685,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
             proceeds: FiatAmount::GBP('75'),
+            forFiat: false,
         ),
     ));
 
@@ -650,6 +696,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('25'),
+            forFiat: false,
             sameDayQuantity: new Quantity('20'), // $sharePoolingAssetDisposedOf
         ),
     ));
@@ -671,6 +718,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('10'),
         costBasis: FiatAmount::GBP('14'),
+        forFiat: false,
     ));
 
     then(
@@ -681,6 +729,7 @@ it('can acquire a same-day share pooling asset several times on the same day as 
                 date: $acquireSharePoolingAsset3->date,
                 quantity: $acquireSharePoolingAsset3->quantity,
                 costBasis: $acquireSharePoolingAsset3->costBasis,
+                forFiat: false,
                 sameDayQuantity: new Quantity('10'), // $sharePoolingAssetDisposedOf
             ),
         ),
@@ -702,6 +751,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
             date: LocalDate::parse('2015-10-21'),
             quantity: new Quantity('100'),
             costBasis: FiatAmount::GBP('100'),
+            forFiat: false,
         ),
     ));
 
@@ -711,6 +761,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
             quantity: new Quantity('50'),
             costBasis: FiatAmount::GBP('50'),
             proceeds: FiatAmount::GBP('75'),
+            forFiat: false,
         ),
     ));
 
@@ -721,6 +772,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('20'),
             costBasis: FiatAmount::GBP('25'),
+            forFiat: false,
             sameDayQuantity: new Quantity('20'), // $sharePoolingAssetDisposedOf1
         ),
     ));
@@ -739,6 +791,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
             date: LocalDate::parse('2015-10-22'),
             quantity: new Quantity('60'),
             costBasis: FiatAmount::GBP('90'),
+            forFiat: false,
             sameDayQuantity: new Quantity('30'), // $sharePoolingAssetDisposedOf1
         ),
     ));
@@ -756,6 +809,7 @@ it('can dispose of a same-day share pooling asset several times on the same day 
         date: LocalDate::parse('2015-10-22'),
         quantity: new Quantity('40'),
         proceeds: FiatAmount::GBP('50'),
+        forFiat: false,
     ));
 
     then(new SharePoolingAssetDisposedOf(

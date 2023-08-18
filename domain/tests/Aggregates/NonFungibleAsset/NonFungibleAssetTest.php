@@ -25,11 +25,13 @@ it('can acquire a non-fungible asset', function () {
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     then(new NonFungibleAssetAcquired(
         date: $acquireNonFungibleAsset->date,
         costBasis: $acquireNonFungibleAsset->costBasis,
+        forFiat: false,
     ));
 });
 
@@ -38,36 +40,48 @@ it('cannot acquire a non-fungible asset because the asset is fungible', function
         asset: new Asset('FOO'),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::assetIsFungible($acquireNonFungibleAsset));
 });
 
 it('cannot acquire the same non-fungible asset more than once', function () {
-    given(new NonFungibleAssetAcquired(date: LocalDate::parse('2015-10-21'), costBasis: FiatAmount::GBP('100')));
+    given(new NonFungibleAssetAcquired(
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
+    ));
 
     when(new AcquireNonFungibleAsset(
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::alreadyAcquired($this->aggregateRootId->toAsset()));
 });
 
 it('can increase the cost basis of a non-fungible asset', function () {
-    given(new NonFungibleAssetAcquired(date: LocalDate::parse('2015-10-21'), costBasis: FiatAmount::GBP('100')));
+    given(new NonFungibleAssetAcquired(
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
+    ));
 
     when($increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasisIncrease: FiatAmount::GBP('50'),
+        forFiat: false,
     ));
 
     then(new NonFungibleAssetCostBasisIncreased(
         date: $increaseNonFungibleAssetCostBasis->date,
         costBasisIncrease: $increaseNonFungibleAssetCostBasis->costBasisIncrease,
         newCostBasis: FiatAmount::GBP('150'),
+        forFiat: false,
     ));
 });
 
@@ -76,6 +90,7 @@ it('cannot increase the cost basis of a non-fungible asset that has not been acq
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasisIncrease: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::cannotIncreaseCostBasisBeforeAcquisition($this->aggregateRootId->toAsset()));
@@ -85,12 +100,14 @@ it('cannot increase the cost basis of a non-fungible asset because the transacti
     given($nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     when($increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-20'),
         costBasisIncrease: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::olderThanPreviousTransaction(
@@ -100,12 +117,17 @@ it('cannot increase the cost basis of a non-fungible asset because the transacti
 });
 
 it('cannot increase the cost basis of a non-fungible asset because the currency is different', function () {
-    given(new NonFungibleAssetAcquired(date: LocalDate::parse('2015-10-21'), costBasis: FiatAmount::GBP('100')));
+    given(new NonFungibleAssetAcquired(
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
+    ));
 
     when($increaseNonFungibleAssetCostBasis = new IncreaseNonFungibleAssetCostBasis(
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         costBasisIncrease: new FiatAmount('100', FiatCurrency::EUR),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::currencyMismatch(
@@ -119,18 +141,21 @@ it('can dispose of a non-fungible asset', function () {
     given($nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     when($disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         proceeds: FiatAmount::GBP('150'),
+        forFiat: false,
     ));
 
     then(new NonFungibleAssetDisposedOf(
         date: $disposeOfNonFungibleAsset->date,
         costBasis: $nonFungibleAssetAcquired->costBasis,
         proceeds: $disposeOfNonFungibleAsset->proceeds,
+        forFiat: false,
     ));
 });
 
@@ -139,18 +164,24 @@ it('cannot dispose of a non-fungible asset that has not been acquired', function
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         proceeds: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::cannotDisposeOfBeforeAcquisition($this->aggregateRootId->toAsset()));
 });
 
 it('cannot dispose of a non-fungible asset because the currencies don\'t match', function () {
-    given(new NonFungibleAssetAcquired(date: LocalDate::parse('2015-10-21'), costBasis: FiatAmount::GBP('100')));
+    given(new NonFungibleAssetAcquired(
+        date: LocalDate::parse('2015-10-21'),
+        costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
+    ));
 
     when($disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-21'),
         proceeds: new FiatAmount('100', FiatCurrency::EUR),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::currencyMismatch(
@@ -164,12 +195,14 @@ it('cannot dispose of a non-fungible asset because the transaction is older than
     given($nonFungibleAssetAcquired = new NonFungibleAssetAcquired(
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     ));
 
     when($disposeOfNonFungibleAsset = new DisposeOfNonFungibleAsset(
         asset: $this->aggregateRootId->toAsset(),
         date: LocalDate::parse('2015-10-20'),
         proceeds: FiatAmount::GBP('150'),
+        forFiat: false,
     ));
 
     expectToFail(NonFungibleAssetException::olderThanPreviousTransaction(

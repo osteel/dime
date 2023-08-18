@@ -30,6 +30,7 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
             'quantity' => new Quantity('100'),
             'costBasis' => FiatAmount::GBP('100'),
             'proceeds' => FiatAmount::GBP('100'),
+            'forFiat' => false,
             'sameDayQuantityAllocation' => new QuantityAllocation(),
             'thirtyDayQuantityAllocation' => new QuantityAllocation(),
             'processed' => true,
@@ -44,6 +45,7 @@ class SharePoolingAssetDisposalFactory extends PlainObjectFactory
             'quantity' => $transaction->quantity,
             'costBasis' => $transaction->costBasis,
             'proceeds' => $transaction->proceeds,
+            'forFiat' => $transaction->forFiat,
             'sameDayQuantityAllocation' => $transaction->sameDayQuantityAllocation->copy(),
             'thirtyDayQuantityAllocation' => $transaction->thirtyDayQuantityAllocation->copy(),
         ]);

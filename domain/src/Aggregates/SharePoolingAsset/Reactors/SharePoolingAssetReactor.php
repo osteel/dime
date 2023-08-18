@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Domain\Aggregates\SharePoolingAsset\Reactors;
 
+use Domain\Actions\UpdateSummary;
+use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
 use Domain\Aggregates\TaxYear\Actions\RevertCapitalGainUpdate;
@@ -19,12 +21,25 @@ final class SharePoolingAssetReactor extends EventConsumer
     {
     }
 
+    public function handleSharePoolingAssetAcquired(SharePoolingAssetAcquired $event, Message $message): void
+    {
+        if ($event->acquisition->forFiat) {
+            $this->runner->run(new UpdateSummary(
+                fiatBalanceUpdate: $event->acquisition->costBasis->minus($event->acquisition->costBasis->multipliedBy('2')),
+            ));
+        }
+    }
+
     public function handleSharePoolingAssetDisposedOf(SharePoolingAssetDisposedOf $event, Message $message): void
     {
         $this->runner->run(new UpdateCapitalGain(
             date: $event->disposal->date,
             capitalGainUpdate: new CapitalGain($event->disposal->costBasis, $event->disposal->proceeds),
         ));
+
+        if ($event->disposal->forFiat) {
+            $this->runner->run(new UpdateSummary(fiatBalanceUpdate: $event->disposal->proceeds));
+        }
     }
 
     public function handleSharePoolingAssetDisposalReverted(SharePoolingAssetDisposalReverted $event, Message $message): void
@@ -33,5 +48,11 @@ final class SharePoolingAssetReactor extends EventConsumer
             date: $event->disposal->date,
             capitalGainUpdate: new CapitalGain($event->disposal->costBasis, $event->disposal->proceeds),
         ));
+
+        if ($event->disposal->forFiat) {
+            $this->runner->run(new UpdateSummary(
+                fiatBalanceUpdate: $event->disposal->proceeds->minus($event->disposal->proceeds->multipliedBy('2')),
+            ));
+        }
     }
 }

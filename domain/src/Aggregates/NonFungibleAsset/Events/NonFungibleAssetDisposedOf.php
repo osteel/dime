@@ -13,6 +13,7 @@ final readonly class NonFungibleAssetDisposedOf
         public LocalDate $date,
         public FiatAmount $costBasis,
         public FiatAmount $proceeds,
+        public bool $forFiat,
     ) {
     }
 }

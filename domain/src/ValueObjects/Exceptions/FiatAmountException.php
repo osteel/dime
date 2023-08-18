@@ -15,6 +15,6 @@ final class FiatAmountException extends RuntimeException
 
     public static function fiatCurrenciesDoNotMatch(string ...$currencies): self
     {
-        return new self(sprintf('The fiat currencies don\'t match. Found %s.', implode(', ', $currencies)));
+        return new self(sprintf('The fiat currencies don\'t match (%s).', implode(', ', $currencies)));
     }
 }

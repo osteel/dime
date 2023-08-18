@@ -17,6 +17,7 @@ it('does not process any acquisitions when the disposed of quantity is zero', fu
         date: LocalDate::parse('2015-10-21'),
         quantity: Quantity::zero(),
         proceeds: FiatAmount::GBP('0'),
+        forFiat: false,
     );
 
     $disposal = DisposalProcessor::process(
@@ -34,6 +35,7 @@ it('does not process any section 104 pool acquisitions when none were made befor
         date: LocalDate::parse('2015-10-21'),
         quantity: new Quantity('100'),
         proceeds: FiatAmount::GBP('0'),
+        forFiat: false,
     );
 
     $acquisition = SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2021-10-22')]);

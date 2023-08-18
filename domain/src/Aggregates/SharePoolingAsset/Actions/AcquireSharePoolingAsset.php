@@ -22,6 +22,7 @@ final readonly class AcquireSharePoolingAsset implements Stringable, Timely, Wit
         public LocalDate $date,
         public Quantity $quantity,
         public FiatAmount $costBasis,
+        public bool $forFiat,
         // Testing purposes only
         public ?SharePoolingAssetTransactionId $transactionId = null,
     ) {

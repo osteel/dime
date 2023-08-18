@@ -49,23 +49,25 @@ class SharePoolingAssetHandler
         }
     }
 
-    private function handleDisposal(Acquisition|Disposal|Swap $transaction, Asset $asset, Quantity $quantity): void
+    private function handleDisposal(Disposal|Swap $transaction, Asset $asset, Quantity $quantity): void
     {
         $this->runner->run(new DisposeOfSharePoolingAsset(
             asset: $asset,
             date: $transaction->date,
             quantity: $quantity,
             proceeds: $transaction->marketValue->minus($this->splitFees($transaction)),
+            forFiat: $transaction instanceof Swap && $transaction->acquiredAsset->isFiat(),
         ));
     }
 
-    private function handleAcquisition(Acquisition|Disposal|Swap $transaction, Asset $asset, Quantity $quantity): void
+    private function handleAcquisition(Acquisition|Swap $transaction, Asset $asset, Quantity $quantity): void
     {
         $this->runner->run(new AcquireSharePoolingAsset(
             asset: $asset,
             date: $transaction->date,
             quantity: $quantity,
             costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),
+            forFiat: $transaction instanceof Swap && $transaction->disposedOfAsset->isFiat(),
         ));
     }
 }

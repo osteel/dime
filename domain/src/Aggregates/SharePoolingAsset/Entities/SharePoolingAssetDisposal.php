@@ -23,6 +23,7 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction
         Quantity $quantity,
         FiatAmount $costBasis,
         public readonly FiatAmount $proceeds,
+        public readonly bool $forFiat,
         ?QuantityAllocation $sameDayQuantityAllocation = null,
         ?QuantityAllocation $thirtyDayQuantityAllocation = null,
         bool $processed = true,
@@ -57,6 +58,7 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction
             quantity: $this->quantity,
             costBasis: $this->costBasis->zero(),
             proceeds: $this->proceeds,
+            forFiat: $this->forFiat,
             processed: false,
         );
     }
@@ -84,11 +86,12 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction
     public function __toString(): string
     {
         return sprintf(
-            '%s: disposed of %s tokens for %s (cost basis: %s)',
+            '%s: disposed of %s tokens for %s (cost basis: %s, for fiat: %s)',
             $this->date,
             $this->quantity,
             $this->proceeds,
             $this->costBasis,
+            $this->forFiat ? 'yes' : 'no',
         );
     }
 }

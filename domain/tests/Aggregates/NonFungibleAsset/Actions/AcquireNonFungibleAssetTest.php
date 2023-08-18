@@ -18,6 +18,7 @@ it('can acquire a non-fungible asset', function () {
         asset: Asset::nonFungible('foo'),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('1'),
+        forFiat: false,
     );
 
     $nonFungibleAssetRepository->shouldReceive('get')->once()->andReturn($nonFungibleAsset);
@@ -37,6 +38,7 @@ it('can increase the cost basis of a non-fungible asset', function () {
         asset: Asset::nonFungible('foo'),
         date: LocalDate::parse('2015-10-21'),
         costBasis: FiatAmount::GBP('1'),
+        forFiat: false,
     );
 
     $nonFungibleAssetRepository->shouldReceive('get')->once()->andReturn($nonFungibleAsset);

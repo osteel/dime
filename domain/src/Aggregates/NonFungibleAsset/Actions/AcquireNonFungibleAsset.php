@@ -19,6 +19,7 @@ final readonly class AcquireNonFungibleAsset implements Stringable, WithAsset
         public Asset $asset,
         public LocalDate $date,
         public FiatAmount $costBasis,
+        public bool $forFiat,
     ) {
     }
 
@@ -32,6 +33,7 @@ final readonly class AcquireNonFungibleAsset implements Stringable, WithAsset
                 asset: $this->asset,
                 date: $this->date,
                 costBasisIncrease: $this->costBasis,
+                forFiat: $this->forFiat,
             ));
 
             return;
@@ -48,6 +50,13 @@ final readonly class AcquireNonFungibleAsset implements Stringable, WithAsset
 
     public function __toString(): string
     {
-        return sprintf('%s (asset: %s, date: %s, cost basis: %s)', self::class, $this->asset, $this->date, $this->costBasis);
+        return sprintf(
+            '%s (asset: %s, date: %s, cost basis: %s, for fiat: %s)',
+            self::class,
+            $this->asset,
+            $this->date,
+            $this->costBasis,
+            $this->forFiat ? 'yes' : 'no',
+        );
     }
 }

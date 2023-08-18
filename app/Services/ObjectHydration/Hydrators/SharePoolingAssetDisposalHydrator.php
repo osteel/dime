@@ -30,6 +30,7 @@ final class SharePoolingAssetDisposalHydrator implements PropertyCaster, Propert
             quantity: new Quantity($value['quantity']),
             costBasis: new FiatAmount($value['cost_basis']['quantity'], FiatCurrency::from($value['cost_basis']['currency'])),
             proceeds: new FiatAmount($value['proceeds']['quantity'], FiatCurrency::from($value['proceeds']['currency'])),
+            forFiat: (bool) $value['for_fiat'],
             sameDayQuantityAllocation: new QuantityAllocation(
                 array_map(fn (string $quantity) => new Quantity($quantity), $value['same_day_quantity_allocation']),
             ),
@@ -50,6 +51,7 @@ final class SharePoolingAssetDisposalHydrator implements PropertyCaster, Propert
             'quantity' => (string) $value->quantity,
             'cost_basis' => ['quantity' => (string) $value->costBasis->quantity, 'currency' => $value->costBasis->currency->value],
             'proceeds' => ['quantity' => (string) $value->proceeds->quantity, 'currency' => $value->proceeds->currency->value],
+            'for_fiat' => $value->forFiat,
             'same_day_quantity_allocation' => $this->serializeQuantityAllocation($value->sameDayQuantityAllocation),
             'thirty_day_quantity_allocation' => $this->serializeQuantityAllocation($value->thirtyDayQuantityAllocation),
             'processed' => $value->processed,

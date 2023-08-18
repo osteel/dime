@@ -53,6 +53,7 @@ final class NonFungibleAsset implements NonFungibleAssetContract
         $this->recordThat(new NonFungibleAssetAcquired(
             date: $action->date,
             costBasis: $action->costBasis,
+            forFiat: $action->forFiat,
         ));
     }
 
@@ -76,6 +77,7 @@ final class NonFungibleAsset implements NonFungibleAssetContract
             date: $action->date,
             costBasisIncrease: $action->costBasisIncrease,
             newCostBasis: $this->costBasis?->plus($action->costBasisIncrease) ?? $action->costBasisIncrease,
+            forFiat: $action->forFiat,
         ));
     }
 
@@ -101,6 +103,7 @@ final class NonFungibleAsset implements NonFungibleAssetContract
             date: $action->date,
             costBasis: $this->costBasis,
             proceeds: $action->proceeds,
+            forFiat: $action->forFiat,
         ));
     }
 
