@@ -24,6 +24,7 @@ it('can instantiate an acquisition', function () {
         date: LocalDate::now(TimeZone::utc()),
         quantity: Quantity::zero(),
         costBasis: FiatAmount::GBP('100'),
+        forFiat: false,
     );
 
     expect($acquisition->id)->toBeInstanceOf(SharePoolingAssetTransactionId::class);
@@ -176,5 +177,5 @@ it('can return an acquisition as a string', function () {
         'costBasis' => FiatAmount::GBP('100'),
     ]);
 
-    expect((string) $acquisition)->toBe('2015-10-21: acquired 100 tokens for £100.00');
+    expect((string) $acquisition)->toBe('2015-10-21: acquired 100 tokens for £100.00 (for fiat: no)');
 });

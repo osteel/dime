@@ -4,7 +4,7 @@ use App\Services\CommandRunner\CommandRunnerContract;
 use Domain\Enums\FiatCurrency;
 use LaravelZero\Framework\Commands\Command;
 
-it('can process a spreadhseet', function () {
+it('can process a spreadsheet', function () {
     $this->instance(CommandRunnerContract::class, $commandRunner = Mockery::spy(CommandRunnerContract::class));
 
     $path = base_path('tests/stubs/transactions/valid.csv');
@@ -35,6 +35,11 @@ it('can process a spreadhseet', function () {
         ]),
         'income' => '1000',
         'non_attributable_allowable_cost' => '117',
+    ]);
+
+    $this->assertDatabaseHas('summaries', [
+        'currency' => FiatCurrency::GBP->value,
+        'fiat_balance' => '3330',
     ]);
 
     $commandRunner->shouldHaveReceived('run')->once()->with('review');

@@ -31,7 +31,7 @@ interface PresenterContract
         string $nonAttributableAllowableCost,
         string $totalCostBasis,
         string $capitalGain,
-        string $income
+        string $income,
     ): void;
 
     /** Initiate a progress bar. */

@@ -21,6 +21,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
         LocalDate $date,
         Quantity $quantity,
         FiatAmount $costBasis,
+        public readonly bool $forFiat,
         ?SharePoolingAssetTransactionId $id = null,
         ?Quantity $sameDayQuantity = null,
         ?Quantity $thirtyDayQuantity = null,
@@ -110,6 +111,12 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
 
     public function __toString(): string
     {
-        return sprintf('%s: acquired %s tokens for %s', $this->date, $this->quantity, $this->costBasis);
+        return sprintf(
+            '%s: acquired %s tokens for %s (for fiat: %s)',
+            $this->date,
+            $this->quantity,
+            $this->costBasis,
+            $this->forFiat ? 'yes' : 'no',
+        );
     }
 }

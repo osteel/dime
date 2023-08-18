@@ -27,6 +27,7 @@ final class SharePoolingAssetAcquisitionHydrator implements PropertyCaster, Prop
             date: LocalDate::parse($value['date']),
             quantity: new Quantity($value['quantity']),
             costBasis: new FiatAmount($value['cost_basis']['quantity'], FiatCurrency::from($value['cost_basis']['currency'])),
+            forFiat: (bool) $value['for_fiat'],
             sameDayQuantity: new Quantity($value['same_day_quantity']),
             thirtyDayQuantity: new Quantity($value['thirty_day_quantity']),
         );
@@ -41,6 +42,7 @@ final class SharePoolingAssetAcquisitionHydrator implements PropertyCaster, Prop
             'date' => (string) $value->date,
             'quantity' => (string) $value->quantity,
             'cost_basis' => ['quantity' => (string) $value->costBasis->quantity, 'currency' => $value->costBasis->currency->value],
+            'for_fiat' => $value->forFiat,
             'same_day_quantity' => (string) $value->sameDayQuantity(),
             'thirty_day_quantity' => (string) $value->thirtyDayQuantity(),
         ];

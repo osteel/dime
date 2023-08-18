@@ -27,6 +27,7 @@ class SharePoolingAssetAcquisitionFactory extends PlainObjectFactory
             'date' => LocalDate::parse('2015-10-21'),
             'quantity' => new Quantity('100'),
             'costBasis' => FiatAmount::GBP('100'),
+            'forFiat' => false,
             'sameDayQuantity' => null,
             'thirtyDayQuantity' => null,
         ];
@@ -38,6 +39,7 @@ class SharePoolingAssetAcquisitionFactory extends PlainObjectFactory
             'date' => $transaction->date,
             'quantity' => $transaction->quantity,
             'costBasis' => $transaction->costBasis,
+            'forFiat' => $transaction->forFiat,
         ]);
     }
 }

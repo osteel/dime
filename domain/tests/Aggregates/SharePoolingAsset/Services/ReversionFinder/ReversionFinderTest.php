@@ -14,6 +14,7 @@ it('returns an empty collection of disposals when the acquired quantity is zero'
         date: LocalDate::parse('2015-10-21'),
         quantity: Quantity::zero(),
         costBasis: FiatAmount::GBP('0'),
+        forFiat: false,
     );
 
     $disposals = ReversionFinder::disposalsToRevertOnAcquisition($acquisition, SharePoolingAssetTransactions::make());

@@ -79,6 +79,7 @@ final class SharePoolingAsset implements SharePoolingAssetContract
                 date: $action->date,
                 quantity: $action->quantity,
                 costBasis: $action->costBasis,
+                forFiat: $action->forFiat,
             ),
         ));
 
@@ -124,6 +125,7 @@ final class SharePoolingAsset implements SharePoolingAssetContract
             quantity: $action->quantity,
             costBasis: $action->proceeds->zero(),
             proceeds: $action->proceeds,
+            forFiat: $action->forFiat,
             processed: false,
         ));
 
@@ -141,6 +143,7 @@ final class SharePoolingAsset implements SharePoolingAssetContract
                 date: $disposal->date,
                 quantity: $disposal->quantity,
                 proceeds: $disposal->proceeds,
+                forFiat: $disposal->forFiat,
             ));
         }
     }
