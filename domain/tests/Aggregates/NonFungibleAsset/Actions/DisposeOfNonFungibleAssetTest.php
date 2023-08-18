@@ -20,7 +20,7 @@ it('can dispose of a non-fungible asset', function () {
     $nonFungibleAssetRepository->shouldReceive('get')->once()->andReturn($nonFungibleAsset);
     $nonFungibleAssetRepository->shouldReceive('save')->once()->with($nonFungibleAsset);
 
-    $disposeOfNonFungibleAsset->handle($nonFungibleAssetRepository);
+    $disposeOfNonFungibleAsset($nonFungibleAssetRepository);
 
     $nonFungibleAsset->shouldHaveReceived('disposeOf')->once()->with($disposeOfNonFungibleAsset);
 });

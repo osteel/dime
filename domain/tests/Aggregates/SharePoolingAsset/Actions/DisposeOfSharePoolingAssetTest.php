@@ -22,7 +22,7 @@ it('can dispose of a share pooling asset', function () {
     $sharePoolingAssetRepository->shouldReceive('get')->once()->andReturn($sharePoolingAsset);
     $sharePoolingAssetRepository->shouldReceive('save')->once()->with($sharePoolingAsset);
 
-    $disposeOfSharePoolingAsset->handle($sharePoolingAssetRepository);
+    $disposeOfSharePoolingAsset($sharePoolingAssetRepository);
 
     $sharePoolingAsset->shouldHaveReceived('disposeOf')->once()->with($disposeOfSharePoolingAsset);
 });

@@ -22,7 +22,7 @@ it('can revert a capital gain update', function () {
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
     $taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
-    $revertCapitalGainUpdate->handle($taxYearRepository);
+    $revertCapitalGainUpdate($taxYearRepository);
 
     $taxYear->shouldHaveReceived('revertCapitalGainUpdate')->once()->with($revertCapitalGainUpdate);
 });

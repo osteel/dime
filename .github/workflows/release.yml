@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Validate tag
-        uses: FidelusAleksander/gh-action-regex@v0.2.0
+        uses: FidelusAleksander/gh-action-regex@v0.3.0
         with:
           regex_pattern: "^v\\d+(\\.\\d+)?(\\.\\d+)?$"
           regex_match_type: match

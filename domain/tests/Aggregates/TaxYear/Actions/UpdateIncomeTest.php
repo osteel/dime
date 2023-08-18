@@ -18,7 +18,7 @@ it('can update the income', function () {
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
     $taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
-    $updateIncome->handle($taxYearRepository);
+    $updateIncome($taxYearRepository);
 
     $taxYear->shouldHaveReceived('updateIncome')->once()->with($updateIncome);
 });

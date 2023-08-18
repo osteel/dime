@@ -20,7 +20,7 @@ it('can increase the cost basis of a non-fungible asset', function () {
     $nonFungibleAssetRepository->shouldReceive('get')->once()->andReturn($nonFungibleAsset);
     $nonFungibleAssetRepository->shouldReceive('save')->once()->with($nonFungibleAsset);
 
-    $increaseNonFungibleAssetCostBasis->handle($nonFungibleAssetRepository);
+    $increaseNonFungibleAssetCostBasis($nonFungibleAssetRepository);
 
     $nonFungibleAsset->shouldHaveReceived('increaseCostBasis')->once()->with($increaseNonFungibleAssetCostBasis);
 });

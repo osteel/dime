@@ -18,7 +18,7 @@ final class UpdateNonAttributableAllowableCost implements Stringable
     ) {
     }
 
-    public function handle(TaxYearRepository $taxYearRepository): void
+    public function __invoke(TaxYearRepository $taxYearRepository): void
     {
         $taxYearId = TaxYearId::fromDate($this->date);
         $taxYear = $taxYearRepository->get($taxYearId);

@@ -22,7 +22,7 @@ final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely, Wi
     ) {
     }
 
-    public function handle(NonFungibleAssetRepository $nonFungibleAssetRepository): void
+    public function __invoke(NonFungibleAssetRepository $nonFungibleAssetRepository): void
     {
         $nonFungibleAssetId = NonFungibleAssetId::fromAsset($this->asset);
         $nonFungibleAsset = $nonFungibleAssetRepository->get($nonFungibleAssetId);

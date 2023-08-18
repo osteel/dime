@@ -18,7 +18,7 @@ it('can update the non-attributable allowable cost', function () {
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
     $taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
-    $updateNonAttributableAllowableCost->handle($taxYearRepository);
+    $updateNonAttributableAllowableCost($taxYearRepository);
 
     $taxYear->shouldHaveReceived('updateNonAttributableAllowableCost')->once()->with($updateNonAttributableAllowableCost);
 });

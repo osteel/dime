@@ -23,7 +23,7 @@ it('can acquire a non-fungible asset', function () {
     $nonFungibleAssetRepository->shouldReceive('get')->once()->andReturn($nonFungibleAsset);
     $nonFungibleAssetRepository->shouldReceive('save')->once()->with($nonFungibleAsset);
 
-    $acquireNonFungibleAsset->handle($nonFungibleAssetRepository, $runner);
+    $acquireNonFungibleAsset($nonFungibleAssetRepository, $runner);
 
     $nonFungibleAsset->shouldHaveReceived('acquire')->once()->with($acquireNonFungibleAsset);
 });
@@ -50,5 +50,5 @@ it('can increase the cost basis of a non-fungible asset', function () {
         ->withArgs(fn (IncreaseNonFungibleAssetCostBasis $action) => $action->date === $acquireNonFungibleAsset->date
             && $action->costBasisIncrease === $acquireNonFungibleAsset->costBasis);
 
-    $acquireNonFungibleAsset->handle($nonFungibleAssetRepository, $runner);
+    $acquireNonFungibleAsset($nonFungibleAssetRepository, $runner);
 });
