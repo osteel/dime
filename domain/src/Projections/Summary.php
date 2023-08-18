@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property FiatCurrency $currency
  * @property FiatAmount   $fiat_balance
  *
- * @method static self firstOrNew($attributes = [], $values = [])
+ * @method static self|null first()
+ * @method static self      firstOrNew($attributes = [], $values = [])
  */
 final class Summary extends Model
 {

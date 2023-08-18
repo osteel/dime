@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Repositories\SummaryRepository;
 use App\Services\ActionRunner\ActionRunner;
 use App\Services\CommandRunner\CommandRunner;
 use App\Services\CommandRunner\CommandRunnerContract;
@@ -13,6 +14,7 @@ use App\Services\TransactionProcessor\TransactionProcessor;
 use App\Services\TransactionProcessor\TransactionProcessorContract;
 use App\Services\TransactionReader\Adapters\PhpSpreadsheetAdapter;
 use App\Services\TransactionReader\TransactionReader;
+use Domain\Repositories\SummaryRepository as SummaryRepositoryInterface;
 use Domain\Services\ActionRunner\ActionRunner as ActionRunnerInterface;
 use Domain\Services\TransactionDispatcher\TransactionDispatcher;
 use Domain\Services\TransactionDispatcher\TransactionDispatcherContract;
@@ -32,6 +34,8 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->singleton(TransactionDispatcherContract::class, fn (Application $app) => resolve(TransactionDispatcher::class));
         $this->app->singleton(TransactionProcessorContract::class, fn (Application $app) => resolve(TransactionProcessor::class));
         $this->app->singleton(TransactionReader::class, fn (Application $app) => new PhpSpreadsheetAdapter());
+
+        $this->app->bind(SummaryRepositoryInterface::class, SummaryRepository::class);
 
         if (! $this->isProduction()) {
             $this->app->register(TinkerZeroServiceProvider::class);
