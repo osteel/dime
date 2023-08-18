@@ -50,21 +50,23 @@ class NonFungibleAssetHandler
         }
     }
 
-    private function handleDisposal(Acquisition|Disposal|Swap $transaction, Asset $asset): void
+    private function handleDisposal(Disposal|Swap $transaction, Asset $asset): void
     {
         $this->runner->run(new DisposeOfNonFungibleAsset(
             asset: $asset,
             date: $transaction->date,
             proceeds: $transaction->marketValue->minus($this->splitFees($transaction)),
+            forFiat: $transaction instanceof Swap && $transaction->acquiredAsset->isFiat(),
         ));
     }
 
-    private function handleAcquisition(Acquisition|Disposal|Swap $transaction, Asset $asset): void
+    private function handleAcquisition(Acquisition|Swap $transaction, Asset $asset): void
     {
         $this->runner->run(new AcquireNonFungibleAsset(
             asset: $asset,
             date: $transaction->date,
             costBasis: $transaction->marketValue->plus($this->splitFees($transaction)),
+            forFiat: $transaction instanceof Swap && $transaction->disposedOfAsset->isFiat(),
         ));
     }
 }

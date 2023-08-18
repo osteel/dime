@@ -19,6 +19,7 @@ final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely, Wi
         public Asset $asset,
         public LocalDate $date,
         public FiatAmount $proceeds,
+        public bool $forFiat,
     ) {
     }
 
@@ -43,6 +44,13 @@ final readonly class DisposeOfNonFungibleAsset implements Stringable, Timely, Wi
 
     public function __toString(): string
     {
-        return sprintf('%s (asset: %s, date: %s, proceeds: %s)', self::class, $this->asset, $this->date, $this->proceeds);
+        return sprintf(
+            '%s (asset: %s, date: %s, proceeds: %s, for fiat: %s)',
+            self::class,
+            $this->asset,
+            $this->date,
+            $this->proceeds,
+            $this->forFiat ? 'yes' : 'no',
+        );
     }
 }

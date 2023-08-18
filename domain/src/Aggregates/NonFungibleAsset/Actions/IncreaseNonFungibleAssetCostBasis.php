@@ -19,6 +19,7 @@ final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Ti
         public Asset $asset,
         public LocalDate $date,
         public FiatAmount $costBasisIncrease,
+        public bool $forFiat,
     ) {
     }
 
@@ -44,11 +45,12 @@ final readonly class IncreaseNonFungibleAssetCostBasis implements Stringable, Ti
     public function __toString(): string
     {
         return sprintf(
-            '%s (asset: %s, date: %s, cost basis increase: %s)',
+            '%s (asset: %s, date: %s, cost basis increase: %s, for fiat: %s)',
             self::class,
             $this->asset,
             $this->date,
             $this->costBasisIncrease,
+            $this->forFiat ? 'yes' : 'no',
         );
     }
 }
