@@ -27,7 +27,7 @@ final readonly class DisposeOfSharePoolingAsset implements Stringable, Timely, W
     ) {
     }
 
-    public function handle(SharePoolingAssetRepository $sharePoolingAssetRepository): void
+    public function __invoke(SharePoolingAssetRepository $sharePoolingAssetRepository): void
     {
         $sharePoolingAssetId = SharePoolingAssetId::fromAsset($this->asset);
         $sharePoolingAsset = $sharePoolingAssetRepository->get($sharePoolingAssetId);

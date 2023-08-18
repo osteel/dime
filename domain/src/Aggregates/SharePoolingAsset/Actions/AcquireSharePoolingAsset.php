@@ -27,7 +27,7 @@ final readonly class AcquireSharePoolingAsset implements Stringable, Timely, Wit
     ) {
     }
 
-    public function handle(SharePoolingAssetRepository $sharePoolingAssetRepository): void
+    public function __invoke(SharePoolingAssetRepository $sharePoolingAssetRepository): void
     {
         $sharePoolingAssetId = SharePoolingAssetId::fromAsset($this->asset);
         $sharePoolingAsset = $sharePoolingAssetRepository->get($sharePoolingAssetId);

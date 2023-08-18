@@ -22,7 +22,7 @@ it('can acquire a share pooling asset', function () {
     $sharePoolingAssetRepository->shouldReceive('get')->once()->andReturn($sharePoolingAsset);
     $sharePoolingAssetRepository->shouldReceive('save')->once()->with($sharePoolingAsset);
 
-    $acquireSharePoolingAsset->handle($sharePoolingAssetRepository);
+    $acquireSharePoolingAsset($sharePoolingAssetRepository);
 
     $sharePoolingAsset->shouldHaveReceived('acquire')->once()->with($acquireSharePoolingAsset);
 });

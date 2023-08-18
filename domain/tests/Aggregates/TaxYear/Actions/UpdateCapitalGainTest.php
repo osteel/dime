@@ -22,7 +22,7 @@ it('can update the capital gain', function () {
     $taxYearRepository->shouldReceive('get')->once()->andReturn($taxYear);
     $taxYearRepository->shouldReceive('save')->once()->with($taxYear);
 
-    $updateCapitalGain->handle($taxYearRepository);
+    $updateCapitalGain($taxYearRepository);
 
     $taxYear->shouldHaveReceived('updateCapitalGain')->once()->with($updateCapitalGain);
 });
