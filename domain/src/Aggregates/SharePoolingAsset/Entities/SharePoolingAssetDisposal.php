@@ -14,18 +14,14 @@ use Domain\ValueObjects\Quantity;
 
 final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction
 {
-    public readonly QuantityAllocation $sameDayQuantityAllocation;
-
-    public readonly QuantityAllocation $thirtyDayQuantityAllocation;
-
     public function __construct(
         LocalDate $date,
         Quantity $quantity,
         FiatAmount $costBasis,
         public readonly FiatAmount $proceeds,
         public readonly bool $forFiat,
-        ?QuantityAllocation $sameDayQuantityAllocation = null,
-        ?QuantityAllocation $thirtyDayQuantityAllocation = null,
+        public readonly QuantityAllocation $sameDayQuantityAllocation = new QuantityAllocation(),
+        public readonly QuantityAllocation $thirtyDayQuantityAllocation = new QuantityAllocation(),
         bool $processed = true,
         ?SharePoolingAssetTransactionId $id = null,
     ) {
@@ -33,9 +29,6 @@ final class SharePoolingAssetDisposal extends SharePoolingAssetTransaction
 
         $costBasis->currency === $proceeds->currency
             || throw SharePoolingAssetDisposalException::currencyMismatch($costBasis->currency, $proceeds->currency);
-
-        $this->sameDayQuantityAllocation = $sameDayQuantityAllocation ?? new QuantityAllocation();
-        $this->thirtyDayQuantityAllocation = $thirtyDayQuantityAllocation ?? new QuantityAllocation();
 
         $allocatedQuantity = $this->sameDayQuantityAllocation->quantity()->plus($this->thirtyDayQuantityAllocation->quantity());
 

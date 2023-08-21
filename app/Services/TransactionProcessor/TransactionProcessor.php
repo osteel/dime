@@ -19,9 +19,9 @@ use Domain\ValueObjects\Transactions\Disposal;
 use Domain\ValueObjects\Transactions\Swap;
 use Domain\ValueObjects\Transactions\Transfer;
 
-final class TransactionProcessor implements TransactionProcessorContract
+final readonly class TransactionProcessor implements TransactionProcessorContract
 {
-    public function __construct(private readonly TransactionDispatcherContract $transactionDispatcher)
+    public function __construct(private TransactionDispatcherContract $transactionDispatcher)
     {
     }
 

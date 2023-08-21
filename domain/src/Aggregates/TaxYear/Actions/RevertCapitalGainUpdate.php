@@ -10,11 +10,11 @@ use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Stringable;
 
-final class RevertCapitalGainUpdate implements Stringable
+final readonly class RevertCapitalGainUpdate implements Stringable
 {
     final public function __construct(
-        public readonly LocalDate $date,
-        public readonly CapitalGain $capitalGainUpdate,
+        public LocalDate $date,
+        public CapitalGain $capitalGainUpdate,
     ) {
     }
 

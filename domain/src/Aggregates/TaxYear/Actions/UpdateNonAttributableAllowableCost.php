@@ -10,11 +10,11 @@ use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\ValueObjects\FiatAmount;
 use Stringable;
 
-final class UpdateNonAttributableAllowableCost implements Stringable
+final readonly class UpdateNonAttributableAllowableCost implements Stringable
 {
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly FiatAmount $nonAttributableAllowableCostChange,
+        public LocalDate $date,
+        public FiatAmount $nonAttributableAllowableCostChange,
     ) {
     }
 

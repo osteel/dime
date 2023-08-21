@@ -7,9 +7,9 @@ namespace Domain\Aggregates\SharePoolingAsset\ValueObjects;
 use Ramsey\Uuid\Uuid;
 use Stringable;
 
-final class SharePoolingAssetTransactionId implements Stringable
+final readonly class SharePoolingAssetTransactionId implements Stringable
 {
-    final private function __construct(public readonly string $id)
+    final private function __construct(public string $id)
     {
     }
 

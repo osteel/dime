@@ -9,7 +9,7 @@ use Illuminate\Process\Exceptions\ProcessFailedException;
 use Illuminate\Process\PendingProcess;
 use Symfony\Component\Console\Output\NullOutput;
 
-final class DatabaseManager implements DatabaseManagerContract
+final readonly class DatabaseManager implements DatabaseManagerContract
 {
     public function __construct(
         private Repository $config,

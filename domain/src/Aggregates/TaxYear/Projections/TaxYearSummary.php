@@ -67,7 +67,7 @@ final class TaxYearSummary extends Model
     {
         return Attribute::make(
             get: function (?string $value) {
-                $values = is_null($value) ? [] : json_decode($value, true);
+                $values = is_null($value) ? [] : json_decode($value, true, 512, JSON_THROW_ON_ERROR);
 
                 assert(is_array($values));
 
@@ -76,7 +76,7 @@ final class TaxYearSummary extends Model
                     proceeds: new FiatAmount($values['proceeds'] ?? '0', $this->currency),
                 );
             },
-            set: fn (CapitalGain $value) => json_encode($value),
+            set: fn (CapitalGain $value) => json_encode($value, JSON_THROW_ON_ERROR),
         );
     }
 
