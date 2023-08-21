@@ -41,7 +41,7 @@
         "phpstan/extension-installer": "^1.2",
         "phpstan/phpstan": "^1.10.6",
         "rector/rector": "^0.15.21",
-        "tomasvotruba/type-coverage": "^0.1.0"
+        "tomasvotruba/type-coverage": "^0.2.0"
     },
     "autoload": {
         "psr-4": {
