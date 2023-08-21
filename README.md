@@ -139,7 +139,7 @@ You can now run `dime` from anywhere.
 
 ## Usage
 
-You can display Dime's help menu by calling the executable without arguments:
+Display Dime's menu by calling the executable without arguments:
 
 ```
 $ dime
@@ -177,6 +177,8 @@ To review a specific tax year:
 ```
 $ dime review 2015-2016
 ```
+
+Calling the `review` command without specifying a tax year will also display your current fiat balance (the difference between the fiat amount you put in and the fiat amount you took out).
 
 ## Spreadsheet format
 
