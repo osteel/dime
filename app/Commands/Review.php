@@ -11,6 +11,15 @@ use Illuminate\Database\QueryException;
 
 final class Review extends Command
 {
+    public const SUMMARY_HEADERS = [
+        'Proceeds',
+        'Cost basis',
+        'Non-attributable allowable cost',
+        'Total cost basis',
+        'Capital gain or loss',
+        'Income',
+    ];
+
     /**
      * The signature of the command.
      *
@@ -34,7 +43,7 @@ final class Review extends Command
         try {
             $this->validateTaxYear($taxYear);
         } catch (TaxYearIdException $exception) {
-            $this->presenter->error($exception->getMessage());
+            $this->failure($exception->getMessage());
 
             return self::INVALID;
         }
@@ -49,18 +58,18 @@ final class Review extends Command
         }
 
         if (empty($availableTaxYears)) {
-            $this->presenter->warning('No tax year to review. Please submit transactions first, using the `process` command');
+            $this->warning('No tax year to review. Please submit transactions first, using the `process` command');
 
             return self::SUCCESS;
         }
 
         if (! is_null($taxYear) && ! in_array($taxYear, $availableTaxYears)) {
-            $this->presenter->warning('This tax year is not available');
+            $this->warning('This tax year is not available');
             $taxYear = null;
         }
 
         if (is_null($taxYear)) {
-            $this->presenter->info(sprintf('Current fiat balance: %s', $summaryRepository->get()?->fiat_balance ?? ''));
+            $this->hint(sprintf('Current fiat balance: %s', $summaryRepository->get()?->fiat_balance ?? ''));
         }
 
         // Order tax years from more recent to older
@@ -68,7 +77,7 @@ final class Review extends Command
 
         $taxYear ??= count($availableTaxYears) === 1
             ? $availableTaxYears[0]
-            : $this->presenter->choice('Please select a tax year for details', $availableTaxYears, $availableTaxYears[0]);
+            : $this->select('Please select a tax year for details', $availableTaxYears, $availableTaxYears[0]);
 
         assert(is_string($taxYear));
 
@@ -83,7 +92,7 @@ final class Review extends Command
 
         assert($taxYearSummary instanceof TaxYearSummary);
 
-        $this->presenter->summary(
+        $this->displaySummary(
             taxYear: $taxYear,
             proceeds: (string) $taxYearSummary->capital_gain->proceeds,
             costBasis: (string) $taxYearSummary->capital_gain->costBasis,
@@ -98,13 +107,31 @@ final class Review extends Command
             return self::SUCCESS;
         }
 
-        $taxYear = $this->presenter->choice('Review another tax year?', ['No', ...$availableTaxYears], 'No');
+        $taxYear = $this->select('Review another tax year?', ['No', ...$availableTaxYears], 'No');
 
         if ($taxYear === 'No') {
             return self::SUCCESS;
         }
 
         return $this->summary($repository, $taxYear, $availableTaxYears);
+    }
+
+    /** Display a tax year's summary. */
+    private function displaySummary(
+        string $taxYear,
+        string $proceeds,
+        string $costBasis,
+        string $nonAttributableAllowableCost,
+        string $totalCostBasis,
+        string $capitalGain,
+        string $income,
+    ): void {
+        $this->hint(sprintf('Summary for tax year %s', $taxYear));
+
+        $this->table(
+            self::SUMMARY_HEADERS,
+            [[$proceeds, $costBasis, $nonAttributableAllowableCost, $totalCostBasis, $capitalGain, $income]],
+        );
     }
 
     /** @throws TaxYearIdException */

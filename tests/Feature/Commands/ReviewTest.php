@@ -1,11 +1,11 @@
 <?php
 
+use App\Commands\Review;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\Enums\FiatCurrency;
 use Domain\ValueObjects\FiatAmount;
-use LaravelZero\Framework\Commands\Command;
 
 it('can review a tax year', function () {
     TaxYearSummary::factory()->create([
@@ -22,8 +22,9 @@ it('can review a tax year', function () {
     $this->assertDatabaseCount('tax_year_summaries', 1);
 
     $this->artisan('review')
-        ->expectsOutputToContain('---------- ------------ --------------------------------- ------------------ ---------------------- --------')
-        ->expectsOutputToContain(' Proceeds   Cost basis   Non-attributable allowable cost   Total cost basis   Capital gain or loss   Income ')
-        ->expectsOutputToContain(' £200.00    £100.00      £75.00                            £175.00            £25.00                 £50.00 ')
-        ->assertExitCode(Command::SUCCESS);
+        ->expectsTable(
+            Review::SUMMARY_HEADERS,
+            [['£200.00', '£100.00', '£75.00', '£175.00', '£25.00', '£50.00']],
+        )
+        ->assertSuccessful();
 });

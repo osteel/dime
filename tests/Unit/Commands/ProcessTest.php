@@ -51,7 +51,7 @@ it('cannot process a spreadsheet because of a transaction reader exception', fun
     $this->transactionReader->shouldReceive('read')->with($this->path)->once()->andThrow($exception);
 
     $this->artisan('process', ['spreadsheet' => $this->path])
-        ->expectsOutput($exception->getMessage())
+        ->expectsOutputToContain($exception->getMessage())
         ->assertExitCode(Command::INVALID);
 });
 
@@ -65,7 +65,7 @@ it('cannot process a spreadsheet because of a transaction processor exception', 
     $this->transactionProcessor->shouldReceive('process')->with(['foo'])->once()->andThrow($exception);
 
     $this->artisan('process', ['spreadsheet' => $this->path])
-        ->expectsOutput($exception->getMessage())
+        ->expectsOutputToContain($exception->getMessage())
         ->assertExitCode(Command::INVALID);
 });
 
@@ -73,10 +73,13 @@ it('can process a spreadsheet and pass the transactions to the transaction proce
     $this->databaseManager->shouldReceive('prepare')->once()->andReturn();
     $this->transactionReader->shouldReceive('read')->with($this->path)->once()->andReturn(generator(['foo']));
     $this->transactionReader->shouldReceive('read')->with($this->path)->once()->andReturn(generator(['foo']));
-    $this->commandRunner->shouldReceive('run')->with('review')->once()->andReturn(Command::SUCCESS);
+    $this->commandRunner->shouldReceive('run')
+        ->withArgs(fn (string $command, array $output) => $command === 'review')
+        ->once()
+        ->andReturn(Command::SUCCESS);
 
     $this->artisan('process', ['spreadsheet' => $this->path])
-        ->assertExitCode(Command::SUCCESS);
+        ->assertSuccessful();
 
     $this->transactionProcessor->shouldHaveReceived('process')->with(['foo'])->once();
 });
