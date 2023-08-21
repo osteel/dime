@@ -24,7 +24,7 @@
     "require-dev": {
         "brick/date-time": "^0.5.1",
         "eventsauce/eventsauce": "^3.4",
-        "eventsauce/message-repository-for-illuminate": "^0.4.2",
+        "eventsauce/message-repository-for-illuminate": "^1.0",
         "eventsauce/object-hydrator": "^1.3",
         "eventsauce/pest-utilities": "^3.4",
         "fakerphp/faker": "^1.21.0",
