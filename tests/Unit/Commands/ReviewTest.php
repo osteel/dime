@@ -1,5 +1,6 @@
 <?php
 
+use App\Commands\Review;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
@@ -80,7 +81,7 @@ it('can review a tax year', function () {
         ->expectsOutputToContain('Current fiat balance: £10.00')
         ->expectsOutputToContain('Summary for tax year 2021-2022')
         ->expectsTable(
-            ['Proceeds', 'Cost basis', 'Non-attributable allowable cost', 'Total cost basis', 'Capital gain or loss', 'Income'],
+            Review::SUMMARY_HEADERS,
             [['£4.00', '£2.00', '£1.00', '£3.00', '£1.00', '£10.00']],
         )
         ->assertSuccessful();

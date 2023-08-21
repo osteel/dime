@@ -38,7 +38,7 @@ final class Process extends Command
         assert(is_string($spreadsheet));
 
         if (! is_file($spreadsheet)) {
-            $this->error(sprintf('No spreadsheet could be found at %s', $spreadsheet));
+            $this->failure(sprintf('No spreadsheet could be found at %s', $spreadsheet));
 
             return self::INVALID;
         }
@@ -46,17 +46,17 @@ final class Process extends Command
         try {
             $database->prepare();
         } catch (DatabaseManagerException $exception) {
-            $this->error(sprintf('Database error: %s', $exception->getMessage()));
+            $this->failure(sprintf('Database error: %s', $exception->getMessage()));
 
             return self::FAILURE;
         }
 
-        $this->info(sprintf('Processing %s...', basename($spreadsheet)));
+        $this->hint(sprintf('Processing %s...', basename($spreadsheet)));
 
         try {
             $this->progressStart(iterator_count($transactionReader->read($spreadsheet)));
         } catch (TransactionReaderException $exception) {
-            $this->error($exception->getMessage());
+            $this->failure($exception->getMessage());
 
             return self::INVALID;
         }
@@ -66,7 +66,7 @@ final class Process extends Command
                 $transactionProcessor->process($transaction);
             } catch (TransactionProcessorException $exception) {
                 $this->progressComplete();
-                $this->error($exception->getMessage());
+                $this->failure($exception->getMessage());
 
                 return self::INVALID;
             }

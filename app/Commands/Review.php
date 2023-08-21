@@ -11,6 +11,15 @@ use Illuminate\Database\QueryException;
 
 final class Review extends Command
 {
+    public const SUMMARY_HEADERS = [
+        'Proceeds',
+        'Cost basis',
+        'Non-attributable allowable cost',
+        'Total cost basis',
+        'Capital gain or loss',
+        'Income',
+    ];
+
     /**
      * The signature of the command.
      *
@@ -34,7 +43,7 @@ final class Review extends Command
         try {
             $this->validateTaxYear($taxYear);
         } catch (TaxYearIdException $exception) {
-            $this->error($exception->getMessage());
+            $this->failure($exception->getMessage());
 
             return self::INVALID;
         }
@@ -60,7 +69,7 @@ final class Review extends Command
         }
 
         if (is_null($taxYear)) {
-            $this->info(sprintf('Current fiat balance: %s', $summaryRepository->get()?->fiat_balance ?? ''));
+            $this->hint(sprintf('Current fiat balance: %s', $summaryRepository->get()?->fiat_balance ?? ''));
         }
 
         // Order tax years from more recent to older
@@ -68,7 +77,7 @@ final class Review extends Command
 
         $taxYear ??= count($availableTaxYears) === 1
             ? $availableTaxYears[0]
-            : $this->choice('Please select a tax year for details', $availableTaxYears, $availableTaxYears[0]);
+            : $this->select('Please select a tax year for details', $availableTaxYears, $availableTaxYears[0]);
 
         assert(is_string($taxYear));
 
@@ -98,7 +107,7 @@ final class Review extends Command
             return self::SUCCESS;
         }
 
-        $taxYear = $this->choice('Review another tax year?', ['No', ...$availableTaxYears], 'No');
+        $taxYear = $this->select('Review another tax year?', ['No', ...$availableTaxYears], 'No');
 
         if ($taxYear === 'No') {
             return self::SUCCESS;
@@ -117,10 +126,10 @@ final class Review extends Command
         string $capitalGain,
         string $income,
     ): void {
-        $this->info(sprintf('Summary for tax year %s', $taxYear));
+        $this->hint(sprintf('Summary for tax year %s', $taxYear));
 
         $this->table(
-            ['Proceeds', 'Cost basis', 'Non-attributable allowable cost', 'Total cost basis', 'Capital gain or loss', 'Income'],
+            self::SUMMARY_HEADERS,
             [[$proceeds, $costBasis, $nonAttributableAllowableCost, $totalCostBasis, $capitalGain, $income]],
         );
     }

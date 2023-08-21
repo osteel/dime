@@ -1,5 +1,6 @@
 <?php
 
+use App\Commands\Review;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
@@ -22,7 +23,7 @@ it('can review a tax year', function () {
 
     $this->artisan('review')
         ->expectsTable(
-            ['Proceeds', 'Cost basis', 'Non-attributable allowable cost', 'Total cost basis', 'Capital gain or loss', 'Income'],
+            Review::SUMMARY_HEADERS,
             [['£200.00', '£100.00', '£75.00', '£175.00', '£25.00', '£50.00']],
         )
         ->assertSuccessful();
