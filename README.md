@@ -97,7 +97,7 @@ $ source ~/.bash_profile
 > Requires PHP 8.2 and the [BCMath](https://www.php.net/manual/en/book.bc.php) extension.
 
 <!-- phar -->
-[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.1.2/dime) from the [latest release](https://github.com/osteel/dime/releases/tag/v0.1.2).
+[Download the PHAR archive](https://github.com/osteel/dime/releases/download/v0.2/dime) from the [latest release](https://github.com/osteel/dime/releases/tag/v0.2).
 <!-- /phar -->
 
 You can use the application straight away:
