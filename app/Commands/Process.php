@@ -38,7 +38,7 @@ final class Process extends Command
         assert(is_string($spreadsheet));
 
         if (! is_file($spreadsheet)) {
-            $this->presenter->error(sprintf('No spreadsheet could be found at %s', $spreadsheet));
+            $this->error(sprintf('No spreadsheet could be found at %s', $spreadsheet));
 
             return self::INVALID;
         }
@@ -46,15 +46,15 @@ final class Process extends Command
         try {
             $database->prepare();
         } catch (DatabaseManagerException $exception) {
-            $this->presenter->error(sprintf('Database error: %s', $exception->getMessage()));
+            $this->error(sprintf('Database error: %s', $exception->getMessage()));
 
             return self::FAILURE;
         }
 
-        $this->presenter->info(sprintf('Processing %s...', basename($spreadsheet)));
+        $this->info(sprintf('Processing %s...', basename($spreadsheet)));
 
         try {
-            $this->presenter->progressStart(iterator_count($transactionReader->read($spreadsheet)));
+            $this->progressStart(iterator_count($transactionReader->read($spreadsheet)));
         } catch (TransactionReaderException $exception) {
             $this->error($exception->getMessage());
 
@@ -65,19 +65,19 @@ final class Process extends Command
             try {
                 $transactionProcessor->process($transaction);
             } catch (TransactionProcessorException $exception) {
-                $this->presenter->progressComplete();
+                $this->progressComplete();
                 $this->error($exception->getMessage());
 
                 return self::INVALID;
             }
 
-            $this->presenter->progressAdvance();
+            $this->progressAdvance();
         }
 
-        $this->presenter->progressComplete();
+        $this->progressComplete();
 
-        $this->presenter->success('Transactions successfully processed!');
+        $this->success('Transactions successfully processed!');
 
-        return $commandRunner->run('review');
+        return $commandRunner->run(command: 'review', output: $this->output);
     }
 }

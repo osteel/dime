@@ -1,6 +1,5 @@
 <?php
 
-use App\Services\Presenter\PresenterContract;
 use Domain\Aggregates\TaxYear\Projections\TaxYearSummary;
 use Domain\Aggregates\TaxYear\Repositories\TaxYearSummaryRepository;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
@@ -33,7 +32,7 @@ it('cannot review a tax year because none are available', function () {
 
     $this->artisan('review')
         ->expectsOutputToContain('No tax year to review')
-        ->assertExitCode(Command::SUCCESS);
+        ->assertSuccessful();
 });
 
 it('cannot review a tax year because there is an issue with the database', function () {
@@ -41,7 +40,7 @@ it('cannot review a tax year because there is an issue with the database', funct
 
     $this->artisan('review')
         ->expectsOutputToContain('No tax year to review')
-        ->assertExitCode(Command::SUCCESS);
+        ->assertSuccessful();
 });
 
 it('cannot review a tax year because the submitted tax year is not available', function () {
@@ -77,16 +76,14 @@ it('can review a tax year', function () {
             'non_attributable_allowable_cost' => FiatAmount::GBP('1'),
         ]));
 
-    $presenter = Mockery::mock(PresenterContract::class);
-    $presenter->shouldReceive('info')->once()->with('Current fiat balance: £10.00')->andReturn();
-    $presenter->shouldReceive('summary')
-        ->once()
-        ->with($taxYearId->toString(), '£4.00', '£2.00', '£1.00', '£3.00', '£1.00', '£10.00')
-        ->andReturn();
-
-    $this->instance(PresenterContract::class, $presenter);
-
-    $this->artisan('review')->assertExitCode(Command::SUCCESS);
+    $this->artisan('review')
+        ->expectsOutputToContain('Current fiat balance: £10.00')
+        ->expectsOutputToContain('Summary for tax year 2021-2022')
+        ->expectsTable(
+            ['Proceeds', 'Cost basis', 'Non-attributable allowable cost', 'Total cost basis', 'Capital gain or loss', 'Income'],
+            [['£4.00', '£2.00', '£1.00', '£3.00', '£1.00', '£10.00']],
+        )
+        ->assertSuccessful();
 });
 
 it('offers to choose a tax year', function () {
@@ -100,23 +97,21 @@ it('offers to choose a tax year', function () {
     ]);
 
     $this->taxYearSummaryRepository->shouldReceive('find')
-        ->once()
         ->withArgs(fn (TaxYearId $id) => $id->toString() === '2022-2023')
+        ->once()
         ->andReturn(TaxYearSummary::factory()->make());
 
     $this->taxYearSummaryRepository->shouldReceive('find')
-        ->once()
         ->withArgs(fn (TaxYearId $id) => $id->toString() === '2021-2022')
+        ->once()
         ->andReturn(TaxYearSummary::factory()->make());
 
-    $presenter = Mockery::mock(PresenterContract::class);
-    $presenter->shouldReceive('info')->once()->with('Current fiat balance: £-10.00')->andReturn();
-    $presenter->shouldReceive('choice')->once()->with('Please select a tax year for details', ['2022-2023', '2021-2022'], '2022-2023')->andReturn('2022-2023');
-    $presenter->shouldReceive('choice')->once()->with('Review another tax year?', ['No', '2022-2023', '2021-2022'], 'No')->andReturn('2021-2022');
-    $presenter->shouldReceive('choice')->once()->with('Review another tax year?', ['No', '2022-2023', '2021-2022'], 'No')->andReturn('No');
-    $presenter->shouldReceive('summary')->twice()->andReturn();
-
-    $this->instance(PresenterContract::class, $presenter);
-
-    $this->artisan('review')->assertExitCode(Command::SUCCESS);
+    $this->artisan('review')
+        ->expectsOutputToContain('Current fiat balance: £-10.00')
+        ->expectsChoice('Please select a tax year for details', '2022-2023', ['2022-2023', '2021-2022'])
+        ->expectsOutputToContain('Summary for tax year 2022-2023')
+        ->expectsChoice('Review another tax year?', '2021-2022', ['No', '2022-2023', '2021-2022'])
+        ->expectsOutputToContain('Summary for tax year 2021-2022')
+        ->expectsChoice('Review another tax year?', 'No', ['No', '2022-2023', '2021-2022'])
+        ->assertSuccessful();
 });
