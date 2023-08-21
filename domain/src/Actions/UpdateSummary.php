@@ -7,9 +7,9 @@ namespace Domain\Actions;
 use Domain\Projections\Summary;
 use Domain\ValueObjects\FiatAmount;
 
-final class UpdateSummary
+final readonly class UpdateSummary
 {
-    final public function __construct(public readonly FiatAmount $fiatBalanceUpdate)
+    final public function __construct(public FiatAmount $fiatBalanceUpdate)
     {
     }
 

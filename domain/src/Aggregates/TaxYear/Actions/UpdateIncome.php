@@ -10,11 +10,11 @@ use Domain\Aggregates\TaxYear\ValueObjects\TaxYearId;
 use Domain\ValueObjects\FiatAmount;
 use Stringable;
 
-final class UpdateIncome implements Stringable
+final readonly class UpdateIncome implements Stringable
 {
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly FiatAmount $incomeUpdate,
+        public LocalDate $date,
+        public FiatAmount $incomeUpdate,
     ) {
     }
 

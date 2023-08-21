@@ -7,12 +7,12 @@ namespace Domain\Aggregates\TaxYear\Events;
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\TaxYear\ValueObjects\CapitalGain;
 
-final class CapitalGainUpdateReverted
+final readonly class CapitalGainUpdateReverted
 {
     final public function __construct(
-        public readonly LocalDate $date,
-        public readonly CapitalGain $capitalGainUpdate,
-        public readonly CapitalGain $newCapitalGain,
+        public LocalDate $date,
+        public CapitalGain $capitalGainUpdate,
+        public CapitalGain $newCapitalGain,
     ) {
     }
 }

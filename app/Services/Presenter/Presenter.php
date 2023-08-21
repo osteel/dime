@@ -8,7 +8,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class Presenter implements PresenterContract
 {
-    private SymfonyStyle $ui;
+    private readonly SymfonyStyle $ui;
 
     public function __construct(InputInterface $input, OutputInterface $output)
     {

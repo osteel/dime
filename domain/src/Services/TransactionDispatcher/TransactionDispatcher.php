@@ -15,13 +15,13 @@ use Domain\ValueObjects\Transactions\Swap;
 use Domain\ValueObjects\Transactions\Transaction;
 use Domain\ValueObjects\Transactions\Transfer;
 
-final class TransactionDispatcher implements TransactionDispatcherContract
+final readonly class TransactionDispatcher implements TransactionDispatcherContract
 {
     public function __construct(
-        private readonly IncomeHandler $incomeHandler,
-        private readonly TransferHandler $transferHandler,
-        private readonly NonFungibleAssetHandler $nonFungibleAssetHandler,
-        private readonly SharePoolingAssetHandler $sharePoolingAssetHandler,
+        private IncomeHandler $incomeHandler,
+        private TransferHandler $transferHandler,
+        private NonFungibleAssetHandler $nonFungibleAssetHandler,
+        private SharePoolingAssetHandler $sharePoolingAssetHandler,
     ) {
     }
 

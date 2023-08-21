@@ -7,12 +7,12 @@ namespace Domain\Aggregates\TaxYear\Events;
 use Brick\DateTime\LocalDate;
 use Domain\ValueObjects\FiatAmount;
 
-final class IncomeUpdated
+final readonly class IncomeUpdated
 {
     public function __construct(
-        public readonly LocalDate $date,
-        public readonly FiatAmount $incomeUpdate,
-        public readonly FiatAmount $newIncome,
+        public LocalDate $date,
+        public FiatAmount $incomeUpdate,
+        public FiatAmount $newIncome,
     ) {
     }
 }

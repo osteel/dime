@@ -98,7 +98,7 @@ final class Review extends Command
             return self::SUCCESS;
         }
 
-        $taxYear = $this->presenter->choice('Review another tax year?', array_merge(['No'], $availableTaxYears), 'No');
+        $taxYear = $this->presenter->choice('Review another tax year?', ['No', ...$availableTaxYears], 'No');
 
         if ($taxYear === 'No') {
             return self::SUCCESS;
