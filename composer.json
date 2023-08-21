@@ -22,7 +22,7 @@
         "ext-bcmath": "*"
     },
     "require-dev": {
-        "brick/date-time": "^0.4.2",
+        "brick/date-time": "^0.5.1",
         "eventsauce/eventsauce": "^3.4",
         "eventsauce/message-repository-for-illuminate": "^0.4.2",
         "eventsauce/object-hydrator": "^1.3",
