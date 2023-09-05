@@ -38,7 +38,7 @@ final class ReversionFinder
             return $disposalsToRevert;
         }
 
-        // Get same-day disposals with part of their quantity not matched with same-day acquisitions
+        // Get same-day disposals with part of their quantity not allocated to same-day acquisitions
         $sameDayDisposals = $transactions->disposalsMadeOn($date)->withAvailableSameDayQuantity();
 
         if ($sameDayDisposals->isEmpty()) {
@@ -49,8 +49,8 @@ final class ReversionFinder
         // cost basis of the disposals, it's simpler to revert them all and start over
         $disposalsToRevert->add(...$sameDayDisposals);
 
-        // Deduct what's left (either the whole remaining quantity or the disposals' unmatched
-        // same-day quantity, whichever is smaller) from the remaining quantity to be matched
+        // Deduct what's left (either the whole remaining quantity or the disposals' unallocated
+        // same-day quantity, whichever is smaller) from the remaining quantity to be allocated
         $quantityToDeduct = Quantity::minimum($remainingQuantity, $sameDayDisposals->availableSameDayQuantity());
         $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
@@ -74,8 +74,8 @@ final class ReversionFinder
         foreach ($pastThirtyDaysDisposals as $disposal) {
             $disposalsToRevert->add($disposal);
 
-            // Deduct what's left (either the whole remaining quantity or the disposal's available
-            // 30-day quantity, whichever is smaller) from the remaining quantity to be matched
+            // Deduct what's left (either the whole remaining quantity or the disposal's uncallocated
+            // 30-day quantity, whichever is smaller) from the remaining quantity to be allocated
             $quantityToDeduct = Quantity::minimum($remainingQuantity, $disposal->availableThirtyDayQuantity());
             $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
@@ -94,18 +94,18 @@ final class ReversionFinder
     ): SharePoolingAssetDisposals {
         $disposalsToRevert = SharePoolingAssetDisposals::make();
 
-        // Get processed disposals with 30-day quantity matched with acquisitions on the same
-        // day as the disposal, with same-day quantity about to be matched with the disposal
+        // Get processed disposals with 30-day quantity allocated to acquisitions on the same
+        // day as the disposal, with same-day quantity about to be allocated to the disposal
         $sameDayAcquisitions = $transactions->acquisitionsMadeOn($disposal->date)->withThirtyDayQuantity();
 
         $remainingQuantity = $disposal->quantity;
         foreach ($sameDayAcquisitions as $acquisition) {
             // Add disposals up to the disposal's quantity, starting with the most recent ones
-            $disposalsWithMatchedThirtyDayQuantity = $transactions->processed()
-                ->disposalsWithThirtyDayQuantityMatchedWith($acquisition)
+            $disposalsWithAllocatedThirtyDayQuantity = $transactions->processed()
+                ->disposalsWithThirtyDayQuantityAllocatedTo($acquisition)
                 ->reverse();
 
-            foreach ($disposalsWithMatchedThirtyDayQuantity as $disposal) {
+            foreach ($disposalsWithAllocatedThirtyDayQuantity as $disposal) {
                 $disposalsToRevert->add($disposal);
 
                 $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityAllocatedTo($acquisition), $remainingQuantity);

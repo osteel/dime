@@ -502,7 +502,7 @@ it('can return a collection of disposals with 30-day quantity allocated to an ac
         SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('20'), id: $acquisition2->id)->make(),
         $disposal2 = SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('70'), id: $acquisition1->id)->make(),
         SharePoolingAssetDisposal::factory()->make(),
-    )->disposalsWithThirtyDayQuantityMatchedWith($acquisition1);
+    )->disposalsWithThirtyDayQuantityAllocatedTo($acquisition1);
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual(2);

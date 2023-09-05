@@ -64,7 +64,7 @@ abstract class SharePoolingAssetTransaction implements Stringable
     public function availableThirtyDayQuantity(): Quantity
     {
         // Same-day quantity always gets priority, and it is assumed that the existing
-        // 30-day quantity has already been matched with priority transactions. That
+        // 30-day quantity has already been allocated to priority transactions. That
         // leaves us with the section 104 pool quantity, which is what we return
         return $this->section104PoolQuantity();
     }

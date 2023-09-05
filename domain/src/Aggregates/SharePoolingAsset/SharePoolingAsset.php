@@ -118,7 +118,7 @@ final class SharePoolingAsset implements SharePoolingAssetContract
         $this->revertDisposals($disposalsToRevert);
 
         // Add the current disposal to the transactions (as unprocessed) so previous disposals
-        // don't try to match their 30-day quantity with the disposal's same-day acquisitions
+        // don't try to allocate their 30-day quantity to the disposal's same-day acquisitions
         $this->transactions->add(new SharePoolingAssetDisposal(
             id: $action->transactionId,
             date: $action->date,
@@ -176,9 +176,10 @@ final class SharePoolingAsset implements SharePoolingAssetContract
 
     public function applySharePoolingAssetDisposalReverted(SharePoolingAssetDisposalReverted $event): void
     {
-        // Replace the disposal in the array with the same disposal, but with reset quantities. This
-        // way, when several disposals are being replayed, a disposal won't be matched with future
-        // acquisitions within the next 30 days if these acquisitions have disposals on the same day
+        // Replace the disposal in the array with the same disposal, with reset quantities. This way,
+        // when several disposals are being replayed, we're sure the quantities of acquisitions made
+        // within 30 days of a disposal won't be wrongly allocated to that disposal instead of some
+        // disposals that might have happened on the same day as the acquisitions
         $this->transactions->add($event->disposal->copyAsUnprocessed());
     }
 

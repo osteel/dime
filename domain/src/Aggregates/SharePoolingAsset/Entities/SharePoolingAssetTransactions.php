@@ -267,7 +267,7 @@ final class SharePoolingAssetTransactions implements IteratorAggregate
         return $this->disposalsMadeAfter($date->minusDays(1));
     }
 
-    public function disposalsWithThirtyDayQuantityMatchedWith(SharePoolingAssetAcquisition $acquisition): SharePoolingAssetDisposals
+    public function disposalsWithThirtyDayQuantityAllocatedTo(SharePoolingAssetAcquisition $acquisition): SharePoolingAssetDisposals
     {
         $transactions = array_filter(
             $this->transactions,

@@ -13,11 +13,11 @@ use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\Exceptions\Qua
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 
 /**
- * This service restores the quantities from acquisitions that were
- * previously matched with a disposal that is now being reverted.
+ * This service restores acquisition quantities that were previously allocated to a disposal that is now being reverted.
  */
 final class QuantityAdjuster
 {
+    /** @throws SharePoolingAssetAcquisitionException */
     public static function revertDisposal(
         SharePoolingAssetDisposal $disposal,
         SharePoolingAssetTransactions $transactions,
