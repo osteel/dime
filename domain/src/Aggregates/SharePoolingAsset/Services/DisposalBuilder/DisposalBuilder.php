@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor;
+namespace Domain\Aggregates\SharePoolingAsset\Services\DisposalBuilder;
 
 use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
@@ -16,7 +16,7 @@ use Domain\ValueObjects\Quantity;
  * This service essentially calculates the cost basis of a disposal by looking at past and future
  * transactions, following the various share pooling asset rules (same-day, 30-day, section 104 pool).
  */
-final class DisposalProcessor
+final class DisposalBuilder
 {
     public static function process(
         DisposeOfSharePoolingAsset $disposal,
@@ -109,7 +109,9 @@ final class DisposalProcessor
         foreach ($sameDayAcquisitions as $acquisition) {
             $quantityToAllocate = Quantity::minimum($remainder, $acquisition->availableSameDayQuantity());
             $sameDayQuantityAllocation->allocateQuantity($quantityToAllocate, $acquisition);
-            $acquisition->increaseSameDayQuantity($remainder);
+
+            $acquisition->increaseSameDayQuantityUpToAvailableQuantity($remainder);
+
             $remainder = $remainder->minus($quantityToAllocate);
             if ($remainder->isZero()) {
                 break;
@@ -154,7 +156,7 @@ final class DisposalProcessor
             foreach ($sameDayDisposals as $disposal) {
                 $sameDayQuantityToApply = Quantity::minimum($disposal->availableSameDayQuantity(), $thirtyDayQuantityToApply);
                 $disposal->sameDayQuantityAllocation->allocateQuantity($sameDayQuantityToApply, $acquisition);
-                $acquisition->increaseSameDayQuantity($sameDayQuantityToApply);
+                $acquisition->increaseSameDayQuantityUpToAvailableQuantity($sameDayQuantityToApply);
                 $thirtyDayQuantityToApply = $thirtyDayQuantityToApply->minus($sameDayQuantityToApply);
                 if ($thirtyDayQuantityToApply->isZero()) {
                     break;
@@ -170,7 +172,7 @@ final class DisposalProcessor
             $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($thirtyDayQuantityToApply));
 
             $thirtyDayQuantityAllocation->allocateQuantity($thirtyDayQuantityToApply, $acquisition);
-            $acquisition->increaseThirtyDayQuantity($thirtyDayQuantityToApply);
+            $acquisition->increaseThirtyDayQuantityUpToAvailableQuantity($thirtyDayQuantityToApply);
             $remainingQuantity = $remainingQuantity->minus($thirtyDayQuantityToApply);
 
             // Continue until there are no more transactions or we've covered all disposed tokens

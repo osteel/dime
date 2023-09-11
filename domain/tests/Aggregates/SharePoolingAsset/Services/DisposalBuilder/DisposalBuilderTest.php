@@ -4,7 +4,7 @@ use Brick\DateTime\LocalDate;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
-use Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor\DisposalProcessor;
+use Domain\Aggregates\SharePoolingAsset\Services\DisposalBuilder\DisposalBuilder;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetTransactionId;
 use Domain\ValueObjects\Asset;
 use Domain\ValueObjects\FiatAmount;
@@ -20,7 +20,7 @@ it('does not process any acquisitions when the disposed of quantity is zero', fu
         forFiat: false,
     );
 
-    $disposal = DisposalProcessor::process(
+    $disposal = DisposalBuilder::process(
         disposal: $action,
         transactions: SharePoolingAssetTransactions::make(SharePoolingAssetAcquisition::factory()->make()),
     );
@@ -40,7 +40,7 @@ it('does not process any section 104 pool acquisitions when none were made befor
 
     $acquisition = SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2021-10-22')]);
 
-    $disposal = DisposalProcessor::process($action, SharePoolingAssetTransactions::make($acquisition));
+    $disposal = DisposalBuilder::process($action, SharePoolingAssetTransactions::make($acquisition));
 
     expect($disposal->id)->toBe($id);
 });

@@ -10,7 +10,6 @@ use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\Timely;
 use Domain\Aggregates\SharePoolingAsset\Actions\Contracts\WithAsset;
 use Domain\Aggregates\SharePoolingAsset\Actions\DisposeOfSharePoolingAsset;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
-use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposals;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetAcquired;
@@ -18,7 +17,7 @@ use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposalReverted
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetDisposedOf;
 use Domain\Aggregates\SharePoolingAsset\Events\SharePoolingAssetFiatCurrencySet;
 use Domain\Aggregates\SharePoolingAsset\Exceptions\SharePoolingAssetException;
-use Domain\Aggregates\SharePoolingAsset\Services\DisposalProcessor\DisposalProcessor;
+use Domain\Aggregates\SharePoolingAsset\Services\DisposalBuilder\DisposalBuilder;
 use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\QuantityAdjuster;
 use Domain\Aggregates\SharePoolingAsset\Services\ReversionFinder\ReversionFinder;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\SharePoolingAssetId;
@@ -67,10 +66,10 @@ final class SharePoolingAsset implements SharePoolingAssetContract
 
         $disposalsToRevert = ReversionFinder::disposalsToRevertOnAcquisition(
             acquisition: $action,
-            transactions: $this->transactions,
+            transactions: $this->transactions->copy(),
         );
 
-        $this->revertDisposals($disposalsToRevert);
+        $disposalsToRevert->isEmpty() || $this->revertDisposals($disposalsToRevert);
 
         // Record the new acquisition
         $this->recordThat(new SharePoolingAssetAcquired(
@@ -83,13 +82,22 @@ final class SharePoolingAsset implements SharePoolingAssetContract
             ),
         ));
 
-        $this->replayDisposals($disposalsToRevert);
+        $disposalsToRevert->isEmpty() || $this->replayDisposals($disposalsToRevert);
     }
 
     public function applySharePoolingAssetAcquired(SharePoolingAssetAcquired $event): void
     {
         $this->previousTransactionDate = $event->acquisition->date;
-        $this->transactions->add($event->acquisition);
+        // The reason for cloning here is for cases where an acquisition causes some disposals to be reverted before
+        // the acquisition is recorded and the disposals subsequently replayed. The acquisition should be recorded
+        // with its same-day and 30-day quantities to zero, because at the time of the event the disposals haven't
+        // been replayed yet. But the aggregate is only persisted after the disposals have been reverted, the
+        // acquisition has been processed *and* the disposals have been replayed. Since the latter update the
+        // acquisition's same-day and 30-day quantities, these updates occur before the acquisition's event
+        // is recorded, meaning the event is stored with the updated quantities. As a result, whenever the
+        // aggregate is recreated from its events, the acquisition already has a same-day and/or 30-day
+        // quantity, but upon replaying the subsequent disposals, these quantities are updated *again*.
+        $this->transactions->add(clone $event->acquisition);
     }
 
     /** @throws SharePoolingAssetException */
@@ -97,41 +105,25 @@ final class SharePoolingAsset implements SharePoolingAssetContract
     {
         $this->validateCurrency($action->proceeds->currency, $action);
 
-        if (! $action->isReplay()) {
-            $this->validateTimeline($action);
-        }
+        $action->isReplay() || $this->validateTimeline($action);
 
         $this->validateDisposalQuantity($action);
 
         $disposalsToRevert = ReversionFinder::disposalsToRevertOnDisposal(
             disposal: $action,
-            transactions: $this->transactions,
+            transactions: $this->transactions->copy(),
         );
 
-        // If there are no disposals to revert, process the current disposal normally
-        if ($disposalsToRevert->isEmpty()) {
-            $this->recordDisposal($action);
+        $disposalsToRevert->isEmpty() || $this->revertDisposals($disposalsToRevert);
 
-            return;
-        }
+        $sharePoolingAssetDisposal = DisposalBuilder::process(
+            disposal: $action,
+            transactions: $this->transactions->copy(),
+        );
 
-        $this->revertDisposals($disposalsToRevert);
+        $this->recordThat(new SharePoolingAssetDisposedOf(disposal: $sharePoolingAssetDisposal));
 
-        // Add the current disposal to the transactions (as unprocessed) so previous disposals
-        // don't try to allocate their 30-day quantity to the disposal's same-day acquisitions
-        $this->transactions->add(new SharePoolingAssetDisposal(
-            id: $action->transactionId,
-            date: $action->date,
-            quantity: $action->quantity,
-            costBasis: $action->proceeds->zero(),
-            proceeds: $action->proceeds,
-            forFiat: $action->forFiat,
-            processed: false,
-        ));
-
-        $this->replayDisposals($disposalsToRevert);
-
-        $this->recordDisposal($action);
+        $disposalsToRevert->isEmpty() || $this->replayDisposals($disposalsToRevert);
     }
 
     private function replayDisposals(SharePoolingAssetDisposals $disposals): void
@@ -148,18 +140,11 @@ final class SharePoolingAsset implements SharePoolingAssetContract
         }
     }
 
-    private function recordDisposal(DisposeOfSharePoolingAsset $action): void
-    {
-        $sharePoolingAssetDisposal = DisposalProcessor::process(
-            disposal: $action,
-            transactions: $this->transactions,
-        );
-
-        $this->recordThat(new SharePoolingAssetDisposedOf(disposal: $sharePoolingAssetDisposal));
-    }
-
     public function applySharePoolingAssetDisposedOf(SharePoolingAssetDisposedOf $event): void
     {
+        // Adjust quantities for acquisitions whose quantities were allocated to the disposal
+        QuantityAdjuster::applyDisposal($event->disposal, $this->transactions);
+
         $this->previousTransactionDate = $event->disposal->date;
         $this->transactions->add($event->disposal);
     }
@@ -167,19 +152,17 @@ final class SharePoolingAsset implements SharePoolingAssetContract
     private function revertDisposals(SharePoolingAssetDisposals $disposals): void
     {
         foreach ($disposals as $disposal) {
-            // Restore quantities deducted from the acquisitions whose quantities were allocated to the disposal
-            QuantityAdjuster::revertDisposal($disposal, $this->transactions);
-
             $this->recordThat(new SharePoolingAssetDisposalReverted(disposal: $disposal));
         }
     }
 
     public function applySharePoolingAssetDisposalReverted(SharePoolingAssetDisposalReverted $event): void
     {
-        // Replace the disposal in the array with the same disposal, with reset quantities. This way,
-        // when several disposals are being replayed, we're sure the quantities of acquisitions made
-        // within 30 days of a disposal won't be wrongly allocated to that disposal instead of some
-        // disposals that might have happened on the same day as the acquisitions
+        // Restore quantities deducted from acquisitions whose quantities were allocated to the disposal
+        QuantityAdjuster::revertDisposal($event->disposal, $this->transactions);
+
+        // Replace the disposal in the array with the same disposal, as unprocessed. This way we save the disposal's
+        // position in the array but it's ignored for calculations (e.g. the validation of the disposed of quantity)
         $this->transactions->add($event->disposal->copyAsUnprocessed());
     }
 

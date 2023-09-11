@@ -88,19 +88,24 @@ final class ReversionFinder
         return $disposalsToRevert;
     }
 
+    /**
+     * Get processed disposals with 30-day quantity allocated to acquisitions from the same day as the
+     * current disposal, with same-day quantity that should be allocated to that disposal instead.
+     */
     public static function disposalsToRevertOnDisposal(
         DisposeOfSharePoolingAsset $disposal,
         SharePoolingAssetTransactions $transactions,
     ): SharePoolingAssetDisposals {
         $disposalsToRevert = SharePoolingAssetDisposals::make();
 
-        // Get processed disposals with 30-day quantity allocated to acquisitions on the same
-        // day as the disposal, with same-day quantity about to be allocated to the disposal
+        // Get the acquisitions from the same day as the disposal and with currently-allocated 30-day quantity
         $sameDayAcquisitions = $transactions->acquisitionsMadeOn($disposal->date)->withThirtyDayQuantity();
 
         $remainingQuantity = $disposal->quantity;
         foreach ($sameDayAcquisitions as $acquisition) {
-            // Add disposals up to the disposal's quantity, starting with the most recent ones
+            // Add disposals up to the disposal's quantity, starting with the most recent ones. That is
+            // because older disposals get priority when allocating the 30-day quantity of acquisitions
+            // made within 30 days of the disposal, so the last disposals in are the first out
             $disposalsWithAllocatedThirtyDayQuantity = $transactions->processed()
                 ->disposalsWithThirtyDayQuantityAllocatedTo($acquisition)
                 ->reverse();
@@ -111,13 +116,15 @@ final class ReversionFinder
                 $quantityToDeduct = Quantity::minimum($disposal->thirtyDayQuantityAllocatedTo($acquisition), $remainingQuantity);
                 $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
-                // Stop as soon as the disposal's quantity has fully been allocated
+                // Stop as soon as the disposal's quantity has been fully allocated
                 if ($remainingQuantity->isZero()) {
                     break 2;
                 }
             }
         }
 
-        return $disposalsToRevert;
+        // To maintain the priority of older disposals over the 30-day quantity of acquisitions made
+        // within 30 days, however, they need to be reverted and replayed in chronological order
+        return $disposalsToRevert->reverse();
     }
 }

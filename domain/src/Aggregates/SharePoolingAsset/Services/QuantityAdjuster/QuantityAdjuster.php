@@ -12,24 +12,37 @@ use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\Exceptions\QuantityAdjusterException;
 use Domain\Aggregates\SharePoolingAsset\ValueObjects\QuantityAllocation;
 
-/**
- * This service restores acquisition quantities that were previously allocated to a disposal that is now being reverted.
- */
 final class QuantityAdjuster
 {
-    /** @throws SharePoolingAssetAcquisitionException */
+    /**
+     * Adjust acquisition quantities based on the disposal's allocated quantities.
+     *
+     * @throws SharePoolingAssetAcquisitionException
+     */
+    public static function applyDisposal(
+        SharePoolingAssetDisposal $disposal,
+        SharePoolingAssetTransactions $transactions,
+    ): void {
+        foreach (self::getAcquisitions($disposal->sameDayQuantityAllocation, $transactions) as $acquisition) {
+            $acquisition->increaseSameDayQuantity($disposal->sameDayQuantityAllocation->quantityAllocatedTo($acquisition));
+        }
+
+        foreach (self::getAcquisitions($disposal->thirtyDayQuantityAllocation, $transactions) as $acquisition) {
+            $acquisition->increaseThirtyDayQuantity($disposal->thirtyDayQuantityAllocation->quantityAllocatedTo($acquisition));
+        }
+    }
+
+    /**
+     * Restore acquisition quantities that were previously allocated to a disposal that is now being reverted.
+     *
+     * @throws SharePoolingAssetAcquisitionException
+     */
     public static function revertDisposal(
         SharePoolingAssetDisposal $disposal,
         SharePoolingAssetTransactions $transactions,
     ): void {
         foreach (self::getAcquisitions($disposal->sameDayQuantityAllocation, $transactions) as $acquisition) {
-            try {
-                $acquisition->decreaseSameDayQuantity($disposal->sameDayQuantityAllocation->quantityAllocatedTo($acquisition));
-            } catch (SharePoolingAssetAcquisitionException) {
-                // @TODO When re-acquiring within 30 days an asset that was disposed of on the same day it was acquired,
-                // decreasing the same-day quantity of the concerned acquisitions fails, because at the time the latter
-                // were recorded within the SharePoolingAssetAcquired events that had no same-day quantity yet
-            }
+            $acquisition->decreaseSameDayQuantity($disposal->sameDayQuantityAllocation->quantityAllocatedTo($acquisition));
         }
 
         foreach (self::getAcquisitions($disposal->thirtyDayQuantityAllocation, $transactions) as $acquisition) {

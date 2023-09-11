@@ -1,6 +1,5 @@
 <?php
 
-use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetAcquisition;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetDisposal;
 use Domain\Aggregates\SharePoolingAsset\Entities\SharePoolingAssetTransactions;
 use Domain\Aggregates\SharePoolingAsset\Services\QuantityAdjuster\Exceptions\QuantityAdjusterException;
@@ -26,14 +25,4 @@ it('cannot revert a disposal because a transaction is not an acquisition', funct
 
     expect(fn () => QuantityAdjuster::revertDisposal($disposal, $transactions))
         ->toThrow(QuantityAdjusterException::class, QuantityAdjusterException::notAnAcquisition($id)->getMessage());
-});
-
-it('reverts a disposal despite insufficient same-day quantity', function () {
-    $disposal = SharePoolingAssetDisposal::factory()
-        ->withSameDayQuantity(new Quantity('100'), $id = SharePoolingAssetTransactionId::fromString('foo'))
-        ->make();
-
-    $transactions = SharePoolingAssetTransactions::make(SharePoolingAssetAcquisition::factory()->make(['id' => $id]));
-
-    expect(QuantityAdjuster::revertDisposal($disposal, $transactions))->not->toThrow(QuantityAdjusterException::class);
 });
