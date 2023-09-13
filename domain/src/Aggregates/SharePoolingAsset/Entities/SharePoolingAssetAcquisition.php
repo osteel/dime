@@ -74,8 +74,12 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
         return $this;
     }
 
-    /** Increase the same-day quantity and adjust the 30-day quantity accordingly. */
-    public function increaseSameDayQuantityUpToAvailableQuantity(Quantity $quantity): self
+    /**
+     * Increase the same-day quantity and adjust the 30-day quantity accordingly.
+     *
+     * @return Quantity the added quantity
+     */
+    public function increaseSameDayQuantityUpToAvailableQuantity(Quantity $quantity): Quantity
     {
         // Adjust same-day quantity
         $quantityToAdd = Quantity::minimum($quantity, $this->availableSameDayQuantity());
@@ -85,7 +89,7 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
         $quantityToDeduct = Quantity::minimum($quantityToAdd, $this->thirtyDayQuantity);
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantityToDeduct);
 
-        return $this;
+        return $quantityToAdd;
     }
 
     /** @throws SharePoolingAssetAcquisitionException */
@@ -111,12 +115,13 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
         return $this;
     }
 
-    public function increaseThirtyDayQuantityUpToAvailableQuantity(Quantity $quantity): self
+    /** @return Quantity the added quantity */
+    public function increaseThirtyDayQuantityUpToAvailableQuantity(Quantity $quantity): Quantity
     {
         $quantityToAdd = Quantity::minimum($quantity, $this->availableThirtyDayQuantity());
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->plus($quantityToAdd);
 
-        return $this;
+        return $quantityToAdd;
     }
 
     /** @throws SharePoolingAssetAcquisitionException */

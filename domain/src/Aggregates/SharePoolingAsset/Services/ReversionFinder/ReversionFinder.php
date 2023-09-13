@@ -38,19 +38,20 @@ final class ReversionFinder
             return $disposalsToRevert;
         }
 
-        // Get same-day disposals with part of their quantity not allocated to same-day acquisitions
-        $sameDayDisposals = $transactions->disposalsMadeOn($date)->withAvailableSameDayQuantity();
+        // Get all same-day disposals. As the average cost basis of same-day acquisitions is used to
+        // calculate the cost basis of the disposals, it's simpler to revert them all and start over
+        $sameDayDisposals = $transactions->disposalsMadeOn($date);
 
         if ($sameDayDisposals->isEmpty()) {
             return self::add30DayDisposalsToRevert($disposalsToRevert, $transactions, $date, $remainingQuantity);
         }
 
-        // As the average cost basis of same-day acquisitions is used to calculate the
-        // cost basis of the disposals, it's simpler to revert them all and start over
         $disposalsToRevert->add(...$sameDayDisposals);
 
-        // Deduct what's left (either the whole remaining quantity or the disposals' unallocated
-        // same-day quantity, whichever is smaller) from the remaining quantity to be allocated
+        // Deduct either the acquisition's remaining quantity or the disposals' unallocated same-day
+        // quantity (whichever is smaller) from the quantity to be allocated. The trick here is that,
+        // while we are going to revert and replay all same-day disposals, their same-day quantity
+        // already allocated to earlier same-day acquisitions must be taken into account, still
         $quantityToDeduct = Quantity::minimum($remainingQuantity, $sameDayDisposals->availableSameDayQuantity());
         $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
@@ -74,8 +75,8 @@ final class ReversionFinder
         foreach ($pastThirtyDaysDisposals as $disposal) {
             $disposalsToRevert->add($disposal);
 
-            // Deduct what's left (either the whole remaining quantity or the disposal's uncallocated
-            // 30-day quantity, whichever is smaller) from the remaining quantity to be allocated
+            // Deduct either the acquisition's remaining quantity or the disposal's uncallocated
+            // 30-day quantity (whichever is smaller) from the quantity to be allocated
             $quantityToDeduct = Quantity::minimum($remainingQuantity, $disposal->availableThirtyDayQuantity());
             $remainingQuantity = $remainingQuantity->minus($quantityToDeduct);
 
@@ -106,7 +107,7 @@ final class ReversionFinder
             // Add disposals up to the disposal's quantity, starting with the most recent ones. That is
             // because older disposals get priority when allocating the 30-day quantity of acquisitions
             // made within 30 days of the disposal, so the last disposals in are the first out
-            $disposalsWithAllocatedThirtyDayQuantity = $transactions->processed()
+            $disposalsWithAllocatedThirtyDayQuantity = $transactions
                 ->disposalsWithThirtyDayQuantityAllocatedTo($acquisition)
                 ->reverse();
 

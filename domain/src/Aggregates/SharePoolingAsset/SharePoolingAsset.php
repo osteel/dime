@@ -66,7 +66,7 @@ final class SharePoolingAsset implements SharePoolingAssetContract
 
         $disposalsToRevert = ReversionFinder::disposalsToRevertOnAcquisition(
             acquisition: $action,
-            transactions: $this->transactions->copy(),
+            transactions: $this->transactions,
         );
 
         $disposalsToRevert->isEmpty() || $this->revertDisposals($disposalsToRevert);
@@ -96,7 +96,7 @@ final class SharePoolingAsset implements SharePoolingAssetContract
         // acquisition's same-day and 30-day quantities, these updates occur before the acquisition's event
         // is recorded, meaning the event is stored with the updated quantities. As a result, whenever the
         // aggregate is recreated from its events, the acquisition already has a same-day and/or 30-day
-        // quantity, but upon replaying the subsequent disposals, these quantities are updated *again*.
+        // quantity, but upon replaying the subsequent disposals, these quantities are updated *again*
         $this->transactions->add(clone $event->acquisition);
     }
 
@@ -111,12 +111,12 @@ final class SharePoolingAsset implements SharePoolingAssetContract
 
         $disposalsToRevert = ReversionFinder::disposalsToRevertOnDisposal(
             disposal: $action,
-            transactions: $this->transactions->copy(),
+            transactions: $this->transactions,
         );
 
         $disposalsToRevert->isEmpty() || $this->revertDisposals($disposalsToRevert);
 
-        $sharePoolingAssetDisposal = DisposalBuilder::process(
+        $sharePoolingAssetDisposal = DisposalBuilder::make(
             disposal: $action,
             transactions: $this->transactions->copy(),
         );

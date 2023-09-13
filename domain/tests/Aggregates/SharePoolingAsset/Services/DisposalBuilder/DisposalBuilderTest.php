@@ -20,7 +20,7 @@ it('does not process any acquisitions when the disposed of quantity is zero', fu
         forFiat: false,
     );
 
-    $disposal = DisposalBuilder::process(
+    $disposal = DisposalBuilder::make(
         disposal: $action,
         transactions: SharePoolingAssetTransactions::make(SharePoolingAssetAcquisition::factory()->make()),
     );
@@ -40,7 +40,7 @@ it('does not process any section 104 pool acquisitions when none were made befor
 
     $acquisition = SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2021-10-22')]);
 
-    $disposal = DisposalBuilder::process($action, SharePoolingAssetTransactions::make($acquisition));
+    $disposal = DisposalBuilder::make($action, SharePoolingAssetTransactions::make($acquisition));
 
     expect($disposal->id)->toBe($id);
 });

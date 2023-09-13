@@ -18,7 +18,7 @@ use Domain\ValueObjects\Quantity;
  */
 final class DisposalBuilder
 {
-    public static function process(
+    public static function make(
         DisposeOfSharePoolingAsset $disposal,
         SharePoolingAssetTransactions $transactions,
     ): SharePoolingAssetDisposal {
@@ -107,13 +107,10 @@ final class DisposalBuilder
         // Deduct the applied quantity from the same-day acquisitions
         $remainder = $availableSameDayQuantity;
         foreach ($sameDayAcquisitions as $acquisition) {
-            $quantityToAllocate = Quantity::minimum($remainder, $acquisition->availableSameDayQuantity());
+            $quantityToAllocate = $acquisition->increaseSameDayQuantityUpToAvailableQuantity($remainder);
             $sameDayQuantityAllocation->allocateQuantity($quantityToAllocate, $acquisition);
 
-            $acquisition->increaseSameDayQuantityUpToAvailableQuantity($remainder);
-
-            $remainder = $remainder->minus($quantityToAllocate);
-            if ($remainder->isZero()) {
+            if (($remainder = $remainder->minus($quantityToAllocate))->isZero()) {
                 break;
             }
         }
@@ -146,37 +143,13 @@ final class DisposalBuilder
 
         foreach ($withinThirtyDaysAcquisitions as $acquisition) {
             // Apply the acquisition's cost basis to the disposed of asset up to the remaining quantity
-            $thirtyDayQuantityToApply = Quantity::minimum($acquisition->availableThirtyDayQuantity(), $remainingQuantity);
-
-            // Also deduct same-day disposals with available same-day quantity that haven't been processed yet
-            $sameDayDisposals = $transactions->disposalsMadeOn($acquisition->date)
-                ->unprocessed()
-                ->withAvailableSameDayQuantity();
-
-            foreach ($sameDayDisposals as $disposal) {
-                $sameDayQuantityToApply = Quantity::minimum($disposal->availableSameDayQuantity(), $thirtyDayQuantityToApply);
-                $disposal->sameDayQuantityAllocation->allocateQuantity($sameDayQuantityToApply, $acquisition);
-                $acquisition->increaseSameDayQuantityUpToAvailableQuantity($sameDayQuantityToApply);
-                $thirtyDayQuantityToApply = $thirtyDayQuantityToApply->minus($sameDayQuantityToApply);
-                if ($thirtyDayQuantityToApply->isZero()) {
-                    break;
-                }
-            }
-
-            if ($thirtyDayQuantityToApply->isZero()) {
-                continue;
-            }
-
+            $quantityToAllocate = $acquisition->increaseThirtyDayQuantityUpToAvailableQuantity($remainingQuantity);
             $averageCostBasisPerUnit = $acquisition->averageCostBasisPerUnit();
+            $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($quantityToAllocate));
+            $thirtyDayQuantityAllocation->allocateQuantity($quantityToAllocate, $acquisition);
 
-            $costBasis = $costBasis->plus($averageCostBasisPerUnit->multipliedBy($thirtyDayQuantityToApply));
-
-            $thirtyDayQuantityAllocation->allocateQuantity($thirtyDayQuantityToApply, $acquisition);
-            $acquisition->increaseThirtyDayQuantityUpToAvailableQuantity($thirtyDayQuantityToApply);
-            $remainingQuantity = $remainingQuantity->minus($thirtyDayQuantityToApply);
-
-            // Continue until there are no more transactions or we've covered all disposed tokens
-            if ($remainingQuantity->isZero()) {
+            // Continue until there are no more transactions or we've covered all disposed of tokens
+            if (($remainingQuantity = $remainingQuantity->minus($quantityToAllocate))->isZero()) {
                 break;
             }
         }

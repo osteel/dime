@@ -109,7 +109,12 @@ it('can increase the same-day quantity', function (string $increase, string $sam
     'scenario 2' => ['10', '40'],
 ]);
 
-it('can increase the same-day quantity up to the available quantity', function (string $increase, string $sameDayQuantity, string $thirtyDayQuantity) {
+it('can increase the same-day quantity up to the available quantity', function (
+    string $increase,
+    string $sameDayQuantity,
+    string $thirtyDayQuantity,
+    string $addedQuantity,
+) {
     /** @var SharePoolingAssetAcquisition */
     $acquisition = SharePoolingAssetAcquisition::factory()->make([
         'quantity' => new Quantity('100'),
@@ -117,15 +122,16 @@ it('can increase the same-day quantity up to the available quantity', function (
         'thirtyDayQuantity' => new Quantity('60'),
     ]);
 
-    $acquisition->increaseSameDayQuantityUpToAvailableQuantity(new Quantity($increase));
+    $added = $acquisition->increaseSameDayQuantityUpToAvailableQuantity(new Quantity($increase));
 
     expect((string) $acquisition->sameDayQuantity())->toBe($sameDayQuantity);
     expect((string) $acquisition->thirtyDayQuantity())->toBe($thirtyDayQuantity);
+    expect((string) $added)->toBe($addedQuantity);
 })->with([
-    'scenario 1' => ['5', '35', '55'],
-    'scenario 2' => ['10', '40', '50'],
-    'scenario 3' => ['70', '100', '0'],
-    'scenario 4' => ['71', '100', '0'],
+    'scenario 1' => ['5', '35', '55', '5'],
+    'scenario 2' => ['10', '40', '50', '10'],
+    'scenario 3' => ['70', '100', '0', '70'],
+    'scenario 4' => ['71', '100', '0', '70'],
 ]);
 
 it('cannot decrease the same-day quantity because the quantity is too great', function () {
@@ -185,7 +191,12 @@ it('can increase the 30-day quantity', function (string $increase, string $thirt
     'scenario 2' => ['10', '70'],
 ]);
 
-it('can increase the 30-day quantity up to the available quantity', function (string $increase, string $sameDayQuantity, string $thirtyDayQuantity) {
+it('can increase the 30-day quantity up to the available quantity', function (
+    string $increase,
+    string $sameDayQuantity,
+    string $thirtyDayQuantity,
+    string $addedQuantity,
+) {
     /** @var SharePoolingAssetAcquisition */
     $acquisition = SharePoolingAssetAcquisition::factory()->make([
         'quantity' => new Quantity('100'),
@@ -193,14 +204,15 @@ it('can increase the 30-day quantity up to the available quantity', function (st
         'thirtyDayQuantity' => new Quantity('60'),
     ]);
 
-    $acquisition->increaseThirtyDayQuantityUpToAvailableQuantity(new Quantity($increase));
+    $added = $acquisition->increaseThirtyDayQuantityUpToAvailableQuantity(new Quantity($increase));
 
     expect((string) $acquisition->sameDayQuantity())->toBe($sameDayQuantity);
     expect((string) $acquisition->thirtyDayQuantity())->toBe($thirtyDayQuantity);
+    expect((string) $added)->toBe($addedQuantity);
 })->with([
-    'scenario 1' => ['5', '30', '65'],
-    'scenario 2' => ['10', '30', '70'],
-    'scenario 3' => ['15', '30', '70'],
+    'scenario 1' => ['5', '30', '65', '5'],
+    'scenario 2' => ['10', '30', '70', '10'],
+    'scenario 3' => ['15', '30', '70', '10'],
 ]);
 
 it('cannot decrease the 30-day quantity because the quantity is too great', function () {
