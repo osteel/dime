@@ -69,22 +69,6 @@ it('can reverse a collection of disposals', function () {
     expect($disposals->getIterator()[2])->toBe($disposal1);
 });
 
-it('can return the unprocessed disposals from a collection of disposals', function () {
-    /** @var list<SharePoolingAssetDisposal> */
-    $items = [
-        SharePoolingAssetDisposal::factory()->make(),
-        $unprocessed1 = SharePoolingAssetDisposal::factory()->unprocessed()->make(),
-        SharePoolingAssetDisposal::factory()->make(),
-        $unprocessed2 = SharePoolingAssetDisposal::factory()->unprocessed()->make(),
-    ];
-
-    $disposals = SharePoolingAssetDisposals::make(...$items)->unprocessed();
-
-    expect($disposals->count())->toBeInt()->toBe(2);
-    expect($disposals->getIterator()[0])->toBe($unprocessed1);
-    expect($disposals->getIterator()[1])->toBe($unprocessed2);
-});
-
 it('can return the disposals with available same-day quantity from a collection of disposals', function () {
     /** @var list<SharePoolingAssetDisposal> */
     $items = [

@@ -63,6 +63,7 @@ it('can return the section 104 pool cost basis', function (string $quantity, str
 it('can return the various quantities', function () {
     /** @var SharePoolingAssetAcquisition */
     $acquisition = SharePoolingAssetAcquisition::factory()->make([
+        'quantity' => new Quantity('100'),
         'sameDayQuantity' => new Quantity('30'),
         'thirtyDayQuantity' => new Quantity('60'),
     ]);
@@ -78,7 +79,21 @@ it('can return the various quantities', function () {
     expect((string) $acquisition->availableThirtyDayQuantity())->toBe('10');
 });
 
-it('can increase the same-day quantity', function (string $increase, string $sameDayQuantity, string $thirtyDayQuantity) {
+it('cannot increase the same-day quantity because the quantity is too great', function () {
+    /** @var SharePoolingAssetAcquisition */
+    $acquisition = SharePoolingAssetAcquisition::factory()->make([
+        'quantity' => new Quantity('100'),
+        'sameDayQuantity' => new Quantity('30'),
+        'thirtyDayQuantity' => new Quantity('60'),
+    ]);
+
+    expect(fn () => $acquisition->increaseSameDayQuantity(new Quantity('11')))->toThrow(
+        SharePoolingAssetAcquisitionException::class,
+        SharePoolingAssetAcquisitionException::insufficientSameDayQuantityToIncrease(new Quantity('11'), new Quantity('10'))->getMessage(),
+    );
+});
+
+it('can increase the same-day quantity', function (string $increase, string $sameDayQuantity) {
     /** @var SharePoolingAssetAcquisition */
     $acquisition = SharePoolingAssetAcquisition::factory()->make([
         'quantity' => new Quantity('100'),
@@ -89,12 +104,34 @@ it('can increase the same-day quantity', function (string $increase, string $sam
     $acquisition->increaseSameDayQuantity(new Quantity($increase));
 
     expect((string) $acquisition->sameDayQuantity())->toBe($sameDayQuantity);
-    expect((string) $acquisition->thirtyDayQuantity())->toBe($thirtyDayQuantity);
 })->with([
-    'scenario 1' => ['5', '35', '55'],
-    'scenario 2' => ['10', '40', '50'],
-    'scenario 3' => ['70', '100', '0'],
-    'scenario 4' => ['71', '100', '0'],
+    'scenario 1' => ['5', '35'],
+    'scenario 2' => ['10', '40'],
+]);
+
+it('can increase the same-day quantity up to the available quantity', function (
+    string $increase,
+    string $sameDayQuantity,
+    string $thirtyDayQuantity,
+    string $addedQuantity,
+) {
+    /** @var SharePoolingAssetAcquisition */
+    $acquisition = SharePoolingAssetAcquisition::factory()->make([
+        'quantity' => new Quantity('100'),
+        'sameDayQuantity' => new Quantity('30'),
+        'thirtyDayQuantity' => new Quantity('60'),
+    ]);
+
+    $added = $acquisition->increaseSameDayQuantityUpToAvailableQuantity(new Quantity($increase));
+
+    expect((string) $acquisition->sameDayQuantity())->toBe($sameDayQuantity);
+    expect((string) $acquisition->thirtyDayQuantity())->toBe($thirtyDayQuantity);
+    expect((string) $added)->toBe($addedQuantity);
+})->with([
+    'scenario 1' => ['5', '35', '55', '5'],
+    'scenario 2' => ['10', '40', '50', '10'],
+    'scenario 3' => ['70', '100', '0', '70'],
+    'scenario 4' => ['71', '100', '0', '70'],
 ]);
 
 it('cannot decrease the same-day quantity because the quantity is too great', function () {
@@ -107,7 +144,7 @@ it('cannot decrease the same-day quantity because the quantity is too great', fu
 
     expect(fn () => $acquisition->decreaseSameDayQuantity(new Quantity('31')))->toThrow(
         SharePoolingAssetAcquisitionException::class,
-        SharePoolingAssetAcquisitionException::insufficientSameDayQuantity(new Quantity('31'), new Quantity('30'))->getMessage(),
+        SharePoolingAssetAcquisitionException::insufficientSameDayQuantityToDecrease(new Quantity('31'), new Quantity('30'))->getMessage(),
     );
 });
 
@@ -124,7 +161,21 @@ it('can decrease the same-day quantity', function () {
     expect((string) $acquisition->sameDayQuantity())->toBe('20');
 });
 
-it('can increase the 30-day quantity', function (string $increase, string $sameDayQuantity, string $thirtyDayQuantity) {
+it('cannot increase the 30-day quantity because the quantity is too great', function () {
+    /** @var SharePoolingAssetAcquisition */
+    $acquisition = SharePoolingAssetAcquisition::factory()->make([
+        'quantity' => new Quantity('100'),
+        'sameDayQuantity' => new Quantity('30'),
+        'thirtyDayQuantity' => new Quantity('60'),
+    ]);
+
+    expect(fn () => $acquisition->increaseThirtyDayQuantity(new Quantity('11')))->toThrow(
+        SharePoolingAssetAcquisitionException::class,
+        SharePoolingAssetAcquisitionException::insufficientThirtyDayQuantityToIncrease(new Quantity('11'), new Quantity('10'))->getMessage(),
+    );
+});
+
+it('can increase the 30-day quantity', function (string $increase, string $thirtyDayQuantity) {
     /** @var SharePoolingAssetAcquisition */
     $acquisition = SharePoolingAssetAcquisition::factory()->make([
         'quantity' => new Quantity('100'),
@@ -134,12 +185,34 @@ it('can increase the 30-day quantity', function (string $increase, string $sameD
 
     $acquisition->increaseThirtyDayQuantity(new Quantity($increase));
 
-    expect((string) $acquisition->sameDayQuantity())->toBe($sameDayQuantity);
     expect((string) $acquisition->thirtyDayQuantity())->toBe($thirtyDayQuantity);
 })->with([
-    'scenario 1' => ['5', '30', '65'],
-    'scenario 2' => ['10', '30', '70'],
-    'scenario 3' => ['15', '30', '70'],
+    'scenario 1' => ['5', '65'],
+    'scenario 2' => ['10', '70'],
+]);
+
+it('can increase the 30-day quantity up to the available quantity', function (
+    string $increase,
+    string $sameDayQuantity,
+    string $thirtyDayQuantity,
+    string $addedQuantity,
+) {
+    /** @var SharePoolingAssetAcquisition */
+    $acquisition = SharePoolingAssetAcquisition::factory()->make([
+        'quantity' => new Quantity('100'),
+        'sameDayQuantity' => new Quantity('30'),
+        'thirtyDayQuantity' => new Quantity('60'),
+    ]);
+
+    $added = $acquisition->increaseThirtyDayQuantityUpToAvailableQuantity(new Quantity($increase));
+
+    expect((string) $acquisition->sameDayQuantity())->toBe($sameDayQuantity);
+    expect((string) $acquisition->thirtyDayQuantity())->toBe($thirtyDayQuantity);
+    expect((string) $added)->toBe($addedQuantity);
+})->with([
+    'scenario 1' => ['5', '30', '65', '5'],
+    'scenario 2' => ['10', '30', '70', '10'],
+    'scenario 3' => ['15', '30', '70', '10'],
 ]);
 
 it('cannot decrease the 30-day quantity because the quantity is too great', function () {
@@ -152,7 +225,7 @@ it('cannot decrease the 30-day quantity because the quantity is too great', func
 
     expect(fn () => $acquisition->decreaseThirtyDayQuantity(new Quantity('61')))->toThrow(
         SharePoolingAssetAcquisitionException::class,
-        SharePoolingAssetAcquisitionException::insufficientThirtyDayQuantity(new Quantity('61'), new Quantity('60'))->getMessage(),
+        SharePoolingAssetAcquisitionException::insufficientThirtyDayQuantityToDecrease(new Quantity('61'), new Quantity('60'))->getMessage(),
     );
 });
 

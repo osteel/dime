@@ -28,9 +28,9 @@ it('can process a spreadsheet', function () {
         'tax_year_id' => '2020-2021',
         'currency' => FiatCurrency::GBP->value,
         'capital_gain' => json_encode([
-            'cost_basis' => '15709.51947887970615243342516069788787',
+            'cost_basis' => '16656.83425160697887970615243342516063',
             'proceeds' => '27979.5',
-            'difference' => '12269.98052112029384756657483930211213',
+            'difference' => '11322.66574839302112029384756657483937',
         ]),
         'income' => '1000',
         'non_attributable_allowable_cost' => '117',

@@ -63,8 +63,23 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
         return $this->costBasis->dividedBy($this->quantity)->multipliedBy($this->section104PoolQuantity());
     }
 
-    /** Increase the same-day quantity and adjust the 30-day quantity accordingly. */
     public function increaseSameDayQuantity(Quantity $quantity): self
+    {
+        if ($quantity->isGreaterThan($availableQuantity = $this->section104PoolQuantity())) {
+            throw SharePoolingAssetAcquisitionException::insufficientSameDayQuantityToIncrease($quantity, $availableQuantity);
+        }
+
+        $this->sameDayQuantity = $this->sameDayQuantity->plus($quantity);
+
+        return $this;
+    }
+
+    /**
+     * Increase the same-day quantity and adjust the 30-day quantity accordingly.
+     *
+     * @return Quantity the added quantity
+     */
+    public function increaseSameDayQuantityUpToAvailableQuantity(Quantity $quantity): Quantity
     {
         // Adjust same-day quantity
         $quantityToAdd = Quantity::minimum($quantity, $this->availableSameDayQuantity());
@@ -74,14 +89,14 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
         $quantityToDeduct = Quantity::minimum($quantityToAdd, $this->thirtyDayQuantity);
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantityToDeduct);
 
-        return $this;
+        return $quantityToAdd;
     }
 
     /** @throws SharePoolingAssetAcquisitionException */
     public function decreaseSameDayQuantity(Quantity $quantity): self
     {
         if ($quantity->isGreaterThan($this->sameDayQuantity)) {
-            throw SharePoolingAssetAcquisitionException::insufficientSameDayQuantity($quantity, $this->sameDayQuantity);
+            throw SharePoolingAssetAcquisitionException::insufficientSameDayQuantityToDecrease($quantity, $this->sameDayQuantity);
         }
 
         $this->sameDayQuantity = $this->sameDayQuantity->minus($quantity);
@@ -91,17 +106,29 @@ final class SharePoolingAssetAcquisition extends SharePoolingAssetTransaction
 
     public function increaseThirtyDayQuantity(Quantity $quantity): self
     {
+        if ($quantity->isGreaterThan($availableQuantity = $this->section104PoolQuantity())) {
+            throw SharePoolingAssetAcquisitionException::insufficientThirtyDayQuantityToIncrease($quantity, $availableQuantity);
+        }
+
+        $this->thirtyDayQuantity = $this->thirtyDayQuantity->plus($quantity);
+
+        return $this;
+    }
+
+    /** @return Quantity the added quantity */
+    public function increaseThirtyDayQuantityUpToAvailableQuantity(Quantity $quantity): Quantity
+    {
         $quantityToAdd = Quantity::minimum($quantity, $this->availableThirtyDayQuantity());
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->plus($quantityToAdd);
 
-        return $this;
+        return $quantityToAdd;
     }
 
     /** @throws SharePoolingAssetAcquisitionException */
     public function decreaseThirtyDayQuantity(Quantity $quantity): self
     {
         if ($quantity->isGreaterThan($this->thirtyDayQuantity)) {
-            throw SharePoolingAssetAcquisitionException::insufficientThirtyDayQuantity($quantity, $this->thirtyDayQuantity);
+            throw SharePoolingAssetAcquisitionException::insufficientThirtyDayQuantityToDecrease($quantity, $this->thirtyDayQuantity);
         }
 
         $this->thirtyDayQuantity = $this->thirtyDayQuantity->minus($quantity);

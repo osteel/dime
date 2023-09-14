@@ -39,6 +39,21 @@ it('can make a collection of transactions', function () {
     expect($transactions->count())->toBeInt()->toBe(3);
 });
 
+it('can return a copy of a collection of transactions', function () {
+    /** @var list<SharePoolingAssetTransaction> */
+    $items = [
+        $first = SharePoolingAssetAcquisition::factory()->make(),
+        $second = SharePoolingAssetDisposal::factory()->make(),
+    ];
+
+    $transactions = SharePoolingAssetTransactions::make(...$items)->copy();
+
+    expect($first)->not->toBe($transactions->get(0));
+    expect($second)->not->toBe($transactions->get(1));
+    expect($first)->toEqual($transactions->get(0));
+    expect($second)->toEqual($transactions->get(1));
+});
+
 it('can return the first transaction of a collection', function () {
     /** @var list<SharePoolingAssetTransaction> */
     $items = [
@@ -502,7 +517,7 @@ it('can return a collection of disposals with 30-day quantity allocated to an ac
         SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('20'), id: $acquisition2->id)->make(),
         $disposal2 = SharePoolingAssetDisposal::factory()->withThirtyDayQuantity(new Quantity('70'), id: $acquisition1->id)->make(),
         SharePoolingAssetDisposal::factory()->make(),
-    )->disposalsWithThirtyDayQuantityMatchedWith($acquisition1);
+    )->disposalsWithThirtyDayQuantityAllocatedTo($acquisition1);
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual(2);

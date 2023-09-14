@@ -65,16 +65,6 @@ final class SharePoolingAssetDisposals implements IteratorAggregate
         return new self(array_reverse($this->disposals));
     }
 
-    public function unprocessed(): SharePoolingAssetDisposals
-    {
-        $disposals = array_filter(
-            $this->disposals,
-            fn (SharePoolingAssetDisposal $disposal) => ! $disposal->processed,
-        );
-
-        return self::make(...$disposals);
-    }
-
     public function withAvailableSameDayQuantity(): SharePoolingAssetDisposals
     {
         $disposals = array_filter(
