@@ -1,0 +1,8 @@
+Date,Operation,Market value,Sent asset,Sent quantity,Sent asset is non-fungible,Received asset,Received quantity,Received asset is non-fungible,Fee currency,Fee quantity,Fee market value,Income
+01/01/2023,swap,1000,GBP,1000,FALSE,BTC,8000,FALSE,,,,FALSE
+31/01/2023,swap,500,BTC,5000,FALSE,GBP,500,FALSE,,,,FALSE
+31/01/2023,swap,320,GBP,320,FALSE,BTC,4000,FALSE,,,,FALSE
+31/01/2023,swap,75,GBP,75,FALSE,BTC,1000,FALSE,,,,FALSE
+31/01/2023,swap,70,GBP,70,FALSE,BTC,1000,FALSE,,,,FALSE
+31/01/2023,swap,142,BTC,2000,FALSE,GBP,142,FALSE,,,,FALSE
+31/01/2023,swap,35,GBP,35,FALSE,BTC,500,FALSE,,,,FALSE
