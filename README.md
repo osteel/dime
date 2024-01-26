@@ -35,6 +35,7 @@ You should seek the advice of a professional accountant before using this progra
 ## Table of contents
 
 * [Installation](#installation)
+	* [Standalone application 🧪](#standalone-application-)
 	* [Composer](#composer)
 	* [PHAR (Linux / Unix / macOS)](#phar-linux--unix--macos)
 	* [Docker](#docker)
