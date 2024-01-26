@@ -111,7 +111,7 @@ return [
             LaravelZero\Framework\Components\Updater\SelfUpdateCommand::class,
         ] : [],
         Helpers::installedViaDocker() === false ? [
-            \App\Commands\Delete::class,
+            App\Commands\Delete::class,
         ] : [],
     ),
 

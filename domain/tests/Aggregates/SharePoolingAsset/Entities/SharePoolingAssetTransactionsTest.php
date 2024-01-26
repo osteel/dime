@@ -149,7 +149,7 @@ it('can return a collection of transactions that happened on a specific day', fu
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
-    )->madeOn(Localdate::parse($date));
+    )->madeOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetTransactions::class);
     expect($transactions->count())->toEqual($count);
@@ -168,7 +168,7 @@ it('can return a collection of acquisitions that happened on a specific day', fu
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
-    )->acquisitionsMadeOn(Localdate::parse($date));
+    )->acquisitionsMadeOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetAcquisitions::class);
     expect($transactions->count())->toEqual($count);
@@ -187,7 +187,7 @@ it('can return a collection of disposals that happened on a specific day', funct
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-22')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
-    )->disposalsMadeOn(Localdate::parse($date));
+    )->disposalsMadeOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual($count);
@@ -207,7 +207,7 @@ it('can return a collection of transactions that happened between two dates', fu
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->madeBetween(Localdate::parse($date1), Localdate::parse($date2));
+    )->madeBetween(LocalDate::parse($date1), LocalDate::parse($date2));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetTransactions::class);
     expect($transactions->count())->toEqual($count);
@@ -230,7 +230,7 @@ it('can return a collection of acquisitions that happened between two dates', fu
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->acquisitionsMadeBetween(Localdate::parse($date1), Localdate::parse($date2));
+    )->acquisitionsMadeBetween(LocalDate::parse($date1), LocalDate::parse($date2));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetAcquisitions::class);
     expect($transactions->count())->toEqual($count);
@@ -252,7 +252,7 @@ it('can return a collection of disposals that happened between two dates', funct
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->disposalsMadeBetween(Localdate::parse($date1), Localdate::parse($date2));
+    )->disposalsMadeBetween(LocalDate::parse($date1), LocalDate::parse($date2));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual($count);
@@ -274,7 +274,7 @@ it('can return a collection of transactions that happened before a date (exclusi
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->madeBefore(Localdate::parse($date));
+    )->madeBefore(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetTransactions::class);
     expect($transactions->count())->toEqual($count);
@@ -293,7 +293,7 @@ it('can return a collection of acquisitions that happened before a date (exclusi
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->acquisitionsMadeBefore(Localdate::parse($date));
+    )->acquisitionsMadeBefore(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetAcquisitions::class);
     expect($transactions->count())->toEqual($count);
@@ -312,7 +312,7 @@ it('can return a collection of disposals that happened before a date (exclusive)
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->disposalsMadeBefore(Localdate::parse($date));
+    )->disposalsMadeBefore(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual($count);
@@ -331,7 +331,7 @@ it('can return a collection of transactions that happened before a date (inclusi
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->madeBeforeOrOn(Localdate::parse($date));
+    )->madeBeforeOrOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetTransactions::class);
     expect($transactions->count())->toEqual($count);
@@ -351,7 +351,7 @@ it('can return a collection of acquisitions that happened before a date (inclusi
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->acquisitionsMadeBeforeOrOn(Localdate::parse($date));
+    )->acquisitionsMadeBeforeOrOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetAcquisitions::class);
     expect($transactions->count())->toEqual($count);
@@ -371,7 +371,7 @@ it('can return a collection of disposals that happened before a date (inclusive)
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->disposalsMadeBeforeOrOn(Localdate::parse($date));
+    )->disposalsMadeBeforeOrOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual($count);
@@ -391,7 +391,7 @@ it('can return a collection of transactions that happened after a date (exclusiv
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->madeAfter(Localdate::parse($date));
+    )->madeAfter(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetTransactions::class);
     expect($transactions->count())->toEqual($count);
@@ -410,7 +410,7 @@ it('can return a collection of acquisitions that happened after a date (exclusiv
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->acquisitionsMadeAfter(Localdate::parse($date));
+    )->acquisitionsMadeAfter(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetAcquisitions::class);
     expect($transactions->count())->toEqual($count);
@@ -429,7 +429,7 @@ it('can return a collection of disposals that happened after a date (exclusive)'
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->disposalsMadeAfter(Localdate::parse($date));
+    )->disposalsMadeAfter(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual($count);
@@ -448,7 +448,7 @@ it('can return a collection of transactions that happened after a date (inclusiv
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->madeAfterOrOn(Localdate::parse($date));
+    )->madeAfterOrOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetTransactions::class);
     expect($transactions->count())->toEqual($count);
@@ -468,7 +468,7 @@ it('can return a collection of acquisitions that happened after a date (inclusiv
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->acquisitionsMadeAfterOrOn(Localdate::parse($date));
+    )->acquisitionsMadeAfterOrOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetAcquisitions::class);
     expect($transactions->count())->toEqual($count);
@@ -488,7 +488,7 @@ it('can return a collection of disposals that happened after a date (inclusive)'
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-23')]),
         SharePoolingAssetAcquisition::factory()->make(['date' => LocalDate::parse('2015-10-24')]),
         SharePoolingAssetDisposal::factory()->make(['date' => LocalDate::parse('2015-10-25')]),
-    )->disposalsMadeAfterOrOn(Localdate::parse($date));
+    )->disposalsMadeAfterOrOn(LocalDate::parse($date));
 
     expect($transactions)->toBeInstanceOf(SharePoolingAssetDisposals::class);
     expect($transactions->count())->toEqual($count);
