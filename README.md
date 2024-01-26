@@ -58,9 +58,35 @@ You should seek the advice of a professional accountant before using this progra
 
 ## Installation
 
+### Standalone application 🧪
+
+> [!NOTE]
+> This is an experimental feature. Please [open an issue](#issue-reporting) if the application doesn't behave as expected.
+
+Download the binary for your operating system:
+
+| OS | Binary |
+| -- | ------ |
+| macOS aarch64 (M1, M2, M3...) | [dime-macos-aarch64](https://github.com/osteel/dime/releases/download/v0.3/dime-macos-aarch64) |
+
+You can use the application straight away:
+
+```
+$ php dime-<YOUR-OS>
+```
+
+Or you may want to move it to a directory that is in your system's `PATH`:
+
+```
+$ chmod +x dime-<YOUR-OS>
+$ mv dime-<YOUR-OS> /usr/local/bin/dime
+```
+
+You can now run `dime` from anywhere instead of `php dime-<YOUR-OS>`.
+
 ### Composer
 
-> **Note**
+> [!IMPORTANT]
 > Requires [Composer](https://getcomposer.org/) as well as PHP 8.2 and the [BCMath](https://www.php.net/manual/en/book.bc.php) extension.
 
 You can instal Dime via [Composer](https://getcomposer.org):
@@ -93,7 +119,7 @@ $ source ~/.bash_profile
 
 ### PHAR (Linux / Unix / macOS)
 
-> **Note**
+> [!IMPORTANT]
 > Requires PHP 8.2 and the [BCMath](https://www.php.net/manual/en/book.bc.php) extension.
 
 <!-- phar -->
@@ -117,7 +143,7 @@ You can now run `dime` from anywhere instead of `php dime`.
 
 ### Docker
 
-> **Note**
+> [!IMPORTANT]
 > Requires [Docker](https://www.docker.com/) and sh or Bash.
 
 [Download this shell script](/.docker/dime.sh) and use it straight away:
@@ -157,7 +183,7 @@ $ dime process transactions.csv
 
 It will validate and process each transaction and display the corresponding tax figures or report any errors.
 
-> **Note**
+> [!TIP]
 > You will need to run this command every time you update the spreadsheet.
 
 See the [Spreadsheet format](#spreadsheet-format) section to learn how to report your transactions.
@@ -239,7 +265,7 @@ The market value is at the centre of Dime's calculation rules so it is crucial t
 
 When the transaction includes a sent asset (and is not a transfer – transfers don't need a market value), you must use the sent asset's market value as the transaction's market value, _based on the reported sent quantity_ (see [Sent quantity](#sent-quantity) section below to learn how to report it correctly).
 
-> **Note**
+> [!IMPORTANT]
 > Be particularly vigilant when selling an asset for some fiat currency. It is tempting to use the received fiat amount as the market value, but if a fee was taken, the actual market value is the received amount plus the fee's market value.
 
 When the transaction does not include a sent asset (i.e. `receive` transactions), the transaction's market value is the received asset's market value.
@@ -255,8 +281,8 @@ Keeping in mind that when a transaction includes a sent asset, its market value 
 * If using a decentralised protocol, use the value reported by the corresponding blockchain's explorer (see the value between brackets in the _Tokens Transferred_ section [here](https://etherscan.io/tx/0x2c9310e04c01e1329973c205cc6f3d3a7be3237ed09b968faef7ed85d9dfea65), for instance);
 * If none of the above applies, look up the asset on price-tracking websites such as [CoinMarketCap](https://coinmarketcap.com/) or [CoinGecko](https://www.coingecko.com/).
 
-> **Note**
-> If any of the above amounts are expressed in a foreign currency, use HMRC's [exchange rates](https://www.gov.uk/government/publications/hmrc-exchange-rates-for-2023-monthly "HMRC exchange rates for 2023: monthly") to convert them to pound sterling.
+> [!TIP]
+> If any of the above amounts are expressed in a foreign currency, use HMRC's [exchange rates](https://www.trade-tariff.service.gov.uk/exchange_rates "HMRC currency exchange monthly rates") to convert them to pound sterling.
 
 Sometimes, while the transaction includes a sent asset, its price isn't tracked anywhere. In that case, use the received asset's market value plus the fee's market value, if you paid for that fee.
 
@@ -280,7 +306,7 @@ The quantity sent. For NFTs, that would be `1`.
 
 Be as precise as possible and report all available decimal places.
 
-> **Note**
+> [!IMPORTANT]
 > When the sent asset and the [fee](#fee)'s currency are the same (e.g. GBP in both cases), _and the fee's quantity was deducted from the sent quantity_, the sent quantity must exclude the fee's quantity.
 > * Example #1: If you send £50 to an exchange and spend it all in a transaction that incurs a £0.50 fee, the sent quantity is 49.5.
 > * Example #2: If you swap 1 bitcoin for 10 ethers on an exchange and the transaction incurs a BTC 0.01 fee, the sent quantity is 0.99.
@@ -322,7 +348,7 @@ Different values must be used depending on the context:
 
 The reason for the latter is that exchanges usually estimate how much the fee will be and charge that estimate. This amount is almost always different from the actual fee, but that's the amount you will be charged anyway.
 
-> **Note**
+> [!TIP]
 > Be sure not to report fees that you didn't pay for. For instance, if you received an airdrop that was sent by the token issuer and the transaction includes a fee, the issuer paid for that fee, not you, so you don't have to report it.
 
 Here is the detail of each fee-related column.

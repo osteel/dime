@@ -1,5 +1,6 @@
 /vendor
 /.idea
+/.standalone
 /.vscode
 /.vagrant
 /database/database.sqlite
