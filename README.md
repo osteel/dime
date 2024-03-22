@@ -73,7 +73,8 @@ Download the binary for your operating system:
 You can use the application straight away:
 
 ```
-$ php dime-<YOUR-OS>
+$ chmod +x dime-<YOUR-OS>
+$ ./dime-<YOUR-OS>
 ```
 
 Or you may want to move it to a directory that is in your system's `PATH`:
@@ -83,7 +84,7 @@ $ chmod +x dime-<YOUR-OS>
 $ mv dime-<YOUR-OS> /usr/local/bin/dime
 ```
 
-You can now run `dime` from anywhere instead of `php dime-<YOUR-OS>`.
+You can now run `dime` from anywhere instead of `./dime-<YOUR-OS>`.
 
 ### Composer
 
